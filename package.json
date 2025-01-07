@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "concurrently --names \"frontend,backend\" -c \"blue,green\" \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "npm run start --prefix frontend",
+    "start:backend": "npm run start --prefix backend",
+    "dev": "concurrently --names \"frontend,backend\" -c \"blue,green\" \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "nodemon ./src/index.ts --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9"
+  }
+}
