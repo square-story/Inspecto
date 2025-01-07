@@ -1,0 +1,59 @@
+# Compiled source files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# IDE specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Python specific files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Node.js specific files
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# JavaScript specific files
+*.js.map
+
+# Environment variables
+.env
+
+# Build directories
+/build/
+dist/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+/.pnp
+.pnp.js
+
+# TypeScript specific files
+*.tsbuildinfo
+
+# Miscellaneous
+*.swp
+*.swo
+*.bak
+*.tmp
+
+desktop.ini
