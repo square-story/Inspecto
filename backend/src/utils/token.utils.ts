@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
+import appConfig from '../config/app.config';
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
-const ACCESS_TOKEN_EXPIRATION = '15m'; // 15 minutes
-const REFRESH_TOKEN_EXPIRATION = '7d'; // 7 days
+const ACCESS_TOKEN_SECRET = appConfig.accessToken!;
+const REFRESH_TOKEN_SECRET = appConfig.refreshToken!;
+const ACCESS_TOKEN_EXPIRATION = appConfig.accessTime;
+const REFRESH_TOKEN_EXPIRATION = appConfig.refreshTime;
 
 interface TokenPayload {
     userId: Types.ObjectId,
