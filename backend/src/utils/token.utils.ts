@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
@@ -6,7 +7,8 @@ const ACCESS_TOKEN_EXPIRATION = '15m'; // 15 minutes
 const REFRESH_TOKEN_EXPIRATION = '7d'; // 7 days
 
 interface TokenPayload {
-    userId: string;
+    userId: Types.ObjectId,
+    role: string
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
