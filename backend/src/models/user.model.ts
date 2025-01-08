@@ -1,16 +1,19 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
-export interface IUsers extends Document {
-    _id: ObjectId;
+export interface IUserInput {
     FirstName: string;
     LastName: string;
-    Created_at: Date;
     Email: string;
     Password: string;
-    Address: string | null;
+    Created_at: Date;
     Updated_at: Date;
+    Address: string | null;
     Profile_image: string | null;
     Status: boolean;
+}
+
+export interface IUsers extends Document, IUserInput {
+    _id: ObjectId;
 }
 
 const UsersSchema: Schema = new Schema<IUsers>({

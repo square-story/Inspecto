@@ -1,9 +1,9 @@
-import Users, { IUsers } from '../models/user.model';
+import Users, { IUsers, IUserInput } from '../models/user.model';
 import { IUserRepository } from './interfaces/user.repository.interface';
 
 
 class UserRepository implements IUserRepository {
-    async createUser(userData: IUsers): Promise<IUsers> {
+    async createUser(userData: IUserInput): Promise<IUsers> {
         const user = new Users(userData);
         return await user.save();
     }
