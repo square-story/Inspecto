@@ -10,6 +10,7 @@ export interface IUserInput {
     Address: string | null;
     Profile_image: string | null;
     Status: boolean;
+    role: string;
 }
 
 export interface IUsers extends Document, IUserInput {
@@ -25,7 +26,8 @@ const UsersSchema: Schema = new Schema<IUsers>({
     Address: { type: String, default: null },
     Updated_at: { type: Date, required: true },
     Profile_image: { type: String, default: null },
-    Status: { type: Boolean, required: true, default: true }
+    Status: { type: Boolean, required: true, default: true },
+    role: { type: String, default: 'user' }
 }, { timestamps: true })
 
 const Users = mongoose.model<IUsers>('Users', UsersSchema);

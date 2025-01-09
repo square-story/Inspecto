@@ -2,10 +2,13 @@ import Users, { IUsers, IUserInput } from '../models/user.model';
 import { IUserRepository } from './interfaces/user.repository.interface';
 
 
-class UserRepository implements IUserRepository {
+export class UserRepository implements IUserRepository {
     async createUser(userData: IUserInput): Promise<IUsers> {
         const user = new Users(userData);
         return await user.save();
+    }
+    async findById(userId: string): Promise<IUsers | null> {
+        return await Users.findById(userId)
     }
     async findUserByEmail(email: string): Promise<IUsers | null> {
         return await Users.findOne({ Email: email });
@@ -21,4 +24,3 @@ class UserRepository implements IUserRepository {
     }
 }
 
-export default new UserRepository()
