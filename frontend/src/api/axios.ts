@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { store } from '../features/app/store';
+import { logout, setCredentials } from '../features/auth/authSlice';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -8,56 +10,74 @@ const axiosInstance = axios.create({
     withCredentials: true,
 });
 
-axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config
-})
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const state = store.getState();
+        const token = state.auth.accessToken;
 
-const getRefreshEndpoint = (role: string) => {
-    switch (role) {
-        case "admin":
-            return `${process.env.REACT_APP_API_URL}/admin/refresh`;
-        case "user":
-            return `${process.env.REACT_APP_API_URL}/user/refresh`;
-        case "inspector":
-            return `${process.env.REACT_APP_API_URL}/inspector/refresh`;
-        default:
-            throw new Error("Invalid role for refresh endpoint");
+        if (token && config.headers) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
-};
+);
+
 
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response && error.response.status === 401) {
-            const originalRequest = error.config;
+        const originalRequest = error.config;
+
+        // If error is 401 and we haven't tried to refresh token yet
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
             try {
-                const userRole = localStorage.getItem("role");
-                if (!userRole) {
-                    throw new Error('User role not found')
+                const state = store.getState();
+                const refreshToken = state.auth.refreshToken;
+                const userRole = state.auth.role;
+
+                if (!refreshToken || !userRole) {
+                    store.dispatch(logout());
+                    return Promise.reject(error);
                 }
 
-                const refreshEndpoint = getRefreshEndpoint(userRole)
-                const refreshResponse = await axios.post(refreshEndpoint, {
-                    token: localStorage.getItem("refreshToken"),
-                });
-                const newAccessToken = refreshResponse.data.accessToken
-                localStorage.setItem("accessToken", newAccessToken)
-                originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`
-                return axiosInstance(originalRequest)
+                // Get refresh token endpoint based on role
+                const refreshEndpoint = `/${userRole}/refresh`;
+
+                const response = await axios.post(
+                    `${import.meta.env.VITE_API_URL}${refreshEndpoint}`,
+                    {
+                        token: refreshToken
+                    },
+                    { withCredentials: true }
+                );
+
+                const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+                // Update tokens in Redux store
+                store.dispatch(
+                    setCredentials({
+                        accessToken,
+                        refreshToken: newRefreshToken,
+                        role: userRole
+                    })
+                );
+
+                // Retry original request with new token
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                return axiosInstance(originalRequest);
             } catch (refreshError) {
-                console.log('Failed to refresh token:', refreshError)
-                localStorage.clear();
-                window.location.href = "/login"; // Redirect to login page
+                store.dispatch(logout());
                 return Promise.reject(refreshError);
             }
-
         }
+
         return Promise.reject(error);
     }
-)
+);
 
 export default axiosInstance;
