@@ -7,7 +7,7 @@ export class AdminAuthController {
     static async login(req: Request, res: Response) {
         try {
             const { email, password } = req.body;
-            const tokens = await adminAuthService.login(email, password)
+            const tokens = await adminAuthService.login(email, password, res)
             res.status(200).json(tokens)
         } catch (error) {
             if (error instanceof Error) {
