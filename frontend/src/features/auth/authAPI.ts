@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../api/axios';
+import { clearCredentials } from './authSlice';
 
 interface LoginCredentials {
     email: string,
@@ -9,7 +10,6 @@ interface LoginCredentials {
 
 interface LoginResponse {
     accessToken: string,
-    refreshToken: string
 }
 
 export const loginUser = createAsyncThunk(
@@ -24,7 +24,7 @@ export const loginUser = createAsyncThunk(
                 }
             );
             return {
-                ...response.data,
+                accessToken: response.data.accessToken,
                 role: credentials.role
             };
         } catch (error: unknown) {
@@ -35,10 +35,10 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
     'auth/logout',
-    async (_, { rejectWithValue }) => {
+    async (_, { dispatch, rejectWithValue }) => {
         try {
-            await axiosInstance.post('/logout');
-            return;
+            await axiosInstance.post('/logout', {}, { withCredentials: true });
+            dispatch(clearCredentials());
         } catch (error) {
             return rejectWithValue(error);
         }
