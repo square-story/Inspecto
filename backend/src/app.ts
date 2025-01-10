@@ -33,7 +33,7 @@ app.post('/logout', (req: Request, res: Response) => {
 })
 
 
-app.use('/admin', adminRoutes) //connect the routes like this
+app.use('/admin', adminRoutes)
 
 
 app.use((req, res) => {
