@@ -9,7 +9,6 @@ interface LoginCredentials {
 
 interface LoginResponse {
     accessToken: string,
-    refreshToken: string
 }
 
 export const loginUser = createAsyncThunk(
@@ -24,7 +23,7 @@ export const loginUser = createAsyncThunk(
                 }
             );
             return {
-                ...response.data,
+                accessToken: response.data.accessToken,
                 role: credentials.role
             };
         } catch (error: unknown) {

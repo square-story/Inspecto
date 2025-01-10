@@ -19,14 +19,17 @@ export class AdminAuthController {
     }
     static async refreshToken(req: Request, res: Response) {
         try {
-            const { token } = req.body;
-            const tokens = await adminAuthService.refreshToken(token)
-            res.status(200).json(tokens)
+            const refreshToken = req.cookies.refreshToken; // Get the refresh token from the HTTP-only cookie
+            if (!refreshToken) {
+                return res.status(401).json({ message: 'Refresh token missing' });
+            }
+            const newAccessToken = await adminAuthService.refreshToken(refreshToken);
+            res.status(200).json({ accessToken: newAccessToken });
         } catch (error) {
             if (error instanceof Error) {
-                res.status(403).json({ message: error.message })
+                res.status(403).json({ message: error.message });
             } else {
-                res.status(403).json({ message: 'forbidden' })
+                res.status(403).json({ message: 'Forbidden' });
             }
         }
     }

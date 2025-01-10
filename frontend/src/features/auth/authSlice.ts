@@ -3,7 +3,6 @@ import { loginUser, logoutUser } from './authAPI';
 
 interface AuthState {
     accessToken: string | null;
-    refreshToken: string | null;
     role: 'admin' | 'user' | 'inspector' | null;
     isAuthenticated: boolean;
     isLoading: boolean;
@@ -12,7 +11,6 @@ interface AuthState {
 
 const initialState: AuthState = {
     accessToken: localStorage.getItem('accessToken'),
-    refreshToken: localStorage.getItem('refreshToken'),
     role: localStorage.getItem('role') as AuthState['role'],
     isAuthenticated: !!localStorage.getItem('accessToken'),
     isLoading: false,
@@ -24,25 +22,23 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         setCredentials: (state, action) => {
-            const { accessToken, refreshToken, role } = action.payload;
+            const { accessToken, role } = action.payload;
             state.accessToken = accessToken;
-            state.refreshToken = refreshToken;
             state.role = role;
             state.isAuthenticated = true;
 
             localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
-            localStorage.setItem('role', role);
+            localStorage.setItem('role', role || '');
         },
         clearError: (state) => {
             state.error = null;
         },
-        logout: (state) => {
-            state.accessToken = null
-            state.refreshToken = null
+        clearCredentials(state) {
+            state.accessToken = null;
             state.role = null;
-            state.isAuthenticated = false
-            localStorage.clear()
+            state.isAuthenticated = false;
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('role');
         }
     },
     extraReducers: (builder) => {
@@ -55,11 +51,9 @@ const authSlice = createSlice({
                 state.isLoading = false;
                 state.isAuthenticated = true;
                 state.accessToken = action.payload.accessToken;
-                state.refreshToken = action.payload.refreshToken;
                 state.role = action.payload.role as AuthState['role'];
 
                 localStorage.setItem('accessToken', action.payload.accessToken);
-                localStorage.setItem('refreshToken', action.payload.refreshToken);
                 localStorage.setItem('role', action.payload.role);
             })
             .addCase(loginUser.rejected, (state, action) => {
@@ -68,7 +62,6 @@ const authSlice = createSlice({
             })
             .addCase(logoutUser.fulfilled, (state) => {
                 state.accessToken = null;
-                state.refreshToken = null;
                 state.role = null;
                 state.isAuthenticated = false;
                 localStorage.clear();
@@ -76,5 +69,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { setCredentials, clearError, logout } = authSlice.actions;
+export const { setCredentials, clearError, clearCredentials } = authSlice.actions;
 export default authSlice.reducer;

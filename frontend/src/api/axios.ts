@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { store } from '../features/app/store';
-import { logout, setCredentials } from '../features/auth/authSlice';
+import { clearCredentials, setCredentials } from '../features/auth/authSlice';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -37,11 +37,10 @@ axiosInstance.interceptors.response.use(
 
             try {
                 const state = store.getState();
-                const refreshToken = state.auth.refreshToken;
                 const userRole = state.auth.role;
 
-                if (!refreshToken || !userRole) {
-                    store.dispatch(logout());
+                if (!userRole) {
+                    store.dispatch(clearCredentials());
                     return Promise.reject(error);
                 }
 
@@ -51,27 +50,26 @@ axiosInstance.interceptors.response.use(
                 const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}${refreshEndpoint}`,
                     {
-                        token: refreshToken
+
                     },
                     { withCredentials: true }
                 );
 
-                const { accessToken, refreshToken: newRefreshToken } = response.data;
+                const { accessToken } = response.data;
 
                 // Update tokens in Redux store
                 store.dispatch(
                     setCredentials({
                         accessToken,
-                        refreshToken: newRefreshToken,
                         role: userRole
                     })
                 );
 
                 // Retry original request with new token
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
-                store.dispatch(logout());
+                store.dispatch(clearCredentials());
                 return Promise.reject(refreshError);
             }
         }
