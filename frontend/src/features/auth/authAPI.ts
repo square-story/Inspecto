@@ -37,7 +37,7 @@ export const logoutUser = createAsyncThunk(
     'auth/logout',
     async (_, { dispatch, rejectWithValue }) => {
         try {
-            await axiosInstance.post('/admin/logout', {}, { withCredentials: true });
+            await axiosInstance.post('/logout', {}, { withCredentials: true });
             dispatch(clearCredentials());
         } catch (error) {
             return rejectWithValue(error);
