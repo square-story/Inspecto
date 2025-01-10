@@ -1,12 +1,15 @@
 import express, { Request, Response } from "express";
 import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
+import cookieParser from 'cookie-parser'
 import adminRoutes from "./routes/admin.routes";
 import cors from "cors";
 
 const app = express()
 
 app.use(express.json()); //for Parsing JSON request bodies
+
+app.use(cookieParser());
 
 //connect Database
 connectToDatabase();
@@ -22,6 +25,7 @@ app.get('/', (req: Request, res: Response) => {
 
 
 app.use('/admin', adminRoutes) //connect the routes like this
+
 
 app.use((req, res) => {
     res.status(404).send('rote not found')
