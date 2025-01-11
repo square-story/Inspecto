@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../features/auth/authAPI';
 import { RootState, AppDispatch } from '../../features/app/store';
-import { clearError } from '../../features/auth/authSlice';
 
 const AdminLoginPage = () => {
     const [email, setEmail] = useState('');
@@ -11,7 +10,7 @@ const AdminLoginPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
 
-    const { isLoading, error } = useSelector((state: RootState) => state.auth);
+    const { isLoading } = useSelector((state: RootState) => state.auth);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -36,11 +35,6 @@ const AdminLoginPage = () => {
         <div>
             <h1>Welcome Admin</h1>
             <form onSubmit={handleSubmit}>
-                {error && (
-                    <div className="error" onClick={() => dispatch(clearError())}>
-                        {error}
-                    </div>
-                )}
                 <input
                     type="email"
                     placeholder="email"

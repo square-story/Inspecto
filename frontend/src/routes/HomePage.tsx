@@ -1,9 +1,9 @@
-import Navbar from "../components/NavBar"
+import Navbar04Page from "@/app/navbar/page"
 
 const HomePage = () => {
 
     return (<>
-        <Navbar />
+        <Navbar04Page />
     </>
     )
 }

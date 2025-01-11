@@ -8,6 +8,8 @@ import InspectorLoginPage from "./pages/inspector/InspectorLoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import InspectorDashboard from "./pages/inspector/InspectorDashboard";
 import UserDashboard from "./pages/user/UserDashboard";
+import UserRegister from "./pages/user/UserRegister";
+import UserForget from "./pages/user/UserForget";
 
 const App = () => {
   return (
@@ -29,6 +31,22 @@ const App = () => {
           element={
             <PublicRoute>
               <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/user/forget"
+          element={
+            <PublicRoute>
+              <UserForget />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/user/register"
+          element={
+            <PublicRoute>
+              <UserRegister />
             </PublicRoute>
           }
         />

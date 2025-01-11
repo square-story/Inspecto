@@ -17,17 +17,15 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-
 import {
     Input
-} from '@/components/ui/input'
+} from "@/components/ui/input"
 
 const formSchema = z.object({
-    "Email": z.string(),
-    "Password": z.string()
+    "email": z.string()
 });
 
-function DraftForm() {
+export function ForgetPassword() {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -42,14 +40,14 @@ function DraftForm() {
         <div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col p-2 md:p-5 w-full mx-auto rounded-md max-w-3xl gap-2 border">
-                    <h1 className="text-3xl font-bold">Inspector Login</h1>
-                    <p className="text-base">Please enter details and password.</p>
+                    <h1 className="text-3xl font-bold">Forget password</h1>
+                    <p className="text-base">it will create a link for send to your email</p>
                     <FormField
                         control={form.control}
-                        name="Email"
+                        name="email"
                         render={({ field }) => (
                             <FormItem className="w-full">
-                                <FormLabel>Email</FormLabel> *
+                                <FormLabel>Enter Existing email</FormLabel> *
                                 <FormControl>
                                     <Input
                                         placeholder="Enter your Email"
@@ -67,27 +65,6 @@ function DraftForm() {
                         )
                         }
                     />
-
-                    <FormField
-                        control={form.control}
-                        name="Password"
-                        render={({ field }) => (
-                            <FormItem className="w-full">
-                                <FormLabel>Password</FormLabel> *
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        placeholder="Password"
-                                        type="password"
-                                    />
-                                </FormControl>
-
-                                <FormMessage />
-                            </FormItem>
-                        )
-                        }
-                    />
-
                     <div className="flex justify-end items-center w-full pt-3">
                         <Button className="rounded-lg" size="sm">
                             Submit
@@ -100,12 +77,13 @@ function DraftForm() {
 }
 
 
-const InspectorLoginPage = () => {
+
+const UserForget = () => {
     return (
-        <div className="justify-center items-center flex w-full h-screen">
-            <DraftForm />
+        <div className="flex justify-center items-center w-full h-screen">
+            <ForgetPassword />
         </div>
     )
 }
 
-export default InspectorLoginPage
+export default UserForget
