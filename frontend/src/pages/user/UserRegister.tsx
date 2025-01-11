@@ -1,9 +1,9 @@
-import { DraftForm } from "@/app/userSignup/UserSignupProcess"
+import { SignUp } from "@/app/userSignup/UserSignupProcess"
 
 const UserRegister = () => {
     return (
         <div className="flex w-full h-screen justify-center items-center">
-            <DraftForm />
+            <SignUp />
         </div>
     )
 }

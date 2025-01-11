@@ -31,7 +31,7 @@ const formSchema = z.object({
     "phone": z.number()
 });
 
-export function DraftForm() {
+export function SignUp() {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

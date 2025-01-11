@@ -10,6 +10,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+
+// Define validation schema using Zod
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+})
 
 export function LoginForm({
   className,
@@ -19,6 +28,20 @@ export function LoginForm({
   const handleNav = (path: string) => {
     navigate(path)
   }
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+  })
+
+  const onSubmit = (data: z.infer<typeof loginSchema>) => {
+    console.log("Form Data:", data)
+    handleNav("/user/dashboard")
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -29,7 +52,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -37,21 +60,34 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  required
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-red-600 text-sm">{errors.email.message}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <a
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline cursor-pointer"
-                    onClick={() => handleNav('/user/forget')}>
+                    onClick={() => handleNav("/user/forget")}
+                  >
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-red-600 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
-              <Button type="submit" variant="default" className="w-full" onClick={() => handleNav('/user/dashboard')}>
+              <Button type="submit" variant="default" className="w-full">
                 Login
               </Button>
               <Button variant="outline" className="w-full">
@@ -81,15 +117,20 @@ export function LoginForm({
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-
               Don&apos;t have an account?{" "}
-              <a className="underline underline-offset-4 cursor-pointer" onClick={() => handleNav('/user/register')}>
+              <a
+                className="underline underline-offset-4 cursor-pointer"
+                onClick={() => handleNav("/user/register")}
+              >
                 Sign up
               </a>
             </div>
             <div className="mt-4 text-center text-sm">
               Are You A Inspector{" "}
-              <a className="underline underline-offset-4 cursor-pointer" onClick={() => handleNav('/inspector/login')}>
+              <a
+                className="underline underline-offset-4 cursor-pointer"
+                onClick={() => handleNav("/inspector/login")}
+              >
                 Click Here
               </a>
             </div>
