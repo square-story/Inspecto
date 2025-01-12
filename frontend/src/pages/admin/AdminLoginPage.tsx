@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../features/auth/authAPI';
-import { RootState, AppDispatch } from '../../features/app/store';
+import { RootState, AppDispatch } from '../../features/store';
 
 const AdminLoginPage = () => {
     const [email, setEmail] = useState('');

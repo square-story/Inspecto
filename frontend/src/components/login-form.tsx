@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useDispatch } from "react-redux"
-import type { AppDispatch } from "../features/app/store"
+import type { AppDispatch } from "../features/store"
 import { loginUser } from "@/features/auth/authAPI"
 import BackButton from "./BackButton"
 
