@@ -21,6 +21,7 @@ import {
 import {
     Input
 } from '@/components/ui/input'
+import { useNavigate } from "react-router-dom"
 
 const formSchema = z.object({
     "Email": z.string(),
@@ -36,6 +37,11 @@ function DraftForm() {
 
     function onSubmit(fields: z.infer<typeof formSchema>) {
         console.log(fields);
+    }
+
+    const navigate = useNavigate()
+    const handleNav = (path: string) => {
+        navigate(path)
     }
 
     return (
@@ -73,25 +79,49 @@ function DraftForm() {
                         name="Password"
                         render={({ field }) => (
                             <FormItem className="w-full">
-                                <FormLabel>Password</FormLabel> *
+
+
+
+
+                                <div className="flex items-end">
+                                    <FormLabel>Password</FormLabel> *
+                                    <a
+                                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline cursor-pointer"
+                                        onClick={() => handleNav('/inspector/forget')}
+                                    >
+                                        Forgot your password?
+                                    </a>
+                                </div>
                                 <FormControl>
                                     <Input
                                         {...field}
                                         placeholder="Password"
                                         type="password"
                                     />
+
                                 </FormControl>
 
+
                                 <FormMessage />
+
                             </FormItem>
                         )
                         }
                     />
 
-                    <div className="flex justify-end items-center w-full pt-3">
-                        <Button className="rounded-lg" size="sm">
+                    <div className="flex justify-center items-center w-full pt-3">
+                        <Button className="rounded-lg w-full" size="sm">
                             Submit
                         </Button>
+                    </div>
+                    <div className="mt-4 text-center text-sm">
+                        Don&apos;t have an account?{" "}
+                        <a
+                            className="underline underline-offset-4 cursor-pointer"
+                            onClick={() => handleNav("/inspector/register")}
+                        >
+                            Sign up
+                        </a>
                     </div>
                 </form>
             </Form>
