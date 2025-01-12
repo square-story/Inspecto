@@ -163,7 +163,7 @@ export function SignUp() {
                         )
                         }
                     />
-                    <div className="flex flex-col justify-between items-center w-full pt-3 gap-2">
+                    <div className="flex flex-col justify-between items-center w-full pt-3 gap-5">
                         <Button className="rounded-lg w-full" size="sm" type="submit">
                             Submit
                         </Button>
