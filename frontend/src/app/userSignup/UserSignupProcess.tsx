@@ -21,6 +21,7 @@ import {
 import {
     Input
 } from "@/components/ui/input"
+import BackButton from "@/components/BackButton"
 
 const formSchema = z.object({
     "Email": z.string(),
@@ -44,7 +45,9 @@ export function SignUp() {
 
     return (
         <div>
+            <BackButton />
             <Form {...form}>
+
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col p-2 md:p-5 w-full mx-auto rounded-md max-w-3xl gap-2 border">
                     <h1 className="text-3xl font-bold">User Creation</h1>
                     <p className="text-base">Sign up to create an account</p>

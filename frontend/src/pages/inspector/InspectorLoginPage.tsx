@@ -22,6 +22,7 @@ import {
     Input
 } from '@/components/ui/input'
 import { useNavigate } from "react-router-dom"
+import BackButton from "@/components/BackButton"
 
 const formSchema = z.object({
     "Email": z.string(),
@@ -46,6 +47,7 @@ function DraftForm() {
 
     return (
         <div>
+            <BackButton />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col p-2 md:p-5 w-full mx-auto rounded-md max-w-3xl gap-2 border">
                     <h1 className="text-3xl font-bold">Inspector Login</h1>

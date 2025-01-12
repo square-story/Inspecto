@@ -16,6 +16,7 @@ import * as z from "zod"
 import { useDispatch } from "react-redux"
 import type { AppDispatch } from "../features/app/store"
 import { loginUser } from "@/features/auth/authAPI"
+import BackButton from "./BackButton"
 
 // Define validation schema using Zod
 const loginSchema = z.object({
@@ -58,7 +59,9 @@ export function LoginForm({
   }
 
   return (
+
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <BackButton />
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">User Login</CardTitle>
