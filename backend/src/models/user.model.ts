@@ -27,7 +27,7 @@ const UsersSchema: Schema = new Schema<IUsers>({
     address: { type: String, default: null },
     profile_image: { type: String, default: null },
     status: { type: Boolean, default: true },
-    role: { type: String, required: true }
+    role: { type: String, required: true, default: 'user' }
 });
 
-export default mongoose.model<IUsers>("Users", UsersSchema);
+export default mongoose.model<IUsers>("User", UsersSchema);

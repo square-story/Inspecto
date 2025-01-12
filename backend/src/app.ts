@@ -39,7 +39,7 @@ app.use('/admin', adminRoutes)
 app.use('/user', userRoutes)
 
 
-app.use((req, res) => {
+app.use((req: Request, res: Response) => {
     res.status(404).send('rote not found')
 })
 

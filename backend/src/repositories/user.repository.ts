@@ -1,8 +1,8 @@
-import { IUserInput, IUsers } from '../models/user.model';
+import { IUsers } from '../models/user.model';
 import Users from '../models/user.model';
 
 class UserRepository {
-    async createUser(userData: IUserInput): Promise<IUsers> {
+    async createUser(userData: Partial<IUsers>): Promise<IUsers> {
         const user = new Users(userData);
         return await user.save();
     }
