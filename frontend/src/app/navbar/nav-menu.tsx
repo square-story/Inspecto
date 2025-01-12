@@ -19,19 +19,25 @@ export const NavMenu = (props: NavigationMenuProps) => {
             <NavigationMenuList className="gap-6 space-x-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start">
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <button onClick={() => handleNavigation('/')}>
-                            Home
+                        <button className="hover:font-bold" onClick={() => handleNavigation('/')}>
+                            About Us
                         </button>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <button onClick={() => handleNavigation('/blog')}>
-                            Blog
+                        <button className="hover:font-bold" onClick={() => handleNavigation('/blog')}>
+                            How It Works
                         </button>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
-                {/* Add more NavigationMenuItems as needed */}
+                <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                        <button className="hover:font-bold" onClick={() => handleNavigation('/')}>
+                            Contact
+                        </button>
+                    </NavigationMenuLink>
+                </NavigationMenuItem>
             </NavigationMenuList>
         </NavigationMenu>
     );
