@@ -19,7 +19,7 @@ export class AdminAuthService {
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
         });
         return { accessToken }
@@ -33,4 +33,5 @@ export class AdminAuthService {
         const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
         return { accessToken: newAccessToken }
     }
+
 }

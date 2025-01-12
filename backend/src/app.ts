@@ -3,6 +3,7 @@ import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
 import cookieParser from 'cookie-parser'
 import adminRoutes from "./routes/admin.routes";
+import userRoutes from './routes/user.routes'
 import cors from "cors";
 
 const app = express()
@@ -34,6 +35,8 @@ app.post('/logout', (req: Request, res: Response) => {
 
 
 app.use('/admin', adminRoutes)
+
+app.use('/user', userRoutes)
 
 
 app.use((req, res) => {
