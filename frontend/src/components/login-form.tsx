@@ -13,6 +13,9 @@ import { useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { useDispatch } from "react-redux"
+import type { AppDispatch } from "../features/app/store"
+import { loginUser } from "@/features/auth/authAPI"
 
 // Define validation schema using Zod
 const loginSchema = z.object({
@@ -36,10 +39,22 @@ export function LoginForm({
   } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
   })
+  const dispatch = useDispatch<AppDispatch>()
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {
-    console.log("Form Data:", data)
-    handleNav("/user/dashboard")
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    try {
+      const result = await dispatch(loginUser({
+        email: data.email,
+        password: data.password,
+        role: 'user'
+      })).unwrap()
+
+      if (result) {
+        handleNav('/user/dashboard');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   }
 
   return (
