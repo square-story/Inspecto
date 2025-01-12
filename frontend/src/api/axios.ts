@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { store } from '../features/app/store';
+import { store } from '../features/store';
 import { clearCredentials, setCredentials } from '../features/auth/authSlice';
 
 const axiosInstance = axios.create({
