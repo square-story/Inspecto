@@ -36,14 +36,9 @@ export class UserAuthController {
     static registerUser: RequestHandler = async (req: Request, res: Response) => {
         try {
             const { email, password, firstName, lastName } = req.body
-            const newUser = await userAuthService.registerUser(email, password, firstName, lastName)
-            res.status(201).json({
-                message: "user successfully created",
-                user: {
-                    id: newUser._id,
-                    name: newUser.firstName,
-                    email: newUser.email,
-                }
+            const registerUser = await userAuthService.registerUser(email, password, firstName, lastName)
+            res.status(200).json({
+                registerUser
             })
         } catch (error) {
             if (error instanceof Error) {
@@ -53,4 +48,30 @@ export class UserAuthController {
             }
         }
     }
+    static verifyOTP = async (req: Request, res: Response) => {
+        try {
+            const { email, otp } = req.body
+            const result = await userAuthService.verifyOTP(email, otp)
+            res.status(200).json(result)
+        } catch (error) {
+            if (error instanceof Error) {
+                res.status(400).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: "Something went wrong" });
+            }
+        }
+    }
+    static resendOTP = async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body;
+            const result = await userAuthService.resendOTP(email);
+            res.status(200).json(result);
+        } catch (error) {
+            if (error instanceof Error) {
+                res.status(400).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: "Something went wrong" });
+            }
+        }
+    };
 }
