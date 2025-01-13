@@ -2,7 +2,6 @@ import { Response } from "express";
 import UserRepository from "../../repositories/user.repository";
 import { generateAccessToken, verifyAccessToken, generateRefreshToken } from "../../utils/token.utils";
 import bcrypt from 'bcrypt'
-import User, { IUsers } from '../../models/user.model';
 import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis";
 import appConfig from "../../config/app.config";
