@@ -11,8 +11,13 @@ export class UserAuthService {
     }
     async login(email: string, password: string, res: Response) {
         const user = await this.userRepository.findUserByEmail(email)
-        if (!user || user.password !== password) {
-            throw new Error('Invalid password or Email')
+        if (!user) {
+            throw new Error('User Not Found')
+        }
+        const comparePassword = await bcrypt.compare(password, user.password)
+
+        if (!comparePassword) {
+            throw new Error('The Password is inCorrect')
         }
         const payload = { userId: user.id, role: user.role }
         const accessToken = generateAccessToken(payload)

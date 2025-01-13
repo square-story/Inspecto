@@ -18,8 +18,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.3"
+    "mongoose": "^8.9.3",
+    "nodemailer": "^6.9.16"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
