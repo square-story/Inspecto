@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../features/app/store';
+import { RootState } from '../features/store';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
