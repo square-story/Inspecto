@@ -49,6 +49,7 @@ export default function OTPComponent() {
             } else {
                 toast.success('Successfully created your account');
             }
+            localStorage.removeItem('otp-email')
             navigate('/user/login')
         } catch (error) {
             console.error("Form submission error", error);
