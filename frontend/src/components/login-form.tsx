@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../features/store";
 import { loginUser } from "@/features/auth/authAPI";
 import BackButton from "./BackButton";
+import { AxiosError } from "axios";
 
 // Define validation schema using Zod
 const loginSchema = z.object({
@@ -59,15 +60,14 @@ export function LoginForm({
       if (result) {
         handleNav("/user/dashboard");
       }
-    } catch (error: any) {
-      if (error.response?.data?.message) {
-        // Field-specific error handling
+
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
         if (error.response.data.field === "email") {
           setError("email", { type: "server", message: error.response.data.message });
         } else if (error.response.data.field === "password") {
           setError("password", { type: "server", message: error.response.data.message });
         } else {
-          // General errors
           setError("root", { type: "server", message: error.response.data.message });
         }
       } else {
