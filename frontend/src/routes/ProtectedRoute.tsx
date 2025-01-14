@@ -30,8 +30,14 @@ export const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
 export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, role } = useSelector((state: RootState) => state.auth);
 
-    if (isAuthenticated && role) {
-        // If already authenticated, redirect to their dashboard
+    if (isAuthenticated) {
+        if (role === 'admin' || role === 'inspector') {
+            const dashboardPath = `/${role}/dashboard`;
+            return <Navigate to={dashboardPath} replace />;
+        }
+        if (role === 'user' && window.location.pathname === '/') {
+            return <>{children}</>;
+        }
         const dashboardPath = `/${role}/dashboard`;
         return <Navigate to={dashboardPath} replace />;
     }
