@@ -10,6 +10,7 @@ import InspectorDashboard from "./pages/inspector/InspectorDashboard";
 import UserDashboard from "./pages/user/UserDashboard";
 import UserRegister from "./pages/user/UserRegister";
 import UserForget from "./pages/user/UserForget";
+import UserInputOTP from "./pages/user/UserInputOTP";
 
 const App = () => {
   return (
@@ -47,6 +48,14 @@ const App = () => {
           element={
             <PublicRoute>
               <UserRegister />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/user/verify-otp"
+          element={
+            <PublicRoute>
+              <UserInputOTP />
             </PublicRoute>
           }
         />

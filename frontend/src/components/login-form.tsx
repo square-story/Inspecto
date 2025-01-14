@@ -62,16 +62,18 @@ export function LoginForm({
       }
 
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        if (error.response.data.field === "email") {
-          setError("email", { type: "server", message: error.response.data.message });
-        } else if (error.response.data.field === "password") {
-          setError("password", { type: "server", message: error.response.data.message });
+      if (error instanceof AxiosError) {
+        // Handle field-specific errors
+        if (error.response?.data?.field === 'email') {
+          setError('email', { type: 'manual', message: error.response?.data.message });
+        } else if (error.response?.data?.field === 'password') {
+          setError('password', { type: 'manual', message: error.response?.data.message });
         } else {
-          setError("root", { type: "server", message: error.response.data.message });
+          // Handle general errors
+          setError('root', { type: 'manual', message: error.response?.data?.message || 'An error occurred' });
         }
       } else {
-        console.error("Unexpected error:", error);
+        console.error('Unexpected error:', error);
       }
     }
   };

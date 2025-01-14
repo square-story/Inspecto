@@ -45,6 +45,7 @@ export class UserAuthService {
 
     async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {
         const existingUser = await this.userRepository.findUserByEmail(email)
+
         if (existingUser) {
             throw new Error('user already Exist');
         }

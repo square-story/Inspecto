@@ -54,6 +54,7 @@ export function SignUp() {
         try {
             const response = await axiosInstance.post('/user/register', data)
             if (response) {
+                localStorage.setItem('otp-email', data.email)
                 navigate('/user/verify-otp')
             }
         } catch (error) {
