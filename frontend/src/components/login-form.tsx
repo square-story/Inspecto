@@ -1,65 +1,82 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useNavigate } from "react-router-dom"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { useDispatch } from "react-redux"
-import type { AppDispatch } from "../features/store"
-import { loginUser } from "@/features/auth/authAPI"
-import BackButton from "./BackButton"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../features/store";
+import { loginUser } from "@/features/auth/authAPI";
+import BackButton from "./BackButton";
 
 // Define validation schema using Zod
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, 'password Contain atleast 6 character').max(16, 'password contain only 16 character'),
-})
+  password: z
+    .string()
+    .min(6, "Password must contain at least 6 characters")
+    .max(16, "Password cannot exceed 16 characters"),
+});
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const handleNav = (path: string) => {
-    navigate(path)
-  }
+    navigate(path);
+  };
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-  })
-  const dispatch = useDispatch<AppDispatch>()
+  });
+  const dispatch = useDispatch<AppDispatch>();
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
-      const result = await dispatch(loginUser({
-        email: data.email,
-        password: data.password,
-        role: 'user'
-      })).unwrap()
+      const result = await dispatch(
+        loginUser({
+          email: data.email,
+          password: data.password,
+          role: "user",
+        })
+      ).unwrap();
 
       if (result) {
-        handleNav('/user/dashboard');
+        handleNav("/user/dashboard");
       }
-    } catch (error) {
-      console.error('Login failed:', error);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        // Field-specific error handling
+        if (error.response.data.field === "email") {
+          setError("email", { type: "server", message: error.response.data.message });
+        } else if (error.response.data.field === "password") {
+          setError("password", { type: "server", message: error.response.data.message });
+        } else {
+          // General errors
+          setError("root", { type: "server", message: error.response.data.message });
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
     }
-  }
+  };
 
   return (
-
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <BackButton />
       <Card>
@@ -71,6 +88,11 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
+            {errors.root && (
+              <p className="text-red-600 text-sm text-center">
+                {errors.root.message}
+              </p>
+            )}
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -156,5 +178,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

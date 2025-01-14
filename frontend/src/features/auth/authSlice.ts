@@ -19,7 +19,7 @@ const initialState: AuthState = {
 };
 
 // Declare the async actions
-export const loginUser = createAsyncThunk(
+const loginUser = createAsyncThunk(
     'auth/login',
     async (credentials: { email: string; password: string; role: AuthState['role'] }, { rejectWithValue }) => {
         try {
@@ -44,7 +44,7 @@ export const loginUser = createAsyncThunk(
     }
 );
 
-export const logoutUser = createAsyncThunk(
+const logoutUser = createAsyncThunk(
     'auth/logout',
     async (_, { dispatch, rejectWithValue }) => {
         try {
