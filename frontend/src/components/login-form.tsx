@@ -21,7 +21,7 @@ import BackButton from "./BackButton"
 // Define validation schema using Zod
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(6, 'password Contain atleast 6 character').max(16, 'password contain only 16 character'),
 })
 
 export function LoginForm({
