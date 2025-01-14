@@ -18,6 +18,7 @@ import type { AppDispatch } from "../features/store";
 import { loginUser } from "@/features/auth/authAPI";
 import BackButton from "./BackButton";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 // Define validation schema using Zod
 const loginSchema = z.object({
@@ -58,6 +59,7 @@ export function LoginForm({
       ).unwrap();
 
       if (result) {
+        toast.success('Login successfully')
         handleNav("/user/dashboard");
       }
 

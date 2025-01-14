@@ -15,6 +15,7 @@ import BackButton from "@/components/BackButton";
 import axiosInstance from "@/api/axios";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 // Validation schema using zod
 const formSchema = z
@@ -55,6 +56,7 @@ export function SignUp() {
             const response = await axiosInstance.post('/user/register', data)
             if (response) {
                 localStorage.setItem('otp-email', data.email)
+                toast.info('Please Check Your Mail For Verification')
                 navigate('/user/verify-otp')
             }
         } catch (error) {
@@ -63,6 +65,7 @@ export function SignUp() {
                     type: "manual",
                     message: error.response.data.message,
                 });
+                toast.error(error.response.data.message)
             } else {
                 console.error("Unexpected error:", error);
             }
