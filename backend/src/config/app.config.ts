@@ -7,8 +7,15 @@ interface AppConfig {
     databaseUrl: string;
     accessToken: string;
     refreshToken: string;
-    accessTime: string,
-    refreshTime: string
+    accessTime: string;
+    refreshTime: string;
+    redisHost: string;
+    redisPort: number;
+    smtpHost: string;
+    smtpPort: number
+    smtpUser: string;
+    smtpPass: string;
+    otpExp: number;
 }
 
 const appConfig: AppConfig = {
@@ -17,7 +24,14 @@ const appConfig: AppConfig = {
     accessToken: process.env.ACCESS_TOKEN_SECRET || 'Access Secret',
     refreshToken: process.env.REFRESH_TOKEN_SECRET || 'Refresh Secret',
     accessTime: process.env.ACCESS_TOKEN_EXPIRATION || '15m',
-    refreshTime: process.env.REFRESH_TOKEN_EXPIRATION || '7d'
+    refreshTime: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
+    redisHost: process.env.REDIS_HOST || 'localhost',
+    redisPort: parseInt(process.env.REDIS_PORT || '6379', 10),
+    smtpHost: process.env.SMTP_HOST || '',
+    smtpPort: parseInt(process.env.SMTP_PORT || "587", 10),
+    smtpUser: process.env.SMTP_USER || '',
+    smtpPass: process.env.SMTP_PASS || '',
+    otpExp: parseInt(process.env.OTP_EXPIRY || '300', 10)
 };
 
 export default appConfig;

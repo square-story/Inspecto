@@ -1,15 +1,15 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IUserInput {
-    FirstName: string;
-    LastName: string;
-    Email: string;
-    Password: string;
-    Created_at: Date;
-    Updated_at: Date;
-    Address: string | null;
-    Profile_image: string | null;
-    Status: boolean;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    created_at: Date;
+    updated_at: Date;
+    address: string | null;
+    profile_image: string | null;
+    status: boolean;
     role: string;
 }
 
@@ -18,18 +18,16 @@ export interface IUsers extends Document, IUserInput {
 }
 
 const UsersSchema: Schema = new Schema<IUsers>({
-    FirstName: { type: String, required: true },
-    LastName: { type: String, required: true },
-    Created_at: { type: Date, required: true },
-    Email: { type: String, required: true, unique: true },
-    Password: { type: String, required: true },
-    Address: { type: String, default: null },
-    Updated_at: { type: Date, required: true },
-    Profile_image: { type: String, default: null },
-    Status: { type: Boolean, required: true, default: true },
-    role: { type: String, default: 'user' }
-}, { timestamps: true })
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    created_at: { type: Date, default: Date.now },
+    updated_at: { type: Date, default: Date.now },
+    address: { type: String, default: null },
+    profile_image: { type: String, default: null },
+    status: { type: Boolean, default: true },
+    role: { type: String, required: true, default: 'user' }
+});
 
-const Users = mongoose.model<IUsers>('Users', UsersSchema);
-
-export default Users;
+export default mongoose.model<IUsers>("User", UsersSchema);

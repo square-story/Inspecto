@@ -1,5 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { loginUser, logoutUser } from './authAPI';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import axiosInstance from '../../api/axios';
 
 interface AuthState {
     accessToken: string | null;
@@ -17,21 +18,58 @@ const initialState: AuthState = {
     error: null,
 };
 
+// Declare the async actions
+const loginUser = createAsyncThunk(
+    'auth/login',
+    async (credentials: { email: string; password: string; role: AuthState['role'] }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post<{ accessToken: string }>(
+                `/${credentials.role}/login`,
+                {
+                    email: credentials.email,
+                    password: credentials.password,
+                },
+                { withCredentials: true }
+            );
+            return {
+                accessToken: response.data.accessToken,
+                role: credentials.role,
+            };
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data.message);
+            }
+            return rejectWithValue('An unknown error occurred');
+        }
+    }
+);
+
+const logoutUser = createAsyncThunk(
+    'auth/logout',
+    async (_, { dispatch, rejectWithValue }) => {
+        try {
+            await axiosInstance.post('/logout', {}, { withCredentials: true });
+            dispatch(clearCredentials());
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data.message);
+            }
+            return rejectWithValue('An unknown error occurred');
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setCredentials: (state, action) => {
+        setCredentials(state, action: PayloadAction<{ accessToken: string; role: AuthState['role'] }>) {
             const { accessToken, role } = action.payload;
             state.accessToken = accessToken;
             state.role = role;
             state.isAuthenticated = true;
-
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('role', role || '');
-        },
-        clearError: (state) => {
-            state.error = null;
         },
         clearCredentials(state) {
             state.accessToken = null;
@@ -39,7 +77,13 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             localStorage.removeItem('accessToken');
             localStorage.removeItem('role');
-        }
+        },
+        setLoading(state, action: PayloadAction<boolean>) {
+            state.isLoading = action.payload;
+        },
+        setError(state, action: PayloadAction<string | null>) {
+            state.error = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -54,20 +98,24 @@ const authSlice = createSlice({
                 state.role = action.payload.role as AuthState['role'];
 
                 localStorage.setItem('accessToken', action.payload.accessToken);
-                localStorage.setItem('role', action.payload.role);
+                localStorage.setItem('role', action.payload.role || '');
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
             .addCase(logoutUser.fulfilled, (state) => {
+                state.isLoading = false;
+                state.isAuthenticated = false;
                 state.accessToken = null;
                 state.role = null;
-                state.isAuthenticated = false;
-                localStorage.clear();
+
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('role');
             });
     },
 });
 
-export const { setCredentials, clearError, clearCredentials } = authSlice.actions;
+export const { setCredentials, clearCredentials, setLoading, setError } = authSlice.actions;
+
 export default authSlice.reducer;

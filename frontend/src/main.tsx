@@ -2,10 +2,15 @@ import { createRoot } from 'react-dom/client'
 import { Provider } from "react-redux";
 import './index.css'
 import App from './App.tsx'
-import { store } from './features/app/store.ts';
+import { store } from './features/store.ts';
+import { ThemeProvider } from "./components/ui/theme-provider.tsx"
+import { Toaster } from 'sonner';
 
 createRoot(document.getElementById('root')!).render(
-  <Provider store={store}>
-    <App />
-  </Provider>
+  <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <Provider store={store}>
+      <App />
+      <Toaster />
+    </Provider>
+  </ThemeProvider>
 )
