@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import BackButton from "@/components/BackButton";
+import axiosInstance from "@/api/axios";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 
 // Validation schema using zod
 const formSchema = z
@@ -45,9 +48,24 @@ export function SignUp() {
             lastName: "",
         },
     });
+    const navigate = useNavigate()
     // Handle form submission
-    function onSubmit(data: z.infer<typeof formSchema>) {
-        console.log(data)
+    async function onSubmit(data: z.infer<typeof formSchema>) {
+        try {
+            const response = await axiosInstance.post('/user/register', data)
+            if (response) {
+                navigate('/user/verify-otp')
+            }
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                form.setError("email", {
+                    type: "manual",
+                    message: error.response.data.message,
+                });
+            } else {
+                console.error("Unexpected error:", error);
+            }
+        }
     }
 
     return (

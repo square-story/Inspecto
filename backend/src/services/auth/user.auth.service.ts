@@ -16,7 +16,7 @@ export class UserAuthService {
         const user = await this.userRepository.findUserByEmail(email)
         if (!user) {
             res.status(400).json({ field: 'email', message: 'User not found' })
-            return;
+            return
         }
         const comparePassword = await bcrypt.compare(password, user.password)
 
@@ -43,10 +43,10 @@ export class UserAuthService {
         return { accessToken: newAccessToken }
     }
 
-    async registerUser(email: string, password: string, firstName: string, lastName: string): Promise<{ message: string }> {
+    async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {
         const existingUser = await this.userRepository.findUserByEmail(email)
         if (existingUser) {
-            throw new Error('User with this Email already exists')
+            throw new Error('user already Exist');
         }
         const hashPassword = await bcrypt.hash(password, 10)
         const otp = generateOtp();

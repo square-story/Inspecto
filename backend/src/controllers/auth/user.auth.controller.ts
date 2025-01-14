@@ -36,9 +36,9 @@ export class UserAuthController {
     static registerUser: RequestHandler = async (req: Request, res: Response) => {
         try {
             const { email, password, firstName, lastName } = req.body
-            const registerUser = await userAuthService.registerUser(email, password, firstName, lastName)
+            const response = await userAuthService.registerUser(email, password, firstName, lastName, res)
             res.status(200).json({
-                registerUser
+                response
             })
         } catch (error) {
             if (error instanceof Error) {
