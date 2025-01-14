@@ -2,8 +2,10 @@ import { SignUp } from "@/app/userSignup/UserSignupProcess"
 
 const UserRegister = () => {
     return (
-        <div className="flex w-full h-screen justify-center items-center">
-            <SignUp />
+        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+            <div className="w-full max-w-sm">
+                <SignUp />
+            </div>
         </div>
     )
 }
