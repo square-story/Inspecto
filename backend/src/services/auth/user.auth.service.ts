@@ -1,6 +1,6 @@
 import { Response } from "express";
 import UserRepository from "../../repositories/user.repository";
-import { generateAccessToken, verifyAccessToken, generateRefreshToken } from "../../utils/token.utils";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 import bcrypt from 'bcrypt'
 import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis";
@@ -36,7 +36,7 @@ export class UserAuthService {
         return ({ accessToken, userDetails })
     }
     async refreshToken(token: string) {
-        const payload = await verifyAccessToken(token)
+        const payload = await verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
