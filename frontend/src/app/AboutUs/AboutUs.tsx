@@ -1,33 +1,71 @@
+import {
+    Blocks,
+    Bot,
+    ChartPie,
+    Film,
+    MessageCircle,
+    Settings2,
+} from "lucide-react";
+
 const features = [
     {
-        title: "Verified Inspectors",
-        description: "Work with authorized professionals you can trust.",
+        icon: Settings2,
+        title: "Customizable Layouts",
+        description:
+            "Design your space with drag-and-drop simplicity—create grids, lists, or galleries in seconds.",
     },
     {
-        title: "Centralized Reports",
-        description: "Access and share detailed inspection reports anytime.",
+        icon: Blocks,
+        title: "Interactive Widgets",
+        description:
+            "Embed polls, quizzes, or forms to keep your audience engaged.",
     },
     {
-        title: "Seamless Booking",
-        description: "Easily schedule inspections at your convenience.",
+        icon: Bot,
+        title: "AI-Powered Tools",
+        description:
+            "Generate summaries, auto-format content, or translate into multiple languages seamlessly.",
+    },
+    {
+        icon: Film,
+        title: "Media Integrations",
+        description:
+            "Connect with Spotify, Instagram, or your own media library for dynamic visuals and sound.",
+    },
+    {
+        icon: ChartPie,
+        title: "Advanced Analytics",
+        description:
+            "Track engagement, clicks, and user activity with intuitive charts and reports.",
+    },
+    {
+        icon: MessageCircle,
+        title: "Seamless Collaboration",
+        description:
+            "Comment, tag, and assign tasks directly within your documents.",
     },
 ];
 
-const Features02Page = () => {
+const Features01Page = () => {
     return (
         <div className="min-h-screen flex items-center justify-center py-12">
-            <div className="w-full">
-                <h2 className="text-4xl md:text-5xl font-black tracking-tight text-center">
-                    Ignite Your Imagination
+            <div>
+                <h2 className="text-5xl md:text-6xl font-black tracking-tight text-center">
+                    Unleash Your Creativity
                 </h2>
-                <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 max-w-md sm:max-w-screen-md lg:max-w-screen-lg w-full mx-auto px-6">
+                <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-screen-lg mx-auto px-6">
                     {features.map((feature) => (
-                        <div key={feature.title} className="flex flex-col text-start">
-                            <div className="mb-5 sm:mb-6 w-full aspect-[4/5] bg-muted rounded-xl" />
-                            <span className="text-2xl font-bold tracking-tight">
+                        <div
+                            key={feature.title}
+                            className="flex flex-col border rounded-xl py-6 px-5"
+                        >
+                            <div className="mb-3 h-10 w-10 flex items-center justify-center bg-muted rounded-full">
+                                <feature.icon className="h-6 w-6" />
+                            </div>
+                            <span className="text-lg font-bold tracking-tight">
                                 {feature.title}
                             </span>
-                            <p className="mt-2 max-w-[25ch] text-muted-foreground/80 text-[17px] font-medium">
+                            <p className="mt-1 text-foreground/80 text-[15px]">
                                 {feature.description}
                             </p>
                         </div>
@@ -38,4 +76,4 @@ const Features02Page = () => {
     );
 };
 
-export default Features02Page;
+export default Features01Page;

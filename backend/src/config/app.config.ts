@@ -23,7 +23,7 @@ const appConfig: AppConfig = {
     databaseUrl: process.env.DATABASE_URL || 'mongodb://localhost:27017/inspectodb',
     accessToken: process.env.ACCESS_TOKEN_SECRET || 'Access Secret',
     refreshToken: process.env.REFRESH_TOKEN_SECRET || 'Refresh Secret',
-    accessTime: process.env.ACCESS_TOKEN_EXPIRATION || '20s',
+    accessTime: process.env.ACCESS_TOKEN_EXPIRATION || '15m',
     refreshTime: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
     redisHost: process.env.REDIS_HOST || 'localhost',
     redisPort: parseInt(process.env.REDIS_PORT || '6379', 10),
