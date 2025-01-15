@@ -1,14 +1,8 @@
-"use client"
-import * as z from "zod"
-import {
-    zodResolver
-} from "@hookform/resolvers/zod"
-import {
-    Button
-} from "@/components/ui/button"
-import {
-    useForm
-} from "react-hook-form"
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+
 import {
     Form,
     FormControl,
@@ -16,128 +10,123 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
-
+} from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
 import {
-    Input
-} from '@/components/ui/input'
-import { useNavigate } from "react-router-dom"
-import BackButton from "@/components/BackButton"
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 
+// Improved schema with additional validation rules
 const formSchema = z.object({
-    "Email": z.string(),
-    "Password": z.string()
-});
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: z
+        .string()
+        .min(6, { message: 'Password must be at least 6 characters long' })
+        .regex(/[a-zA-Z0-9]/, { message: 'Password must be alphanumeric' }),
+})
 
-function DraftForm() {
-
+export default function LoginPreview() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {},
+        defaultValues: {
+            email: '',
+            password: '',
+        },
     })
 
-    function onSubmit(fields: z.infer<typeof formSchema>) {
-        console.log(fields);
-    }
-
-    const navigate = useNavigate()
-    const handleNav = (path: string) => {
-        navigate(path)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            // Assuming an async login function
+            console.log(values)
+            toast(
+                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+                    <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+                </pre>,
+            )
+        } catch (error) {
+            console.error('Form submission error', error)
+            toast.error('Failed to submit the form. Please try again.')
+        }
     }
 
     return (
-        <div>
-            <BackButton />
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col p-2 md:p-5 w-full mx-auto rounded-md max-w-3xl gap-2 border">
-                    <h1 className="text-3xl font-bold">Inspector Login</h1>
-                    <p className="text-base">Please enter details and password.</p>
-                    <FormField
-                        control={form.control}
-                        name="Email"
-                        render={({ field }) => (
-                            <FormItem className="w-full">
-                                <FormLabel>Email</FormLabel> *
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter your Email"
-                                        type={"email"}
-                                        value={field.value}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            field.onChange(val);
-                                        }}
-                                    />
-                                </FormControl>
-
-                                <FormMessage />
-                            </FormItem>
-                        )
-                        }
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="Password"
-                        render={({ field }) => (
-                            <FormItem className="w-full">
-
-
-
-
-                                <div className="flex items-end">
-                                    <FormLabel>Password</FormLabel> *
-                                    <a
-                                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline cursor-pointer"
-                                        onClick={() => handleNav('/inspector/forget')}
-                                    >
-                                        Forgot your password?
-                                    </a>
-                                </div>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        placeholder="Password"
-                                        type="password"
-                                    />
-
-                                </FormControl>
-
-
-                                <FormMessage />
-
-                            </FormItem>
-                        )
-                        }
-                    />
-
-                    <div className="flex justify-center items-center w-full pt-3">
-                        <Button className="rounded-lg w-full" size="sm">
-                            Submit
-                        </Button>
-                    </div>
+        <div className="flex flex-col min-h-[100vh] h-full w-full items-center justify-center px-4">
+            <Card className="mx-auto max-w-sm">
+                <CardHeader>
+                    <CardTitle className="text-2xl">Inspector Login</CardTitle>
+                    <CardDescription>
+                        Enter your email and password to login to your account.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <div className="grid gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem className="grid gap-2">
+                                            <FormLabel htmlFor="email">Email</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="email"
+                                                    placeholder="johndoe@mail.com"
+                                                    type="email"
+                                                    autoComplete="email"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem className="grid gap-2">
+                                            <div className="flex justify-between items-center">
+                                                <FormLabel htmlFor="password">Password</FormLabel>
+                                                <a
+                                                    href="#"
+                                                    className="ml-auto inline-block text-sm underline"
+                                                >
+                                                    Forgot your password?
+                                                </a>
+                                            </div>
+                                            <FormControl>
+                                                <PasswordInput
+                                                    id="password"
+                                                    placeholder="******"
+                                                    autoComplete="current-password"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit" className="w-full">
+                                    Login
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
                     <div className="mt-4 text-center text-sm">
-                        Don&apos;t have an account?{" "}
-                        <a
-                            className="underline underline-offset-4 cursor-pointer"
-                            onClick={() => handleNav("/inspector/register")}
-                        >
+                        Don&apos;t have an account?{' '}
+                        <a href="#" className="underline">
                             Sign up
                         </a>
                     </div>
-                </form>
-            </Form>
+                </CardContent>
+            </Card>
         </div>
     )
 }
-
-
-const InspectorLoginPage = () => {
-    return (
-        <div className="justify-center items-center flex w-full h-screen">
-            <DraftForm />
-        </div>
-    )
-}
-
-export default InspectorLoginPage
