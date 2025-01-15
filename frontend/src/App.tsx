@@ -11,6 +11,7 @@ import UserDashboard from "./pages/user/UserDashboard";
 import UserRegister from "./pages/user/UserRegister";
 import UserForget from "./pages/user/UserForget";
 import UserInputOTP from "./pages/user/UserInputOTP";
+import FAQPage from "./routes/FAQPage";
 
 const App = () => {
   return (
@@ -22,6 +23,15 @@ const App = () => {
           element={
             <PublicRoute>
               <HomePage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/questions"
+          element={
+            <PublicRoute>
+              <FAQPage />
             </PublicRoute>
           }
         />

@@ -10,39 +10,39 @@ import {
 const features = [
     {
         icon: Settings2,
-        title: "Customizable Layouts",
+        title: "Verified Inspectors",
         description:
             "Design your space with drag-and-drop simplicity—create grids, lists, or galleries in seconds.",
     },
     {
         icon: Blocks,
-        title: "Interactive Widgets",
+        title: "Easy & Fast Car Inspection Booking",
         description:
-            "Embed polls, quizzes, or forms to keep your audience engaged.",
+            "Easily schedule inspections at your convenience.",
     },
     {
         icon: Bot,
-        title: "AI-Powered Tools",
+        title: "Hassle-Free Reports",
         description:
-            "Generate summaries, auto-format content, or translate into multiple languages seamlessly.",
+            "Access your inspection results anytime, anywhere.",
     },
     {
         icon: Film,
-        title: "Media Integrations",
+        title: " 24/7 Customer Support",
         description:
-            "Connect with Spotify, Instagram, or your own media library for dynamic visuals and sound.",
+            "We’re here to help whenever you need us.",
     },
     {
         icon: ChartPie,
-        title: "Advanced Analytics",
+        title: "Safe and Secure Process",
         description:
-            "Track engagement, clicks, and user activity with intuitive charts and reports.",
+            "Your vehicle and data are in good hands.",
     },
     {
         icon: MessageCircle,
-        title: "Seamless Collaboration",
+        title: "Centralized Reports",
         description:
-            "Comment, tag, and assign tasks directly within your documents.",
+            "Access and share detailed inspection reports anytime.",
     },
 ];
 
@@ -51,7 +51,7 @@ const Features01Page = () => {
         <div className="min-h-screen flex items-center justify-center py-12">
             <div>
                 <h2 className="text-5xl md:text-6xl font-black tracking-tight text-center">
-                    Unleash Your Creativity
+                    Why Choose Inspecto?
                 </h2>
                 <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-screen-lg mx-auto px-6">
                     {features.map((feature) => (

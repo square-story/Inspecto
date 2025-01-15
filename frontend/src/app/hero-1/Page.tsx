@@ -30,7 +30,7 @@ const Hero01 = () => {
                     </div>
                 </div>
                 <div className="w-full aspect-video bg-accent rounded-xl overflow-hidden group">
-
+                    <img src="https://i.pinimg.com/736x/7f/4e/02/7f4e02244d449a3ebfb367edc366d92f.jpg" alt="" />
                 </div>
             </div>
         </div>
