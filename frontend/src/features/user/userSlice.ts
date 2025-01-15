@@ -6,7 +6,7 @@ interface UserState {
     lastName: string;
     email: string;
     address: string | null;
-    profile_image: string | null;
+    profile_image: string;
     status: boolean;
     role: string;
 }
@@ -17,7 +17,7 @@ const initialState: UserState = {
     lastName: '',
     email: '',
     address: null,
-    profile_image: null,
+    profile_image: '',
     status: true,
     role: 'user',
 };

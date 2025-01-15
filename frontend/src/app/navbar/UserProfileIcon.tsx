@@ -29,6 +29,9 @@ export function UserProfileIcon() {
     const user = useSelector((state: RootState) => state.user)
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate()
+    const handleNavigation = (path: string) => {
+        navigate(path);
+    };
     const handleLogout = async () => {
         try {
             toast.promise(
@@ -73,29 +76,29 @@ export function UserProfileIcon() {
             <DropdownMenuTrigger asChild>
                 <Button variant='outline' className="rounded-full">
                     <Avatar className="cursor-pointer">
-                        <AvatarImage src={user?.firstName} alt="User" />
-                        <AvatarFallback>{user?.firstName?.charAt(0) || "J"}</AvatarFallback>
+                        <AvatarImage src={user.profile_image} alt="User" />
+                        <AvatarFallback>{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>Hey {user.firstName.toUpperCase()}👋</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigation('user/dashboard')}>
                         Profile
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                        Billing
+                        My Vehicles
                         <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                        Settings
+                        Book an Inspection
                         <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                        Keyboard shortcuts
+                        Inspection History
                         <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -119,7 +122,7 @@ export function UserProfileIcon() {
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>GitHub</DropdownMenuItem>
+                <DropdownMenuItem>Notifications</DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuItem disabled>API</DropdownMenuItem>
                 <DropdownMenuSeparator />
