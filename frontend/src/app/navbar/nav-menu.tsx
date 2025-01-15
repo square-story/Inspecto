@@ -33,7 +33,7 @@ export const NavMenu = (props: NavigationMenuProps) => {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <button className="hover:font-bold hover:ease-in-out duration-300" onClick={() => handleNavigation('/')}>
+                        <button className="hover:font-bold hover:ease-in-out duration-300" onClick={() => handleNavigation('/contact')}>
                             Contact
                         </button>
                     </NavigationMenuLink>

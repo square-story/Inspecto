@@ -12,6 +12,7 @@ import UserRegister from "./pages/user/UserRegister";
 import UserForget from "./pages/user/UserForget";
 import UserInputOTP from "./pages/user/UserInputOTP";
 import FAQPage from "./routes/FAQPage";
+import ContactPage from "./routes/ContactPage";
 
 const App = () => {
   return (
@@ -30,9 +31,14 @@ const App = () => {
         <Route
           path="/questions"
           element={
-            <PublicRoute>
-              <FAQPage />
-            </PublicRoute>
+            <FAQPage />
+          }
+        />
+
+        <Route
+          path="/contact"
+          element={
+            <ContactPage />
           }
         />
 
