@@ -6,8 +6,8 @@ export class UserAuthController {
     static userLogin: RequestHandler = async (req: Request, res: Response) => {
         try {
             const { email, password } = req.body
-            const token = await userAuthService.login(email, password, res)
-            res.status(200).json(token)
+            const response = await userAuthService.login(email, password, res)
+            res.status(200).json(response)
         } catch (error) {
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message })

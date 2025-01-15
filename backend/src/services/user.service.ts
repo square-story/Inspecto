@@ -3,7 +3,7 @@ import UserRepository from "../repositories/user.repository";
 
 
 
-class UserService {
+export class UserService {
     private userRepository: UserRepository
     constructor() {
         this.userRepository = new UserRepository()
@@ -20,6 +20,9 @@ class UserService {
     async findUsersByEmail(email: string) {
         return await this.userRepository.findUserByEmail(email)
     }
+    async findUserByUserId(userId: string) {
+        return await this.userRepository.findById(userId)
+    }
     async updateUser(userId: string, updates: Partial<IUsers>) {
         return await this.userRepository.updateUser(userId, updates)
     }
@@ -31,4 +34,3 @@ class UserService {
     }
 }
 
-export default new UserService();

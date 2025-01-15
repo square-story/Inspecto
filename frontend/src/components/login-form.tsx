@@ -19,6 +19,9 @@ import { loginUser } from "@/features/auth/authAPI";
 import BackButton from "./BackButton";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import { setUser } from "@/features/user/userSlice";
+import { setCredentials } from "@/features/auth/authSlice";
+
 
 // Define validation schema using Zod
 const loginSchema = z.object({
@@ -59,8 +62,17 @@ export function LoginForm({
       ).unwrap();
 
       if (result) {
+        const { accessToken, role } = result
+        dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+        if (result.userDetails) {
+          dispatch(setUser({
+            id: result.userDetails.id,
+            firstName: result.userDetails.firstName,
+            email: result.userDetails.email,
+          }))
+        }
         toast.success('Login successfully')
-        handleNav("/user/dashboard");
+        handleNav("/");
       }
 
     } catch (error) {

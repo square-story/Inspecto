@@ -10,6 +10,14 @@ interface LoginCredentials {
 
 interface LoginResponse {
     accessToken: string,
+    role: string,
+    userDetails?: {
+        id: string,
+        email: string,
+        role: string,
+        firstName: string,
+        lastName: string
+    }
 }
 
 export const loginUser = createAsyncThunk(
@@ -25,7 +33,8 @@ export const loginUser = createAsyncThunk(
             );
             return {
                 accessToken: response.data.accessToken,
-                role: credentials.role
+                role: credentials.role,
+                userDetails: response.data?.userDetails
             };
         } catch (error: unknown) {
             return rejectWithValue(error);

@@ -32,7 +32,14 @@ export class UserAuthService {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
         })
-        return ({ accessToken })
+        const userDetails = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName
+        };
+        return ({ accessToken, userDetails })
     }
     async refreshToken(token: string) {
         const payload = await verifyAccessToken(token)

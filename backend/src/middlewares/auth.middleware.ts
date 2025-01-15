@@ -1,22 +1,31 @@
+import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../utils/token.utils";
+import appConfig from "../config/app.config";
 
-declare module 'express-serve-static-core' {
+declare module "express-serve-static-core" {
     interface Request {
-        user?: any;
+        user?: { userId: string; role: string }; // Extend the type to include user information
     }
 }
 
-export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
     const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: 'Token missing' })
+    if (!authHeader) {
+        res.status(401).json({ message: "Token missing" });
+        return;
+    }
 
-    const token = authHeader.split(' ')[1]
+    const token = authHeader.split(" ")[1];
     try {
-        const payload = verifyAccessToken(token)
-        req.user = payload
+        const payload = jwt.verify(token, appConfig.accessToken as string) as { userId: string; role: string };
+        req.user = payload;
         next();
-    } catch (error) {
-        return res.status(403).json({ message: 'Invalid Token' })
+    } catch (error: any) {
+        if (error.name === "TokenExpiredError") {
+            res.status(401).json({ message: "Token expired" });
+        } else {
+            res.status(403).json({ message: "Invalid token" });
+        }
+        console.error("JWT verification error:", error);
     }
 }
