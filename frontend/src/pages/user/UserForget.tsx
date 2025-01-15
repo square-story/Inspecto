@@ -1,14 +1,8 @@
-"use client"
-import * as z from "zod"
-import {
-    zodResolver
-} from "@hookform/resolvers/zod"
-import {
-    Button
-} from "@/components/ui/button"
-import {
-    useForm
-} from "react-hook-form"
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+
 import {
     Form,
     FormControl,
@@ -16,77 +10,84 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
 import {
-    Input
-} from "@/components/ui/input"
-import BackButton from "@/components/BackButton"
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import BackButton from '@/components/BackButton'
 
+// Schema for email validation
 const formSchema = z.object({
-    "email": z.string()
-});
+    email: z.string().email({ message: 'Invalid email address' }),
+})
 
-export function ForgetPassword() {
-
+export default function ForgetPasswordPreview() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {},
+        defaultValues: {
+            email: '',
+        },
     })
 
-    function onSubmit(fields: z.infer<typeof formSchema>) {
-        console.log(fields);
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            // Assuming a function to send reset email
+            console.log(values)
+            toast.success('Password reset email sent. Please check your inbox.')
+        } catch (error) {
+            console.error('Error sending password reset email', error)
+            toast.error('Failed to send password reset email. Please try again.')
+        }
     }
 
     return (
-        <div>
-
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col p-2 md:p-5 w-full mx-auto rounded-md max-w-3xl gap-2 border">
+        <div className="flex min-h-[100vh] h-full w-full items-center justify-center px-4">
+            <Card className="mx-auto max-w-sm">
+                <CardHeader>
                     <BackButton />
-                    <h1 className="text-3xl font-bold">Forget password</h1>
-                    <p className="text-base">it will create a link for send to your email</p>
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem className="w-full">
-                                <FormLabel>Enter Existing email</FormLabel> *
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter your Email"
-                                        type={"email"}
-                                        value={field.value}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            field.onChange(val);
-                                        }}
-                                    />
-                                </FormControl>
-
-                                <FormMessage />
-                            </FormItem>
-                        )
-                        }
-                    />
-                    <div className="flex justify-end items-center w-full pt-3">
-                        <Button className="rounded-lg" size="sm">
-                            Submit
-                        </Button>
-                    </div>
-                </form>
-            </Form>
+                    <CardTitle className="text-2xl">Forgot Password</CardTitle>
+                    <CardDescription>
+                        Enter your email address to receive a password reset link.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <div className="grid gap-4">
+                                {/* Email Field */}
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem className="grid gap-2">
+                                            <FormLabel htmlFor="email">Email</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="email"
+                                                    placeholder="johndoe@mail.com"
+                                                    type="email"
+                                                    autoComplete="email"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit" className="w-full">
+                                    Send Reset Link
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </CardContent>
+            </Card>
         </div>
     )
 }
-
-
-
-const UserForget = () => {
-    return (
-        <div className="flex justify-center items-center w-full h-screen">
-            <ForgetPassword />
-        </div>
-    )
-}
-
-export default UserForget

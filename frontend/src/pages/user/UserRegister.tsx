@@ -24,6 +24,7 @@ import { PasswordInput } from '@/components/ui/password-input'
 import axiosInstance from '@/api/axios'
 import { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '@/components/BackButton'
 
 
 // Define validation schema using Zod
@@ -87,6 +88,7 @@ export default function RegisterPreview() {
         <div className="flex min-h-[100vh] h-full w-full items-center justify-center px-4">
             <Card className="mx-auto max-w-sm">
                 <CardHeader>
+                    <BackButton />
                     <CardTitle className="text-2xl">Register</CardTitle>
                     <CardDescription>
                         Create a new account by filling out the form below.
