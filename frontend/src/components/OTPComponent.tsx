@@ -26,6 +26,9 @@ import {
 import axiosInstance from "@/api/axios"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { setCredentials } from "@/features/auth/authSlice"
+import { AppDispatch } from "@/features/store"
 
 const formSchema = z.object({
     otp: z.string()
@@ -37,8 +40,10 @@ export default function OTPComponent() {
         resolver: zodResolver(formSchema),
 
     })
+    const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate()
     async function onSubmit(values: z.infer<typeof formSchema>) {
+
         try {
             const email = localStorage.getItem('otp-email');
             const otp = values.otp;
@@ -50,7 +55,9 @@ export default function OTPComponent() {
                 toast.success('Successfully created your account');
             }
             localStorage.removeItem('otp-email')
-            navigate('/user/login')
+            const { accessToken } = response.data
+            dispatch(setCredentials({ accessToken, role: 'user' }))
+            navigate('/')
         } catch (error) {
             console.error("Form submission error", error);
 

@@ -57,7 +57,7 @@ export class UserAuthService {
         await sendEmail(email, 'Your Inspecto OTP', `Your OTP is ${otp}`);
         return { message: 'OTP send successfully' }
     }
-    async verifyOTP(email: string, otp: string) {
+    async verifyOTP(email: string, otp: string, res: Response) {
         const redisKey = `user:register:${email}`;
         const userData = await redisClient.get(redisKey)
 
@@ -72,7 +72,15 @@ export class UserAuthService {
 
         const newUser = await this.userRepository.createUser({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
         await redisClient.del(redisKey)
-        return { message: "User registerd successfully", user: newUser }
+        const payload = { userId: newUser.id, role: newUser.role }
+        const accessToken = generateAccessToken(payload)
+        const refreshToken = generateRefreshToken(payload)
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        })
+        return { message: "User registerd successfully", user: newUser, accessToken }
     }
     async resendOTP(email: string) {
         const redisKey = `user:register:${email}`

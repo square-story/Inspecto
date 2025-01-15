@@ -51,7 +51,7 @@ export class UserAuthController {
     static verifyOTP = async (req: Request, res: Response) => {
         try {
             const { email, otp } = req.body
-            const result = await userAuthService.verifyOTP(email, otp)
+            const result = await userAuthService.verifyOTP(email, otp, res)
             res.status(200).json(result)
         } catch (error) {
             if (error instanceof Error) {
