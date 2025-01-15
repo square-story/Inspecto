@@ -2,7 +2,7 @@ import { MailIcon, MapPinIcon, MessageCircle, PhoneIcon } from "lucide-react";
 
 
 const Contact03Page = () => (
-    <div className="min-h-screen flex items-center justify-center pt-25 md:pt-16 pb-16">
+    <div className="min-h-screen flex items-center justify-center pt-60 md:pt-60 pb-16">
         <div className="w-full max-w-screen-xl mx-auto px-6 xl:px-0">
             <b className="text-primary">Contact Us</b>
             <h2 className="mt-3 text-2xl md:text-4xl font-black tracking-tight">
