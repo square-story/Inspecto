@@ -25,6 +25,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
 import { AppDispatch } from "@/features/store";
 import axiosInstance from "@/api/axios";
+import BackButton from './BackButton';
 
 const formSchema = z.object({
     otp: z.string().min(6, "OTP must be 6 digits").max(6)
@@ -112,6 +113,7 @@ export default function OTPVerification() {
     return (
         <Card className="w-full max-w-md mx-auto shadow-lg">
             <CardContent className="p-6">
+                <BackButton />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField

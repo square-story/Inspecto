@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
+import BackButton from '@/components/BackButton'
 
 // Improved schema with additional validation rules
 const formSchema = z.object({
@@ -57,8 +58,11 @@ export default function LoginPreview() {
 
     return (
         <div className="flex flex-col min-h-[100vh] h-full w-full items-center justify-center px-4">
+
             <Card className="mx-auto max-w-sm">
+
                 <CardHeader>
+                    <BackButton />
                     <CardTitle className="text-2xl">Inspector Login</CardTitle>
                     <CardDescription>
                         Enter your email and password to login to your account.

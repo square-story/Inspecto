@@ -39,9 +39,10 @@ export function ForgetPassword() {
 
     return (
         <div>
-            <BackButton />
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col p-2 md:p-5 w-full mx-auto rounded-md max-w-3xl gap-2 border">
+                    <BackButton />
                     <h1 className="text-3xl font-bold">Forget password</h1>
                     <p className="text-base">it will create a link for send to your email</p>
                     <FormField
