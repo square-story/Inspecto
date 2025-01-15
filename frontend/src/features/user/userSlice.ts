@@ -6,7 +6,7 @@ interface UserState {
     lastName: string;
     email: string;
     address: string | null;
-    profile_image: string;
+    profile_image: string | null;
     status: boolean;
     role: string;
 }

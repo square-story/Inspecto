@@ -16,15 +16,15 @@ export class UserAuthController {
             }
         }
     }
-    static refreshToken: RequestHandler = (req: Request, res: Response) => {
+    static refreshToken: RequestHandler = async (req: Request, res: Response) => {
         try {
             const refreshToken = req.cookies.refreshToken
             if (!refreshToken) {
                 res.status(401).json({ message: 'Refresh token missing' })
                 return
             }
-            const newAccessToken = userAuthService.refreshToken(refreshToken)
-            res.status(200).json({ accessToken: newAccessToken })
+            const accessToken = await userAuthService.refreshToken(refreshToken)
+            res.status(200).json(accessToken)
         } catch (error) {
             if (error instanceof Error) {
                 res.status(403).json({ message: error.message });

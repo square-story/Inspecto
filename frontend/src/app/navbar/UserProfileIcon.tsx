@@ -76,7 +76,7 @@ export function UserProfileIcon() {
             <DropdownMenuTrigger asChild>
                 <Button variant='outline' className="rounded-full">
                     <Avatar className="cursor-pointer">
-                        <AvatarImage src={user.profile_image} alt="User" />
+                        <AvatarImage src={user.profile_image || ''} alt="User" />
                         <AvatarFallback>{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                 </Button>
