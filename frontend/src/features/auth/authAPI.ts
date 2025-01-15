@@ -12,11 +12,14 @@ interface LoginResponse {
     accessToken: string,
     role: string,
     userDetails?: {
-        id: string,
-        email: string,
-        role: string,
-        firstName: string,
-        lastName: string
+        _id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        address: string | null;
+        profile_image: string | null;
+        status: boolean;
+        role: string;
     }
 }
 

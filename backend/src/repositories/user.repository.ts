@@ -8,7 +8,7 @@ class UserRepository {
     }
 
     async findById(userId: string): Promise<IUsers | null> {
-        return await Users.findById(userId);
+        return await Users.findById(userId).select('-password');
     }
 
     async findUserByEmail(email: string): Promise<IUsers | null> {

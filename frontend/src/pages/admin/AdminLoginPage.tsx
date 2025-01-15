@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../features/auth/authAPI';
 import { RootState, AppDispatch } from '../../features/store';
+import { setCredentials } from '@/features/auth/authSlice';
 
 const AdminLoginPage = () => {
     const [email, setEmail] = useState('');
@@ -24,6 +25,8 @@ const AdminLoginPage = () => {
             ).unwrap();
 
             if (result) {
+                const { accessToken, role } = result
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
                 navigate('/admin/dashboard');
             }
         } catch (error) {

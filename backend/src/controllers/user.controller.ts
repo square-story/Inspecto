@@ -19,13 +19,7 @@ export class UserController {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
-            // Send user details (exclude sensitive data like password)
-            res.status(200).json({
-                id: user.id,
-                firstName: user.firstName,
-                email: user.email,
-                role: user.role,
-            });
+            res.status(200).json(user);
         } catch (error) {
             next(error); // Pass the error to the error-handling middleware
         }

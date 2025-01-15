@@ -15,23 +15,42 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { RootState } from "@/features/store"
+import { logoutUser } from "@/features/auth/authAPI"
+import { AppDispatch, RootState } from "@/features/store"
 import { setUser } from "@/features/user/userSlice"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { AxiosError } from "axios"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 export function UserProfileIcon() {
     const user = useSelector((state: RootState) => state.user)
-    const dispatch = useDispatch()
+    const dispatch = useDispatch<AppDispatch>()
+    const navigate = useNavigate()
+    const handleLogout = async () => {
+        try {
+            toast.promise(
+                dispatch(logoutUser()),
+                {
+                    loading: 'Logging out...',
+                    success: 'Successfully logged out!',
+                    error: 'Failed to logout. Please try again.',
+                }
+            )
+            navigate('/')
+        } catch (error) {
+            console.error('Logout failed:', error)
+        }
+    }
+
 
     useEffect(() => {
         (async () => {
             try {
                 const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-                if (storedUser && storedUser.id) {
+                if (storedUser) {
                     dispatch(setUser(storedUser));
                 }
                 const response = await axiosInstance.get('/user/details')
@@ -45,6 +64,10 @@ export function UserProfileIcon() {
             }
         })()
     }, [dispatch])
+
+
+
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -100,7 +123,7 @@ export function UserProfileIcon() {
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuItem disabled>API</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                     Log out
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                 </DropdownMenuItem>
