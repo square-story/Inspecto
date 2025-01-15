@@ -1,13 +1,8 @@
-import {
-    useForm
-} from "react-hook-form"
-import {
-    zodResolver
-} from "@hookform/resolvers/zod"
-import * as z from "zod"
-import {
-    Button
-} from "@/components/ui/button"
+import { useState, useEffect } from 'react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -16,34 +11,63 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
     InputOTP,
     InputOTPGroup,
     InputOTPSeparator,
-    InputOTPSlot
-} from "@/components/ui/input-otp"
-import axiosInstance from "@/api/axios"
-import { toast } from "sonner"
-import { useNavigate } from "react-router-dom"
-import { useDispatch } from "react-redux"
-import { setCredentials } from "@/features/auth/authSlice"
-import { AppDispatch } from "@/features/store"
+    InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/features/auth/authSlice";
+import { AppDispatch } from "@/features/store";
+import axiosInstance from "@/api/axios";
 
 const formSchema = z.object({
-    otp: z.string()
+    otp: z.string().min(6, "OTP must be 6 digits").max(6)
 });
 
-export default function OTPComponent() {
+export default function OTPVerification() {
+    const [timeLeft, setTimeLeft] = useState(60);
+    const [isActive, setIsActive] = useState(true);
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        defaultValues: {
+            otp: ""
+        }
+    });
 
-    })
-    const dispatch = useDispatch<AppDispatch>()
-    const navigate = useNavigate()
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (isActive && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft((time) => time - 1);
+            }, 1000);
+        } else if (timeLeft === 0) {
+            setIsActive(false);
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [isActive, timeLeft]);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
-
         try {
             const email = localStorage.getItem('otp-email');
             const otp = values.otp;
@@ -54,51 +78,111 @@ export default function OTPComponent() {
             } else {
                 toast.success('Successfully created your account');
             }
-            localStorage.removeItem('otp-email')
-            const { accessToken } = response.data
-            dispatch(setCredentials({ accessToken, role: 'user' }))
-            navigate('/')
+
+            localStorage.removeItem('otp-email');
+            const { accessToken } = response.data;
+            dispatch(setCredentials({ accessToken, role: 'user' }));
+            navigate('/');
         } catch (error) {
             console.error("Form submission error", error);
-
-            // Optional: Display an error toast
             toast.error('Failed to verify OTP. Please try again.');
         }
     }
 
+    const handleResendOTP = async () => {
+        try {
+            const email = localStorage.getItem('otp-email');
+            if (!email) {
+                toast.error('Email not found. Please try again.');
+                return;
+            }
+
+            const response = await axiosInstance.post('/user/resend-otp', { email });
+
+            toast.success(response.data.message);
+            setTimeLeft(60);
+            setIsActive(true);
+            form.reset();
+        } catch (error) {
+            console.error("Resend OTP error", error);
+            toast.error('Failed to resend OTP. Please try again.');
+        }
+    };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
+        <Card className="w-full max-w-md mx-auto shadow-lg">
+            <CardContent className="p-6">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="otp"
+                            render={({ field }) => (
+                                <FormItem className="space-y-2">
+                                    <FormLabel className="text-base font-semibold">Verification Code</FormLabel>
+                                    <FormControl>
+                                        <InputOTP
+                                            maxLength={6}
+                                            {...field}
+                                            className="gap-2"
+                                        >
+                                            <InputOTPGroup>
+                                                <InputOTPSlot index={0} />
+                                                <InputOTPSlot index={1} />
+                                                <InputOTPSlot index={2} />
+                                            </InputOTPGroup>
+                                            <InputOTPSeparator />
+                                            <InputOTPGroup>
+                                                <InputOTPSlot index={3} />
+                                                <InputOTPSlot index={4} />
+                                                <InputOTPSlot index={5} />
+                                            </InputOTPGroup>
+                                        </InputOTP>
+                                    </FormControl>
+                                    <FormDescription>
+                                        Please enter the verification code sent to your email
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                <FormField
-                    control={form.control}
-                    name="otp"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>One-Time Password</FormLabel>
-                            <FormControl>
-                                <InputOTP maxLength={6} {...field}>
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={0} />
-                                        <InputOTPSlot index={1} />
-                                        <InputOTPSlot index={2} />
-                                    </InputOTPGroup>
-                                    <InputOTPSeparator />
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={3} />
-                                        <InputOTPSlot index={4} />
-                                        <InputOTPSlot index={5} />
-                                    </InputOTPGroup>
-                                </InputOTP>
-                            </FormControl>
-                            <FormDescription>Please enter the one-time password sent to your email.</FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <Button type="submit">Submit</Button>
-            </form>
-        </Form>
-    )
+                        <div className="space-y-4">
+                            <Button
+                                type="submit"
+                                className="w-full"
+                            >
+                                Verify OTP
+                            </Button>
+
+                            <div className="text-center space-y-2">
+                                <p className="text-sm text-gray-500">
+                                    Didn't receive the code?
+                                </p>
+                                {timeLeft > 0 ? (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="w-full text-gray-500 cursor-not-allowed"
+                                        disabled
+                                    >
+                                        Resend in {formatTime(timeLeft)}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={handleResendOTP}
+                                    >
+                                        Resend Code
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
+    );
 }
