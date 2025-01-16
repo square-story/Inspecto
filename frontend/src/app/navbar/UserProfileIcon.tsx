@@ -78,12 +78,12 @@ export function UserProfileIcon() {
             <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="p-0 h-10 w-10 rounded-full flex items-center justify-center border-0">
                     <Avatar className="h-full w-full">
-                        <AvatarImage
+                        {user.profile_image ? <AvatarImage
                             src={user.profile_image}
                             alt="User"
                             className="object-cover rounded-full"
                         />
-                        <AvatarFallback className="text-sm">{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                            : <AvatarFallback className="text-sm">{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>}
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
