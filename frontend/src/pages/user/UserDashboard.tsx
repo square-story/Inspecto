@@ -30,12 +30,14 @@ const UserDashboard = () => {
             <h1>UserDashboard</h1>
             <Button variant='destructive' onClick={handleLogout}>Logout</Button>
             <ToasterTrigger message="some message" type="error" />
-            <SpotlightCard className="custom-spotlight-card" spotlightColor="rgba(0, 229, 255, 0.2)">
-                <i className="fa fa-lock"></i>
-                <h2>Enhanced Security</h2>
-                <p>Our state of the art software offers peace of mind through the strictest security measures.</p>
-                <button>Learn more</button>
-            </SpotlightCard>
+            <div className="flex h-full w-full">
+                <SpotlightCard className="custom-spotlight-card h-screen w-full" spotlightColor="rgba(0, 288, 255, 0.2)">
+                    <i className="fa fa-lock"></i>
+                    <h2 className="text-secondary">Enhanced Security</h2>
+                    <p className="text-secondary">Our state of the art software offers peace of mind through the strictest security measures.</p>
+                    <button>Learn more</button>
+                </SpotlightCard>
+            </div>
         </div>
     )
 }

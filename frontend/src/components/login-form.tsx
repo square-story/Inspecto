@@ -66,7 +66,10 @@ export function LoginForm({
         const { accessToken, role } = result
         dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
         if (result.userDetails) {
-          dispatch(setUser(result.userDetails))
+          dispatch(setUser({
+            ...result.userDetails,
+            profile_image: result.userDetails.profile_image || ''
+          }))
         }
         toast.success('Login successfully')
         handleNav("/");

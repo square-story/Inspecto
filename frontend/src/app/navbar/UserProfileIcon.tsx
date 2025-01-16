@@ -56,8 +56,10 @@ export function UserProfileIcon() {
                 if (storedUser) {
                     dispatch(setUser(storedUser));
                 }
+                console.log("First render", storedUser)
                 const response = await axiosInstance.get('/user/details')
                 const freshUser = response.data
+                console.log("Second render", freshUser)
                 dispatch(setUser(freshUser))
             } catch (error) {
                 if (error instanceof AxiosError) {
@@ -74,10 +76,14 @@ export function UserProfileIcon() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant='outline' className="rounded-full">
-                    <Avatar className="cursor-pointer">
-                        <AvatarImage src={user.profile_image || ''} alt="User" />
-                        <AvatarFallback>{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                <Button variant="outline" className="p-0 h-10 w-10 rounded-full flex items-center justify-center border-0">
+                    <Avatar className="h-full w-full">
+                        <AvatarImage
+                            src={user.profile_image}
+                            alt="User"
+                            className="object-cover rounded-full"
+                        />
+                        <AvatarFallback className="text-sm">{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>

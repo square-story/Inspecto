@@ -18,6 +18,13 @@ export class UserAuthService {
             res.status(400).json({ field: 'email', message: 'User not found' })
             return
         }
+        if (!user.password) {
+            res.status(400).json({ field: 'password', message: 'User Want To Enter Password' })
+        }
+        if (user.password === null) {
+            res.status(400).json({ field: 'password', message: 'Password is required' });
+            return;
+        }
         const comparePassword = await bcrypt.compare(password, user.password)
 
         if (!comparePassword) {
@@ -98,6 +105,37 @@ export class UserAuthService {
 
         await sendEmail(email, "Your Inspecto OTP(resent)", `Your new OTP is ${newOTP}`)
         return { message: 'OTP resent successfully' }
+    }
+    async googleLoginOrRegister(email: string | undefined, name: string | undefined, picture: string | undefined, family_name: string | undefined, res: Response) {
+        if (!email || !name) {
+            throw new Error("Google account lacks required information");
+        }
+        let user = await this.userRepository.findUserByEmail(email);
+
+        if (!user) {
+            await this.userRepository.createUser({
+                email,
+                firstName: name,
+                lastName: family_name,
+                profile_image: picture,
+                authProvider: "google",
+                password: null
+            })
+        }
+        const token = this.generateTokens(user, res)
+        return { user, token };
+    }
+    private generateTokens(user: any, res: Response) {
+        const payload = { userId: user._id, role: user.role }
+        const accessToken = generateAccessToken(payload)
+        const refreshToken = generateRefreshToken(payload)
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        })
+
+        return { accessToken };
     }
 }
 

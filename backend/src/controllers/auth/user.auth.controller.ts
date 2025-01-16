@@ -1,6 +1,8 @@
-import { Request, Response, RequestHandler } from "express";
+import { Request, Response, RequestHandler, NextFunction } from "express";
 import { UserAuthService } from "../../services/auth/user.auth.service";
+import { OAuth2Client } from "google-auth-library";
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 const userAuthService = new UserAuthService()
 export class UserAuthController {
     static userLogin: RequestHandler = async (req: Request, res: Response) => {
@@ -72,6 +74,32 @@ export class UserAuthController {
             } else {
                 res.status(500).json({ message: "Something went wrong" });
             }
+        }
+    };
+    static googleAuth: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { token } = req.body;
+
+            if (!token) {
+                res.status(400).json({ message: 'Token is required' });
+                return;
+            }
+
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            const payload = ticket.getPayload();
+            if (!payload) {
+                res.status(400).json({ message: 'Invalid Google token' });
+                return;
+            }
+            const { email, name, picture, family_name } = payload;
+            const response = await userAuthService.googleLoginOrRegister(email, name, picture, family_name, res);
+            res.status(200).json({ message: 'Authentication successful', response });
+        } catch (error) {
+            console.error('Google auth error:', error);
+            res.status(500).json({ message: 'Authentication failed' });
         }
     };
 }
