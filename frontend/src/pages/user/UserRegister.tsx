@@ -194,9 +194,11 @@ export default function RegisterPreview() {
                                 <Button type="submit" className="w-full">
                                     Register
                                 </Button>
-                                <GoogleOAuthProvider clientId={import.meta.env.REACT_APP_GOOGLE_CLIENT_ID}>
-                                    <GoogleButton />
-                                </GoogleOAuthProvider>
+                                <Button variant='link' className="w-full">
+                                    <GoogleOAuthProvider clientId={import.meta.env.VITE_REACT_APP_GOOGLE_CLIENT_ID}>
+                                        <GoogleButton />
+                                    </GoogleOAuthProvider>
+                                </Button>
                             </div>
                         </form>
                     </Form>
