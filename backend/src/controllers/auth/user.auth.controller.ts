@@ -102,4 +102,23 @@ export class UserAuthController {
             res.status(500).json({ message: 'Authentication failed' });
         }
     };
+    static forgetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { email } = req.body;
+            const response = await userAuthService.forgetPassword(email)
+            res.status(200).json(response)
+        } catch (error) {
+            res.status(500).json({ message: 'Server Error' })
+        }
+    }
+    static resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { token, email, password } = req.body
+            const response = await userAuthService.resetPassword(token, email, password)
+            res.status(200).json(response)
+        } catch (error) {
+            console.error('Error in reset password:', error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
 }

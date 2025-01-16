@@ -26,6 +26,9 @@ class UserRepository {
     async getAllUsers(): Promise<IUsers[]> {
         return await Users.find();
     }
+    async updateUserPassword(email: string, password: string): Promise<IUsers | null> {
+        return await Users.findOneAndUpdate({ email }, { password }, { new: true })
+    }
 }
 
 export default UserRepository;

@@ -9,10 +9,11 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import InspectorDashboard from "./pages/inspector/InspectorDashboard";
 import UserDashboard from "./pages/user/UserDashboard";
 import UserRegister from "./pages/user/UserRegister";
-import UserForget from "./pages/user/UserForget";
+import UserForget from "./pages/user/ForgetPasswordPreview";
 import UserInputOTP from "./pages/user/UserInputOTP";
 import FAQPage from "./routes/FAQPage";
 import ContactPage from "./routes/ContactPage";
+import ResetPasswordPreview from "./pages/user/ResetPassword";
 
 const App = () => {
   return (
@@ -52,10 +53,18 @@ const App = () => {
           }
         />
         <Route
-          path="/user/forget"
+          path="/forget/:role"
           element={
             <PublicRoute>
               <UserForget />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPasswordPreview />
             </PublicRoute>
           }
         />

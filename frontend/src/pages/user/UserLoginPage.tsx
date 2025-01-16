@@ -141,7 +141,7 @@ export default function LoginPreview() {
                                                 <FormLabel htmlFor="password">Password</FormLabel>
                                                 <a
                                                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline cursor-pointer"
-                                                    onClick={() => handleNav("/user/forget")}
+                                                    onClick={() => handleNav("/forget/user")}
                                                 >
                                                     Forgot your password?
                                                 </a>

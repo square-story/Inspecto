@@ -6,6 +6,7 @@ import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
+import crypto from "crypto";
 
 export class UserAuthService {
     private userRepository: UserRepository
@@ -136,6 +137,50 @@ export class UserAuthService {
         })
 
         return { accessToken };
+    }
+    async forgetPassword(email: string) {
+        const user = this.userRepository.findUserByEmail(email)
+        if (!user) {
+            throw new Error('User not found')
+        }
+        const { hashedToken, resetToken } = this.generateToken()
+
+        const redisKey = `resetToken:${email}`
+        await redisClient.set(redisKey, hashedToken, { EX: 3600 }) //1 hour
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
+        await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
+        return { message: 'Reset link sent successfully' }
+    }
+    async resetPassword(token: string, email: string, password: string) {
+        const isValid = await this.validateToken(email, token);
+        if (!isValid) {
+            throw new Error('Invalid or expired token');
+        }
+        const hashPassword = await bcrypt.hash(password, 10)
+        await this.userRepository.updateUserPassword(email, password = hashPassword)
+        const redisKey = `resetToken:${email}`
+        await redisClient.del(redisKey)
+        return { message: 'Password reset successful' }
+    }
+    private generateToken() {
+        const resetToken = crypto.randomUUID();
+        const hashedToken = crypto
+            .createHmac("sha256", process.env.CRYPTO_TOKEN_SECRET || 'DEFAULT_SOME')
+            .update(resetToken)
+            .digest("hex");
+        return { resetToken, hashedToken }
+    }
+    private async validateToken(email: string, providedToken: string): Promise<boolean> {
+        const redisKey = `resetToken:${email}`
+        const storedHasedKey = await redisClient.get(redisKey)
+        if (!storedHasedKey) {
+            return false
+        }
+        const hashProvidedToken = crypto
+            .createHmac("sha256", process.env.CRYPTO_TOKEN_SECRET || 'DEFAULT_SOME')
+            .update(providedToken)
+            .digest('hex')
+        return storedHasedKey === hashProvidedToken;
     }
 }
 
