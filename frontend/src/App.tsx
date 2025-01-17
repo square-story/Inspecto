@@ -14,6 +14,8 @@ import UserInputOTP from "./pages/user/UserInputOTP";
 import FAQPage from "./routes/FAQPage";
 import ContactPage from "./routes/ContactPage";
 import ResetPasswordPreview from "./pages/user/ResetPassword";
+import InspectorRegister from "./pages/inspector/InspectorRegister";
+import InspectorOTPVerification from "./pages/inspector/VerifyOTP";
 
 const App = () => {
   return (
@@ -97,6 +99,22 @@ const App = () => {
           element={
             <PublicRoute>
               <InspectorLoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/inspector/register"
+          element={
+            <PublicRoute>
+              <InspectorRegister />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/inspector/verify-otp"
+          element={
+            <PublicRoute>
+              <InspectorOTPVerification />
             </PublicRoute>
           }
         />

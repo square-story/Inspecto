@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import BackButton from '@/components/BackButton'
+import { useNavigate } from 'react-router-dom'
 
 // Improved schema with additional validation rules
 const formSchema = z.object({
@@ -41,6 +42,7 @@ export default function LoginPreview() {
         },
     })
 
+    const navigate = useNavigate()
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             // Assuming an async login function
@@ -99,8 +101,8 @@ export default function LoginPreview() {
                                             <div className="flex justify-between items-center">
                                                 <FormLabel htmlFor="password">Password</FormLabel>
                                                 <a
-                                                    href="#"
-                                                    className="ml-auto inline-block text-sm underline"
+                                                    onClick={() => navigate('/forget/inspector')}
+                                                    className="ml-auto inline-block text-sm underline cursor-pointer"
                                                 >
                                                     Forgot your password?
                                                 </a>
@@ -123,12 +125,9 @@ export default function LoginPreview() {
                             </div>
                         </form>
                     </Form>
-                    <div className="mt-4 text-center text-sm">
-                        Don&apos;t have an account?{' '}
-                        <a href="#" className="underline">
-                            Sign up
-                        </a>
-                    </div>
+                    <Button onClick={() => navigate('/inspector/register')} variant='ghost' className="mt-4 text-center text-sm cursor-pointer w-full">
+                        Become An Inspector
+                    </Button>
                 </CardContent>
             </Card>
         </div>

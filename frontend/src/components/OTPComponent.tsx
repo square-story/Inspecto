@@ -25,7 +25,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
 import { AppDispatch } from "@/features/store";
 import axiosInstance from "@/api/axios";
-import BackButton from './BackButton';
+
 
 const formSchema = z.object({
     otp: z.string().min(6, "OTP must be 6 digits").max(6)
@@ -72,7 +72,7 @@ export default function OTPVerification() {
         try {
             const email = localStorage.getItem('otp-email');
             const otp = values.otp;
-            const response = await axiosInstance.post('/user/verify-otp', { email, otp });
+            const response = await axiosInstance.post('/inspector/verify-otp', { email, otp });
 
             if (response?.data?.message) {
                 toast.success(response.data.message);
@@ -82,8 +82,8 @@ export default function OTPVerification() {
 
             localStorage.removeItem('otp-email');
             const { accessToken } = response.data;
-            dispatch(setCredentials({ accessToken, role: 'user' }));
-            navigate('/');
+            dispatch(setCredentials({ accessToken, role: 'inspector' }));
+            navigate('/inspector/dashboard/');
         } catch (error) {
             console.error("Form submission error", error);
             toast.error('Failed to verify OTP. Please try again.');
@@ -98,7 +98,7 @@ export default function OTPVerification() {
                 return;
             }
 
-            const response = await axiosInstance.post('/user/resend-otp', { email });
+            const response = await axiosInstance.post('/inspector/resend-otp', { email });
 
             toast.success(response.data.message);
             setTimeLeft(60);
@@ -113,7 +113,6 @@ export default function OTPVerification() {
     return (
         <Card className="w-full max-w-md mx-auto shadow-lg">
             <CardContent className="p-6">
-                <BackButton />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
