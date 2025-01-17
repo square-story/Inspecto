@@ -42,7 +42,7 @@ export default function ForgetPasswordPreview() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             const { role } = params
-            const response = await axiosInstance.post(`/${role}/forget`, { email: values.email })
+            const response = await axiosInstance.post(`/${role}/forget`, { email: values.email, role: role })
             toast.success(response.data?.message)
 
         } catch (error) {

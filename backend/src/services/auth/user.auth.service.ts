@@ -138,7 +138,7 @@ export class UserAuthService {
 
         return { accessToken };
     }
-    async forgetPassword(email: string) {
+    async forgetPassword(email: string, role: string) {
         const user = this.userRepository.findUserByEmail(email)
         if (!user) {
             throw new Error('User not found')
@@ -147,7 +147,7 @@ export class UserAuthService {
 
         const redisKey = `resetToken:${email}`
         await redisClient.set(redisKey, hashedToken, { EX: 3600 }) //1 hour
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}&role=${role}`;
         await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
         return { message: 'Reset link sent successfully' }
     }

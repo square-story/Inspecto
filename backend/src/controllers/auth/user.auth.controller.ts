@@ -104,8 +104,8 @@ export class UserAuthController {
     };
     static forgetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const { email } = req.body;
-            const response = await userAuthService.forgetPassword(email)
+            const { email, role } = req.body;
+            const response = await userAuthService.forgetPassword(email, role)
             res.status(200).json(response)
         } catch (error) {
             res.status(500).json({ message: 'Server Error' })

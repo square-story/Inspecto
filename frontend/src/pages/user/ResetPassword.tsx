@@ -22,6 +22,7 @@ import {
 import { PasswordInput } from '@/components/ui/password-input'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '@/api/axios'
+import { AxiosResponse } from 'axios'
 
 // Schema for password validation
 const formSchema = z
@@ -53,9 +54,16 @@ export default function ResetPasswordPreview() {
         try {
             const token = searchParams.get('token');
             const email = searchParams.get('email');
-            const password = values.password
+            const role = searchParams.get('role');
+            const password = values.password;
+            let response: AxiosResponse;
 
-            const response = await axiosInstance.post('/user/reset', { token, email, password })
+            if (role == 'user') {
+                response = await axiosInstance.post('/user/reset', { token, email, password })
+            } else {
+                response = await axiosInstance.post('/inspector/reset', { token, email, password })
+            }
+
             if (response) {
                 toast.success(
                     'Password reset successful. You can now log in with your new password.',
