@@ -41,8 +41,7 @@ const formSchema = z
         email: z.string().email({ message: 'Invalid email address' }),
         phone: z
             .string()
-            .refine(isValidPhoneNumber, { message: "Invalid phone number" })
-            .or(z.literal("")),
+            .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
         password: z
             .string()
             .min(6, { message: 'Password must be at least 6 characters long' })
