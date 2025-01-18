@@ -77,6 +77,9 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             localStorage.removeItem('accessToken');
             localStorage.removeItem('role');
+            if (localStorage.getItem('user')) {
+                localStorage.removeItem('user')
+            }
         },
         setLoading(state, action: PayloadAction<boolean>) {
             state.isLoading = action.payload;

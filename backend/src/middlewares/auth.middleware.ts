@@ -21,11 +21,6 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
         req.user = payload;
         next();
     } catch (error: any) {
-        if (error.name === "TokenExpiredError") {
-            res.status(401).json({ message: "Token expired" });
-        } else {
-            res.status(403).json({ message: "Invalid token" });
-        }
-        console.error("JWT verification error:", error);
+        res.status(401).json({ message: "Token expired" });
     }
 }

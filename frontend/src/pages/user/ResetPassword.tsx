@@ -68,7 +68,11 @@ export default function ResetPasswordPreview() {
                 toast.success(
                     'Password reset successful. You can now log in with your new password.',
                 )
-                navigate('/user/login')
+                if (role === 'user') {
+                    navigate('/user/login')
+                } else {
+                    navigate('/inspector/login')
+                }
             }
         } catch (error) {
             console.error('Error resetting password', error)

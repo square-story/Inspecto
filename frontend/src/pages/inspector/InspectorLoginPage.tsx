@@ -23,6 +23,11 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import BackButton from '@/components/BackButton'
 import { useNavigate } from 'react-router-dom'
+import { loginUser } from '@/features/auth/authAPI'
+import { useDispatch } from 'react-redux'
+import { setCredentials } from '@/features/auth/authSlice'
+import { AppDispatch } from '@/features/store'
+import { AxiosError } from 'axios'
 
 // Improved schema with additional validation rules
 const formSchema = z.object({
@@ -30,7 +35,7 @@ const formSchema = z.object({
     password: z
         .string()
         .min(6, { message: 'Password must be at least 6 characters long' })
-        .regex(/[a-zA-Z0-9]/, { message: 'Password must be alphanumeric' }),
+        .regex(/[a-zA-Z0-9]/, { message: 'Password must be Alphanumeric' }),
 })
 
 export default function LoginPreview() {
@@ -41,20 +46,39 @@ export default function LoginPreview() {
             password: '',
         },
     })
-
+    const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate()
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            // Assuming an async login function
-            console.log(values)
-            toast(
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-                </pre>,
-            )
+            const result = await dispatch(
+                loginUser({
+                    email: values.email,
+                    password: values.password,
+                    role: "inspector",
+                })
+            ).unwrap();
+
+
+            if (result) {
+                const { accessToken, role } = result
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+                toast.success('Login successfully')
+                navigate("/inspector/dashboard");
+            }
         } catch (error) {
-            console.error('Form submission error', error)
-            toast.error('Failed to submit the form. Please try again.')
+            if (error instanceof AxiosError) {
+                // Handle field-specific errors
+                if (error.response?.data?.field === 'email') {
+                    form.setError('email', { type: 'manual', message: error.response?.data.message });
+                } else if (error.response?.data?.field === 'password') {
+                    form.setError('password', { type: 'manual', message: error.response?.data.message });
+                } else {
+                    // Handle general errors
+                    form.setError('root', { type: 'manual', message: error.response?.data?.message || 'An error occurred' });
+                }
+            } else {
+                console.error('Unexpected error:', error);
+            }
         }
     }
 

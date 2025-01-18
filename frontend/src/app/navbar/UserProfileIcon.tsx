@@ -56,10 +56,8 @@ export function UserProfileIcon() {
                 if (storedUser) {
                     dispatch(setUser(storedUser));
                 }
-                console.log("First render", storedUser)
                 const response = await axiosInstance.get('/user/details')
                 const freshUser = response.data
-                console.log("Second render", freshUser)
                 dispatch(setUser(freshUser))
             } catch (error) {
                 if (error instanceof AxiosError) {
