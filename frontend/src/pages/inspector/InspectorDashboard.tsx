@@ -1,7 +1,10 @@
+import DashBoard from "@/app/InspectorDashBoard/DashBoard"
 
 const InspectorDashboard = () => {
     return (
-        <div>InspectorDashboard</div>
+        <>
+            <DashBoard />
+        </>
     )
 }
 

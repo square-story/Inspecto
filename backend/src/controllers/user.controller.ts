@@ -21,7 +21,7 @@ export class UserController {
             }
             res.status(200).json(user);
         } catch (error) {
-            next(error); // Pass the error to the error-handling middleware
+            console.error(error)
         }
     };
 }

@@ -10,16 +10,16 @@ export interface IInspectorInput {
     profile_image: string;
     status: boolean;
     role: string;
-    certificates: [Object];
+    certificates: [object];
     yearOfExp: number;
     phone: string;
     signature: string;
     specialization: [string],
-    start_time: Date;
-    end_time: Date;
+    start_time: string;
+    end_time: string;
     avaliable_days: number;
     isListed: boolean;
-    isCompleted:boolean;
+    isCompleted: boolean;
 }
 
 export interface IInspector extends Document, IInspectorInput {
@@ -35,16 +35,16 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     profile_image: { type: String },
     status: { type: Boolean, default: true },
     role: { type: String, default: 'inspector' },
-    certificates: { type: [Object]},
+    certificates: { type: [Object] },
     yearOfExp: { type: Number },
     phone: { type: String, required: true },
-    signature: { type: String},
+    signature: { type: String },
     specialization: { type: [String] },
-    start_time: { type: Date },
-    end_time: { type: Date },
+    start_time: { type: String },
+    end_time: { type: String },
     avaliable_days: { type: Number },
     isListed: { type: Boolean, default: false },
-    isCompleted:{type:Boolean,default:false}
+    isCompleted: { type: Boolean, default: false }
 })
 
 export default mongoose.model<IInspector>("Inspector", InspectorSchema);

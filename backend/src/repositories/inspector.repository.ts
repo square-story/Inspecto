@@ -12,6 +12,9 @@ export class InspectorRepository implements IinspectorRepository {
     async getAllInspector(): Promise<IInspector[]> {
         return await inspectorModel.find()
     }
+    async findInspectorById(inspectorId: string): Promise<Partial<IInspector> | null> {
+        return await inspectorModel.findById(inspectorId).select('-password')
+    }
     async deleteInspector(userId: string): Promise<IInspector | null> {
         return await inspectorModel.findByIdAndDelete(userId)
     }
