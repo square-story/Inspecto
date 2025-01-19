@@ -48,7 +48,7 @@ export class InspectorAuthService {
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
-        const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
+        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role })
         return { accessToken: newAccessToken }
     }
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {

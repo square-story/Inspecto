@@ -20,7 +20,7 @@ export class AdminAuthController {
 
     static refreshToken: RequestHandler = async (req, res) => {
         try {
-            const refreshToken = req.cookies.refreshToken; // Get the refresh token from the HTTP-only cookie
+            const refreshToken = await req.cookies.refreshToken; // Get the refresh token from the HTTP-only cookie
             if (!refreshToken) {
                 res.status(401).json({ message: 'Refresh token missing' });
                 return;

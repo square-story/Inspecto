@@ -20,7 +20,7 @@ export class UserAuthController {
     }
     static refreshToken: RequestHandler = async (req: Request, res: Response) => {
         try {
-            const refreshToken = req.cookies.refreshToken
+            const refreshToken = await req.cookies.refreshToken
             if (!refreshToken) {
                 res.status(401).json({ message: 'Refresh token missing' })
                 return

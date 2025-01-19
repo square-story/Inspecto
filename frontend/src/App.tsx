@@ -16,6 +16,7 @@ import ContactPage from "./routes/ContactPage";
 import ResetPasswordPreview from "./pages/user/ResetPassword";
 import InspectorRegister from "./pages/inspector/InspectorRegister";
 import InspectorOTPVerification from "./pages/inspector/VerifyOTP";
+import DetailedForm from "./pages/inspector/DataRegisteration";
 
 const App = () => {
   return (
@@ -133,6 +134,14 @@ const App = () => {
           element={
             <ProtectedRoute role="inspector">
               <InspectorDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inspector/form-fill/*"
+          element={
+            <ProtectedRoute role="inspector">
+              <DetailedForm />
             </ProtectedRoute>
           }
         />

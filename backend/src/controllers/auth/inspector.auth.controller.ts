@@ -17,9 +17,13 @@ export class InspectorAuthController {
     }
     static refreshToken: RequestHandler = async (req: Request, res: Response) => {
         try {
-            const { token } = req.body
-            const response = await inspectorAuthService.refreshToken(token)
-            res.status(200).json(response)
+            const refreshToken = await req.cookies.refreshToken
+            if (!refreshToken) {
+                res.status(401).json({ message: 'Refresh token missing' })
+                return
+            }
+            const accessToken = await inspectorAuthService.refreshToken(refreshToken)
+            res.status(200).json(accessToken)
         } catch (error) {
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message })
