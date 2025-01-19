@@ -10,7 +10,7 @@ export interface IInspectorInput {
     profile_image: string;
     status: boolean;
     role: string;
-    certificates: [object];
+    certificates: [string];
     yearOfExp: number;
     phone: string;
     signature: string;
@@ -35,7 +35,7 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     profile_image: { type: String },
     status: { type: Boolean, default: true },
     role: { type: String, default: 'inspector' },
-    certificates: { type: [Object] },
+    certificates: { type: [String] },
     yearOfExp: { type: Number },
     phone: { type: String, required: true },
     signature: { type: String },

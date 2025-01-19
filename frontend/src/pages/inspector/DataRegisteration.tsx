@@ -1,296 +1,301 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { CloudUpload, Paperclip } from "lucide-react";
-import {
-    FileInput,
-    FileUploader,
-    FileUploaderContent,
-    FileUploaderItem,
-} from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { X } from "lucide-react";
 import { TagsInput } from "@/components/ui/tags-input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Validation schema
 const formSchema = z.object({
-    profile_image: z.string(),
-    start_time: z.number().min(1).max(12),
-    start_option: z.string(),
-    end_time: z.number().min(1).max(12),
-    end_option: z.string(),
-    address: z.string().min(3),
-    certificate: z.string(),
-    yearOfExp: z.number().min(1).max(30),
-    specialization: z.array(z.string()).nonempty("Please add at least one item"),
+    address: z.string().min(3, "Address must be at least 3 characters"),
+    profile_image: z.string().min(1, "Profile image is required"),
+    certificates: z.array(z.string()).min(1, "At least one certificate is required"),
+    yearOfExp: z.number().min(1).max(50, "Experience must be between 1-50 years"),
+    signature: z.string().min(1, "Signature is required"),
+    specialization: z.array(z.string()).min(1, "At least one specialization is required"),
+    start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
+    end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
+    avaliable_days: z.number().min(1).max(7, "Days must be between 1-7")
 });
 
-export default function DetailedForm() {
-    const [files, setFiles] = useState<File[] | null>(null);
-
-    const dropZoneConfig = {
-        maxFiles: 5,
-        maxSize: 1024 * 1024 * 4,
-        multiple: true,
-    };
+export default function InspectorForm() {
+    const [profilePreview, setProfilePreview] = useState<string>("");
+    const [certificatePreviews, setCertificatePreviews] = useState<string[]>([]);
+    const [signaturePreview, setSignaturePreview] = useState<string>("");
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            specialization: ["test"],
-        },
+            specialization: [],
+            certificates: [],
+            avaliable_days: 5
+        }
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        try {
-            console.log(values);
-            toast(
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-                </pre>
-            );
-        } catch (error) {
-            console.error("Form submission error", error);
-            toast.error("Failed to submit the form. Please try again.");
+    const handleFileUpload = (file: File, setter: (url: string) => void) => {
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setter(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
-    }
+    };
+
+    const handleCertificateUpload = (files: FileList) => {
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCertificatePreviews(prev => [...prev, reader.result as string]);
+                form.setValue('certificates', [...form.getValues('certificates'), file.name]);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const removeCertificate = (index: number) => {
+        setCertificatePreviews(prev => prev.filter((_, i) => i !== index));
+        form.setValue('certificates', form.getValues('certificates').filter((_, i) => i !== index));
+    };
+
+    const onSubmit = (data: z.infer<typeof formSchema>) => {
+        try {
+            console.log(data);
+            toast.success("Form submitted successfully!");
+        } catch (error) {
+            toast.error("Failed to submit form");
+            console.log(error)
+        }
+    };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto p-4">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-center">Professional Profile</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-center">Inspector Profile</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            {/* Profile Image Section */}
-                            <section className="space-y-6">
-                                <h3 className="text-lg font-semibold">Profile Image</h3>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            {/* Profile Image */}
+                            <div className="space-y-4">
                                 <FormField
                                     control={form.control}
                                     name="profile_image"
                                     render={({ field }) => (
                                         <FormItem>
+                                            <FormLabel>Profile Image</FormLabel>
                                             <FormControl>
-                                                <FileUploader
-                                                    value={files}
-                                                    onValueChange={(files) => {
-                                                        setFiles(files);
-                                                        field.onChange(files);
-                                                    }}
-                                                    dropzoneOptions={dropZoneConfig}
-                                                    className="relative bg-background rounded-lg p-2"
-                                                >
-                                                    <FileInput
-                                                        id="fileInput"
-                                                        className="outline-dashed outline-1 outline-slate-500 hover:outline-slate-600 transition-all"
-                                                    >
-                                                        <div className="flex items-center justify-center flex-col p-6 w-full">
-                                                            <CloudUpload className="text-gray-500 w-8 h-8 mb-2" />
-                                                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                                                                <span className="font-semibold">Click to upload</span> or drag and drop
-                                                            </p>
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                                SVG, PNG, JPG or GIF (Max 4MB)
-                                                            </p>
-                                                        </div>
-                                                    </FileInput>
-                                                    <FileUploaderContent>
-                                                        {files?.map((file, i) => (
-                                                            <FileUploaderItem key={i} index={i}>
-                                                                <Paperclip className="h-4 w-4 stroke-current" />
-                                                                <span className="text-sm">{file.name}</span>
-                                                            </FileUploaderItem>
-                                                        ))}
-                                                    </FileUploaderContent>
-                                                </FileUploader>
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <Input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) => {
+                                                            if (e.target.files?.[0]) {
+                                                                handleFileUpload(e.target.files[0], setProfilePreview);
+                                                                field.onChange(e.target.files[0].name);
+                                                            }
+                                                        }}
+                                                    />
+                                                    {profilePreview && (
+                                                        <img src={profilePreview} alt="Profile" className="w-32 h-32 object-cover rounded-full" />
+                                                    )}
+                                                </div>
                                             </FormControl>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                            </section>
-
-                            {/* Working Hours Section */}
-                            <section className="space-y-6">
-                                <h3 className="text-lg font-semibold">Working Hours</h3>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-6">
-                                        <FormField
-                                            control={form.control}
-                                            name="start_time"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Start Time</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="eg: 8"
-                                                            type="number"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormDescription>Enter hour (1-12)</FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="start_option"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Period</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select AM/PM" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="AM">AM</SelectItem>
-                                                            <SelectItem value="PM">PM</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                    <div className="space-y-6">
-                                        <FormField
-                                            control={form.control}
-                                            name="end_time"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>End Time</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="eg: 5"
-                                                            type="number"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormDescription>Enter hour (1-12)</FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="end_option"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Period</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select AM/PM" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="AM">AM</SelectItem>
-                                                            <SelectItem value="PM">PM</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* Professional Details Section */}
-                            <section className="space-y-6">
-                                <h3 className="text-lg font-semibold">Professional Details</h3>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <FormField
-                                        control={form.control}
-                                        name="address"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>address</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Enter your address"
-                                                        type="text"
-                                                        className="w-full"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>Your current city of practice</FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="yearOfExp"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Years of Experience</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="eg: 2"
-                                                        type="number"
-                                                        className="w-full"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>Total years of professional experience</FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <div className="md:col-span-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="specialization"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Specializations</FormLabel>
-                                                    <FormControl>
-                                                        <TagsInput
-                                                            value={field.value}
-                                                            onValueChange={field.onChange}
-                                                            placeholder="Enter specializations and press Enter"
-                                                            className="w-full"
-                                                        />
-                                                    </FormControl>
-                                                    <FormDescription>Add your areas of expertise</FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                </div>
-                            </section>
-
-                            <div className="flex justify-end pt-6">
-                                <Button type="submit" className="w-full sm:w-auto">
-                                    Save Profile
-                                </Button>
                             </div>
+
+                            {/* Basic Information */}
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="address"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Address</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="Enter your address" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="yearOfExp"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Years of Experience</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    {...field}
+                                                    onChange={e => field.onChange(parseInt(e.target.value))}
+                                                    placeholder="Years of experience"
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            {/* Time and Days */}
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="start_time"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Start Time</FormLabel>
+                                            <FormControl>
+                                                <Input type="time" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="end_time"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>End Time</FormLabel>
+                                            <FormControl>
+                                                <Input type="time" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="avaliable_days"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Available Days</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    max="7"
+                                                    {...field}
+                                                    onChange={e => field.onChange(parseInt(e.target.value))}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            {/* Certificates */}
+                            <FormField
+                                control={form.control}
+                                name="certificates"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Certificates</FormLabel>
+                                        <FormControl>
+                                            <div className="space-y-4">
+                                                <Input
+                                                    type="file"
+                                                    accept="image/*,.pdf"
+                                                    multiple
+                                                    onChange={(e) => {
+                                                        if (e.target.files?.length) {
+                                                            handleCertificateUpload(e.target.files);
+                                                        }
+                                                    }}
+                                                />
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                    {certificatePreviews.map((preview, index) => (
+                                                        <div key={index} className="relative">
+                                                            <img src={preview} alt={`Certificate ${index + 1}`} className="w-full h-40 object-cover rounded" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeCertificate(index)}
+                                                                className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Specialization */}
+                            <FormField
+                                control={form.control}
+                                name="specialization"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Specializations</FormLabel>
+                                        <FormControl>
+                                            <TagsInput
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Add specializations"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Signature */}
+                            <FormField
+                                control={form.control}
+                                name="signature"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Signature</FormLabel>
+                                        <FormControl>
+                                            <div className="flex flex-col items-center gap-4">
+                                                <Input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        if (e.target.files?.[0]) {
+                                                            handleFileUpload(e.target.files[0], setSignaturePreview);
+                                                            field.onChange(e.target.files[0].name);
+                                                        }
+                                                    }}
+                                                />
+                                                {signaturePreview && (
+                                                    <img src={signaturePreview} alt="Signature" className="w-64 h-32 object-contain border rounded" />
+                                                )}
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <Button type="submit" className="w-full">Submit</Button>
                         </form>
                     </Form>
                 </CardContent>
