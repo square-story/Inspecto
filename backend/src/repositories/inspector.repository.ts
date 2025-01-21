@@ -22,6 +22,9 @@ export class InspectorRepository implements IinspectorRepository {
         return await inspectorModel.findOneAndUpdate({ email }, { password }, { new: true })
     }
     async updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
-        return await inspectorModel.findOneAndUpdate({ userId }, { ...updates }, { new: true })
+        return await inspectorModel.findOneAndUpdate({ _id: userId }, { ...updates }, { new: true })
+    }
+    async updateInspectorProfileCompletion(userId: string) {
+        return await inspectorModel.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true })
     }
 }

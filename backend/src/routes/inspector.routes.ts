@@ -15,6 +15,7 @@ router.post('/resend-otp', InspectorAuthController.resendOTP)
 router.post('/forget', InspectorAuthController.forgetPassword)
 router.post('/reset', InspectorAuthController.resetPassword)
 router.get('/details', authenticateToken, authorizeRole('inspector'), InspectorController.getInspectorDetails)
+router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), InspectorController.completeProfile)
 
 
 export default router

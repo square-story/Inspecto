@@ -9,7 +9,8 @@ import cors from "cors";
 
 const app = express()
 
-app.use(express.json()); //for Parsing JSON request bodies
+app.use(express.json({ limit: '50mb' })); //for Parsing JSON request bodies
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(cookieParser());
 

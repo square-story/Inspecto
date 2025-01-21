@@ -21,4 +21,34 @@ export class InspectorController {
             console.error(error)
         }
     }
+    static completeProfile: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const userId = req.user?.userId
+            const data = req.body
+            if (!userId) {
+                res.status(400).json('User Id is missing in the token')
+                return;
+            }
+            console.log('The user id is:', userId)
+            console.log('The Data is:', data)
+            const response = await inspectorService.completeInspectorProfile(userId, data)
+            console.log('Response after the inspector Service', response)
+            if (response) {
+                res.status(200).json({
+                    message: 'Profile updated successfully',
+                    data: response
+                });
+                return;
+            }
+            res.status(400).json({ message: 'Failed to update profile' });
+            return;
+        } catch (error: any) {
+            console.error('Profile completion error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
+    }
 }
