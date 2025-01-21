@@ -29,10 +29,7 @@ export class InspectorController {
                 res.status(400).json('User Id is missing in the token')
                 return;
             }
-            console.log('The user id is:', userId)
-            console.log('The Data is:', data)
             const response = await inspectorService.completeInspectorProfile(userId, data)
-            console.log('Response after the inspector Service', response)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',

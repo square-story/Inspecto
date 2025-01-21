@@ -25,6 +25,6 @@ export class InspectorRepository implements IinspectorRepository {
         return await inspectorModel.findOneAndUpdate({ _id: userId }, { ...updates }, { new: true })
     }
     async updateInspectorProfileCompletion(userId: string) {
-        return await inspectorModel.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true })
+        return await inspectorModel.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true }).select('-password')
     }
 }
