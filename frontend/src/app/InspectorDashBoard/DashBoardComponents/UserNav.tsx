@@ -15,6 +15,7 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { logoutUser } from "@/features/auth/authAPI"
 import { setInspector } from "@/features/inspector/inspectorSlice"
 import { AppDispatch, RootState } from "@/features/store"
 import { AxiosError } from "axios"
@@ -42,6 +43,21 @@ export function UserNav() {
             }
         })()
     }, [dispatch])
+    const handleLogout = async () => {
+        try {
+            toast.promise(
+                dispatch(logoutUser()),
+                {
+                    loading: 'Logging out...',
+                    success: 'Successfully logged out!',
+                    error: 'Failed to logout. Please try again.',
+                }
+            )
+            navigate('/')
+        } catch (error) {
+            console.error('Logout failed:', error)
+        }
+    }
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -77,7 +93,7 @@ export function UserNav() {
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleLogout()}>
                     Log out
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                 </DropdownMenuItem>
