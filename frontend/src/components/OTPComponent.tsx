@@ -72,7 +72,7 @@ export default function OTPVerification() {
         try {
             const email = localStorage.getItem('otp-email');
             const otp = values.otp;
-            const response = await axiosInstance.post('/inspector/verify-otp', { email, otp });
+            const response = await axiosInstance.post('/user/verify-otp', { email, otp });
 
             if (response?.data?.message) {
                 toast.success(response.data.message);
@@ -82,8 +82,8 @@ export default function OTPVerification() {
 
             localStorage.removeItem('otp-email');
             const { accessToken } = response.data;
-            dispatch(setCredentials({ accessToken, role: 'inspector' }));
-            navigate('/inspector/dashboard/');
+            dispatch(setCredentials({ accessToken, role: 'user' }));
+            navigate('/');
         } catch (error) {
             console.error("Form submission error", error);
             toast.error('Failed to verify OTP. Please try again.');
@@ -98,7 +98,7 @@ export default function OTPVerification() {
                 return;
             }
 
-            const response = await axiosInstance.post('/inspector/resend-otp', { email });
+            const response = await axiosInstance.post('/user/resend-otp', { email });
 
             toast.success(response.data.message);
             setTimeLeft(60);

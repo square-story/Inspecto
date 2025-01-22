@@ -30,7 +30,7 @@ const formSchema = z.object({
     otp: z.string().min(6, "OTP must be 6 digits").max(6)
 });
 
-export default function InspectorOTPVerification() {
+export default function InspectorOTPVerification({ role = "inspector" }) {
     const [timeLeft, setTimeLeft] = useState(60);
     const [isActive, setIsActive] = useState(true);
     const dispatch = useDispatch<AppDispatch>();
@@ -71,7 +71,7 @@ export default function InspectorOTPVerification() {
         try {
             const email = localStorage.getItem('otp-email');
             const otp = values.otp;
-            const response = await axiosInstance.post('/inspector/verify-otp', { email, otp });
+            const response = await axiosInstance.post(`/${role}/verify-otp`, { email, otp });
 
             if (response?.data?.message) {
                 toast.success(response.data.message);
@@ -82,7 +82,7 @@ export default function InspectorOTPVerification() {
             localStorage.removeItem('otp-email');
             const { accessToken } = response.data;
             dispatch(setCredentials({ accessToken, role: 'inspector' }));
-            navigate('/inspector/dashboard');
+            navigate(`/${role}/dashboard`);
         } catch (error) {
             console.error("Form submission error", error);
             toast.error('Failed to verify OTP. Please try again.');
@@ -97,7 +97,7 @@ export default function InspectorOTPVerification() {
                 return;
             }
 
-            const response = await axiosInstance.post('/inspector/resend-otp', { email });
+            const response = await axiosInstance.post(`/${role}/resend-otp`, { email });
 
             toast.success(response.data.message);
             setTimeLeft(60);

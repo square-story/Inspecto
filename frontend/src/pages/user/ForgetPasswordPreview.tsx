@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input'
 import BackButton from '@/components/BackButton'
 import axiosInstance from '@/api/axios'
 import { useParams } from 'react-router-dom'
+import { AxiosError } from 'axios'
 
 // Schema for email validation
 const formSchema = z.object({
@@ -43,11 +44,15 @@ export default function ForgetPasswordPreview() {
         try {
             const { role } = params
             const response = await axiosInstance.post(`/${role}/forget`, { email: values.email, role: role })
-            toast.success(response.data?.message)
-
+            if (response) {
+                toast.success(response.data?.message)
+            }
         } catch (error) {
             console.error('Error sending password reset email', error)
-            toast.error('Failed to send password reset email. Please try again.')
+            if (error instanceof AxiosError) {
+                form.setError('email', { message: error.response?.data?.message })
+                toast.error(error.response?.data?.message)
+            }
         }
     }
 

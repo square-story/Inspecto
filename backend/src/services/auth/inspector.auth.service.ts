@@ -103,7 +103,7 @@ export class InspectorAuthService {
         return { message: 'OTP resent successfully' }
     }
     async forgetPassword(email: string, role: string) {
-        const user = this.inspectorRepository.findInspectorByEmail(email)
+        const user = await this.inspectorRepository.findInspectorByEmail(email)
         if (!user) {
             throw new Error('User not found')
         }

@@ -139,7 +139,7 @@ export class UserAuthService {
         return { accessToken };
     }
     async forgetPassword(email: string, role: string) {
-        const user = this.userRepository.findUserByEmail(email)
+        const user = await this.userRepository.findUserByEmail(email)
         if (!user) {
             throw new Error('User not found')
         }
