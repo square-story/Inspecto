@@ -26,7 +26,6 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/features/store'
 import { loginUser } from '@/features/auth/authAPI'
 import { setCredentials } from '@/features/auth/authSlice'
-import { setUser } from '@/features/user/userSlice'
 import { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import GoogleButton from './GoogleButton'
@@ -70,12 +69,6 @@ export default function LoginPreview() {
             if (result) {
                 const { accessToken, role } = result
                 dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
-                if (result.userDetails) {
-                    dispatch(setUser({
-                        ...result.userDetails,
-                        profile_image: result.userDetails.profile_image || ''
-                    }))
-                }
                 toast.success('Login successfully')
                 handleNav("/");
             }

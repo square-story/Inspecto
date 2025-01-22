@@ -52,10 +52,6 @@ export function UserProfileIcon() {
     useEffect(() => {
         (async () => {
             try {
-                const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-                if (storedUser) {
-                    dispatch(setUser(storedUser));
-                }
                 const response = await axiosInstance.get('/user/details')
                 const freshUser = response.data
                 dispatch(setUser(freshUser))

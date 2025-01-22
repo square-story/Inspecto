@@ -40,8 +40,7 @@ export class UserAuthService {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
         })
-        const { password: userPassword, ...userDetails } = user;
-        return ({ accessToken, userDetails })
+        return ({ accessToken })
     }
     async refreshToken(token: string) {
         const payload = await verifyRefreshToken(token)

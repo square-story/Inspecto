@@ -37,7 +37,6 @@ export const loginUser = createAsyncThunk(
             return {
                 accessToken: response.data.accessToken,
                 role: credentials.role,
-                userDetails: response.data?.userDetails
             };
         } catch (error: unknown) {
             return rejectWithValue(error);
