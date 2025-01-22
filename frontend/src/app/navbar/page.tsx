@@ -15,8 +15,8 @@ const Navbar04Page = () => {
 
 
     return (
-        <div className="w-screen fixed top-6 z-40 backdrop-blur-md" >
-            <nav className="inset-x-4 absolute h-16 bg-background/80 border dark:border-slate-700/70 max-w-screen-xl mx-auto rounded-full">
+        <div className="w-screen fixed top-6 z-40" >
+            <nav className="inset-x-4 absolute h-16 bg-background border dark:border-slate-700/70 max-w-screen-xl mx-auto rounded-full">
                 <div className="h-full flex items-center justify-between mx-auto px-4">
                     <Logo />
 
