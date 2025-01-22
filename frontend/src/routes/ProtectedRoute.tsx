@@ -1,45 +1,90 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../features/store';
+import { Navigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/features/store";
+import { UserRole } from "./types";
+import { ROLE_DASHBOARD_PATHS } from "./guards";
+import React from "react";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    role: 'admin' | 'user' | 'inspector';
+    role: UserRole;
+    allowedRoles?: UserRole[]; // Optional: Allow multiple roles to access a route
 }
 
-// Route guard for authenticated routes (dashboards, etc.)
-export const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
-    const { isAuthenticated, role: userRole } = useSelector((state: RootState) => state.auth);
+export const ProtectedRoute = ({
+    children,
+    role,
+    allowedRoles
+}: ProtectedRouteProps) => {
+    const { isAuthenticated, role: userRole } = useSelector(
+        (state: RootState) => state.auth
+    );
     const location = useLocation();
 
     if (!isAuthenticated) {
-        // Redirect to home page if not authenticated
-        return <Navigate to="/" state={{ from: location }} replace />;
+        return <Navigate
+            to={"/"}
+            state={{ from: location, message: "please login to access this page" }}
+            replace
+        />;
     }
 
-    if (role !== userRole) {
-        // If authenticated but wrong role, redirect to their correct dashboard
-        const dashboardPath = `/${userRole}/dashboard`;
-        return <Navigate to={dashboardPath} replace />;
-    }
+    // Handle role checking
+    const hasPermission = allowedRoles
+        ? userRole !== null && allowedRoles.includes(userRole)
+        : role === userRole;
 
-    return <>{children}</>;
-};
-
-// Route guard for public routes (login pages)
-export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated, role } = useSelector((state: RootState) => state.auth);
-
-    if (isAuthenticated) {
-        if (role === 'admin' || role === 'inspector') {
-            const dashboardPath = `/${role}/dashboard`;
-            return <Navigate to={dashboardPath} replace />;
+    if (!hasPermission) {
+        if (userRole === null) {
+            return <Navigate
+                to={"/"}
+                state={{
+                    from: location,
+                    message: 'You do not have permission to access this page'
+                }}
+                replace
+            />;
         }
-        if (role === 'user' && window.location.pathname === '/') {
+
+        const dashboardPath = ROLE_DASHBOARD_PATHS[userRole];
+        return <Navigate
+            to={dashboardPath}
+            state={{
+                from: location,
+                message: 'You do not have permission to access this page'
+            }}
+            replace
+        />;
+    }
+    return <>{children}</>;
+}
+
+interface PublicRouteProps {
+    children: React.ReactNode;
+    allowAuthenticated?: boolean; // Optional: Allow authenticated users to access some public routes
+}
+
+export const PublicRoute = ({
+    children,
+    allowAuthenticated = false
+}: PublicRouteProps) => {
+    const { isAuthenticated, role } = useSelector(
+        (state: RootState) => state.auth
+    );
+    const location = useLocation();
+
+    if (isAuthenticated && !allowAuthenticated) {
+        // Special case for users on homepage
+        if (role === 'user' && location.pathname === '/') {
             return <>{children}</>;
         }
-        const dashboardPath = `/${role}/dashboard`;
-        return <Navigate to={dashboardPath} replace />;
+
+        const dashboardPath = role ? ROLE_DASHBOARD_PATHS[role] : "/";
+        return <Navigate
+            to={dashboardPath}
+            state={{ from: location }}
+            replace
+        />;
     }
 
     return <>{children}</>;

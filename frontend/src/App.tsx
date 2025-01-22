@@ -1,7 +1,7 @@
 // src/App.tsx
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
-import HomePage from "./routes/HomePage";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/user/UserLoginPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import InspectorLoginPage from "./pages/inspector/InspectorLoginPage";
@@ -11,8 +11,8 @@ import UserDashboard from "./pages/user/UserDashboard";
 import UserRegister from "./pages/user/UserRegister";
 import UserForget from "./pages/user/ForgetPasswordPreview";
 import UserInputOTP from "./pages/user/UserInputOTP";
-import FAQPage from "./routes/FAQPage";
-import ContactPage from "./routes/ContactPage";
+import FAQPage from "./pages/FAQPage";
+import ContactPage from "./pages/ContactPage";
 import ResetPasswordPreview from "./pages/user/ResetPassword";
 import InspectorRegister from "./pages/inspector/InspectorRegister";
 import InspectorOTPVerification from "./pages/inspector/VerifyOTP";
