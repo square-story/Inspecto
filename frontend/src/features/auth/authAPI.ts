@@ -11,16 +11,6 @@ interface LoginCredentials {
 interface LoginResponse {
     accessToken: string,
     role: string,
-    userDetails?: {
-        _id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        address: string | null;
-        profile_image: string | null;
-        status: boolean;
-        role: string;
-    }
 }
 
 export const loginUser = createAsyncThunk(
