@@ -1,5 +1,4 @@
 import { ModeToggle } from "@/components/ui/DarkModeSwitch"
-import { MainNav } from "./DashBoardComponents/MainNav"
 import { Search } from "./DashBoardComponents/Search"
 import { UserNav } from "./DashBoardComponents/UserNav"
 import { useDispatch, useSelector } from "react-redux"
@@ -41,17 +40,11 @@ const DashBoard = () => {
                     <AlertCompletion isOpen={isDialogOpen} onClose={handleClose} />
                 </div>
             )}
-            <div className="md:hidden">
-                {/*
-                Working of Mobile view
-                */}
-                <h1 className="text-5xl">Working on it!</h1>
-            </div>
-            <div className="hidden flex-col md:flex">
+            <div className="flex-row">
                 <div className="border-b">
-                    <div className="flex h-16 items-center justify-between px-3 space-x-4">
-                        <MainNav className="mx-6" />
-                        <div className="ml-auto flex items-center space-x-4">
+                    <div className="flex h-16 items-center justify-between px-3">
+                        <h1 className="font-bold cursor-pointer text-2xl">Inspecto</h1>
+                        <div className="ml-auto flex items-center">
                             <Search />
                         </div>
                         <div className="ml-auto flex items-center space-x-4">
