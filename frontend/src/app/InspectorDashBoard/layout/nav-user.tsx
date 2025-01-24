@@ -1,8 +1,6 @@
 import {
     BadgeCheck,
-    Bell,
     ChevronsUpDown,
-    CreditCard,
     LogOut,
     Sparkles,
 } from 'lucide-react'
@@ -22,7 +20,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/features/store'
 import { logoutUser } from '@/features/auth/authAPI'
@@ -104,22 +102,10 @@ export function NavUser({
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem asChild>
-                                <Link to='/settings/account'>
+                                <div onClick={() => navigate('/inspector/dashboard/settings')}>
                                     <BadgeCheck />
                                     Account
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link to='/settings'>
-                                    <CreditCard />
-                                    Billing
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link to='/settings/notifications'>
-                                    <Bell />
-                                    Notifications
-                                </Link>
+                                </div>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
