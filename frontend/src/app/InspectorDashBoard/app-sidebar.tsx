@@ -12,7 +12,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { NavUser } from "@/components/layout/nav-user"
+import { NavUser } from "@/app/InspectorDashBoard/layout/nav-user"
 import { useSelector } from "react-redux"
 import { RootState } from "@/features/store"
 

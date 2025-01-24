@@ -1,16 +1,16 @@
 import { ModeToggle } from "@/components/ui/DarkModeSwitch"
-import { Search } from "./DashBoardComponents/Search"
-import { UserNav } from "./DashBoardComponents/UserNav"
+import { Search } from "../components/Search"
+import { UserNav } from "../components/UserNav"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "@/features/store"
-import { AlertCompletion } from "./DashBoardComponents/AlertCompletion"
+import { AlertCompletion } from "../components/AlertCompletion"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { logoutUser } from "@/features/auth/authAPI"
 import { toast } from "sonner"
 
 
-const DashBoard = () => {
+const InspectorNavBar = () => {
     const Inspector = useSelector((state: RootState) => state.inspector)
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate()
@@ -58,4 +58,4 @@ const DashBoard = () => {
     )
 }
 
-export default DashBoard
+export default InspectorNavBar
