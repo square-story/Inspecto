@@ -1,5 +1,5 @@
-import Contact03Page from "@/app/Contact/Contact"
-import Footer05Page from "@/app/Footer/Footer"
+import Contact03Page from "@/app/Contact"
+import Footer05Page from "@/app/Footer"
 import Navbar04Page from "@/app/navbar/page"
 
 const ContactPage = () => {
