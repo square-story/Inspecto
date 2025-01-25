@@ -1,4 +1,3 @@
-import axiosInstance from "@/api/axios"
 import {
     Avatar,
     AvatarFallback,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
 import { setInspector } from "@/features/inspector/inspectorSlice"
+import { inspectorService } from "@/services/inspector.service"
 import { AppDispatch, RootState } from "@/store"
 import { AxiosError } from "axios"
 import { useEffect } from "react"
@@ -32,7 +32,7 @@ export function UserNav() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await axiosInstance.get('/inspector/details')
+                const response = await inspectorService.getProfile()
                 const freshUser = response.data
                 dispatch(setInspector(freshUser))
             } catch (error) {

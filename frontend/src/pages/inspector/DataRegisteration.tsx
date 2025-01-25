@@ -16,9 +16,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2 } from "lucide-react";
 import { TagsInput } from "@/components/ui/tags-input";
-import axiosInstance from "@/api/axios";
 import { useNavigate } from "react-router-dom";
 import { uploadToCloudinary } from "@/utils/cloudinary";
+import { inspectorService } from "@/services/inspector.service";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -155,7 +155,7 @@ export default function InspectorForm() {
                 end_time: data.end_time,
                 avaliable_days: data.avaliable_days
             };
-            const response = await axiosInstance.post('/inspector/complete-profile', submitData)
+            const response = await inspectorService.completeProfile(submitData)
             if (response.data) {
                 toast.success("Profile updated successfully!");
                 navigate('/inspector/dashboard');

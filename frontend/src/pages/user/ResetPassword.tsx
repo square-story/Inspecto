@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/card'
 import { PasswordInput } from '@/components/ui/password-input'
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axiosInstance from '@/api/axios'
 import { AxiosResponse } from 'axios'
+import { AuthServices } from '@/services/auth.service'
 
 // Schema for password validation
 const formSchema = z
@@ -52,16 +52,16 @@ export default function ResetPasswordPreview() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            const token = searchParams.get('token');
-            const email = searchParams.get('email');
-            const role = searchParams.get('role');
+            const token = searchParams.get('token') || '';
+            const email = searchParams.get('email') || '';
+            const role = searchParams.get('role') || '';
             const password = values.password;
             let response: AxiosResponse;
 
             if (role == 'user') {
-                response = await axiosInstance.post('/user/reset', { token, email, password })
+                response = await AuthServices.passwordReset(role, { token, email, password })
             } else {
-                response = await axiosInstance.post('/inspector/reset', { token, email, password })
+                response = await AuthServices.passwordReset(role, { token, email, password })
             }
 
             if (response) {

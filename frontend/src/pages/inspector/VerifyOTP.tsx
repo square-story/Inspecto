@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
 import { AppDispatch } from "@/store";
-import axiosInstance from "@/api/axios";
+import { AuthServices } from '@/services/auth.service';
 
 const formSchema = z.object({
     otp: z.string().min(6, "OTP must be 6 digits").max(6)
@@ -69,9 +69,9 @@ export default function InspectorOTPVerification({ role = "inspector" }) {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            const email = localStorage.getItem('otp-email');
+            const email = localStorage.getItem('otp-email') || '';
             const otp = values.otp;
-            const response = await axiosInstance.post(`/${role}/verify-otp`, { email, otp });
+            const response = await AuthServices.verifyOTP('inspector', { email, otp })
 
             if (response?.data?.message) {
                 toast.success(response.data.message);
@@ -97,7 +97,7 @@ export default function InspectorOTPVerification({ role = "inspector" }) {
                 return;
             }
 
-            const response = await axiosInstance.post(`/${role}/resend-otp`, { email });
+            const response = await AuthServices.resentOTP('inspector', email)
 
             toast.success(response.data.message);
             setTimeLeft(60);

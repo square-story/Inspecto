@@ -21,12 +21,12 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
-import axiosInstance from '@/api/axios'
 import { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '@/components/BackButton'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { isValidPhoneNumber } from 'react-phone-number-input'
+import { AuthServices } from '@/services/auth.service'
 
 
 // Define validation schema using Zod
@@ -71,7 +71,11 @@ export default function InspectorRegister() {
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
         try {
-            const response = await axiosInstance.post('/inspector/register', data)
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
+            const response = await AuthServices.registerUser('inspector', formData);
 
             if (response) {
                 localStorage.setItem('otp-email', data.email)

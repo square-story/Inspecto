@@ -4,6 +4,7 @@ import FAQPage from "../pages/FAQPage";
 import ContactPage from "../pages/ContactPage";
 import { PublicRoute } from "./ProtectedRoute";
 import UserForget from "../pages/user/ForgetPasswordPreview";
+import ResetPasswordPreview from "@/pages/user/ResetPassword";
 
 const PublicRoutes = () => (
     <Routes>
@@ -15,6 +16,7 @@ const PublicRoutes = () => (
         <Route path="/questions" element={<FAQPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/forget/:role" element={<PublicRoute><UserForget /></PublicRoute>} />
+        <Route path="/reset-password" element={<PublicRoute><ResetPasswordPreview /></PublicRoute>} />
     </Routes>
 );
 

@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
 import { AppDispatch } from "@/store";
-import axiosInstance from "@/api/axios";
+import { AuthServices } from '@/services/auth.service';
 
 
 const formSchema = z.object({
@@ -70,9 +70,9 @@ export default function OTPVerification() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            const email = localStorage.getItem('otp-email');
+            const email = localStorage.getItem('otp-email') || '';
             const otp = values.otp;
-            const response = await axiosInstance.post('/user/verify-otp', { email, otp });
+            const response = await AuthServices.verifyOTP('user', { email, otp })
 
             if (response?.data?.message) {
                 toast.success(response.data.message);
@@ -98,7 +98,7 @@ export default function OTPVerification() {
                 return;
             }
 
-            const response = await axiosInstance.post('/user/resend-otp', { email });
+            const response = await AuthServices.resentOTP('user', email)
 
             toast.success(response.data.message);
             setTimeLeft(60);

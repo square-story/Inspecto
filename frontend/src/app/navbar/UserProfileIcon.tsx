@@ -1,5 +1,3 @@
-
-import axiosInstance from "@/api/axios"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -24,6 +22,7 @@ import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import { userService } from "@/services/user.service"
 
 export function UserProfileIcon() {
     const user = useSelector((state: RootState) => state.user)
@@ -52,7 +51,7 @@ export function UserProfileIcon() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await axiosInstance.get('/user/details')
+                const response = await userService.getUser()
                 const freshUser = response.data
                 dispatch(setUser(freshUser))
             } catch (error) {
