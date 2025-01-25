@@ -21,6 +21,7 @@ export class UserAuthService {
         }
         if (!user.password) {
             res.status(400).json({ field: 'password', message: 'User Want To Enter Password' })
+            return;
         }
         if (user.password === null) {
             res.status(400).json({ field: 'password', message: 'Password is required' });
