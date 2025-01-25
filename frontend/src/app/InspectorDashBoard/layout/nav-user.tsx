@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/sidebar'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { AppDispatch } from '@/features/store'
+import { AppDispatch } from '@/store'
 import { logoutUser } from '@/features/auth/authAPI'
 import { toast } from 'sonner'
 

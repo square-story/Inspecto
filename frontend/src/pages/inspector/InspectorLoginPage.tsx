@@ -26,7 +26,7 @@ import { useNavigate } from 'react-router-dom'
 import { loginUser } from '@/features/auth/authAPI'
 import { useDispatch } from 'react-redux'
 import { setCredentials } from '@/features/auth/authSlice'
-import { AppDispatch } from '@/features/store'
+import { AppDispatch } from '@/store'
 import { AxiosError } from 'axios'
 
 // Improved schema with additional validation rules

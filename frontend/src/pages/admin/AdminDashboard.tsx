@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux"
-import { AppDispatch } from "../../features/store";
+import { AppDispatch } from "@/store";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../features/auth/authAPI";
 

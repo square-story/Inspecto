@@ -16,7 +16,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
-import { AppDispatch, RootState } from "@/features/store"
+import { AppDispatch, RootState } from "@/store"
 import { setUser } from "@/features/user/userSlice"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { AxiosError } from "axios"

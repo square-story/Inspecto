@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
-import { AppDispatch } from "@/features/store";
+import { AppDispatch } from "@/store";
 import axiosInstance from "@/api/axios";
 
 const formSchema = z.object({

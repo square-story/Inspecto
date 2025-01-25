@@ -1,7 +1,7 @@
 import { ToasterTrigger } from "@/components/Toaster"
 import { Button } from "@/components/ui/button"
 import { logoutUser } from "@/features/auth/authAPI"
-import { AppDispatch } from "@/features/store"
+import { AppDispatch } from "@/store"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"

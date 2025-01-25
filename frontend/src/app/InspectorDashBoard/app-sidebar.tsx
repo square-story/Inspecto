@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/app/InspectorDashBoard/layout/nav-user";
 import { useSelector } from "react-redux";
-import { RootState } from "@/features/store";
+import { RootState } from "@/store";
 
 // Menu items with routes
 const items = [

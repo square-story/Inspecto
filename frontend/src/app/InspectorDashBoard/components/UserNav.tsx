@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
 import { setInspector } from "@/features/inspector/inspectorSlice"
-import { AppDispatch, RootState } from "@/features/store"
+import { AppDispatch, RootState } from "@/store"
 import { AxiosError } from "axios"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"

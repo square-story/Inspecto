@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { RootState } from "@/features/store";
+import { RootState } from "@/store";
 import { UserRole } from "./types";
 import { ROLE_DASHBOARD_PATHS } from "./guards";
 import React from "react";
