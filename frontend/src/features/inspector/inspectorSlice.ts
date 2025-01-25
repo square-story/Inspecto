@@ -8,7 +8,7 @@ interface InspectorState {
     profile_image: string;
     status: boolean;
     role: string;
-    certificates: [object];
+    certificates: [string];
     yearOfExp: number;
     phone: string;
     signature: string;
@@ -28,7 +28,7 @@ const initialState: InspectorState = {
     profile_image: '',
     status: false,
     role: '',
-    certificates: [{}],
+    certificates: [''],
     yearOfExp: 0,
     phone: '',
     signature: '',
@@ -65,7 +65,7 @@ const inspectorSlice = createSlice({
         setRole(state, action: PayloadAction<string>) {
             state.role = action.payload;
         },
-        setCertificates(state, action: PayloadAction<[object]>) {
+        setCertificates(state, action: PayloadAction<[string]>) {
             state.certificates = action.payload;
         },
         setYearOfExp(state, action: PayloadAction<number>) {
