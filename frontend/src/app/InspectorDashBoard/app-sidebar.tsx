@@ -46,7 +46,7 @@ export function AppSidebar() {
     const inspector = useSelector((state: RootState) => state.inspector);
 
     return (
-        <Sidebar>
+        <Sidebar collapsible="icon" variant="sidebar">
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupLabel>M A I N M E N U</SidebarGroupLabel>
