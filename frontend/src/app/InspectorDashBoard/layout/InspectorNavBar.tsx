@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { logoutUser } from "@/features/auth/authAPI"
 import { toast } from "sonner"
+import { EmailVerificationAlert } from "../components/EmailVerifcation"
 
 
 const InspectorNavBar = () => {
@@ -39,6 +40,9 @@ const InspectorNavBar = () => {
                 <div>
                     <AlertCompletion isOpen={isDialogOpen} onClose={handleClose} />
                 </div>
+            )}
+            {!Inspector.isListed && (
+                <EmailVerificationAlert onClose={handleClose} />
             )}
             <div className="flex-row">
                 <div className="border-b">
