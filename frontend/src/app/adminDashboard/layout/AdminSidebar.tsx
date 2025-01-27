@@ -1,28 +1,28 @@
 import { NavUser } from "@/app/InspectorDashBoard/layout/nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { Banknote, Car, Home, Settings2 } from "lucide-react";
+import { CalendarRange, Home, Settings, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const items = [
     {
         title: "DashBoard",
-        route: "/inspector/dashboard",
+        route: "/admin/dashboard",
         icon: Home,
     },
     {
-        title: "Assigned Inspections",
-        route: "/inspector/dashboard/inspection",
-        icon: Car,
+        title: "Users",
+        route: "/admin/dashboard/users",
+        icon: Users,
     },
     {
-        title: "Earning history",
-        route: "/inspector/dashboard/earnings",
-        icon: Banknote,
+        title: "Inspectors",
+        route: "/inspector/dashboard/inspectors",
+        icon: CalendarRange,
     },
     {
         title: "Settings",
         route: "/inspector/dashboard/settings",
-        icon: Settings2,
+        icon: Settings,
     },
 ];
 
