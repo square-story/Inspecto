@@ -39,7 +39,7 @@ const AdminSidebar = () => {
                                 <SidebarMenuItem key={item.title}
                                     className={location.pathname.startsWith(item.route) ? "active" : ""}
                                 >
-                                    <SidebarMenuButton onClick={() => navigate(item.route)}>
+                                    <SidebarMenuButton tooltip={item.title} onClick={() => navigate(item.route)}>
                                         <item.icon />
                                         <span>{item.title}</span>
                                     </SidebarMenuButton>
@@ -61,3 +61,5 @@ const AdminSidebar = () => {
 }
 
 export default AdminSidebar
+
+
