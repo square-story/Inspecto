@@ -12,7 +12,7 @@ const InspectorDashboard = () => {
             <Layout>
                 <Header>
                     <NavBar />
-                    <h1 className="font-bold text-xl">inspecto</h1>
+                    <h1 className="font-bold text-2xl cursor-pointer">Inspecto</h1>
                     <div className='ml-auto flex items-center gap-4'>
                         <Search />
                         <ModeToggle />
