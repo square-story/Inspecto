@@ -1,57 +1,37 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/card";
+import { ArrowRight, Shapes } from "lucide-react";
 
-export function AdminCard() {
+const AdminCard = () => {
     return (
-        <Card className="w-[350px]">
-            <CardHeader>
-                <CardTitle>Create project</CardTitle>
-                <CardDescription>Deploy your new project in one-click.</CardDescription>
+        <Card className="max-w-xs shadow-none">
+            <CardHeader className="pt-4 pb-4 px-5 flex-row items-center gap-3 font-semibold">
+                <div className="h-8 w-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
+                    <Shapes className="h-5 w-5" />
+                </div>
+                Shadcn UI Blocks
             </CardHeader>
-            <CardContent>
-                <form>
-                    <div className="grid w-full items-center gap-4">
-                        <div className="flex flex-col space-y-1.5">
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" placeholder="Name of your project" />
-                        </div>
-                        <div className="flex flex-col space-y-1.5">
-                            <Label htmlFor="framework">Framework</Label>
-                            <Select>
-                                <SelectTrigger id="framework">
-                                    <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent position="popper">
-                                    <SelectItem value="next">Next.js</SelectItem>
-                                    <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                                    <SelectItem value="astro">Astro</SelectItem>
-                                    <SelectItem value="nuxt">Nuxt.js</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </form>
+
+            <CardContent className="text-[15px] text-muted-foreground px-5">
+                <p>
+                    Explore a collection of Shadcn UI blocks and components, ready to
+                    preview and copy.
+                </p>
+                <div className="mt-5 w-full aspect-video bg-muted rounded-xl" />
             </CardContent>
-            <CardFooter className="flex justify-between">
-                <Button variant="outline">Cancel</Button>
-                <Button>Deploy</Button>
+
+            <CardFooter>
+                <Button className="/blocks">
+                    Explore Blocks <ArrowRight />
+                </Button>
             </CardFooter>
         </Card>
-    )
-}
+    );
+};
+
+export default AdminCard;
