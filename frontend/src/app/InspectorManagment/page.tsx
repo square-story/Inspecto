@@ -4,14 +4,15 @@
 import { useEffect, useState } from "react";
 import { DataTable } from "./data-table";
 import { Inspectors, columns } from "./columns";
+import { AdminService } from "@/services/admin.service";
 
 export default function DemoPage() {
     const [data, setData] = useState<Inspectors[]>([]);
 
     useEffect(() => {
         async function fetchData() {
-            const response = await getData();
-            setData(response);
+            const response = await AdminService.getInspectors();
+            setData(response.data)
         }
         fetchData();
     }, []);
@@ -23,29 +24,3 @@ export default function DemoPage() {
     );
 }
 
-async function getData(): Promise<Inspectors[]> {
-    return [
-        {
-            id: "728ed52f",
-            firstName: "sadik",
-            email: "sadik@gmail.com",
-            status: "pending",
-            profile_image: `https://avatar.iran.liara.run/public`
-        },
-        {
-            id: "489e1d42",
-            firstName: "somethings",
-            status: "blocked",
-            email: "example@gmail.com",
-            profile_image: "https://avatar.iran.liara.run/public"
-        },
-        {
-            id: "2385340",
-            firstName: "sfdoome",
-            status: "unblock",
-            email: "some@gmail.com",
-            profile_image: "https://avatar.iran.liara.run/public"
-        },
-
-    ];
-}

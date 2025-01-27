@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface InspectorState {
+export interface InspectorState {
     firstName: string;
     lastName: string;
     email: string;

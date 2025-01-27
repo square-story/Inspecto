@@ -14,11 +14,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 export type Inspectors = {
-    id: string;
+    _id: string;
     firstName: string;
     email: string;
-    status: 'blocked' | 'unblock' | 'pending',
-    profile_image: string,
+    isListed: boolean;
+    isCompleted: boolean;
+    profile_image: string;
 }
 
 export const columns: ColumnDef<Inspectors>[] = [
@@ -44,8 +45,12 @@ export const columns: ColumnDef<Inspectors>[] = [
         header: "Email"
     },
     {
-        accessorKey: "status",
-        header: "Status",
+        accessorKey: "isListed",
+        header: "Verification Status",
+    },
+    {
+        accessorKey: "isCompleted",
+        header: "Details Status",
     },
     {
         id: "actions",
@@ -63,7 +68,7 @@ export const columns: ColumnDef<Inspectors>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.id)}
+                            onClick={() => navigator.clipboard.writeText(payment._id)}
                         >
                             Copy payment ID
                         </DropdownMenuItem>
