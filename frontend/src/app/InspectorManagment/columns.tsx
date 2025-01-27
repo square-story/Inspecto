@@ -1,6 +1,7 @@
 //contain our column definitions.
 
 import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react"
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,7 +43,17 @@ export const columns: ColumnDef<Inspectors>[] = [
     },
     {
         accessorKey: "email",
-        header: "Email"
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Email
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
     },
     {
         accessorKey: "isListed",
@@ -73,7 +84,7 @@ export const columns: ColumnDef<Inspectors>[] = [
                             Copy payment ID
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
+                        <DropdownMenuItem>View Inspector</DropdownMenuItem>
                         <DropdownMenuItem>View payment details</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
