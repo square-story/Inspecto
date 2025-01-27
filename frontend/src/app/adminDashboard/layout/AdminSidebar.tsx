@@ -16,12 +16,12 @@ const items = [
     },
     {
         title: "Inspectors",
-        route: "/inspector/dashboard/inspectors",
+        route: "/admin/dashboard/inspectors",
         icon: CalendarRange,
     },
     {
         title: "Settings",
-        route: "/inspector/dashboard/settings",
+        route: "/admin/dashboard/settings",
         icon: Settings,
     },
 ];
