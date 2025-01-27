@@ -11,18 +11,29 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 export type Inspectors = {
     id: string;
     firstName: string;
     email: string;
-    status: 'blocked' | 'unblock' | 'pending'
+    status: 'blocked' | 'unblock' | 'pending',
+    profile_image: string,
 }
 
 export const columns: ColumnDef<Inspectors>[] = [
     {
-        accessorKey: "status",
-        header: "Status",
+        accessorKey: "profile_image",
+        header: "Profile",
+        cell: ({ row }) => {
+            const profileImage = row.getValue("profile_image") as string;
+            return (
+                <Avatar className="rounded-full">
+                    <AvatarImage className="object-cover h-7 w-7" src={profileImage} alt="Profile" />
+                    <AvatarFallback className="rounded-full">SN</AvatarFallback>
+                </Avatar>
+            );
+        },
     },
     {
         accessorKey: "firstName",
@@ -31,6 +42,10 @@ export const columns: ColumnDef<Inspectors>[] = [
     {
         accessorKey: "email",
         header: "Email"
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
     },
     {
         id: "actions",

@@ -30,18 +30,21 @@ async function getData(): Promise<Inspectors[]> {
             firstName: "sadik",
             email: "sadik@gmail.com",
             status: "pending",
+            profile_image: `https://avatar.iran.liara.run/public`
         },
         {
             id: "489e1d42",
             firstName: "somethings",
             status: "blocked",
             email: "example@gmail.com",
+            profile_image: "https://avatar.iran.liara.run/public"
         },
         {
             id: "2385340",
             firstName: "sfdoome",
             status: "unblock",
             email: "some@gmail.com",
+            profile_image: "https://avatar.iran.liara.run/public"
         },
 
     ];
