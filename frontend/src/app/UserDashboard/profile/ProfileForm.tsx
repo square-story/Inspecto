@@ -1,8 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { z } from 'zod'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router-dom'
-import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,71 +14,67 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import InputDemo from './InputDemo'
+import { useUserDetails } from '@/hooks/useUserDetails'
+import { useDispatch } from 'react-redux'
+import { userService } from '@/services/user.service'
+import { updateUser } from '@/features/user/userSlice'
+
 
 
 const profileFormSchema = z.object({
-    username: z
+    firstName: z
         .string()
-        .min(2, {
-            message: 'Username must be at least 2 characters.',
-        })
-        .max(30, {
-            message: 'Username must not be longer than 30 characters.',
-        }),
-    email: z
-        .string({
-            required_error: 'Please select an email to display.',
-        })
-        .email(),
-    bio: z.string().max(160).min(4),
-    urls: z
-        .array(
-            z.object({
-                value: z.string().url({ message: 'Please enter a valid URL.' }),
-            })
-        )
-        .optional(),
-    profilePicture: z.string().url().optional(),
+        .min(2, { message: 'First name must be at least 2 characters.' })
+        .max(30, { message: 'First name must not be longer than 30 characters.' }),
+    lastName: z
+        .string()
+        .min(2, { message: 'Last name must be at least 2 characters.' })
+        .max(30, { message: 'Last name must not be longer than 30 characters.' }),
+    email: z.string().email({ message: 'Please enter a valid email.' }),
+    address: z.string().optional(),
+    profile_image: z.string().url().optional(),
 })
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
+export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-    bio: 'I own a computer.',
-    urls: [
-        { value: 'https://shadcn.com' },
-        { value: 'http://twitter.com/shadcn' },
-    ],
-}
 
 export default function ProfileForm() {
+    const { user } = useUserDetails();
+    const dispatch = useDispatch()
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
-        defaultValues,
-        mode: 'onChange',
+        defaultValues: {
+            firstName: user?.firstName || '',
+            lastName: user?.lastName || '',
+            email: user?.email || '',
+            address: user?.address || '',
+            profile_image: user?.profile_image || ''
+        },
+        mode: "onChange"
     })
 
-    const { fields, append } = useFieldArray({
-        name: 'urls',
-        control: form.control,
-    })
+    // const { fields, append } = useFieldArray({
+    //     name: 'urls',
+    //     control: form.control,
+    // })
 
     const handleImageUpload = (url: string | null) => {
-        form.setValue("profilePicture", url || ""); // Update form value with image URL
+        form.setValue("profile_image", url || user.profile_image);
     };
 
-    function onSubmit(data: ProfileFormValues) {
-        toast(JSON.stringify(data, null, 2))
+    async function onSubmit(data: ProfileFormValues) {
+        try {
+            console.log('the Data is:', data)
+            const updatedUser = await userService.updateUser(data);
+
+            console.log('updates:', updateUser)
+            // Dispatch updated user data to Redux
+            dispatch(updateUser(updatedUser.data));
+            toast.success('Profile updated successfully!');
+        } catch (error) {
+            toast.error('Failed to update profile.');
+        }
     }
 
     return (
@@ -88,12 +83,12 @@ export default function ProfileForm() {
                 <InputDemo onImageUpload={handleImageUpload} />
                 <FormField
                     control={form.control}
-                    name='username'
+                    name='firstName'
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>First Name</FormLabel>
                             <FormControl>
-                                <Input placeholder='shadcn' {...field} />
+                                <Input placeholder="Enter your first name" {...field} />
                             </FormControl>
                             <FormDescription>
                                 This is your public display name. It can be your real name or a
@@ -105,83 +100,43 @@ export default function ProfileForm() {
                 />
                 <FormField
                     control={form.control}
-                    name='email'
+                    name='lastName'
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder='Select a verified email to display' />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value='m@example.com'>m@example.com</SelectItem>
-                                    <SelectItem value='m@google.com'>m@google.com</SelectItem>
-                                    <SelectItem value='m@support.com'>m@support.com</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormDescription>
-                                You can manage verified email addresses in your{' '}
-                                <Link to='/'>email settings</Link>.
-                            </FormDescription>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder='Enter Your last Name'  {...field} />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 <FormField
                     control={form.control}
-                    name='bio'
+                    name='email'
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Bio</FormLabel>
+                            <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Textarea
-                                    placeholder='Tell us a little bit about yourself'
-                                    className='resize-none'
-                                    {...field}
-                                />
+                                <Input type="email" placeholder="Enter your email" {...field} />
                             </FormControl>
-                            <FormDescription>
-                                You can <span>@mention</span> other users and organizations to
-                                link to them.
-                            </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <div>
-                    {fields.map((field, index) => (
-                        <FormField
-                            control={form.control}
-                            key={field.id}
-                            name={`urls.${index}.value`}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className={cn(index !== 0 && 'sr-only')}>
-                                        URLs
-                                    </FormLabel>
-                                    <FormDescription className={cn(index !== 0 && 'sr-only')}>
-                                        Add links to your website, blog, or social media profiles.
-                                    </FormDescription>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    ))}
-                    <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        className='mt-2'
-                        onClick={() => append({ value: '' })}
-                    >
-                        Add URL
-                    </Button>
-                </div>
+                <FormField
+                    control={form.control}
+                    name='address'
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Address</FormLabel>
+                            <FormControl>
+                                <Input placeholder='Enter Your Address'  {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 <Button type='submit'>Update profile</Button>
             </form>
         </Form>

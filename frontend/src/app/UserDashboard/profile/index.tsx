@@ -2,6 +2,7 @@ import ContentSection from '../components/content-section'
 import ProfileForm from './ProfileForm'
 
 export default function SettingsProfile() {
+
     return (
         <ContentSection
             title='Profile'

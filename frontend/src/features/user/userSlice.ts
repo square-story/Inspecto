@@ -35,6 +35,9 @@ const userSlice = createSlice({
             Object.assign(state, initialState);
             // localStorage.removeItem('user')
         },
+        updateUser(state, action) {
+            return { ...state, ...action.payload };
+        },
         // updateField: (state, action: PayloadAction<{ key: keyof UserState; value: string | boolean | null }>) => {
         //     const { key, value } = action.payload;
         //     (state[key] as typeof value) = value; // Dynamically update the field
@@ -44,6 +47,6 @@ const userSlice = createSlice({
     },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser, updateUser } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -14,18 +14,15 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
-import { AppDispatch, RootState } from "@/store"
-import { setUser } from "@/features/user/userSlice"
+import { AppDispatch, } from "@/store"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
-import { AxiosError } from "axios"
-import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { userService } from "@/services/user.service"
+import { useUserDetails } from "@/hooks/useUserDetails"
 
 export function UserProfileIcon() {
-    const user = useSelector((state: RootState) => state.user)
+    const { user } = useUserDetails();
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
     const handleNavigation = (path: string) => {
@@ -48,20 +45,7 @@ export function UserProfileIcon() {
     }
 
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const response = await userService.getUser()
-                const freshUser = response.data
-                dispatch(setUser(freshUser))
-            } catch (error) {
-                if (error instanceof AxiosError) {
-                    console.error('Error fetching user data:', error);
-                    toast.error(error.message)
-                }
-            }
-        })()
-    }, [dispatch])
+
 
 
 
