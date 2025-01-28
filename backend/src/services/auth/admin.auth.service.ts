@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { AdminRepository } from "../../repositories/admin.repository";
-import { generateAccessToken, generateRefreshToken, verifyAccessToken } from "../../utils/token.utils";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 
 export class AdminAuthService {
     private adminRepository: AdminRepository;
@@ -26,7 +26,7 @@ export class AdminAuthService {
     }
 
     async refreshToken(token: string) {
-        const payload = verifyAccessToken(token)
+        const payload = await verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
