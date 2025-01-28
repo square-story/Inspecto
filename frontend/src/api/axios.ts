@@ -54,7 +54,7 @@ axiosInstance.interceptors.response.use(
                     },
                     { withCredentials: true }
                 );
-                const { accessToken } = response.data;
+                const { accessToken } = await response.data;
 
                 // Update tokens in Redux store
                 store.dispatch(
