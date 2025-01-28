@@ -10,5 +10,6 @@ const router = Router()
 router.post('/login', AdminAuthController.login)
 router.post('/refresh', AdminAuthController.refreshToken)
 router.get('/get-inspectors', authenticateToken, authorizeRole('admin'), AdminController.getAllInspectors)
+router.get('/get-users', authenticateToken, authorizeRole('admin'), AdminController.getAllUsers)
 
 export default router

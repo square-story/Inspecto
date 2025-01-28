@@ -25,7 +25,7 @@ class UserRepository implements IUserRepository {
     }
 
     async getAllUsers(): Promise<IUsers[]> {
-        return await Users.find();
+        return await Users.find().select('-password');
     }
     async updateUserPassword(email: string, password: string): Promise<IUsers | null> {
         return await Users.findOneAndUpdate({ email }, { password }, { new: true })

@@ -28,8 +28,10 @@ export const payments: Payment[] = [
 const InspectorMangement = () => {
     return (
         <>
-            <div>InspectorMangement</div>
-            <DemoPage />
+            <div className="flex flex-col px-5">
+                <h1 className="text-xl font-bold">Inspector Managment</h1>
+                <DemoPage />
+            </div>
         </>
     )
 }
