@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import appConfig from "../config/app.config";
+import { verifyAccessToken } from "../utils/token.utils";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -17,7 +18,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 
     const token = authHeader.split(" ")[1];
     try {
-        const payload = jwt.verify(token, appConfig.accessToken as string) as { userId: string; role: string };
+        const payload = verifyAccessToken(token) as unknown as { userId: string; role: string; }
         req.user = payload;
         next();
     } catch (error: any) {
