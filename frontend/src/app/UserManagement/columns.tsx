@@ -34,7 +34,15 @@ export const columns = ({
         },
         {
             accessorKey: "firstName",
-            header: "FirstName",
+            header: ({ column }) => {
+                return (
+                    <Button variant='ghost'
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                        FirstName
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
         },
         {
             accessorKey: "email",
@@ -51,12 +59,8 @@ export const columns = ({
             },
         },
         {
-            accessorKey: "isListed",
+            accessorKey: "status",
             header: "Verification Status",
-        },
-        {
-            accessorKey: "isCompleted",
-            header: "Details Status",
         },
         {
             id: "actions",
