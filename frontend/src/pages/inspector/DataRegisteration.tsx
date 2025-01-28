@@ -24,7 +24,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"]
 
-const fileSchema = z.object({
+const FileSchema = z.object({
     file: typeof window === 'undefined'
         ? z.any()
         : z.instanceof(File)
@@ -36,12 +36,12 @@ const fileSchema = z.object({
 // Validation schema
 const formSchema = z.object({
     address: z.string().min(3, "Address must be at least 3 characters"),
-    profile_image: fileSchema.nullable(),
-    certificates: z.array(fileSchema).min(1, "At least One Certificate is required"),
+    profile_image: FileSchema.nullable(),
+    certificates: z.array(FileSchema).min(1, "At least One Certificate is required"),
     yearOfExp: z.coerce.number()
         .min(1, "Experience must be at least 1 year")
         .max(50, "Experience must not exceed 50 years"),
-    signature: fileSchema.nullable(),
+    signature: FileSchema.nullable(),
     specialization: z.array(z.string()).min(1, "At least one specialization is required"),
     start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
     end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),

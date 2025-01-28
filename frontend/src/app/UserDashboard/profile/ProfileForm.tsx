@@ -23,6 +23,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import InputDemo from './InputDemo'
+
 
 const profileFormSchema = z.object({
     username: z
@@ -46,6 +48,7 @@ const profileFormSchema = z.object({
             })
         )
         .optional(),
+    profilePicture: z.string().url().optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -71,6 +74,10 @@ export default function ProfileForm() {
         control: form.control,
     })
 
+    const handleImageUpload = (url: string | null) => {
+        form.setValue("profilePicture", url || ""); // Update form value with image URL
+    };
+
     function onSubmit(data: ProfileFormValues) {
         toast(JSON.stringify(data, null, 2))
     }
@@ -78,6 +85,7 @@ export default function ProfileForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                <InputDemo onImageUpload={handleImageUpload} />
                 <FormField
                     control={form.control}
                     name='username'
