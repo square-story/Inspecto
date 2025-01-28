@@ -1,45 +1,58 @@
-import { ToasterTrigger } from "@/components/Toaster"
-import { Button } from "@/components/ui/button"
-import { logoutUser } from "@/features/auth/authAPI"
-import { AppDispatch } from "@/store"
-import { useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
-import { toast } from "sonner"
-import SpotlightCard from '../../components/SpotlightCard';
+import SidebarNav from "@/app/UserDashboard/components/side-nav"
+import { Separator } from "@/components/ui/separator"
+import { CalendarRange, Car, LucideLayoutDashboard, Notebook, User } from "lucide-react"
+import { Outlet } from "react-router-dom"
 
 const UserDashboard = () => {
-    const dispatch = useDispatch<AppDispatch>()
-    const navigate = useNavigate()
-    const handleLogout = async () => {
-        try {
-            toast.promise(
-                dispatch(logoutUser()),
-                {
-                    loading: 'Logging out...',
-                    success: 'Successfully logged out!',
-                    error: 'Failed to logout. Please try again.',
-                }
-            )
-            navigate('/')
-        } catch (error) {
-            console.error('Logout failed:', error)
-        }
-    }
     return (
-        <div>
-            <h1>UserDashboard</h1>
-            <Button variant='destructive' onClick={handleLogout}>Logout</Button>
-            <ToasterTrigger message="some message" type="error" />
-            <div className="flex h-full w-full">
-                <SpotlightCard className="custom-spotlight-card h-screen w-full" spotlightColor="rgba(0, 288, 255, 0.2)">
-                    <i className="fa fa-lock"></i>
-                    <h2 className="text-secondary">Enhanced Security</h2>
-                    <p className="text-secondary">Our state of the art software offers peace of mind through the strictest security measures.</p>
-                    <button>Learn more</button>
-                </SpotlightCard>
+        <div className="px-4 py-6">
+            <div className='space-y-0.5'>
+                <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
+                    Settings
+                </h1>
+                <p className='text-muted-foreground'>
+                    Manage your account settings and set e-mail preferences.
+                </p>
+            </div>
+            <Separator className='my-4 lg:my-6' />
+            <div className='flex flex-1 flex-col space-y-2 md:space-y-2 overflow-hidden lg:flex-row lg:space-x-12 lg:space-y-0 '>
+                <aside className='top-0 lg:sticky lg:w-1/5'>
+                    <SidebarNav items={sidebarNavItems} />
+                </aside>
+                <div className='flex w-full p-1 pr-4 overflow-y-hidden'>
+                    <Outlet />
+                </div>
             </div>
         </div>
     )
 }
+
+const sidebarNavItems = [
+    {
+        title: 'Dashboard',
+        icon: <LucideLayoutDashboard size={18} />,
+        href: '/user/dashboard',
+    },
+    {
+        title: 'My Vehicles',
+        icon: <Car size={18} />,
+        href: '/user/dashboard/vehicles',
+    },
+    {
+        title: 'Book an Inspection',
+        icon: <CalendarRange size={18} />,
+        href: '/user/dashboard/inspection',
+    },
+    {
+        title: 'History',
+        icon: <Notebook size={18} />,
+        href: '/user/dashboard/history',
+    },
+    {
+        title: 'Account Settings',
+        icon: <User size={18} />,
+        href: '/user/dashboard/settings',
+    },
+]
 
 export default UserDashboard
