@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { PublicRoute, ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "../pages/user/UserLoginPage";
 import UserDashboard from "../pages/user/UserDashboard";
@@ -11,6 +11,7 @@ const UserRoutes = () => (
         <Route path="register" element={<PublicRoute><UserRegister /></PublicRoute>} />
         <Route path="verify-otp" element={<PublicRoute><UserInputOTP /></PublicRoute>} />
         <Route path="dashboard/*" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
 );
 

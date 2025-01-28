@@ -27,7 +27,7 @@ import { userService } from "@/services/user.service"
 export function UserProfileIcon() {
     const user = useSelector((state: RootState) => state.user)
     const dispatch = useDispatch<AppDispatch>()
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const handleNavigation = (path: string) => {
         navigate(path);
     };
@@ -84,7 +84,7 @@ export function UserProfileIcon() {
                 <DropdownMenuLabel>Hey {user.firstName.toUpperCase()}👋</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => handleNavigation('user/dashboard')}>
+                    <DropdownMenuItem onClick={() => handleNavigation('/user/dashboard')}>
                         Profile
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>

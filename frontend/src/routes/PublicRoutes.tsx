@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import FAQPage from "../pages/FAQPage";
 import ContactPage from "../pages/ContactPage";
@@ -17,6 +17,7 @@ const PublicRoutes = () => (
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/forget/:role" element={<PublicRoute><UserForget /></PublicRoute>} />
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPreview /></PublicRoute>} />
+        <Route path="*" element={<Navigate to='/' replace />} />
     </Routes>
 );
 

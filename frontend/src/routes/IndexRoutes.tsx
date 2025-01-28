@@ -10,7 +10,7 @@ const IndexRoutes = () => (
         <Route path="/user/*" element={<UserRoutes />} />
         <Route path="/admin/*" element={<AdminRoutes />} />
         <Route path="/inspector/*" element={<InspectorRoutes />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to='/' replace />} />
     </Routes>
 );
 
