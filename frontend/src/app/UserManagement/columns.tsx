@@ -1,8 +1,9 @@
+import { DataTableColumnHeader } from "@/components/columnHeader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, CircleCheck, MoreHorizontal, X, } from "lucide-react";
+import { CircleCheck, MoreHorizontal, X, } from "lucide-react";
 
 export type IUsers = {
     _id: string;
@@ -34,29 +35,15 @@ export const columns = ({
         },
         {
             accessorKey: "firstName",
-            header: ({ column }) => {
-                return (
-                    <Button variant='ghost'
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                        FirstName
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                )
-            },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="First Name" />
+            ),
         },
         {
             accessorKey: "email",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Email
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Email" />
+            ),
         },
         {
             accessorKey: "status",

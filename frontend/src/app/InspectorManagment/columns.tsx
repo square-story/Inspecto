@@ -1,7 +1,7 @@
 //contain our column definitions.
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, CircleCheck, X } from "lucide-react"
+import { CircleCheck, X } from "lucide-react"
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DataTableColumnHeader } from "@/components/columnHeader";
 
 export type Inspectors = {
     _id: string;
@@ -45,21 +46,15 @@ export const columns = ({
         },
         {
             accessorKey: "firstName",
-            header: "FirstName",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="First Name" />
+            ),
         },
         {
             accessorKey: "email",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Email
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Email" />
+            ),
         },
         {
             accessorKey: "isListed",
