@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataTableColumnHeader } from "@/components/columnHeader";
+import LongText from "@/components/ui/LongText";
 
 export type Inspectors = {
     _id: string;
     firstName: string;
+    lastName: string;
     email: string;
     isListed: boolean;
     isCompleted: boolean;
@@ -46,12 +48,23 @@ export const columns = ({
             enableHiding: false
         },
         {
-            accessorKey: "firstName",
+            id: 'fullName',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="First Name" />
+                <DataTableColumnHeader column={column} title='Name' />
             ),
-            enableHiding: false
+            cell: ({ row }) => {
+                const { firstName, lastName } = row.original
+                const fullName = `${firstName} ${lastName}`
+                return <LongText className='max-w-36'>{fullName}</LongText>
+            },
+            filterFn: (row, _columnId, filterValue) => {
+                const { firstName, lastName } = row.original
+                const fullName = `${firstName} ${lastName}`.toLowerCase()
+                return fullName.includes(filterValue.toLowerCase()) // Case-insensitive match
+            },
+            meta: { className: 'w-36' },
         },
+
         {
             accessorKey: "email",
             header: ({ column }) => (
