@@ -17,8 +17,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2 } from "lucide-react";
 import { TagsInput } from "@/components/ui/tags-input";
 import { useNavigate } from "react-router-dom";
-import { uploadToCloudinary } from "@/utils/cloudinary";
+import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { inspectorService } from "@/services/inspector.service";
+import { getTransformedImageUrl } from "@/utils/cloudinary";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -125,10 +126,10 @@ export default function InspectorForm() {
             const signature = form.getValues('signature');
             const certificates = form.getValues('certificates');
 
-            const profileUrl = profile ? await uploadToCloudinary(profile.file) : '';
-            const signatureUrl = signature ? await uploadToCloudinary(signature.file) : '';
+            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'default') : '';
+            const signatureUrl = signature ? getTransformedImageUrl(await uploadToCloudinary(signature.file), 'signature') : '';
             const certificateUrls = await Promise.all(
-                certificates.map(cert => uploadToCloudinary(cert.file))
+                certificates.map(async cert => getTransformedImageUrl(await uploadToCloudinary(cert.file), 'certificate'))
             );
 
             return { profileUrl, signatureUrl, certificateUrls };

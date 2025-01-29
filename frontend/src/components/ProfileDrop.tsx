@@ -3,8 +3,9 @@ import { cn } from "@/lib/utils";
 import { ImageIcon, XCircleIcon } from "lucide-react";
 import { useState } from "react";
 import Dropzone from "react-dropzone";
-import { uploadToCloudinary } from "@/utils/cloudinary"; // Update path as needed
+import { uploadToCloudinary } from "@/utils/uploadToCloudinary"; // Update path as needed
 import { toast } from "sonner";
+import { getTransformedImageUrl } from "@/utils/cloudinary";
 
 const ImagePreview = ({
     url,
@@ -45,7 +46,7 @@ export default function ProfileDrop({
         if (file) {
             try {
                 setIsUploading(true);
-                const imageUrl = await uploadToCloudinary(file, {});
+                const imageUrl = getTransformedImageUrl(await uploadToCloudinary(file), 'default');
                 setProfilePicture(imageUrl);
                 onImageUpload(imageUrl); // Pass URL to parent
                 toast.success("Image uploaded successfully!");
