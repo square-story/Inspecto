@@ -14,7 +14,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import InputDemo from './InputDemo'
+import InputDemo from '@/components/ProfileDrop'
 import { useUserDetails } from '@/hooks/useUserDetails'
 import { useDispatch } from 'react-redux'
 import { userService } from '@/services/user.service'

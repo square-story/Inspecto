@@ -30,7 +30,7 @@ const ImagePreview = ({
     </div>
 );
 
-export default function InputDemo({
+export default function ProfileDrop({
     onImageUpload,
     defaultImage
 }: {
@@ -45,7 +45,7 @@ export default function InputDemo({
         if (file) {
             try {
                 setIsUploading(true);
-                const imageUrl = await uploadToCloudinary(file);
+                const imageUrl = await uploadToCloudinary(file, {});
                 setProfilePicture(imageUrl);
                 onImageUpload(imageUrl); // Pass URL to parent
                 toast.success("Image uploaded successfully!");
