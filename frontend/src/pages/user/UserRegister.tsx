@@ -110,7 +110,7 @@ export default function RegisterPreview() {
                                     name="firstName"
                                     render={({ field }) => (
                                         <FormItem className="grid gap-2">
-                                            <FormLabel htmlFor="firstName">Full Name</FormLabel>
+                                            <FormLabel htmlFor="firstName">First Name</FormLabel>
                                             <FormControl>
                                                 <Input id="firstName" placeholder="John" {...field} />
                                             </FormControl>

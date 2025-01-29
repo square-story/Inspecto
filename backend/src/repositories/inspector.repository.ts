@@ -10,7 +10,7 @@ export class InspectorRepository implements IinspectorRepository {
         return await inspectorModel.findOne({ email })
     }
     async getAllInspector(): Promise<IInspector[]> {
-        return await inspectorModel.find().select('-password')
+        return await inspectorModel.find().select('-password').sort({ createdAt: -1 })
     }
     async findInspectorById(inspectorId: string): Promise<Partial<IInspector> | null> {
         return await inspectorModel.findById(inspectorId).select('-password')

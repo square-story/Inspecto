@@ -45,6 +45,6 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     avaliable_days: { type: Number },
     isListed: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false }
-})
+}, { timestamps: true })
 
 export default mongoose.model<IInspector>("Inspector", InspectorSchema);
