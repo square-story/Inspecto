@@ -1,7 +1,7 @@
 //contain our column definitions.
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, CircleCheck, X } from "lucide-react"
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -64,10 +64,24 @@ export const columns = ({
         {
             accessorKey: "isListed",
             header: "Verification Status",
+            cell: ({ row }) => (
+                row.original.isListed ? (
+                    <CircleCheck color="green" />
+                ) : (
+                    <Button variant='destructive'>View Details</Button>
+                )
+            )
         },
         {
             accessorKey: "isCompleted",
-            header: "Details Status",
+            header: "Status",
+            cell: ({ row }) => (
+                row.original.isCompleted ? (
+                    <CircleCheck color="green" />
+                ) : (
+                    <X color="red" />
+                )
+            )
         },
         {
             id: "actions",

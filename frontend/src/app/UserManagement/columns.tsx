@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, CircleCheck, MoreHorizontal, X, } from "lucide-react";
 
 export type IUsers = {
     _id: string;
@@ -60,7 +60,14 @@ export const columns = ({
         },
         {
             accessorKey: "status",
-            header: "Verification Status",
+            header: "Status",
+            cell: ({ row }) => (
+                row.original.status ? (
+                    <CircleCheck color="green" />
+                ) : (
+                    <X color="red" />
+                )
+            )
         },
         {
             id: "actions",

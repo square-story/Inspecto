@@ -1,8 +1,8 @@
-import AdminCard from "./components/AdminCard"
+import Comingsoon from "@/components/Comingsoon"
 
 const AdminDashBoardContent = () => {
     return (
-        <AdminCard />
+        <Comingsoon />
     )
 }
 
