@@ -6,6 +6,8 @@ import {
     useReactTable,
     SortingState,
     getSortedRowModel,
+    getFilteredRowModel,
+    ColumnFiltersState,
 } from "@tanstack/react-table"
 
 
@@ -19,6 +21,7 @@ import {
 } from "@/components/ui/table"
 import { useState } from "react"
 import { DataTablePagination } from "@/components/Pagination"
+import { DataTableToolbar } from "./DataTableToolbar"
 
 
 interface DataTableProps<TData, TValue> {
@@ -31,15 +34,20 @@ export function InspectorDataTable<TData, TValue>({
     data,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const table = useReactTable({
         data, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel(), onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        onColumnFiltersChange: setColumnFilters,
         state: {
             sorting,
+            columnFilters
         },
     })
     return (
-        <div>
+        <div className="space-y-4">
+            <DataTableToolbar table={table} />
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>

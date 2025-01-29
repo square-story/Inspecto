@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { CircleCheck, MoreHorizontal, X, } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 export type IUsers = {
     _id: string;
@@ -50,9 +50,9 @@ export const columns = ({
             header: "Status",
             cell: ({ row }) => (
                 row.original.status ? (
-                    <CircleCheck color="green" />
+                    <Button variant='destructive'>Block</Button>
                 ) : (
-                    <X color="red" />
+                    <Button variant='default'>Un Block</Button>
                 )
             )
         },

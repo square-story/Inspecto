@@ -65,7 +65,11 @@ export const columns = ({
                 ) : (
                     <Button variant='destructive'>View Details</Button>
                 )
-            )
+            ),
+            enableColumnFilter: true,
+            filterFn: (row, columnId, filterValue) => {
+                return filterValue.includes(row.getValue(columnId))
+            },
         },
         {
             accessorKey: "isCompleted",

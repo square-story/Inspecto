@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { InspectorDataTable } from "./InspectorDataTable";
+import { InspectorDataTable } from "./components/InspectorDataTable";
 import { Inspectors, columns } from "./columns";
 import { AdminService } from "@/services/admin.service";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
