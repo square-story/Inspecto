@@ -79,12 +79,8 @@ export default function ProfileForm() {
 
     async function onSubmit(data: ProfileFormValues) {
         try {
-            console.log('the Data is:', data)
             const updatedUser = await userService.updateUser(data);
-
-            console.log('updates:', updateUser)
-            // Dispatch updated user data to Redux
-            dispatch(updateUser(updatedUser.data));
+            dispatch(updateUser(updatedUser.data.user));
             toast.success('Profile updated successfully!');
         } catch (error) {
             toast.error('Failed to update profile.');

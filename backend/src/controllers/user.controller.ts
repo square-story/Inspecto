@@ -37,7 +37,6 @@ export class UserController {
             }
 
             const data = req.body; // Extract data from the request body
-            console.log("backend data getting", data)
             if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
                 console.error("Error: No valid data provided for update.");
                 res.status(400).json({
@@ -46,8 +45,6 @@ export class UserController {
                 });
                 return
             }
-
-            console.log(`Updating user with ID: ${userId} with data:`, data);
 
             const user = await userService.updateUser(userId, data); // Call the service to update the user
             if (!user) {
@@ -58,8 +55,6 @@ export class UserController {
                 });
                 return
             }
-
-            console.log(`User with ID ${userId} updated successfully.`);
             res.status(200).json({
                 success: true,
                 message: "User details updated successfully.",
