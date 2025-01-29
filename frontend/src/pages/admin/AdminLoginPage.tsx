@@ -124,12 +124,6 @@ export default function LoginPreview() {
                                         <FormItem className="grid gap-2">
                                             <div className="flex justify-between items-center">
                                                 <FormLabel htmlFor="password">Password</FormLabel>
-                                                <a
-                                                    onClick={() => navigate('/forget/inspector')}
-                                                    className="ml-auto inline-block text-sm underline cursor-pointer"
-                                                >
-                                                    Forgot your password?
-                                                </a>
                                             </div>
                                             <FormControl>
                                                 <PasswordInput
