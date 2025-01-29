@@ -19,6 +19,7 @@ import { useUserDetails } from '@/hooks/useUserDetails'
 import { useDispatch } from 'react-redux'
 import { userService } from '@/services/user.service'
 import { updateUser } from '@/features/user/userSlice'
+import React from 'react'
 
 
 
@@ -40,7 +41,7 @@ export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 
 export default function ProfileForm() {
-    const { user } = useUserDetails();
+    const { user, loading } = useUserDetails();
     const dispatch = useDispatch()
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
@@ -58,9 +59,21 @@ export default function ProfileForm() {
     //     name: 'urls',
     //     control: form.control,
     // })
+    React.useEffect(() => {
+        if (user) {
+            form.reset({
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                email: user.email || "",
+                address: user.address || "",
+                profile_image: user.profile_image || "",
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     const handleImageUpload = (url: string | null) => {
-        form.setValue("profile_image", url || user.profile_image);
+        form.setValue("profile_image", url || user?.profile_image);
     };
 
     async function onSubmit(data: ProfileFormValues) {
@@ -77,10 +90,12 @@ export default function ProfileForm() {
         }
     }
 
+    if (loading) return (<h1>Loading....</h1>)
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-                <InputDemo onImageUpload={handleImageUpload} />
+                <InputDemo onImageUpload={handleImageUpload} defaultImage={user?.profile_image} />
                 <FormField
                     control={form.control}
                     name='firstName'

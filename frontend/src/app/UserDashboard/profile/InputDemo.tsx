@@ -32,10 +32,12 @@ const ImagePreview = ({
 
 export default function InputDemo({
     onImageUpload,
+    defaultImage
 }: {
     onImageUpload: (url: string | null) => void;
+    defaultImage: string;
 }) {
-    const [profilePicture, setProfilePicture] = useState<string | null>(null);
+    const [profilePicture, setProfilePicture] = useState<string | null>(defaultImage);
     const [isUploading, setIsUploading] = useState(false);
 
     const handleDrop = async (acceptedFiles: File[]) => {

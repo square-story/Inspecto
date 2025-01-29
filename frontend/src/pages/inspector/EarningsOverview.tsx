@@ -1,7 +1,8 @@
+import Comingsoon from "@/components/Comingsoon"
 
 const EarningsOverview = () => {
     return (
-        <div>EarningsOverview</div>
+        <Comingsoon />
     )
 }
 

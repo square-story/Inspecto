@@ -1,6 +1,8 @@
+import Comingsoon from "@/components/Comingsoon"
+
 const InspectorDashBoardHome = () => {
     return (
-        <div>Home some</div>
+        <Comingsoon />
     )
 }
 

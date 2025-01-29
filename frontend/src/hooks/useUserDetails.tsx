@@ -11,6 +11,7 @@ export const useUserDetails = () => {
     const user = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
+
         const fetchUserDetails = async () => {
             try {
                 setLoading(true);
