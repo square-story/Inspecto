@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export type Inspectors = {
     _id: string;
@@ -36,8 +36,8 @@ export const columns = ({
             cell: ({ row }) => {
                 const profileImage = row.getValue("profile_image") as string;
                 return (
-                    <Avatar className="rounded-full">
-                        <AvatarImage className="object-cover h-7 w-7 rounded-full" src={profileImage} alt="Profile" />
+                    <Avatar>
+                        <AvatarImage src={profileImage} alt="Profile" />
                         <AvatarFallback className="rounded-full">SN</AvatarFallback>
                     </Avatar>
                 );

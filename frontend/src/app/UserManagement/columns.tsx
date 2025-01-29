@@ -26,7 +26,7 @@ export const columns = ({
                 const profileImage = row.getValue("profile_image") as string;
                 return (
                     <Avatar>
-                        <AvatarImage className="object-cover h-7 w-7 rounded-full" src={profileImage} alt="Profile" />
+                        <AvatarImage src={profileImage} alt="Profile" />
                         <AvatarFallback className="rounded-full">SN</AvatarFallback>
                     </Avatar>
                 );
