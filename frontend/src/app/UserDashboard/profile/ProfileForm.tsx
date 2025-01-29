@@ -20,6 +20,7 @@ import { useDispatch } from 'react-redux'
 import { userService } from '@/services/user.service'
 import { updateUser } from '@/features/user/userSlice'
 import React from 'react'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 
 
@@ -90,7 +91,7 @@ export default function ProfileForm() {
         }
     }
 
-    if (loading) return (<h1>Loading....</h1>)
+    if (loading) return (<LoadingSpinner />)
 
     return (
         <Form {...form}>
