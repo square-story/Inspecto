@@ -1,34 +1,50 @@
 import axios from "axios";
 
-export const uploadToCloudinary = async (file: File | string): Promise<string> => {
+export const uploadToCloudinary = async (
+    file: File | string,
+    transformationSettings?: { crop?: string; gravity?: string; width?: number; height?: number }
+): Promise<string> => {
     try {
-        if (typeof file === 'string') {
-            if (file.startsWith('http')) {
-                return file;
-            }
-            throw new Error('Invalid file format');
+        // If the file is already a URL (for example, an image URL passed from another source)
+        if (typeof file === 'string' && file.startsWith('http')) {
+            return file;  // Return the URL directly if it's already transformed
         }
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET)
-        const response = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
+
+        if (!(file instanceof File)) {
+            throw new Error('Invalid file type');
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+        const response = await axios.post(
+            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+
         if (!response.data?.secure_url) {
             throw new Error('No secure URL received from Cloudinary');
         }
-        return getTransformedImageUrl(response.data.secure_url);
+
+        // Apply transformation settings to the URL
+        const transformedUrl = getTransformedImageUrl(response.data.secure_url, transformationSettings);
+
+        return transformedUrl;
     } catch (error) {
-        console.error('Error uploading to Cloudinary:', error);
-        throw new Error('Failed to upload image');
+        console.error("Error uploading to Cloudinary:", error);
+        throw new Error("Failed to upload image");
     }
+};
 
-}
+const getTransformedImageUrl = (
+    url: string,
+    { crop = "crop", gravity = "auto:face", width = 300, height = 300 }: { crop?: string; gravity?: string; width?: number; height?: number } = {}
+): string => {
+    // Build the transformation string dynamically
+    const transformation = `c_${crop},g_${gravity},h_${height},w_${width}`;
 
-
-
-const getTransformedImageUrl = (url: string): string => {
-    return url.replace('/upload/', '/upload/c_crop,g_auto:face,h_300,w_300/');
+    // Apply the transformation to the original URL
+    return url.replace('/upload/', `/upload/${transformation}/`);
 };
