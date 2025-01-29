@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DataTable } from "./data-table";
+import { InspectorDataTable } from "./InspectorDataTable";
 import { Inspectors, columns } from "./columns";
 import { AdminService } from "@/services/admin.service";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -25,7 +25,7 @@ export default function DemoPage() {
 
     return (
         <div className="container mx-auto py-10">
-            <DataTable columns={columns({ setIsDrawerOpen, setSelectedInspector })} data={data} />
+            <InspectorDataTable columns={columns({ setIsDrawerOpen, setSelectedInspector })} data={data} />
             {/* Drawer for Inspector Details */}
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerContent>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { columns, IUsers } from "./columns";
 import { AdminService } from "@/services/admin.service";
-import { DataTable } from "../InspectorManagment/data-table";
+import { UserDataTable } from "./UserDataTable";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export default function UserManagmentTable() {
 
     return (
         <div className="container mx-auto py-10">
-            <DataTable columns={columns({ setIsDrawerOpen, setSelectedUser })} data={data} />
+            <UserDataTable columns={columns({ setIsDrawerOpen, setSelectedUser })} data={data} />
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerContent>
                     <DrawerHeader>
