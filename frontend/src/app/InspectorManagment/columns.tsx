@@ -43,12 +43,14 @@ export const columns = ({
                     </Avatar>
                 );
             },
+            enableHiding: false
         },
         {
             accessorKey: "firstName",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="First Name" />
             ),
+            enableHiding: false
         },
         {
             accessorKey: "email",
