@@ -78,15 +78,27 @@ export default function DemoPage() {
 
     const handleApprove = async (inspectorId: string) => {
         try {
-            const response = await AdminService.inspectorApproval(inspectorId);
-            if (response.status === 200) {
-                toast.success("Inspector approved successfully!");
-                // Refresh data after successful approval
-                await fetchData();
-                // Close drawer after successful approval
-                setIsDrawerOpen(false);
+            const result = await confirm({
+                title: 'Approve Inspector',
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: 'Are you sure you want to proceed?',
+            })
+
+            if (result) {
+                const response = await AdminService.inspectorApproval(inspectorId);
+                if (response.status === 200) {
+                    toast.success("Inspector approved successfully!");
+                    // Refresh data after successful approval
+                    await fetchData();
+                    // Close drawer after successful approval
+                    setIsDrawerOpen(false);
+                } else {
+                    toast.error("Error approving inspector.");
+                }
             } else {
-                toast.error("Error approving inspector.");
+                toast.info('cancelled');
+                // Reopen drawer after cancellation
+                setIsDrawerOpen(true);
             }
         } catch (error) {
             console.error("Approval error:", error);

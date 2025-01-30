@@ -21,6 +21,7 @@ export class InspectorService {
             const updates = {
                 isListed: true,
                 status: InspectorStatus.APPROVED,
+                denialReason: '',
                 approvedAt: new Date(),
             };
             const updatedInspector = await this.inspectorRepository.updateInspector(inspectorId, updates)
@@ -42,6 +43,7 @@ export class InspectorService {
             const updates = {
                 isListed: false,
                 status: InspectorStatus.DENIED,
+                isCompleted: false,
                 deniedAt: new Date(),
                 denialReason: reason
             };

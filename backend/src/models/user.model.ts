@@ -9,7 +9,9 @@ export interface IUserInput {
     profile_image: string;
     status: boolean;
     role: string;
-    authProvider: string
+    authProvider: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IUsers extends Document, IUserInput {
