@@ -111,19 +111,19 @@ export default function DemoPage() {
                                         </div>
                                     )}
                                 </div>
+
+
                                 {/* Approve & Deny Buttons */}
                                 <div className="mt-6 flex justify-end space-x-3">
-                                    <Button variant="outline" className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white">
+                                    <Button variant="outline" className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white text-lg px-6 py-3">
                                         Deny
                                     </Button>
-                                    <Button variant="default" className="bg-green-500 hover:bg-green-600">
+                                    <Button variant="default" className="bg-green-500 hover:bg-green-600 text-lg px-6 py-3">
                                         Approve
                                     </Button>
                                 </div>
                             </div>
                         )}
-
-
                     </div>
                     <DrawerFooter>
                         <DrawerClose asChild>
