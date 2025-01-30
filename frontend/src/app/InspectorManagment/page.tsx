@@ -8,6 +8,7 @@ import { AdminService } from "@/services/admin.service";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function DemoPage() {
     const [data, setData] = useState<Inspectors[]>([]);
@@ -19,6 +20,36 @@ export default function DemoPage() {
         }
         fetchData();
     }, []);
+
+    const handleDeny = async (inspectorId: string) => {
+        try {
+            const response = await AdminService.inspectorDeny(inspectorId)
+            if (response.status == 200) {
+                toast.success("Inspector denied successfully!");
+                // Optionally: Refresh Data or Update State
+            } else {
+                toast.error("Error denying inspector.");
+            }
+        } catch (error) {
+            console.error("Denial error:", error);
+            toast.error("Something went wrong.");
+        }
+    };
+
+    const handleApprove = async (inspectorId: string) => {
+        try {
+            const response = await AdminService.inspectorApproval(inspectorId)
+            if (response.status == 200) {
+                toast.success("Inspector approved successfully!");
+                // Optionally: Refresh Data or Update State
+            } else {
+                toast.error("Error approving inspector.");
+            }
+        } catch (error) {
+            console.error("Approval error:", error);
+            toast.error("Something went wrong.");
+        }
+    };
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedInspector, setSelectedInspector] = useState<Inspectors | null>(null);
@@ -115,10 +146,18 @@ export default function DemoPage() {
 
                                 {/* Approve & Deny Buttons */}
                                 <div className="mt-6 flex justify-end space-x-3">
-                                    <Button variant="outline" className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white text-lg px-6 py-3">
+                                    <Button
+                                        variant="outline"
+                                        className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white text-lg px-6 py-3"
+                                        onClick={() => handleDeny(selectedInspector._id)}
+                                    >
                                         Deny
                                     </Button>
-                                    <Button variant="default" className="bg-green-500 hover:bg-green-600 text-lg px-6 py-3">
+                                    <Button
+                                        variant="default"
+                                        className="bg-green-500 hover:bg-green-600 text-lg px-6 py-3"
+                                        onClick={() => handleApprove(selectedInspector._id)}
+                                    >
                                         Approve
                                     </Button>
                                 </div>

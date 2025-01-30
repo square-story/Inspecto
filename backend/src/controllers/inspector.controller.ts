@@ -48,4 +48,7 @@ export class InspectorController {
             return;
         }
     }
+    static approvalProfile: RequestHandler = async (req: Request, res: Response) => {
+
+    }
 }

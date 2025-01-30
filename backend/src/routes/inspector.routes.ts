@@ -17,5 +17,8 @@ router.post('/reset', InspectorAuthController.resetPassword)
 router.get('/details', authenticateToken, authorizeRole('inspector'), InspectorController.getInspectorDetails)
 router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), InspectorController.completeProfile)
 
+//approval and rejection
+router.patch('/approve/:inspector_id', authenticateToken, authorizeRole('admin'), InspectorController.approvalProfile)
+
 
 export default router
