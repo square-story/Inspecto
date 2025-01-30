@@ -1,4 +1,15 @@
 import axiosInstance from "@/api/axios";
+import { AxiosResponse } from "axios";
+
+
+interface UpdateStatusResponse {
+    success: boolean;
+    message: string;
+    data?: {
+        userId: string;
+        status: boolean;
+    };
+}
 
 export const AdminService = {
     getInspectors: async () => {
@@ -14,6 +25,9 @@ export const AdminService = {
         return await axiosInstance.post(`/inspector/deny/${inspectorId}`, { reason });
     },
     blockInspector: async (inspectorId: string) => {
-        return await axiosInstance.patch(`inspector/block/${inspectorId}`)
+        return await axiosInstance.patch(`/inspector/block/${inspectorId}`)
+    },
+    updateUserStatus: async (userId: string): Promise<AxiosResponse<UpdateStatusResponse>> => {
+        return await axiosInstance.patch(`/user/block/${userId}`)
     }
 }

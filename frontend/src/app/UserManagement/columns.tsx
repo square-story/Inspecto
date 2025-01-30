@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 
 export type IUsers = {
     _id: string;
@@ -11,14 +12,18 @@ export type IUsers = {
     email: string;
     status: boolean;
     profile_image: string;
+    address?: string
+    authProvider: string;
 }
 
 export const columns = ({
     setIsDrawerOpen,
     setSelectedUser,
+    onBlockUser,
 }: {
     setIsDrawerOpen: (open: boolean) => void;
     setSelectedUser: (user: IUsers | null) => void;
+    onBlockUser: (userId: string, currentStatus: boolean) => Promise<void>;
 }): ColumnDef<IUsers>[] => [
         {
             accessorKey: "profile_image",
@@ -48,13 +53,31 @@ export const columns = ({
         {
             accessorKey: "status",
             header: "Status",
-            cell: ({ row }) => (
-                row.original.status ? (
-                    <Button variant='destructive'>Block</Button>
-                ) : (
-                    <Button variant='default'>Un Block</Button>
-                )
-            )
+            cell: ({ row }) => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const [isLoading, setIsLoading] = useState(false);
+
+                const handleBlockToggle = async () => {
+                    try {
+                        setIsLoading(true);
+                        await onBlockUser(row.original._id, row.original.status);
+                    } catch (error) {
+                        console.error('Error toggling user block status:', error);
+                    } finally {
+                        setIsLoading(false);
+                    }
+                };
+
+                return (
+                    <Button
+                        variant={row.original.status ? 'destructive' : 'default'}
+                        onClick={handleBlockToggle}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Loading...' : row.original.status ? 'Block' : 'Unblock'}
+                    </Button>
+                );
+            }
         },
         {
             id: "actions",

@@ -32,5 +32,23 @@ export class UserService {
     async getAllUsers() {
         return await this.userRepository.getAllUsers();
     }
+    async toggleStatus(userId: string) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const updateData = {
+            status: !user.status
+        }
+        const updatedUser = await this.userRepository.updateUser(
+            userId,
+            updateData
+        );
+        if (!updatedUser) {
+            throw new Error('Failed to update user status');
+        }
+        return updatedUser;
+    }
 }
 

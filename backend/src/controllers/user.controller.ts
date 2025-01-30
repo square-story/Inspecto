@@ -1,5 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { UserService } from "../services/user.service";
+import mongoose from "mongoose";
 
 const userService = new UserService();
 
@@ -69,4 +70,34 @@ export class UserController {
             return
         }
     };
+    public static updateStatus: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const { userId } = req.params
+
+            if (!mongoose.Types.ObjectId.isValid(userId)) {
+                res.status(400).json({
+                    success: false,
+                    message: "Invalid user ID format"
+                });
+                return;
+            }
+            const response = await userService.toggleStatus(userId)
+
+            res.status(200).json({
+                success: true,
+                message: `User successfully ${response.status ? 'unblocked' : 'blocked'}`,
+                data: {
+                    userId: response._id,
+                    status: response.status
+                }
+            });
+        } catch (error) {
+            console.error("Error occurred while updating user details:", error);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error. Please try again later."
+            });
+            return
+        }
+    }
 }
