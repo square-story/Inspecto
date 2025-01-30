@@ -5,12 +5,15 @@ import App from './App.tsx'
 import { store } from '@/store';
 import { ThemeProvider } from "./components/ui/theme-provider.tsx"
 import { Toaster } from 'sonner';
+import ConfirmDialogProvider from './provider/confirm-dialog-provider.tsx';
 
 createRoot(document.getElementById('root')!).render(
-  <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+  <ConfirmDialogProvider>
     <Provider store={store}>
-      <App />
-      <Toaster />
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <App />
+        <Toaster />
+      </ThemeProvider>
     </Provider>
-  </ThemeProvider>
+  </ConfirmDialogProvider>
 )

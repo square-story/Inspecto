@@ -10,7 +10,7 @@ export const AdminService = {
     inspectorApproval: async (inspectorId: string) => {
         return await axiosInstance.patch(`/inspector/approve/${inspectorId}`)
     },
-    inspectorDeny: async (inspectorId: string) => {
-        return await axiosInstance.patch(`/inspector/deny/${inspectorId}`)
+    denyInspector: async (inspectorId: string, reason: string) => {
+        return await axiosInstance.post(`/inspector/approve/${inspectorId}`, { reason });
     }
 }

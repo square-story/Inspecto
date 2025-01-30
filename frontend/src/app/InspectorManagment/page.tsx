@@ -9,39 +9,82 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, Dr
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useConfirm } from "@omit/react-confirm-dialog";
+import { AlertTriangle } from "lucide-react";
+import { DeleteConfirmContent } from "./components/DenyReason";
 
 export default function DemoPage() {
+    const confirm = useConfirm();
     const [data, setData] = useState<Inspectors[]>([]);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedInspector, setSelectedInspector] = useState<Inspectors | null>(null);
 
     useEffect(() => {
-        async function fetchData() {
-            const response = await AdminService.getInspectors();
-            setData(response.data)
-        }
         fetchData();
     }, []);
 
+    const fetchData = async () => {
+        const response = await AdminService.getInspectors();
+        setData(response.data);
+    };
+
     const handleDeny = async (inspectorId: string) => {
-        try {
-            const response = await AdminService.inspectorDeny(inspectorId)
-            if (response.status == 200) {
-                toast.success("Inspector denied successfully!");
-                // Optionally: Refresh Data or Update State
-            } else {
-                toast.error("Error denying inspector.");
-            }
-        } catch (error) {
-            console.error("Denial error:", error);
-            toast.error("Something went wrong.");
+        // Close drawer before showing confirm dialog
+        setIsDrawerOpen(false);
+
+        let denialReason = "";
+
+        const result = await confirm({
+            title: "Deny Inspector",
+            description: "Please provide a reason for denying this inspector.",
+            icon: <AlertTriangle className="size-4 text-yellow-500" />,
+            confirmButton: {
+                className: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+                onClick: async () => {
+                    if (!denialReason.trim()) {
+                        toast.error("Please provide a denial reason");
+                        return false;
+                    }
+
+                    try {
+                        await AdminService.denyInspector(inspectorId, denialReason);
+                        toast.success("Inspector denied successfully");
+                        // Refresh data after successful denial
+                        await fetchData();
+                        return true;
+                    } catch (error) {
+                        console.error("Denial error:", error);
+                        toast.error("Failed to deny inspector");
+                        return false;
+                    }
+                }
+            },
+            alertDialogTitle: {
+                className: 'flex items-center gap-2'
+            },
+            contentSlot: <DeleteConfirmContent
+                onValueChange={(value) => {
+                    denialReason = value;
+                }}
+            />
+        });
+
+        if (!result) {
+            toast.info('Denial cancelled');
+            // Reopen drawer after cancellation
+            setIsDrawerOpen(true);
         }
     };
 
     const handleApprove = async (inspectorId: string) => {
         try {
-            const response = await AdminService.inspectorApproval(inspectorId)
-            if (response.status == 200) {
+            const response = await AdminService.inspectorApproval(inspectorId);
+            if (response.status === 200) {
                 toast.success("Inspector approved successfully!");
-                // Optionally: Refresh Data or Update State
+                // Refresh data after successful approval
+                await fetchData();
+                // Close drawer after successful approval
+                setIsDrawerOpen(false);
             } else {
                 toast.error("Error approving inspector.");
             }
@@ -51,9 +94,10 @@ export default function DemoPage() {
         }
     };
 
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [selectedInspector, setSelectedInspector] = useState<Inspectors | null>(null);
-
+    const handleDrawerClose = () => {
+        setIsDrawerOpen(false);
+        setSelectedInspector(null);
+    };
     return (
         <div className="container mx-auto py-10">
             <InspectorDataTable columns={columns({ setIsDrawerOpen, setSelectedInspector })} data={data} />
@@ -166,7 +210,7 @@ export default function DemoPage() {
                     </div>
                     <DrawerFooter>
                         <DrawerClose asChild>
-                            <Button variant="outline" onClick={() => setSelectedInspector(null)}>
+                            <Button variant="outline" onClick={handleDrawerClose}>
                                 Close
                             </Button>
                         </DrawerClose>
