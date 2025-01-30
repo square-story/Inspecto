@@ -19,6 +19,7 @@ router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), 
 
 //approval and rejection
 router.patch('/approve/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.approvalProfile)
+router.post('/deny/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.denyProfile)
 
 
 export default router

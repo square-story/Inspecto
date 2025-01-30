@@ -50,17 +50,21 @@ export class InspectorController {
     }
     static approvalProfile: RequestHandler = async (req: Request, res: Response) => {
         try {
-            const inspector = req.params.inspectorId
-            if (!inspector) {
-                res.status(400).json('inspector Id is missing in the params')
+            const inspectorId = req.params.inspectorId
+            if (!inspectorId) {
+                res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const isExist = await inspectorService.getInspectorDetails(inspector)
+            const isExist = await inspectorService.getInspectorDetails(inspectorId)
             if (!isExist) {
-                res.status(400).json("inspector Found in the Database")
+                res.status(404).json("Inspector not found in the database")
                 return
             }
-            const response = await inspectorService.approveInspector(inspector)
+            if (isExist.isListed) {
+                res.status(400).json({ message: "Inspector is already approved" });
+                return;
+            }
+            const response = await inspectorService.approveInspector(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -71,6 +75,50 @@ export class InspectorController {
             return;
         } catch (error: any) {
             console.error('Profile completion error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
+    }
+    static denyProfile: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const inspectorId = req.params.inspectorId;
+            const { reason } = req.body;
+
+            if (!inspectorId) {
+                res.status(400).json({ message: 'Inspector ID is missing in the params' });
+                return;
+            }
+
+            if (!reason || reason.trim().length === 0) {
+                res.status(400).json({ message: 'Denial reason is required' });
+                return
+            }
+
+            const inspector = await inspectorService.getInspectorDetails(inspectorId);
+
+            if (!inspector) {
+                res.status(404).json({ message: "Inspector not found in the database" });
+                return
+            }
+
+            const updatedInspector = await inspectorService.denyInspector(inspectorId, reason);
+
+            if (!updatedInspector) {
+                res.status(400).json({ message: 'Failed to deny profile' });
+                return
+            }
+
+            res.status(200).json({
+                message: 'Profile denied successfully',
+                inspector: updatedInspector
+            });
+            return
+
+        } catch (error: any) {
+            console.error('Profile denial error:', error);
             res.status(500).json({
                 message: 'Internal server error',
                 error: error.message
