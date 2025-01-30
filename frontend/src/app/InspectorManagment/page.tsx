@@ -112,6 +112,42 @@ export default function DemoPage() {
         }
     };
 
+    const handleBlock = async (inspectorId: string) => {
+        try {
+            const result = await confirm({
+                title: 'Approve Inspector',
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: 'Are you sure you want to proceed?',
+                confirmButton: {
+                    className: 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                },
+                alertDialogTitle: {
+                    className: 'flex items-center gap-5'
+                },
+            })
+
+            if (result) {
+                const response = await AdminService.blockInspector(inspectorId);
+                if (response.status === 200) {
+                    toast.success(response.data?.message);
+                    // Refresh data after successful block/unblock
+                    await fetchData();
+                    // Close drawer after successful block/unblock
+                    setIsDrawerOpen(false);
+                } else {
+                    toast.error("Error this operation inspector.");
+                }
+            } else {
+                toast.info('cancelled');
+                // Reopen drawer after cancellation
+                setIsDrawerOpen(true);
+            }
+        } catch (error) {
+            console.error("Approval error:", error);
+            toast.error("Something went wrong.");
+        }
+    }
+
     const handleDrawerClose = () => {
         setIsDrawerOpen(false);
         setSelectedInspector(null);
@@ -208,20 +244,33 @@ export default function DemoPage() {
 
                                 {/* Approve & Deny Buttons */}
                                 <div className="mt-6 flex justify-end space-x-3">
-                                    <Button
-                                        variant="outline"
-                                        className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white text-lg px-6 py-3"
-                                        onClick={() => handleDeny(selectedInspector._id)}
-                                    >
-                                        Deny
-                                    </Button>
-                                    <Button
-                                        variant="default"
-                                        className="bg-green-500 hover:bg-green-600 text-lg px-6 py-3"
-                                        onClick={() => handleApprove(selectedInspector._id)}
-                                    >
-                                        Approve
-                                    </Button>
+                                    {selectedInspector.isListed ? (
+                                        <Button
+                                            variant="outline"
+                                            className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white text-lg px-6 py-3"
+                                            onClick={() => handleBlock(selectedInspector._id)}
+                                        >
+                                            {selectedInspector.status === "APPROVED" ? "Block" : "UnBlock"}
+                                        </Button>
+
+                                    ) : (
+                                        <>
+                                            <Button
+                                                variant="outline"
+                                                className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white text-lg px-6 py-3"
+                                                onClick={() => handleDeny(selectedInspector._id)}
+                                            >
+                                                Deny
+                                            </Button>
+                                            <Button
+                                                variant="default"
+                                                className="bg-green-500 hover:bg-green-600 text-lg px-6 py-3"
+                                                onClick={() => handleApprove(selectedInspector._id)}
+                                            >
+                                                Approve
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         )}

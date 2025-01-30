@@ -6,7 +6,7 @@ export interface InspectorState {
     email: string;
     address: string;
     profile_image: string;
-    status: boolean;
+    status: string;
     role: string;
     certificates: [string];
     yearOfExp: number;
@@ -26,7 +26,7 @@ const initialState: InspectorState = {
     email: '',
     address: '',
     profile_image: '',
-    status: false,
+    status: '',
     role: '',
     certificates: [''],
     yearOfExp: 0,
@@ -59,7 +59,7 @@ const inspectorSlice = createSlice({
         setProfileImage(state, action: PayloadAction<string>) {
             state.profile_image = action.payload;
         },
-        setStatus(state, action: PayloadAction<boolean>) {
+        setStatus(state, action: PayloadAction<string>) {
             state.status = action.payload;
         },
         setRole(state, action: PayloadAction<string>) {

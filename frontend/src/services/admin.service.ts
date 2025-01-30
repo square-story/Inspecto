@@ -12,5 +12,8 @@ export const AdminService = {
     },
     denyInspector: async (inspectorId: string, reason: string) => {
         return await axiosInstance.post(`/inspector/deny/${inspectorId}`, { reason });
+    },
+    blockInspector: async (inspectorId: string) => {
+        return await axiosInstance.patch(`inspector/block/${inspectorId}`)
     }
 }

@@ -126,4 +126,28 @@ export class InspectorController {
             return;
         }
     }
+    static handleBlock: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const inspectorId = req.params.inspectorId
+            if (!inspectorId) {
+                res.status(400).json({ message: 'Inspector ID is missing in the params' });
+                return;
+            }
+            const response = await inspectorService.BlockHandler(inspectorId)
+            if (response) {
+                res.status(200).json({
+                    message: `Profile ${response} successfully`,
+                });
+                return;
+            }
+            res.status(400).json({ message: 'Failed to update profile' });
+        } catch (error: any) {
+            console.error('Profile denial error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
+    }
 }

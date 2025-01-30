@@ -64,4 +64,27 @@ export class InspectorService {
             throw error;
         }
     }
+    async BlockHandler(inspectorId: string) {
+        try {
+            const currentInspector = await this.inspectorRepository.findInspectorById(inspectorId);
+            if (!currentInspector) {
+                throw new Error('Inspector not found');
+            }
+            const updates = {
+                status: currentInspector.status === InspectorStatus.BLOCKED ? InspectorStatus.APPROVED : InspectorStatus.BLOCKED,
+            };
+            await this.inspectorRepository.updateInspector(inspectorId, updates);
+            // if (updatedInspector) {
+            //     if (updates.status === InspectorStatus.BLOCKED) {
+            //         await EmailService.sendBlockNotification(updatedInspector.email, updatedInspector.firstName);
+            //     } else {
+            //         await EmailService.sendUnblockNotification(updatedInspector.email, updatedInspector.firstName);
+            //     }
+            // }
+            return updates.status === InspectorStatus.APPROVED ? "UnBlocked" : "Blocked"
+        } catch (error) {
+            console.error('Error in denyInspector:', error);
+            throw error;
+        }
+    }
 }

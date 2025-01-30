@@ -21,5 +21,8 @@ router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), 
 router.patch('/approve/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.approvalProfile)
 router.post('/deny/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.denyProfile)
 
+//block and unblock
+router.patch('/block/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.handleBlock)
+
 
 export default router

@@ -1,7 +1,7 @@
 //contain our column definitions.
 
 import { ColumnDef } from "@tanstack/react-table";
-import { CircleCheck, X } from "lucide-react"
+import { CircleCheck } from "lucide-react"
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +32,7 @@ export type Inspectors = {
     start_time?: string;
     end_time?: string;
     avaliable_days?: number;
+    status: string;
 }
 
 export const columns = ({
@@ -99,14 +100,10 @@ export const columns = ({
             },
         },
         {
-            accessorKey: "isCompleted",
-            header: "Details Status",
+            accessorKey: "status",
+            header: "Status",
             cell: ({ row }) => (
-                row.original.isCompleted ? (
-                    <CircleCheck color="green" />
-                ) : (
-                    <X color="red" />
-                )
+                row.original.status
             )
         },
         {
