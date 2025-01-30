@@ -37,24 +37,84 @@ export default function DemoPage() {
                     </DrawerHeader>
                     <div className="p-4">
                         {selectedInspector && (
-                            <>
+                            <div className="p-4">
+                                {/* Profile Section */}
                                 <div className="flex items-center space-x-4">
-                                    <Avatar className="h-12 w-12">
+                                    <Avatar className="h-20 w-20 border border-gray-300">
                                         <AvatarImage src={selectedInspector.profile_image} alt="Profile" />
-                                        <AvatarFallback>{selectedInspector.firstName.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback className="text-lg font-semibold">
+                                            {selectedInspector.firstName.charAt(0)}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="font-medium">{selectedInspector.firstName}</p>
+                                        <p className="text-lg font-medium">
+                                            {selectedInspector.firstName} {selectedInspector.lastName}
+                                        </p>
                                         <p className="text-sm text-gray-500">{selectedInspector.email}</p>
+                                        <p className="text-sm text-gray-500">{selectedInspector.phone || "N/A"}</p>
                                     </div>
                                 </div>
+
+                                {/* Inspector Details */}
                                 <div className="mt-4 space-y-2">
                                     <p><strong>ID:</strong> {selectedInspector._id}</p>
-                                    <p><strong>Verification Status:</strong> {selectedInspector.isListed ? "Verified" : "Not Verified"}</p>
-                                    <p><strong>Details Status:</strong> {selectedInspector.isCompleted ? "Complete" : "Incomplete"}</p>
+                                    <p><strong>Verification Status:</strong>
+                                        <span className={`ml-2 px-2 py-1 rounded-md text-white text-xs 
+                    ${selectedInspector.isListed ? "bg-green-500" : "bg-red-500"}`}>
+                                            {selectedInspector.isListed ? "Verified" : "Not Verified"}
+                                        </span>
+                                    </p>
+                                    <p><strong>Details Status:</strong>
+                                        <span className={`ml-2 px-2 py-1 rounded-md text-white text-xs 
+                    ${selectedInspector.isCompleted ? "bg-green-500" : "bg-red-500"}`}>
+                                            {selectedInspector.isCompleted ? "Complete" : "Incomplete"}
+                                        </span>
+                                    </p>
+                                    <p><strong>Years of Experience:</strong> {selectedInspector.yearOfExp || "N/A"}</p>
+                                    <p><strong>Specialization:</strong>
+                                        {selectedInspector.specialization && selectedInspector.specialization.length > 0 ? (
+                                            <span className="ml-2">{selectedInspector.specialization.join(", ")}</span>
+                                        ) : (
+                                            " N/A"
+                                        )}
+                                    </p>
+                                    <p><strong>Available Time:</strong>
+                                        {selectedInspector.start_time && selectedInspector.end_time ? (
+                                            <span className="ml-2">{selectedInspector.start_time} - {selectedInspector.end_time}</span>
+                                        ) : (
+                                            " N/A"
+                                        )}
+                                    </p>
+                                    <p><strong>Available Days per Week:</strong> {selectedInspector.avaliable_days || "N/A"}</p>
+
+                                    {/* Certificates Section with "View Document" Icon */}
+                                    {selectedInspector.certificates && selectedInspector.certificates.length > 0 && (
+                                        <div>
+                                            <strong>Certificates:</strong>
+                                            <ul className="flex flex-wrap mt-1 space-x-2">
+                                                {selectedInspector.certificates.map((certificate, index) => (
+                                                    <li key={index}>
+                                                        <a
+                                                            href={certificate}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-500 hover:underline flex items-center space-x-1"
+                                                        >
+                                                            <span>View Document</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
-                            </>
+                            </div>
                         )}
+
+
                     </div>
                     <DrawerFooter>
                         <DrawerClose asChild>

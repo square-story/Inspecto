@@ -24,6 +24,14 @@ export type Inspectors = {
     isListed: boolean;
     isCompleted: boolean;
     profile_image: string;
+    certificates?: [string];
+    yearOfExp?: number;
+    phone?: string;
+    signature?: string;
+    specialization?: [string];
+    start_time?: string;
+    end_time?: string;
+    avaliable_days?: number;
 }
 
 export const columns = ({
@@ -78,7 +86,11 @@ export const columns = ({
                 row.original.isListed ? (
                     <CircleCheck color="green" />
                 ) : (
-                    <Button variant='destructive'>View Details</Button>
+                    <Button variant='destructive' onClick={() => {
+                        const inspector = row.original;
+                        setSelectedInspector(inspector);
+                        setIsDrawerOpen(true);
+                    }}>View Details</Button>
                 )
             ),
             enableColumnFilter: true,
