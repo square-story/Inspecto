@@ -115,7 +115,7 @@ export default function DemoPage() {
     const handleBlock = async (inspectorId: string) => {
         try {
             const result = await confirm({
-                title: 'Approve Inspector',
+                title: 'Warning',
                 icon: <AlertTriangle className="size-4 text-yellow-500" />,
                 description: 'Are you sure you want to proceed?',
                 confirmButton: {
@@ -186,7 +186,6 @@ export default function DemoPage() {
 
                                 {/* Inspector Details */}
                                 <div className="mt-4 space-y-2">
-                                    <p><strong>ID:</strong> {selectedInspector._id}</p>
                                     <p><strong>Verification Status:</strong>
                                         <span className={`ml-2 px-2 py-1 rounded-md text-white text-xs 
                     ${selectedInspector.isListed ? "bg-green-500" : "bg-red-500"}`}>

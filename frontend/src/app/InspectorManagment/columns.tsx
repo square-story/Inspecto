@@ -82,9 +82,9 @@ export const columns = ({
         },
         {
             accessorKey: "isListed",
-            header: "Verification Status",
+            header: "Status",
             cell: ({ row }) => (
-                row.original.isListed ? (
+                row.original.isListed && row.original.status !== "BLOCKED" ? (
                     <CircleCheck color="green" />
                 ) : (
                     <Button variant='destructive' onClick={() => {
@@ -100,10 +100,10 @@ export const columns = ({
             },
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            accessorKey: "phone",
+            header: "Phone Number",
             cell: ({ row }) => (
-                row.original.status
+                row.original.phone
             )
         },
         {
