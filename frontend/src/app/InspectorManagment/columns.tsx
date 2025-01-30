@@ -100,7 +100,7 @@ export const columns = ({
         },
         {
             accessorKey: "isCompleted",
-            header: "Status",
+            header: "Details Status",
             cell: ({ row }) => (
                 row.original.isCompleted ? (
                     <CircleCheck color="green" />

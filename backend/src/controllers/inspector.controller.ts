@@ -49,6 +49,33 @@ export class InspectorController {
         }
     }
     static approvalProfile: RequestHandler = async (req: Request, res: Response) => {
-
+        try {
+            const inspector = req.params.inspectorId
+            if (!inspector) {
+                res.status(400).json('inspector Id is missing in the params')
+                return;
+            }
+            const isExist = await inspectorService.getInspectorDetails(inspector)
+            if (!isExist) {
+                res.status(400).json("inspector Found in the Database")
+                return
+            }
+            const response = await inspectorService.approveInspector(inspector)
+            if (response) {
+                res.status(200).json({
+                    message: 'Profile updated successfully',
+                });
+                return;
+            }
+            res.status(400).json({ message: 'Failed to update profile' });
+            return;
+        } catch (error: any) {
+            console.error('Profile completion error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
     }
 }

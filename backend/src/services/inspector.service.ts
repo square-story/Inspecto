@@ -15,4 +15,7 @@ export class InspectorService {
             return await this.inspectorRepository.updateInspectorProfileCompletion(userId)
         }
     }
+    async approveInspector(userId: string) {
+        return await this.inspectorRepository.updateInspector(userId, { isListed: true })
+    }
 }

@@ -60,7 +60,7 @@ export default function DemoPage() {
                 }
             },
             alertDialogTitle: {
-                className: 'flex items-center gap-2'
+                className: 'flex items-center gap-5'
             },
             contentSlot: <DeleteConfirmContent
                 onValueChange={(value) => {
