@@ -82,6 +82,12 @@ export default function DemoPage() {
                 title: 'Approve Inspector',
                 icon: <AlertTriangle className="size-4 text-yellow-500" />,
                 description: 'Are you sure you want to proceed?',
+                confirmButton: {
+                    className: 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                },
+                alertDialogTitle: {
+                    className: 'flex items-center gap-5'
+                },
             })
 
             if (result) {
