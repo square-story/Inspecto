@@ -21,12 +21,12 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
-import axiosInstance from '@/api/axios'
 import { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '@/components/BackButton'
 import GoogleButton from './GoogleButton'
 import { GoogleOAuthProvider } from '@react-oauth/google'
+import { AuthServices } from '@/services/auth.service'
 
 
 // Define validation schema using Zod
@@ -66,7 +66,11 @@ export default function RegisterPreview() {
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
         try {
-            const response = await axiosInstance.post('/user/register', data)
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
+            const response = await AuthServices.registerUser('user', formData)
 
             if (response) {
                 localStorage.setItem('otp-email', data.email)
@@ -106,7 +110,7 @@ export default function RegisterPreview() {
                                     name="firstName"
                                     render={({ field }) => (
                                         <FormItem className="grid gap-2">
-                                            <FormLabel htmlFor="firstName">Full Name</FormLabel>
+                                            <FormLabel htmlFor="firstName">First Name</FormLabel>
                                             <FormControl>
                                                 <Input id="firstName" placeholder="John" {...field} />
                                             </FormControl>

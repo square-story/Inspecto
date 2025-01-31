@@ -5,13 +5,13 @@ export interface IUserInput {
     lastName: string;
     email: string;
     password: string | null;
-    created_at: Date;
-    updated_at: Date;
     address: string | null;
     profile_image: string;
     status: boolean;
     role: string;
-    authProvider: string
+    authProvider: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IUsers extends Document, IUserInput {
@@ -23,13 +23,11 @@ const UsersSchema: Schema = new Schema<IUsers>({
     lastName: { type: String, },
     email: { type: String, required: true, unique: true },
     password: { type: String },
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now },
     address: { type: String, default: null },
     profile_image: { type: String, default: "" },
     status: { type: Boolean, default: true },
     role: { type: String, required: true, default: 'user' },
     authProvider: { type: String, default: 'default' }
-});
+}, { timestamps: true });
 
 export default mongoose.model<IUsers>("User", UsersSchema);

@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import BackButton from '@/components/BackButton'
 import { useDispatch } from 'react-redux'
-import { AppDispatch } from '@/features/store'
+import { AppDispatch } from '@/store'
 import { loginUser } from '@/features/auth/authAPI'
 import { setCredentials } from '@/features/auth/authSlice'
 import { AxiosError } from 'axios'
@@ -67,8 +67,8 @@ export default function LoginPreview() {
 
 
             if (result) {
-                const { accessToken, role } = result
-                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+                const { accessToken, role, status } = result
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector", status }))
                 toast.success('Login successfully')
                 handleNav("/");
             }

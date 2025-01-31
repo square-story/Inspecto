@@ -4,10 +4,11 @@ import { ArrowUpRight, ChevronRight } from "lucide-react";
 
 const Hero01 = () => {
     return (
+
         <div className="min-h-screen flex items-center justify-center">
-            <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
+            <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12 ">
                 <div>
-                    <Badge className="bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
+                    <Badge className="animate-bounce bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
                         Just released v1.0.0
                     </Badge>
                     <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tighter">

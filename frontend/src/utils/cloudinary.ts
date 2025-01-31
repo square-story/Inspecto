@@ -1,28 +1,49 @@
-import axios from "axios";
+import { Cloudinary } from "@cloudinary/url-gen";
+import { crop, fill } from "@cloudinary/url-gen/actions/resize";
+import { focusOn } from "@cloudinary/url-gen/qualifiers/gravity";
+import { face } from "@cloudinary/url-gen/qualifiers/focusOn";
 
-export const uploadToCloudinary = async (file: File | string): Promise<string> => {
-    try {
-        if (typeof file === 'string') {
-            if (file.startsWith('http')) {
-                return file;
-            }
-            throw new Error('Invalid file format');
-        }
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET)
-        const response = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        if (!response.data?.secure_url) {
-            throw new Error('No secure URL received from Cloudinary');
-        }
-        return response.data.secure_url;
-    } catch (error) {
-        console.error('Error uploading to Cloudinary:', error);
-        throw new Error('Failed to upload image');
+// Initialize Cloudinary
+const cloudinary = new Cloudinary({
+    cloud: { cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME },
+});
+
+/**
+ * Returns a transformed Cloudinary image URL based on upload type.
+ *
+ * @param publicId - The Cloudinary public ID of the uploaded image.
+ * @param uploadType - The type of image: "certificate", "signature", "default".
+ */
+export const getTransformedImageUrl = (
+    publicId: string,
+    uploadType: "certificate" | "signature" | "default" = "default"
+): string => {
+    let transformation;
+
+    switch (uploadType) {
+        case "certificate":
+            // Resizes document-style images for certificates
+            transformation = cloudinary
+                .image(publicId)
+                .resize(fill().width(800).height(600)); // Standard certificate size
+            break;
+
+        case "signature":
+            // Crops and removes background for signatures
+            transformation = cloudinary
+                .image(publicId)
+                .resize(crop().width(300).height(100).gravity(focusOn(face())))
+            // Makes the background white
+            break;
+
+        default:
+            // Default profile image settings
+            transformation = cloudinary
+                .image(publicId)
+                .resize(
+                    crop().width(300).height(300).gravity(focusOn(face())));
+            break;
     }
 
-}
+    return transformation.toURL();
+};

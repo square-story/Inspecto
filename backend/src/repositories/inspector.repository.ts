@@ -7,10 +7,10 @@ export class InspectorRepository implements IinspectorRepository {
         return await inspector.save()
     }
     async findInspectorByEmail(email: string): Promise<IInspector | null> {
-        return await inspectorModel.findOne({ email })
+        return await inspectorModel.findOne({ email }).exec()
     }
     async getAllInspector(): Promise<IInspector[]> {
-        return await inspectorModel.find()
+        return await inspectorModel.find().select('-password').sort({ createdAt: -1 })
     }
     async findInspectorById(inspectorId: string): Promise<Partial<IInspector> | null> {
         return await inspectorModel.findById(inspectorId).select('-password')

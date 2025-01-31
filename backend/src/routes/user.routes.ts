@@ -15,5 +15,9 @@ router.post('/google/callback', UserAuthController.googleAuth)
 router.post('/forget', UserAuthController.forgetPassword)
 router.post('/reset', UserAuthController.resetPassword)
 router.get('/details', authenticateToken, authorizeRole('user'), UserController.getUserDetails)
+router.put('/update', authenticateToken, authorizeRole('user'), UserController.updateUserDetails)
+
+//block/unblock
+router.patch('/block/:userId', authenticateToken, authorizeRole('admin'), UserController.updateStatus)
 
 export default router

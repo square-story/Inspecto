@@ -1,9 +1,9 @@
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import axiosInstance from "@/api/axios";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
+import { AuthServices } from "@/services/auth.service";
 
 const GoogleButton = () => {
     const dispatch = useDispatch()
@@ -18,9 +18,7 @@ const GoogleButton = () => {
             }
 
             // Send Google credential to the backend
-            const response = await axiosInstance.post(`/user/google/callback`, {
-                token: credential,
-            });
+            const response = await AuthServices.googleLogin('user', { token: credential });
 
             if (response?.data?.message) {
                 toast.success(response.data.message);

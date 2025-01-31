@@ -25,8 +25,8 @@ export class AdminAuthController {
                 res.status(401).json({ message: 'Refresh token missing' });
                 return;
             }
-            const newAccessToken = await adminAuthService.refreshToken(refreshToken);
-            res.status(200).json({ accessToken: newAccessToken });
+            const { accessToken } = await adminAuthService.refreshToken(refreshToken);
+            res.status(200).json({ accessToken, status: true });
         } catch (error) {
             if (error instanceof Error) {
                 res.status(403).json({ message: error.message });

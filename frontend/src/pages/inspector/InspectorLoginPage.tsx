@@ -26,7 +26,7 @@ import { useNavigate } from 'react-router-dom'
 import { loginUser } from '@/features/auth/authAPI'
 import { useDispatch } from 'react-redux'
 import { setCredentials } from '@/features/auth/authSlice'
-import { AppDispatch } from '@/features/store'
+import { AppDispatch } from '@/store'
 import { AxiosError } from 'axios'
 
 // Improved schema with additional validation rules
@@ -60,8 +60,8 @@ export default function LoginPreview() {
 
 
             if (result) {
-                const { accessToken, role } = result
-                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+                const { accessToken, role, status } = result
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector", status }))
                 toast.success('Login successfully')
                 navigate("/inspector/dashboard");
             }

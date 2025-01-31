@@ -1,5 +1,3 @@
-
-import axiosInstance from "@/api/axios"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -16,19 +14,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
-import { AppDispatch, RootState } from "@/features/store"
-import { setUser } from "@/features/user/userSlice"
+import { AppDispatch, } from "@/store"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
-import { AxiosError } from "axios"
-import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import { useUserDetails } from "@/hooks/useUserDetails"
 
 export function UserProfileIcon() {
-    const user = useSelector((state: RootState) => state.user)
+    const { user } = useUserDetails();
     const dispatch = useDispatch<AppDispatch>()
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const handleNavigation = (path: string) => {
         navigate(path);
     };
@@ -49,20 +45,7 @@ export function UserProfileIcon() {
     }
 
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const response = await axiosInstance.get('/user/details')
-                const freshUser = response.data
-                dispatch(setUser(freshUser))
-            } catch (error) {
-                if (error instanceof AxiosError) {
-                    console.error('Error fetching user data:', error);
-                    toast.error(error.message)
-                }
-            }
-        })()
-    }, [dispatch])
+
 
 
 
@@ -85,7 +68,7 @@ export function UserProfileIcon() {
                 <DropdownMenuLabel>Hey {user.firstName.toUpperCase()}👋</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => handleNavigation('user/dashboard')}>
+                    <DropdownMenuItem onClick={() => handleNavigation('/user/dashboard')}>
                         Profile
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>

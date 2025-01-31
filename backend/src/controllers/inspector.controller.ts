@@ -48,4 +48,150 @@ export class InspectorController {
             return;
         }
     }
+    static approvalProfile: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const inspectorId = req.params.inspectorId
+            if (!inspectorId) {
+                res.status(400).json({ message: 'Inspector ID is missing in the params' });
+                return;
+            }
+            const isExist = await inspectorService.getInspectorDetails(inspectorId)
+            if (!isExist) {
+                res.status(404).json("Inspector not found in the database")
+                return
+            }
+            if (isExist.isListed) {
+                res.status(400).json({ message: "Inspector is already approved" });
+                return;
+            }
+            const response = await inspectorService.approveInspector(inspectorId)
+            if (response) {
+                res.status(200).json({
+                    message: 'Profile updated successfully',
+                });
+                return;
+            }
+            res.status(400).json({ message: 'Failed to update profile' });
+            return;
+        } catch (error: any) {
+            console.error('Profile completion error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
+    }
+    static denyProfile: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const inspectorId = req.params.inspectorId;
+            const { reason } = req.body;
+
+            if (!inspectorId) {
+                res.status(400).json({ message: 'Inspector ID is missing in the params' });
+                return;
+            }
+
+            if (!reason || reason.trim().length === 0) {
+                res.status(400).json({ message: 'Denial reason is required' });
+                return
+            }
+
+            const inspector = await inspectorService.getInspectorDetails(inspectorId);
+
+            if (!inspector) {
+                res.status(404).json({ message: "Inspector not found in the database" });
+                return
+            }
+
+            const updatedInspector = await inspectorService.denyInspector(inspectorId, reason);
+
+            if (!updatedInspector) {
+                res.status(400).json({ message: 'Failed to deny profile' });
+                return
+            }
+
+            res.status(200).json({
+                message: 'Profile denied successfully',
+                inspector: updatedInspector
+            });
+            return
+
+        } catch (error: any) {
+            console.error('Profile denial error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
+    }
+    static handleBlock: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const inspectorId = req.params.inspectorId
+            if (!inspectorId) {
+                res.status(400).json({ message: 'Inspector ID is missing in the params' });
+                return;
+            }
+            const response = await inspectorService.BlockHandler(inspectorId)
+            if (response) {
+                res.status(200).json({
+                    message: `Profile ${response} successfully`,
+                });
+                return;
+            }
+            res.status(400).json({ message: 'Failed to update profile' });
+        } catch (error: any) {
+            console.error('Profile denial error:', error);
+            res.status(500).json({
+                message: 'Internal server error',
+                error: error.message
+            });
+            return;
+        }
+    }
+    static updateInspector: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                console.error("Error: User ID is missing from the token.");
+                res.status(400).json({
+                    success: false,
+                    message: "User ID is missing from the token."
+                });
+                return
+            }
+            const data = req.body; // Extract data from the request body
+            if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
+                console.error("Error: No valid data provided for update.");
+                res.status(400).json({
+                    success: false,
+                    message: "No valid data provided for update."
+                });
+                return
+            }
+
+            const inspector = inspectorService.completeInspectorProfile(userId, data)
+            if (!inspector) {
+                console.error(`Error: User with ID ${userId} not found.`);
+                res.status(404).json({
+                    success: false,
+                    message: "inspector not found."
+                });
+                return
+            }
+            res.status(200).json({
+                success: true,
+                message: "User details updated successfully.",
+                inspector
+            });
+        } catch (error) {
+            console.error("Error occurred while updating user details:", error);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error. Please try again later."
+            });
+            return
+        }
+    }
 }

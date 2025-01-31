@@ -17,5 +17,15 @@ router.post('/reset', InspectorAuthController.resetPassword)
 router.get('/details', authenticateToken, authorizeRole('inspector'), InspectorController.getInspectorDetails)
 router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), InspectorController.completeProfile)
 
+//approval and rejection
+router.patch('/approve/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.approvalProfile)
+router.post('/deny/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.denyProfile)
+
+//block and unblock
+router.patch('/block/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.handleBlock)
+
+//updates
+router.put('/update', authenticateToken, authorizeRole('inspector'), InspectorController.updateInspector)
+
 
 export default router

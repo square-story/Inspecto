@@ -21,6 +21,7 @@ export class UserAuthService {
         }
         if (!user.password) {
             res.status(400).json({ field: 'password', message: 'User Want To Enter Password' })
+            return;
         }
         if (user.password === null) {
             res.status(400).json({ field: 'password', message: 'Password is required' });
@@ -32,7 +33,11 @@ export class UserAuthService {
             res.status(400).json({ field: 'password', message: 'Password is mismatch' })
             return;
         }
-        const payload = { userId: user.id, role: user.role }
+        if (!user.status) {
+            res.status(400).json({ field: 'email', message: 'This User Account is Blocked' })
+            return;
+        }
+        const payload = { userId: user.id, role: user.role, }
         const accessToken = generateAccessToken(payload)
         const refreshToken = generateRefreshToken(payload)
         res.cookie('refreshToken', refreshToken, {
@@ -40,15 +45,23 @@ export class UserAuthService {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
         })
-        return ({ accessToken })
+        return ({
+            accessToken,
+            role: 'user',
+            status: user.status
+        })
     }
     async refreshToken(token: string) {
         const payload = await verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
+        const user = await this.userRepository.findById(payload.userId.toString())
+        if (!user || !user.status) {
+            return { status: false, blockReason: "This User Account is Blocked" }
+        }
         const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken }
+        return { accessToken: newAccessToken, status: true, blockReason: "" }
     }
 
     async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {

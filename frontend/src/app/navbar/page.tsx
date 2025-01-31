@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { ModeToggle } from "@/components/ui/DarkModeSwitch";
 
 import { useSelector } from "react-redux";
-import { RootState } from "@/features/store";
+import { RootState } from "@/store";
 import { UserProfileIcon } from "./UserProfileIcon";
 
 const Navbar04Page = () => {

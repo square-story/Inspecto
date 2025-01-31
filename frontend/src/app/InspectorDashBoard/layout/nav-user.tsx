@@ -1,16 +1,11 @@
 import {
-    BadgeCheck,
-    Bell,
     ChevronsUpDown,
-    CreditCard,
     LogOut,
-    Sparkles,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -22,9 +17,9 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { AppDispatch } from '@/features/store'
+import { AppDispatch } from '@/store'
 import { logoutUser } from '@/features/auth/authAPI'
 import { toast } from 'sonner'
 
@@ -94,34 +89,6 @@ export function NavUser({
                                 </div>
                             </div>
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <Sparkles />
-                                Upgrade to Pro
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem asChild>
-                                <Link to='/settings/account'>
-                                    <BadgeCheck />
-                                    Account
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link to='/settings'>
-                                    <CreditCard />
-                                    Billing
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link to='/settings/notifications'>
-                                    <Bell />
-                                    Notifications
-                                </Link>
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleLogout()} >
                             <LogOut />

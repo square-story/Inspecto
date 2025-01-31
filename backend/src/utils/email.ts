@@ -13,13 +13,14 @@ const transporter = nodemailer.createTransport({
     connectionTimeout: 30000, // 30 seconds
 });
 
-export const sendEmail = async (to: string, subject: string, text: string) => {
+export const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
     try {
         const mailOptions = {
             from: `"Inspecto" <${appConfig.smtpUser}>`,
             to,
             subject,
-            text
+            text,
+            html: html || text
         }
         return transporter.sendMail(mailOptions)
     } catch (error) {

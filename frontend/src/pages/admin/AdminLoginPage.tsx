@@ -26,7 +26,7 @@ import { useNavigate } from 'react-router-dom'
 import { loginUser } from '@/features/auth/authAPI'
 import { useDispatch } from 'react-redux'
 import { setCredentials } from '@/features/auth/authSlice'
-import { AppDispatch } from '@/features/store'
+import { AppDispatch } from '@/store'
 import { AxiosError } from 'axios'
 
 // Improved schema with additional validation rules
@@ -58,10 +58,9 @@ export default function LoginPreview() {
                 })
             ).unwrap();
 
-
             if (result) {
                 const { accessToken, role } = result
-                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector", status: true }))
                 toast.success('Login successfully')
                 navigate("/admin/dashboard");
             }
@@ -124,12 +123,6 @@ export default function LoginPreview() {
                                         <FormItem className="grid gap-2">
                                             <div className="flex justify-between items-center">
                                                 <FormLabel htmlFor="password">Password</FormLabel>
-                                                <a
-                                                    onClick={() => navigate('/forget/inspector')}
-                                                    className="ml-auto inline-block text-sm underline cursor-pointer"
-                                                >
-                                                    Forgot your password?
-                                                </a>
                                             </div>
                                             <FormControl>
                                                 <PasswordInput

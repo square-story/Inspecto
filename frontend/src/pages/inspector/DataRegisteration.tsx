@@ -16,15 +16,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2 } from "lucide-react";
 import { TagsInput } from "@/components/ui/tags-input";
-import axiosInstance from "@/api/axios";
 import { useNavigate } from "react-router-dom";
-import { uploadToCloudinary } from "@/utils/cloudinary";
+import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
+import { inspectorService } from "@/services/inspector.service";
+import { getTransformedImageUrl } from "@/utils/cloudinary";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"]
 
-const fileSchema = z.object({
+const FileSchema = z.object({
     file: typeof window === 'undefined'
         ? z.any()
         : z.instanceof(File)
@@ -36,12 +37,12 @@ const fileSchema = z.object({
 // Validation schema
 const formSchema = z.object({
     address: z.string().min(3, "Address must be at least 3 characters"),
-    profile_image: fileSchema.nullable(),
-    certificates: z.array(fileSchema).min(1, "At least One Certificate is required"),
+    profile_image: FileSchema.nullable(),
+    certificates: z.array(FileSchema).min(1, "At least One Certificate is required"),
     yearOfExp: z.coerce.number()
         .min(1, "Experience must be at least 1 year")
         .max(50, "Experience must not exceed 50 years"),
-    signature: fileSchema.nullable(),
+    signature: FileSchema.nullable(),
     specialization: z.array(z.string()).min(1, "At least one specialization is required"),
     start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
     end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
@@ -125,10 +126,10 @@ export default function InspectorForm() {
             const signature = form.getValues('signature');
             const certificates = form.getValues('certificates');
 
-            const profileUrl = profile ? await uploadToCloudinary(profile.file) : '';
-            const signatureUrl = signature ? await uploadToCloudinary(signature.file) : '';
+            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'default') : '';
+            const signatureUrl = signature ? getTransformedImageUrl(await uploadToCloudinary(signature.file), 'signature') : '';
             const certificateUrls = await Promise.all(
-                certificates.map(cert => uploadToCloudinary(cert.file))
+                certificates.map(async cert => getTransformedImageUrl(await uploadToCloudinary(cert.file), 'certificate'))
             );
 
             return { profileUrl, signatureUrl, certificateUrls };
@@ -155,7 +156,7 @@ export default function InspectorForm() {
                 end_time: data.end_time,
                 avaliable_days: data.avaliable_days
             };
-            const response = await axiosInstance.post('/inspector/complete-profile', submitData)
+            const response = await inspectorService.completeProfile(submitData)
             if (response.data) {
                 toast.success("Profile updated successfully!");
                 navigate('/inspector/dashboard');

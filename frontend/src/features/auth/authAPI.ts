@@ -11,6 +11,7 @@ interface LoginCredentials {
 interface LoginResponse {
     accessToken: string,
     role: string,
+    status: boolean 
 }
 
 export const loginUser = createAsyncThunk(
@@ -27,6 +28,7 @@ export const loginUser = createAsyncThunk(
             return {
                 accessToken: response.data.accessToken,
                 role: credentials.role,
+                status: response.data.status
             };
         } catch (error: unknown) {
             return rejectWithValue(error);

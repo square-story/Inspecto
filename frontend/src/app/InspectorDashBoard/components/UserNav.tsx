@@ -1,4 +1,3 @@
-import axiosInstance from "@/api/axios"
 import {
     Avatar,
     AvatarFallback,
@@ -17,7 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
 import { setInspector } from "@/features/inspector/inspectorSlice"
-import { AppDispatch, RootState } from "@/features/store"
+import { inspectorService } from "@/services/inspector.service"
+import { AppDispatch, RootState } from "@/store"
 import { AxiosError } from "axios"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -32,7 +32,7 @@ export function UserNav() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await axiosInstance.get('/inspector/details')
+                const response = await inspectorService.getProfile()
                 const freshUser = response.data
                 dispatch(setInspector(freshUser))
             } catch (error) {
@@ -83,7 +83,7 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => navigate('/inspector/settings')}>
+                    <DropdownMenuItem onClick={() => navigate('/inspector/dashboard/settings')}>
                         Profile
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>

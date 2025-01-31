@@ -1,24 +1,23 @@
-import { useDispatch } from "react-redux"
-import { AppDispatch } from "../../features/store";
-import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../../features/auth/authAPI";
+import Layout from "@/app/adminDashboard/layout/Layout";
+import { Header } from "@/app/adminDashboard/layout/Header";
+import { ModeToggle } from "@/components/ui/DarkModeSwitch";
+import { ProfileDropdown } from "@/components/ProfileDropDown";
+import { Outlet } from "react-router-dom";
 
 
 const AdminDashboard = () => {
-    const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate()
-    const handleLogout = async () => {
-        await dispatch(logoutUser())
-        navigate('/')
-    }
     return (
-        <div>
-            <h1>AdminDashboard</h1>
-            <button onClick={handleLogout}>
-                Logout
-            </button>
-        </div>
-
+        <>
+            <Layout>
+                <Header>
+                    <div className='ml-auto flex items-center gap-4'>
+                        <ModeToggle />
+                        <ProfileDropdown />
+                    </div>
+                </Header>
+                <Outlet />
+            </Layout>
+        </>
     )
 }
 

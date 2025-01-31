@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { RootState } from "@/features/store";
+import { RootState } from "@/store";
 import { UserRole } from "./types";
 import { ROLE_DASHBOARD_PATHS } from "./guards";
 import React from "react";
@@ -62,20 +62,26 @@ export const ProtectedRoute = ({
 interface PublicRouteProps {
     children: React.ReactNode;
     allowAuthenticated?: boolean; // Optional: Allow authenticated users to access some public routes
+    allowBlocked?: boolean
 }
 
 export const PublicRoute = ({
     children,
-    allowAuthenticated = false
+    allowAuthenticated = false,
+    allowBlocked = false
 }: PublicRouteProps) => {
-    const { isAuthenticated, role } = useSelector(
+    const { isAuthenticated, role, status } = useSelector(
         (state: RootState) => state.auth
     );
     const location = useLocation();
 
+    if (isAuthenticated && !status && !allowBlocked) {
+        return <Navigate to="/blocked-account" replace />;
+    }
+
     if (isAuthenticated && !allowAuthenticated) {
         // Special case for users on homepage
-        if (role === 'user' && location.pathname === '/') {
+        if (role === 'user' && location.pathname === '/' || !status && allowBlocked) {
             return <>{children}</>;
         }
 

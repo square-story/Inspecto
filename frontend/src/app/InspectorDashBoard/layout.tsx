@@ -1,4 +1,4 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "./app-sidebar"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -6,7 +6,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SidebarProvider>
             <AppSidebar />
             <main className="w-full flex-grow">
-                <SidebarTrigger />
                 {children}
             </main>
         </SidebarProvider>

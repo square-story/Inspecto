@@ -7,6 +7,7 @@ import redisClient from "../../config/redis";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from 'crypto'
+import { InspectorStatus } from "../../models/inspector.model";
 
 export class InspectorAuthService {
     private inspectorRepository: InspectorRepository;
@@ -16,40 +17,65 @@ export class InspectorAuthService {
     }
 
     async loginOfInspector(email: string, password: string, res: Response) {
-        const inspector = await this.inspectorRepository.findInspectorByEmail(email)
-        if (!inspector) {
-            res.status(400).json({ field: 'email', message: 'Inspector not found' })
-            return;
-        }
+        try {
+            const inspector = await this.inspectorRepository.findInspectorByEmail(email);
+            if (!inspector) {
+                res.status(400).json({ field: 'email', message: 'Inspector not found' });
+                return
+            }
 
-        if (inspector?.password === null || inspector?.password === undefined) {
-            res.status(400).json({ field: 'password', message: 'Inspector Want To Enter Password' });
-            return;
-        }
-        const comparePassword = await bcrypt.compare(password, inspector.password as string);
+            if (!inspector.password) {
+                res.status(400).json({ field: 'password', message: 'Inspector needs to set a password' });
+                return
+            }
 
-        if (!comparePassword) {
-            res.status(400).json({ field: 'password', message: 'Password is mismatch' })
+            const isPasswordValid = await bcrypt.compare(password, inspector.password);
+            if (!isPasswordValid) {
+                res.status(400).json({ field: 'password', message: 'Password is incorrect' });
+                return
+            }
+
+            if (inspector.status === InspectorStatus.BLOCKED) {
+                res.status(400).json({ field: 'email', message: 'This account is blocked' });
+                return
+            }
+
+            const payload = {
+                userId: inspector.id,
+                role: inspector.role,
+            };
+            const accessToken = generateAccessToken(payload);
+            const refreshToken = generateRefreshToken(payload);
+
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+
+            return {
+                accessToken,
+                role: 'inspector',
+                status: true
+            };
+        } catch (error) {
+            console.error('Error in loginOfInspector:', error);
+            res.status(500).json({ message: 'Internal server error' });
             return;
         }
-        const payload = { userId: inspector.id, role: inspector.role }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        })
-        const { password: inspectorPassword, ...inspectorDetails } = inspector
-        return ({ accessToken, inspectorDetails })
     }
     async refreshToken(token: string) {
         const payload = verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
+        const inspector = await this.inspectorRepository.findInspectorById(payload.userId.toString());
+
+        if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
+            return { status: false, blockReason: "This Inspector Account is Blocked" }
+        }
         const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken }
+        return { accessToken: newAccessToken, status: true, blockReason: '' }
     }
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
         const existing = await this.inspectorRepository.findInspectorByEmail(email)

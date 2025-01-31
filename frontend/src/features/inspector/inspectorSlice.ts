@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface InspectorState {
+export interface InspectorState {
     firstName: string;
     lastName: string;
     email: string;
     address: string;
     profile_image: string;
-    status: boolean;
+    status: string;
     role: string;
-    certificates: [object];
+    certificates: [string];
     yearOfExp: number;
     phone: string;
     signature: string;
@@ -26,9 +26,9 @@ const initialState: InspectorState = {
     email: '',
     address: '',
     profile_image: '',
-    status: false,
+    status: '',
     role: '',
-    certificates: [{}],
+    certificates: [''],
     yearOfExp: 0,
     phone: '',
     signature: '',
@@ -59,13 +59,13 @@ const inspectorSlice = createSlice({
         setProfileImage(state, action: PayloadAction<string>) {
             state.profile_image = action.payload;
         },
-        setStatus(state, action: PayloadAction<boolean>) {
+        setStatus(state, action: PayloadAction<string>) {
             state.status = action.payload;
         },
         setRole(state, action: PayloadAction<string>) {
             state.role = action.payload;
         },
-        setCertificates(state, action: PayloadAction<[object]>) {
+        setCertificates(state, action: PayloadAction<[string]>) {
             state.certificates = action.payload;
         },
         setYearOfExp(state, action: PayloadAction<number>) {
