@@ -24,5 +24,8 @@ router.post('/deny/:inspectorId', authenticateToken, authorizeRole('admin'), Ins
 //block and unblock
 router.patch('/block/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.handleBlock)
 
+//updates
+router.put('/update', authenticateToken, authorizeRole('inspector'), InspectorController.updateInspector)
+
 
 export default router

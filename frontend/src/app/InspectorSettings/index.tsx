@@ -1,5 +1,5 @@
-import Comingsoon from "@/components/Comingsoon"
 import ContentSection from "@/components/content-section"
+import InspectorProfileForm from "./InspectorProfileForm"
 
 const InspectorSettings = () => {
     return (
@@ -7,7 +7,7 @@ const InspectorSettings = () => {
             title='Profile Managment'
             desc='Your Profile Details Section'
         >
-            <Comingsoon />
+            <InspectorProfileForm />
         </ContentSection>
     )
 }

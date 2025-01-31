@@ -33,10 +33,12 @@ const ImagePreview = ({
 
 export default function ProfileDrop({
     onImageUpload,
-    defaultImage
+    defaultImage,
+    headerTitle = "Profile Image",
 }: {
     onImageUpload: (url: string | null) => void;
     defaultImage: string;
+    headerTitle?: string;
 }) {
     const [profilePicture, setProfilePicture] = useState<string | null>(defaultImage);
     const [isUploading, setIsUploading] = useState(false);
@@ -61,7 +63,7 @@ export default function ProfileDrop({
 
     return (
         <div className="w-full max-w-40">
-            <Label htmlFor="profile">Profile Picture</Label>
+            <Label htmlFor="profile">{headerTitle}</Label>
             <div className="mt-1 w-full">
                 {profilePicture ? (
                     <ImagePreview

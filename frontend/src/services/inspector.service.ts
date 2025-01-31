@@ -1,4 +1,5 @@
 import axiosInstance from "@/api/axios";
+import { InspectorState } from "@/features/inspector/inspectorSlice";
 
 interface IsubmitData {
     address: string;
@@ -20,5 +21,8 @@ export const inspectorService = {
     },
     getProfile: async () => {
         return await axiosInstance.get('/inspector/details')
+    },
+    updateInspector: async (data: Partial<InspectorState>) => {
+        return await axiosInstance.put('/inspector/update', data)
     }
 }

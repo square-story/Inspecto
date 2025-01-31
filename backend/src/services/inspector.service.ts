@@ -87,4 +87,7 @@ export class InspectorService {
             throw error;
         }
     }
+    async updateDetails(userId: string, data: Partial<IInspector>) {
+        return await this.inspectorRepository.updateInspector(userId, data)
+    }
 }
