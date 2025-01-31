@@ -6,6 +6,8 @@ interface AuthState {
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
+    status: boolean;
+    blockReason: string
 }
 
 const initialState: AuthState = {
@@ -14,6 +16,8 @@ const initialState: AuthState = {
     isAuthenticated: !!localStorage.getItem('accessToken'),
     isLoading: false,
     error: null,
+    status: true,
+    blockReason: ''
 };
 
 
@@ -22,9 +26,10 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setCredentials(state, action: PayloadAction<{ accessToken: string; role: AuthState['role'] }>) {
-            const { accessToken, role } = action.payload;
+        setCredentials(state, action: PayloadAction<{ accessToken: string; role: AuthState['role'], status: boolean }>) {
+            const { accessToken, role, status } = action.payload;
             state.accessToken = accessToken;
+            state.status = status
             state.role = role;
             state.isAuthenticated = true;
             localStorage.setItem('accessToken', accessToken);
@@ -36,6 +41,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             localStorage.removeItem('accessToken');
             localStorage.removeItem('role');
+            state.status = true
         },
         setLoading(state, action: PayloadAction<boolean>) {
             state.isLoading = action.payload;
@@ -43,9 +49,13 @@ const authSlice = createSlice({
         setError(state, action: PayloadAction<string | null>) {
             state.error = action.payload;
         },
+        setBlockedStatus: (state, action) => {
+            state.status = action.payload.status;
+            state.blockReason = action.payload.blockReason
+        }
     },
 });
 
-export const { setCredentials, clearCredentials, setLoading, setError } = authSlice.actions;
+export const { setCredentials, clearCredentials, setLoading, setError, setBlockedStatus } = authSlice.actions;
 
 export default authSlice.reducer;

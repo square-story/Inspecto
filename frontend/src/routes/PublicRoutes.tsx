@@ -17,6 +17,7 @@ const PublicRoutes = () => (
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/forget/:role" element={<PublicRoute><UserForget /></PublicRoute>} />
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPreview /></PublicRoute>} />
+
         <Route path="*" element={<Navigate to='/' replace />} />
     </Routes>
 );

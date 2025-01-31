@@ -58,10 +58,9 @@ export default function LoginPreview() {
                 })
             ).unwrap();
 
-
             if (result) {
                 const { accessToken, role } = result
-                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector", status: true }))
                 toast.success('Login successfully')
                 navigate("/admin/dashboard");
             }

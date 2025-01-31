@@ -67,8 +67,8 @@ export default function LoginPreview() {
 
 
             if (result) {
-                const { accessToken, role } = result
-                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector" }))
+                const { accessToken, role, status } = result
+                dispatch(setCredentials({ accessToken, role: role as "user" | "admin" | "inspector", status }))
                 toast.success('Login successfully')
                 handleNav("/");
             }
