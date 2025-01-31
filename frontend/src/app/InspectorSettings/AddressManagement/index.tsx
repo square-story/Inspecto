@@ -1,14 +1,15 @@
 import Comingsoon from "@/components/Comingsoon"
 import ContentSection from "@/components/content-section"
 
-
-const UserDashboardView = () => {
+const AddressManagment = () => {
     return (
-        <ContentSection title='dashboard'
-            desc='This is how others will see you on the dashboard.'>
+        <ContentSection
+            title='Address Managment'
+            desc='Manage Your Address in here'
+        >
             <Comingsoon />
         </ContentSection>
     )
 }
 
-export default UserDashboardView
+export default AddressManagment

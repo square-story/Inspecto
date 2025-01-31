@@ -2,9 +2,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function UserProfile() {
-
-
-
     return (
         <div className="flex h-screen">
             {/* Sidebar */}

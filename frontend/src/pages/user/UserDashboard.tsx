@@ -1,4 +1,4 @@
-import SidebarNav from "@/app/UserDashboard/components/side-nav"
+import SidebarNav from "@/components/side-nav"
 import { Separator } from "@/components/ui/separator"
 import { CalendarRange, Car, LucideLayoutDashboard, Notebook, User } from "lucide-react"
 import { Outlet } from "react-router-dom"
