@@ -19,5 +19,7 @@ router.put('/update', authenticateToken, authorizeRole('user'), UserController.u
 
 //block/unblock
 router.patch('/block/:userId', authenticateToken, authorizeRole('admin'), UserController.updateStatus)
+//change password
+router.put('/change-password', authenticateToken, authorizeRole("user"), UserController.changePassword)
 
 export default router

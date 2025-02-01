@@ -1,5 +1,7 @@
 import { IUsers } from "../models/user.model";
 import UserRepository from "../repositories/user.repository";
+import { ChangePasswordResponse } from "./inspector.service";
+import bcrypt from 'bcrypt'
 
 
 
@@ -49,6 +51,43 @@ export class UserService {
             throw new Error('Failed to update user status');
         }
         return updatedUser;
+    }
+    async changePassword(currentPassword: string, newPassword: string, userId: string): Promise<ChangePasswordResponse> {
+        try {
+            const isValid = await this.userRepository.findById(userId)
+            if (!isValid) {
+                return {
+                    status: false,
+                    message: 'The user is not available.',
+                };
+            }
+            const isMatch = await bcrypt.compare(currentPassword, isValid.password as string);
+            if (!isMatch) {
+                return {
+                    status: false,
+                    message: 'The current password is incorrect.',
+                };
+            }
+
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+            const response = await this.userRepository.updateUser(userId, {
+                password: hashedNewPassword,
+            });
+            if (response) {
+                return {
+                    status: true,
+                    message: 'The password has been changed successfully.',
+                };
+            } else {
+                return {
+                    status: false,
+                    message: 'Failed to update the password.',
+                };
+            }
+        } catch (error) {
+            console.error('Error in changePassword:', error);
+            throw error;
+        }
     }
 }
 

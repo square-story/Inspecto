@@ -1,6 +1,12 @@
 import { IInspector, InspectorStatus } from "../models/inspector.model";
 import { InspectorRepository } from "../repositories/inspector.repository";
 import { EmailService } from "./email.service";
+import bcrypt from 'bcrypt';
+
+export type ChangePasswordResponse = {
+    status: boolean;
+    message: string;
+};
 
 export class InspectorService {
     private inspectorRepository: InspectorRepository;
@@ -89,5 +95,44 @@ export class InspectorService {
     }
     async updateDetails(userId: string, data: Partial<IInspector>) {
         return await this.inspectorRepository.updateInspector(userId, data)
+    }
+    async changePassword(currentPassword: string, newPassword: string, inspectorId: string): Promise<ChangePasswordResponse> {
+        try {
+            const isValid = await this.inspectorRepository.findInspectorById(inspectorId)
+            if (!isValid) {
+                return {
+                    status: false,
+                    message: 'The user is not available.',
+                };
+            }
+
+            const isMatch = await bcrypt.compare(currentPassword, isValid.password as string);
+
+            if (!isMatch) {
+                return {
+                    status: false,
+                    message: 'The current password is incorrect.',
+                };
+            }
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+            const response = await this.inspectorRepository.updateInspector(inspectorId, {
+                password: hashedNewPassword,
+            });
+
+            if (response) {
+                return {
+                    status: true,
+                    message: 'The password has been changed successfully.',
+                };
+            } else {
+                return {
+                    status: false,
+                    message: 'Failed to update the password.',
+                };
+            }
+        } catch (error) {
+            console.error('Error in changePassword:', error);
+            throw error;
+        }
     }
 }

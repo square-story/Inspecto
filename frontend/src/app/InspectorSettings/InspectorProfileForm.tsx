@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux'
 import { Form } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+
 const profileFormSchema = z.object({
     firstName: z
         .string()
@@ -74,6 +75,7 @@ export default function InspectorProfileForm() {
     if (loading) return (<LoadingSpinner />)
 
     return (
+
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                 <ProfileDrop headerTitle='Profile Picture' onImageUpload={handleImageUpload} defaultImage={inspector?.profile_image} />
@@ -93,6 +95,7 @@ export default function InspectorProfileForm() {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name='lastName'

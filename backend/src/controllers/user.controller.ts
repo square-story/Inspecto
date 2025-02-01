@@ -100,4 +100,45 @@ export class UserController {
             return
         }
     }
+    public static changePassword: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const userId = req.user?.userId
+            if (!userId) {
+                console.error("Error: User ID is missing from the token.");
+                res.status(400).json({
+                    success: false,
+                    message: "User ID is missing from the token."
+                });
+                return
+            }
+            const { currentPassword, newPassword } = req.body
+            if (!currentPassword) {
+                console.log("Error: Request Body doesn't have enough data to complete")
+                res.status(400).json({
+                    success: false,
+                    message: "Request Body doesn't have enough data to complete"
+                })
+                return;
+            }
+            const response = await userService.changePassword(currentPassword, newPassword, userId)
+            if (response.status) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: response.message
+                })
+            }
+        } catch (error) {
+            console.error("Error occurred while updating user details:", error);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error. Please try again later."
+            });
+            return
+        }
+    }
 }

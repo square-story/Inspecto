@@ -26,6 +26,8 @@ router.patch('/block/:inspectorId', authenticateToken, authorizeRole('admin'), I
 
 //updates
 router.put('/update', authenticateToken, authorizeRole('inspector'), InspectorController.updateInspector)
+//change password
+router.put('/change-password', authenticateToken, authorizeRole('inspector'), InspectorController.changePassword)
 
 
 export default router
