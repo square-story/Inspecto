@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import adminRoutes from "./routes/admin.routes";
 import userRoutes from './routes/user.routes'
 import inspectorRoutes from "./routes/inspector.routes";
+import vehiclesRoutes from "./routes/vehicles.routes"
 import cors from "cors";
 
 const app = express()
@@ -35,12 +36,14 @@ app.post('/logout', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Logged out successfully' });
 })
 
-
+//for Admin Operations
 app.use('/admin', adminRoutes)
-
+//inspectors Operations
 app.use('/inspector', inspectorRoutes)
-
+//user Operations
 app.use('/user', userRoutes)
+//vehicles operations
+app.use('/vehicles', vehiclesRoutes)
 
 
 app.use((req: Request, res: Response) => {

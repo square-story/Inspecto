@@ -6,6 +6,7 @@ import UserRegister from "../pages/user/UserRegister";
 import UserInputOTP from "../pages/user/UserInputOTP";
 import SettingsProfile from "@/app/UserDashboard/profile";
 import UserDashboardView from "@/app/UserDashboard/dashboard";
+import VehicleManagement from "@/app/UserDashboard/VehicleManagment";
 
 const UserRoutes = () => (
     <Routes>
@@ -15,6 +16,7 @@ const UserRoutes = () => (
         <Route path="dashboard/*" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} >
             <Route path="" element={<UserDashboardView />} />
             <Route path="settings" element={<SettingsProfile />} />
+            <Route path="vehicles" element={<VehicleManagement />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

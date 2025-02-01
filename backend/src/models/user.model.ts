@@ -12,6 +12,7 @@ export interface IUserInput {
     authProvider: string;
     createdAt: Date;
     updatedAt: Date;
+    vehicles: ObjectId
 }
 
 export interface IUsers extends Document, IUserInput {
@@ -27,7 +28,8 @@ const UsersSchema: Schema = new Schema<IUsers>({
     profile_image: { type: String, default: "" },
     status: { type: Boolean, default: true },
     role: { type: String, required: true, default: 'user' },
-    authProvider: { type: String, default: 'default' }
+    authProvider: { type: String, default: 'default' },
+    vehicles: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" }]
 }, { timestamps: true });
 
 export default mongoose.model<IUsers>("User", UsersSchema);
