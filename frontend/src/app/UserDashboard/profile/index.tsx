@@ -1,5 +1,6 @@
 import ContentSection from '@/components/content-section'
 import ProfileForm from './ProfileForm'
+import PasswordManagement from '@/app/InspectorSettings/PasswordManagment'
 
 export default function SettingsProfile() {
 
@@ -8,7 +9,10 @@ export default function SettingsProfile() {
             title='Profile'
             desc='This is how others will see you on the site.'
         >
-            <ProfileForm />
+            <div className="grid gap-5">
+                <PasswordManagement />
+                <ProfileForm />
+            </div>
         </ContentSection>
     )
 }
