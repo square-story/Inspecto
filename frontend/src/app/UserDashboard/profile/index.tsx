@@ -1,6 +1,6 @@
 import ContentSection from '@/components/content-section'
 import ProfileForm from './ProfileForm'
-import PasswordManagement from '@/app/InspectorSettings/PasswordManagment'
+import PasswordManagement from '@/components/PasswordManagment'
 
 export default function SettingsProfile() {
 

@@ -1,6 +1,6 @@
 import ContentSection from "@/components/content-section"
 import InspectorProfileForm from "./InspectorProfileForm"
-import PasswordManagement from "./PasswordManagment"
+import PasswordManagement from "../../components/PasswordManagment"
 
 const InspectorSettings = () => {
     return (
