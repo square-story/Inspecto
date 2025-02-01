@@ -3,6 +3,7 @@ import InspectorProfileForm from "./InspectorProfileForm"
 import PasswordManagement from "../../components/PasswordManagment"
 
 const InspectorSettings = () => {
+
     return (
         <>
 

@@ -1,4 +1,9 @@
-export default function SvgText() {
+import { useTheme } from "./ui/theme-provider"
+
+export default function SvgText({ text = "Click on the profile" }: { text?: string }) {
+    const { theme } = useTheme()
+    const textColor = theme === "dark" ? "#ffffff" : "#1e1e1e"; // White for dark, black for light
+    const strokeColor = theme === "dark" ? "#ffffff" : "#1e1e1e"; // White for dark, black for light
     return (
         <svg
             version="1.1"
@@ -24,13 +29,13 @@ export default function SvgText() {
                     y="20.92969776945643"
                     fontFamily="Virgil, Segoe UI Emoji"
                     fontSize="23.8923490518909px"
-                    fill="#1e1e1e"
+                    fill={textColor}
                     textAnchor="start"
                     style={{ whiteSpace: "pre" }}
                     direction="ltr"
                     dominantBaseline="alphabetic"
                 >
-                    Click on the profile
+                    {text}
                 </text>
             </g>
             <g strokeLinecap="round">
@@ -41,7 +46,7 @@ export default function SvgText() {
                 >
                     <path
                         d="M0 0 C-9.05 -1.17, -39.6 1.44, -54.29 -7 C-68.98 -15.43, -82.5 -43.33, -88.14 -50.6"
-                        stroke="#1e1e1e"
+                        stroke={strokeColor}
                         strokeWidth="1.5"
                         fill="none"
                         strokeDasharray="8 9"
@@ -54,7 +59,7 @@ export default function SvgText() {
                 >
                     <path
                         d="M-68.31 -35.38 C-76.11 -41.36, -83.91 -47.35, -88.14 -50.6"
-                        stroke="#1e1e1e"
+                        stroke={strokeColor}
                         strokeWidth="1.5"
                         fill="none"
                     ></path>
@@ -66,7 +71,7 @@ export default function SvgText() {
                 >
                     <path
                         d="M-82.74 -26.19 C-84.86 -35.79, -86.99 -45.39, -88.14 -50.6"
-                        stroke="#1e1e1e"
+                        stroke={strokeColor}
                         strokeWidth="1.5"
                         fill="none"
                     ></path>
@@ -74,5 +79,5 @@ export default function SvgText() {
             </g>
             <mask></mask>
         </svg>
-    )
+    );
 }
