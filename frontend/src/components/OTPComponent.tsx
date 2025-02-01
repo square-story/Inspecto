@@ -82,7 +82,7 @@ export default function OTPVerification() {
 
             localStorage.removeItem('otp-email');
             const { accessToken } = response.data;
-            dispatch(setCredentials({ accessToken, role: 'user' }));
+            dispatch(setCredentials({ accessToken, role: 'user', status: true }));
             navigate('/');
         } catch (error) {
             console.error("Form submission error", error);

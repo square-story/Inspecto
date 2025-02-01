@@ -96,7 +96,7 @@ export class UserAuthController {
             }
             const { email, name, picture, family_name } = payload;
             const response = await userAuthService.googleLoginOrRegister(email, name, picture, family_name, res);
-            res.status(200).json({ message: 'Authentication successful', response });
+            res.status(200).json({ message: 'Authentication successful', response, status: response.user?.status });
         } catch (error) {
             console.error('Google auth error:', error);
             res.status(500).json({ message: 'Authentication failed' });
