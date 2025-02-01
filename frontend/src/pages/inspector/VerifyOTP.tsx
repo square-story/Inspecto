@@ -81,7 +81,7 @@ export default function InspectorOTPVerification({ role = "inspector" }) {
 
             localStorage.removeItem('otp-email');
             const { accessToken } = response.data;
-            dispatch(setCredentials({ accessToken, role: 'inspector' }));
+            dispatch(setCredentials({ accessToken, role: 'inspector', status: true }));
             navigate(`/${role}/dashboard`);
         } catch (error) {
             console.error("Form submission error", error);

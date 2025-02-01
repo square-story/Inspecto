@@ -27,7 +27,7 @@ const GoogleButton = () => {
             }
 
             const { accessToken } = response.data;
-            dispatch(setCredentials({ accessToken, role: 'user' }));
+            dispatch(setCredentials({ accessToken, role: 'user', status: response.data.status }));
             navigate('/');
         } catch (error) {
             console.error("Error during Google registration:", error);

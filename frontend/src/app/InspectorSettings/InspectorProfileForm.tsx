@@ -15,6 +15,8 @@ import { useDispatch } from 'react-redux'
 import { Form } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import SvgText from '@/components/SvgText'
+
 const profileFormSchema = z.object({
     firstName: z
         .string()
@@ -74,9 +76,15 @@ export default function InspectorProfileForm() {
     if (loading) return (<LoadingSpinner />)
 
     return (
+
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-                <ProfileDrop headerTitle='Profile Picture' onImageUpload={handleImageUpload} defaultImage={inspector?.profile_image} />
+                <div className='relative'>
+                    <ProfileDrop headerTitle='Profile Picture' onImageUpload={handleImageUpload} defaultImage={inspector?.profile_image} />
+                    <div className="absolute -bottom-10 left-44 ">
+                        <SvgText />
+                    </div>
+                </div>
                 <FormField
                     control={form.control}
                     name='firstName'
@@ -93,6 +101,7 @@ export default function InspectorProfileForm() {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name='lastName'
@@ -138,7 +147,12 @@ export default function InspectorProfileForm() {
                         </FormItem>
                     )}
                 />
-                <ProfileDrop headerTitle='Signature' onImageUpload={handleSignature} defaultImage={inspector?.signature} />
+                <div className='relative'>
+                    <ProfileDrop headerTitle='Signature' onImageUpload={handleSignature} defaultImage={inspector?.signature} />
+                    <div className="absolute -bottom-10 left-44 ">
+                        <SvgText text='To Upload Signature' />
+                    </div>
+                </div>
                 <Button type='submit'>Update profile</Button>
             </form>
         </Form>

@@ -1,5 +1,6 @@
 import axiosInstance from "@/api/axios";
 import { InspectorState } from "@/features/inspector/inspectorSlice";
+import { passwordFormSchema } from "./user.service";
 
 interface IsubmitData {
     address: string;
@@ -24,5 +25,8 @@ export const inspectorService = {
     },
     updateInspector: async (data: Partial<InspectorState>) => {
         return await axiosInstance.put('/inspector/update', data)
+    },
+    changePassword: async (data: passwordFormSchema) => {
+        return await axiosInstance.put('/inspector/change-password', data)
     }
 }

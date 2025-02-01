@@ -15,11 +15,11 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2 } from "lucide-react";
-import { TagsInput } from "@/components/ui/tags-input";
 import { useNavigate } from "react-router-dom";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { inspectorService } from "@/services/inspector.service";
 import { getTransformedImageUrl } from "@/utils/cloudinary";
+import { SpecializationSelect } from "@/components/fancy-multi-select";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -484,10 +484,9 @@ export default function InspectorForm() {
                                     <FormItem>
                                         <FormLabel>Specializations</FormLabel>
                                         <FormControl>
-                                            <TagsInput
+                                            <SpecializationSelect
                                                 value={field.value}
-                                                onValueChange={field.onChange}
-                                                placeholder="Add specializations"
+                                                onChange={field.onChange}
                                             />
                                         </FormControl>
                                         <FormMessage />

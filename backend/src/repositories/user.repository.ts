@@ -9,7 +9,7 @@ class UserRepository implements IUserRepository {
     }
 
     async findById(userId: string): Promise<IUsers | null> {
-        return await Users.findById(userId).select('-password');
+        return await Users.findById(userId)
     }
 
     async findUserByEmail(email: string): Promise<IUsers | null> {
