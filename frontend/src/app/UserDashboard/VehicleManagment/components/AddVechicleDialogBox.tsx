@@ -29,7 +29,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { VehicleType, Transmission } from "@/features/vehicle/vehicleSlice";
+import { VehicleType, Transmission, addVehicle, } from "@/features/vehicle/vehicleSlice";
+import { useDispatch, } from "react-redux";
+import { AppDispatch, } from "@/store";
 
 const addVehicleSchema = z.object({
     make: z.string().min(2, { message: "Make must be at least 2 characters." }),
@@ -46,6 +48,7 @@ const addVehicleSchema = z.object({
 export default function AddVehicleDialog() {
     const [isLoading, setIsLoading] = useState(false);
     const isMobile = useIsMobile();
+    const dispatch = useDispatch<AppDispatch>()
 
     const form = useForm<z.infer<typeof addVehicleSchema>>({
         resolver: zodResolver(addVehicleSchema),
@@ -65,7 +68,8 @@ export default function AddVehicleDialog() {
     async function onSubmit(data: z.infer<typeof addVehicleSchema>) {
         try {
             setIsLoading(true);
-            toast.success(JSON.stringify(data));
+            await dispatch(addVehicle(data))
+            toast.success("Vehicle added successfully");
             form.reset();
         } catch (error) {
             if (error instanceof AxiosError) {

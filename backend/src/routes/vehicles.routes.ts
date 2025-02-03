@@ -12,7 +12,7 @@ const vehicleController = new VehicleController(vehicleService);
 const router = Router();
 
 // Create a new vehicle
-router.post("/", (req, res) => vehicleController.createVehicle(req, res));
+router.post("/", authenticateToken, (req, res) => vehicleController.createVehicle(req, res));
 
 // Get all vehicles for a user
 router.get("/", authenticateToken, (req, res) => vehicleController.getVehiclesByUser(req, res));

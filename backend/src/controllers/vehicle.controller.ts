@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import VehicleService from "../services/vehicle.service";
 import { IVehicleDocument } from "../models/vehicle.model";
+import { ObjectId } from "mongoose";
 
 export default class VehicleController {
     private vehicleService: VehicleService;
@@ -12,6 +13,8 @@ export default class VehicleController {
     async createVehicle(req: Request, res: Response): Promise<void> {
         try {
             const vehicleData: IVehicleDocument = req.body;
+            const userId = req.user?.userId
+            vehicleData.user = userId as unknown as ObjectId
             const vehicle = await this.vehicleService.createVehicle(vehicleData);
             res.status(201).json(vehicle);
         } catch (error) {
