@@ -31,7 +31,12 @@ export default class VehicleController {
 
     async getVehiclesByUser(req: Request, res: Response): Promise<void> {
         try {
-            const vehicles = await this.vehicleService.getVehiclesByUser(req.params.userId);
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(400).json({ message: "User ID is required" });
+                return;
+            }
+            const vehicles = await this.vehicleService.getVehiclesByUser(userId);
             res.json(vehicles);
         } catch (error) {
             res.status(500).json({ message: "Error retrieving user's vehicles", error });
