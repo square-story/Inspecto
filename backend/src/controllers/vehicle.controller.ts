@@ -21,8 +21,11 @@ export default class VehicleController {
 
     async getVehicleById(req: Request, res: Response): Promise<void> {
         try {
-            const vehicle = await this.vehicleService.getVehicleById(req.params.id);
-            if (!vehicle) res.status(404).json({ message: "Vehicle not found" });
+            const vehicle = await this.vehicleService.getVehicleById(req.params.vehicleId);
+            if (!vehicle) {
+                res.status(404).json({ message: "Vehicle not found" });
+                return
+            }
             res.json(vehicle);
         } catch (error) {
             res.status(500).json({ message: "Error retrieving vehicle", error });
@@ -55,8 +58,11 @@ export default class VehicleController {
 
     async deleteVehicle(req: Request, res: Response): Promise<void> {
         try {
-            const deleted = await this.vehicleService.deleteVehicle(req.params.id);
-            if (!deleted) res.status(404).json({ message: "Vehicle not found" });
+            const deleted = await this.vehicleService.deleteVehicle(req.params.vehicleId)
+            if (!deleted) {
+                res.status(404).json({ message: "Vehicle not found" });
+                return
+            }
             res.status(204).send();
         } catch (error) {
             res.status(500).json({ message: "Error deleting vehicle", error });

@@ -86,7 +86,7 @@ export default function AddVehicleDialog() {
     const formContent = (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-4">
                     <FormField
                         control={form.control}
                         name="make"
@@ -272,7 +272,7 @@ export default function AddVehicleDialog() {
                     <DrawerTrigger asChild>
                         <Button>Add New Vehicle</Button>
                     </DrawerTrigger>
-                    <DrawerContent className="p-4">
+                    <DrawerContent className="p-4 w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
                         <DrawerHeader>
                             <DrawerTitle>Add New Vehicle</DrawerTitle>
                             <DrawerDescription>
@@ -287,7 +287,7 @@ export default function AddVehicleDialog() {
                     <DialogTrigger asChild>
                         <Button>Add New Vehicle</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px]">
+                    <DialogContent className="sm:max-w-[800px]">
                         <DialogHeader>
                             <DialogTitle>Add New Vehicle</DialogTitle>
                             <DialogDescription>
