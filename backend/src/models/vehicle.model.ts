@@ -55,7 +55,7 @@ const VehicleSchema: Schema = new Schema<IVehicleDocument>({
     chassisNumber: { type: String, required: true, unique: true }, // Chassis Number
     fuelType: { type: String, enum: ["petrol", "diesel", "electric", "hybrid"], required: true }, // Fuel Type
     transmission: { type: String, enum: Object.values(Transmission), required: true }, // Transmission Type
-    insuranceExpiry: { type: Date, required: true }, // Insurance Expiry Date
+    insuranceExpiry: { type: Date }, // Insurance Expiry Date
     lastInspectionDate: { type: Date }, // Last Inspection Date (Optional)
 
     // New Fields for Vehicle Images
