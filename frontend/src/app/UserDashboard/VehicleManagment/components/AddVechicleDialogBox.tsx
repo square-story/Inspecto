@@ -85,8 +85,8 @@ export default function AddVehicleDialog() {
 
     const formContent = (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid gap-4">
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="grid gap-6 sm:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="make"
