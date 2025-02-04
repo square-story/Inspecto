@@ -1,214 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, } from 'react';
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-} from "@/components/ui/card";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetDescription,
-    SheetClose
-} from "@/components/ui/sheet";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Vehicle } from "@/features/vehicle/vehicleSlice";
-import {
-    ArrowRight,
-    Car,
-    Calendar,
-    Wrench,
-    ShieldCheck,
-    Edit,
-    Trash2,
-    BookText
-} from "lucide-react";
+import { Car, Calendar, Wrench, ShieldCheck, Edit, Trash2 } from "lucide-react";
 import { useDispatch } from 'react-redux';
-import { deleteVehicle, updateVehicle } from '@/features/vehicle/vehicleSlice';
+import { deleteVehicle, updateVehicle, Vehicle } from '@/features/vehicle/vehicleSlice';
 import { AppDispatch } from '@/store';
+
 
 interface DisplayVehicleProps {
     CarDetails: Vehicle;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    onClose?: () => void;
 }
 
-const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
-    const [isDetailOpen, setIsDetailOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [editedVehicle, setEditedVehicle] = useState<Vehicle>(CarDetails);
+const DetailItem = ({ icon, label, value }: {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+}) => (
+    <div className="flex items-center gap-3 bg-background p-3 rounded-lg">
+        {icon}
+        <div>
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-sm font-medium">{value}</p>
+        </div>
+    </div>
+);
 
-    const dispatch = useDispatch<AppDispatch>();
+const VehicleDetailSheet = ({
+    isOpen,
+    onOpenChange,
+    carDetails,
+    onEdit,
+    onDelete
+}: {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    carDetails: Vehicle;
+    onEdit: () => void;
+    onDelete: () => void;
+}) => {
+    const additionalInfo = [
+        { icon: <Car className="h-5 w-5 text-primary" />, label: "Vehicle Type", value: carDetails.type },
+        { icon: <Calendar className="h-5 w-5 text-primary" />, label: "Year", value: carDetails.year.toString() },
+        { icon: <Wrench className="h-5 w-5 text-primary" />, label: "Transmission", value: carDetails.transmission }
+    ];
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setEditedVehicle(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleSaveEdit = () => {
-        // Dispatch update action
-        dispatch(updateVehicle(editedVehicle));
-        setIsEditModalOpen(false);
-        setIsDetailOpen(false);
-    };
-
-    const handleDelete = () => {
-        // Dispatch delete action
-        dispatch(deleteVehicle(CarDetails._id));
-        setIsDeleteDialogOpen(false);
-        setIsDetailOpen(false);
-    };
-
-    const VehicleDetailSheet = () => (
-        <Sheet open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-            <SheetContent className="w-[500px] overflow-y-auto pt-14">
-                <SheetHeader className="mb-6">
+    return (
+        <Sheet open={isOpen} onOpenChange={onOpenChange}>
+            <SheetContent>
+                <SheetHeader>
                     <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <Car className="h-6 w-6 text-primary" />
-                            <SheetTitle>{CarDetails.make} {CarDetails.vehicleModel}</SheetTitle>
-                        </div>
+                        <SheetTitle>{carDetails.make} {carDetails.vehicleModel}</SheetTitle>
                         <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setIsEditModalOpen(true)}
-                            >
+                            <Button variant="outline" size="icon" onClick={onEdit}>
                                 <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
-                                variant="destructive"
-                                size="icon"
-                                onClick={() => setIsDeleteDialogOpen(true)}
-                            >
+                            <Button variant="destructive" size="icon" onClick={onDelete}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
                     </div>
-                    <SheetDescription>
-                        Comprehensive Vehicle Details
-                    </SheetDescription>
                 </SheetHeader>
 
                 <div className="space-y-6">
-                    {/* Vehicle Image */}
-                    <div className="w-full aspect-video bg-muted rounded-xl overflow-hidden">
-                        {CarDetails.frontViewImage ? (
-                            <img
-                                src={CarDetails.frontViewImage}
-                                alt={`${CarDetails.make} ${CarDetails.vehicleModel}`}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                No Image Available
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Vehicle Details Grid */}
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-secondary/20 rounded-xl">
-                        <DetailItem
-                            icon={<Car className="h-5 w-5 text-primary" />}
-                            label="Vehicle Type"
-                            value={CarDetails.type}
+                    {carDetails.frontViewImage && (
+                        <img
+                            src={carDetails.frontViewImage}
+                            alt={`${carDetails.make} ${carDetails.vehicleModel}`}
+                            className="w-full h-48 object-cover rounded-lg"
                         />
-                        <DetailItem
-                            icon={<Calendar className="h-5 w-5 text-primary" />}
-                            label="Year"
-                            value={CarDetails.year.toString()}
-                        />
-                        <DetailItem
-                            icon={<Wrench className="h-5 w-5 text-primary" />}
-                            label="Transmission"
-                            value={CarDetails.transmission}
-                        />
-                        <DetailItem
-                            icon={<BookText className="h-5 w-5 text-primary" />}
-                            label="Fuel Type"
-                            value={CarDetails.fuelType}
-                        />
-                        <DetailItem
-                            icon={<ShieldCheck className="h-5 w-5 text-primary" />}
-                            label="Registration"
-                            value={CarDetails.registrationNumber}
-                        />
-                        <DetailItem
-                            icon={<Calendar className="h-5 w-5 text-primary" />}
-                            label="Insurance Expiry"
-                            value={new Date(CarDetails.insuranceExpiry).toLocaleDateString()}
-                        />
-                    </div>
-
-                    {/* Optional Additional Details */}
-                    {(CarDetails.color || CarDetails.chassisNumber) && (
-                        <div className="bg-secondary/10 p-4 rounded-xl space-y-2">
-                            <h4 className="text-sm font-semibold text-muted-foreground">Additional Information</h4>
-                            {CarDetails.color && (
-                                <div className="flex items-center gap-2">
-                                    <div
-                                        className="h-5 w-5 rounded-full border"
-                                        style={{ backgroundColor: CarDetails.color }}
-                                    />
-                                    <span className="text-sm">{CarDetails.color}</span>
-                                </div>
-                            )}
-                            {CarDetails.chassisNumber && (
-                                <div className="flex items-center gap-2">
-                                    <BookText className="h-5 w-5 text-primary" />
-                                    <span className="text-sm">Chassis: {CarDetails.chassisNumber}</span>
-                                </div>
-                            )}
-                        </div>
                     )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                        {additionalInfo.map((item, index) => (
+                            <DetailItem key={index} {...item} />
+                        ))}
+                    </div>
                 </div>
 
-                <SheetClose asChild>
-                    <Button variant="outline" className="w-full mt-6">
-                        Close Details
+                <SheetFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                        Close
                     </Button>
-                </SheetClose>
+                </SheetFooter>
             </SheetContent>
         </Sheet>
     );
+};
 
-    const EditVehicleDialog = () => (
-        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-            <DialogContent className="sm:max-w-[500px]">
+const EditVehicleDialog = ({
+    isOpen,
+    onOpenChange,
+    vehicle,
+    onSave
+}: {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    vehicle: Vehicle;
+    onSave: (vehicle: Vehicle) => Promise<void>;
+}) => {
+    const [editedVehicle, setEditedVehicle] = useState(vehicle);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setEditedVehicle(prev => ({ ...prev, [name]: value }));
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit Vehicle Details</DialogTitle>
-                    <DialogDescription>
-                        Make changes to your vehicle information here.
-                    </DialogDescription>
+                    <DialogTitle>Edit Vehicle</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="space-y-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="make" className="text-right">
-                            Make
-                        </Label>
+                        <Label htmlFor="make">Make</Label>
                         <Input
                             id="make"
                             name="make"
@@ -218,9 +130,7 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
                         />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="vehicleModel" className="text-right">
-                            Model
-                        </Label>
+                        <Label htmlFor="vehicleModel">Model</Label>
                         <Input
                             id="vehicleModel"
                             name="vehicleModel"
@@ -229,134 +139,85 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
                             className="col-span-3"
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="year" className="text-right">
-                            Year
-                        </Label>
-                        <Input
-                            id="year"
-                            name="year"
-                            type="number"
-                            value={editedVehicle.year}
-                            onChange={handleInputChange}
-                            className="col-span-3"
-                        />
-                    </div>
-                    {/* Add more fields as needed */}
                 </div>
-                <div className="flex justify-end space-x-2">
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsEditModalOpen(false)}
-                    >
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSaveEdit}>
-                        Save Changes
-                    </Button>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                    <Button onClick={() => onSave(editedVehicle)}>Save</Button>
                 </div>
             </DialogContent>
         </Dialog>
     );
+};
 
-    const DeleteConfirmationDialog = () => (
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        This will permanently delete the vehicle from your records.
-                        This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={handleDelete}
-                    >
-                        Delete Vehicle
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
+const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails, }) => {
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
 
-    const DetailItem = ({
-        icon,
-        label,
-        value
-    }: {
-        icon: React.ReactNode,
-        label: string,
-        value: string
-    }) => (
-        <div className="flex items-center gap-3 bg-background p-3 rounded-lg">
-            {icon}
-            <div>
-                <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="text-sm font-medium">{value}</p>
-            </div>
-        </div>
-    );
+    const handleDelete = async () => {
+        try {
+            await dispatch(deleteVehicle(CarDetails._id)).unwrap();
+        } catch (error) {
+            console.error('Failed to delete vehicle:', error);
+        }
+    };
+
+    const handleSave = async (vehicle: Vehicle) => {
+        try {
+            await dispatch(updateVehicle(vehicle)).unwrap();
+            setIsEditOpen(false);
+        } catch (error) {
+            console.error('Failed to update vehicle:', error);
+        }
+    };
 
     return (
         <>
-            <Card className="w-72 flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
-                <CardHeader className="pt-4 pb-4 px-5 flex-row items-center gap-3 font-semibold">
-                    <div className="h-8 w-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
+            <Card className="w-72">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
                         <Car className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-medium">{CarDetails.make} {CarDetails.vehicleModel}</h3>
-                        <p className="text-xs text-muted-foreground">{CarDetails.year}</p>
+                        <div>
+                            <h3 className="text-sm font-medium">{CarDetails.make} {CarDetails.vehicleModel}</h3>
+                            <p className="text-xs text-muted-foreground">{CarDetails.year}</p>
+                        </div>
                     </div>
                 </CardHeader>
 
-                <CardContent className="px-5 space-y-2">
-                    {CarDetails.frontViewImage ? (
-                        <div className="w-full aspect-video relative rounded-xl overflow-hidden">
-                            <img
-                                src={CarDetails.frontViewImage}
-                                alt={`${CarDetails.make} ${CarDetails.vehicleModel}`}
-                                className="object-cover"
-                            />
-                        </div>
-                    ) : (
-                        <div className="w-full aspect-video bg-muted rounded-xl flex items-center justify-center text-muted-foreground text-sm">
-                            No Image Available
-                        </div>
-                    )}
-
-                    <div className="text-[13px] text-muted-foreground space-y-2 mt-2">
+                <CardContent>
+                    <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                            <Wrench className="h-4 w-4 text-primary" />
-                            <span>{CarDetails.type} | {CarDetails.transmission} | {CarDetails.fuelType}</span>
+                            <Wrench className="h-4 w-4" />
+                            <span>{CarDetails.type}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <ShieldCheck className="h-4 w-4 text-primary" />
-                            <span>Reg: {CarDetails.registrationNumber}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-primary" />
-                            <span>Insurance Expires: {new Date(CarDetails.insuranceExpiry).toLocaleDateString()}</span>
+                            <ShieldCheck className="h-4 w-4" />
+                            <span>{CarDetails.registrationNumber}</span>
                         </div>
                     </div>
                 </CardContent>
 
-                <CardFooter className="px-5 pb-4">
-                    <Button
-                        className="w-full flex items-center justify-between"
-                        onClick={() => setIsDetailOpen(true)}
-                    >
-                        View Details <ArrowRight className="h-4 w-4" />
+                <CardFooter>
+                    <Button className="w-full" onClick={() => setIsDetailOpen(true)}>
+                        View Details
                     </Button>
                 </CardFooter>
             </Card>
 
-            <VehicleDetailSheet />
-            <EditVehicleDialog />
-            <DeleteConfirmationDialog />
+            <VehicleDetailSheet
+                isOpen={isDetailOpen}
+                onOpenChange={setIsDetailOpen}
+                carDetails={CarDetails}
+                onEdit={() => setIsEditOpen(true)}
+                onDelete={handleDelete}
+            />
+
+            <EditVehicleDialog
+                isOpen={isEditOpen}
+                onOpenChange={setIsEditOpen}
+                vehicle={CarDetails}
+                onSave={handleSave}
+            />
         </>
     );
 };

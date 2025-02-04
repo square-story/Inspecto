@@ -33,6 +33,10 @@ import { VehicleType, Transmission, addVehicle, } from "@/features/vehicle/vehic
 import { useDispatch, } from "react-redux";
 import { AppDispatch, } from "@/store";
 
+interface AddVehicleDialogProps {
+    onSuccess?: () => void;
+}
+
 const addVehicleSchema = z.object({
     make: z.string().min(2, { message: "Make must be at least 2 characters." }),
     vehicleModel: z.string().min(2, { message: "Model must be at least 2 characters." }),
@@ -45,7 +49,7 @@ const addVehicleSchema = z.object({
     insuranceExpiry: z.coerce.date(),
 });
 
-export default function AddVehicleDialog() {
+const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
     const isMobile = useIsMobile();
     const dispatch = useDispatch<AppDispatch>()
@@ -70,6 +74,7 @@ export default function AddVehicleDialog() {
             setIsLoading(true);
             await dispatch(addVehicle(data))
             toast.success("Vehicle added successfully");
+            onSuccess?.(); // Trigger parent refresh
             form.reset();
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -305,3 +310,5 @@ export default function AddVehicleDialog() {
         </>
     );
 }
+
+export default AddVehicleDialog
