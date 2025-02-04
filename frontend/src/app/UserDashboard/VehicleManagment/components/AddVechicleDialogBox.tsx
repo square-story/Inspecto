@@ -9,16 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage, Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,10 +19,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { VehicleType, Transmission, addVehicle, } from "@/features/vehicle/vehicleSlice";
-import { useDispatch, } from "react-redux";
-import { AppDispatch, } from "@/store";
+import { VehicleType, Transmission, addVehicle } from "@/features/vehicle/vehicleSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
 
 interface AddVehicleDialogProps {
     onSuccess?: () => void;
@@ -47,12 +37,15 @@ const addVehicleSchema = z.object({
     fuelType: z.enum(["petrol", "diesel", "electric", "hybrid"]),
     transmission: z.nativeEnum(Transmission),
     insuranceExpiry: z.coerce.date(),
+    lastInspectionDate: z.coerce.date().optional(),
+    frontViewImage: z.string().url().optional(),
+    rearViewImage: z.string().url().optional(),
+    color: z.string().optional(),
 });
 
 const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const isMobile = useIsMobile();
-    const dispatch = useDispatch<AppDispatch>()
+    const dispatch = useDispatch<AppDispatch>();
 
     const form = useForm<z.infer<typeof addVehicleSchema>>({
         resolver: zodResolver(addVehicleSchema),
@@ -66,15 +59,19 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
             fuelType: "petrol",
             transmission: Transmission.AUTOMATIC,
             insuranceExpiry: new Date(),
+            lastInspectionDate: undefined,
+            frontViewImage: "",
+            rearViewImage: "",
+            color: "",
         },
     });
 
     async function onSubmit(data: z.infer<typeof addVehicleSchema>) {
         try {
             setIsLoading(true);
-            await dispatch(addVehicle(data))
+            await dispatch(addVehicle(data)).unwrap();
             toast.success("Vehicle added successfully");
-            onSuccess?.(); // Trigger parent refresh
+            onSuccess?.();
             form.reset();
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -88,227 +85,262 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
         }
     }
 
-    const handleClose = () => {
-        form.reset();
-    };
-
-    const formContent = (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid gap-6 sm:grid-cols-4">
-                    <FormField
-                        control={form.control}
-                        name="make"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Make</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Toyota" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="vehicleModel"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Model</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Camry" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="year"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Year</FormLabel>
-                                <FormControl>
-                                    <Input type="number" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="type"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Vehicle Type</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Vehicle Type" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {Object.values(VehicleType).map((type) => (
-                                            <SelectItem key={type} value={type}>
-                                                {type}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="registrationNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Registration Number</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="ABC 123" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="chassisNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Chassis Number</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="1HGCM82633A123456" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="fuelType"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Fuel Type</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Fuel Type" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {["petrol", "diesel", "electric", "hybrid"].map((type) => (
-                                            <SelectItem key={type} value={type}>
-                                                {type}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="transmission"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Transmission</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Transmission" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {Object.values(Transmission).map((transmission) => (
-                                            <SelectItem key={transmission} value={transmission}>
-                                                {transmission}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="insuranceExpiry"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Insurance Expiry</FormLabel>
-                                <FormControl>
-                                    <Input type="date" {...field} value={field.value.toISOString().split('T')[0]} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-                {isMobile ? (
-                    <DrawerFooter>
-                        <DrawerClose asChild>
-                            <Button type="button" variant="secondary">
-                                Close
-                            </Button>
-                        </DrawerClose>
-                        <Button type="submit" disabled={isLoading}>
-                            {isLoading ? "Adding Vehicle..." : "Add Vehicle"}
-                        </Button>
-                    </DrawerFooter>
-                ) : (
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary">
-                                Close
-                            </Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={isLoading}>
-                            {isLoading ? "Adding Vehicle..." : "Add Vehicle"}
-                        </Button>
-                    </DialogFooter>
-                )}
-            </form>
-        </Form>
+    const FormSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            {children}
+        </div>
     );
 
     return (
-        <>
-            {isMobile ? (
-                <Drawer onOpenChange={(isOpen) => !isOpen && handleClose()}>
-                    <DrawerTrigger asChild>
-                        <Button>Add New Vehicle</Button>
-                    </DrawerTrigger>
-                    <DrawerContent className="p-4 w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
-                        <DrawerHeader>
-                            <DrawerTitle>Add New Vehicle</DrawerTitle>
-                            <DrawerDescription>
-                                Fill in the details of your new vehicle.
-                            </DrawerDescription>
-                        </DrawerHeader>
-                        {formContent}
-                    </DrawerContent>
-                </Drawer>
-            ) : (
-                <Dialog onOpenChange={(isOpen) => !isOpen && handleClose()}>
-                    <DialogTrigger asChild>
-                        <Button>Add New Vehicle</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[800px]">
-                        <DialogHeader>
-                            <DialogTitle>Add New Vehicle</DialogTitle>
-                            <DialogDescription>
-                                Fill in the details of your new vehicle.
-                            </DialogDescription>
-                        </DialogHeader>
-                        {formContent}
-                    </DialogContent>
-                </Dialog>
-            )}
-        </>
-    );
-}
+        <Dialog onOpenChange={(isOpen) => !isOpen && form.reset()}>
+            <DialogTrigger asChild>
+                <Button>Add New Vehicle</Button>
+            </DialogTrigger>
+            <DialogContent className="w-full sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[1000px] h-[90vh]">
+                <DialogHeader>
+                    <DialogTitle>Add New Vehicle</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details of your new vehicle.
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-full max-h-[calc(90vh-8rem)] px-5">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <FormSection title="General Information">
+                                    <FormField
+                                        control={form.control}
+                                        name="make"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Make</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Toyota" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="vehicleModel"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Model</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Camry" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="year"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Year</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="color"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Color</FormLabel>
+                                                <FormControl>
+                                                    <Input type="color" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </FormSection>
 
-export default AddVehicleDialog
+                                <FormSection title="Registration & Identification">
+                                    <FormField
+                                        control={form.control}
+                                        name="registrationNumber"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Registration Number</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="ABC 123" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="chassisNumber"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Chassis Number</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="1HGCM82633A123456" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="type"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Vehicle Type</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select Vehicle Type" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {Object.values(VehicleType).map((type) => (
+                                                            <SelectItem key={type} value={type}>
+                                                                {type}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </FormSection>
+
+                                <FormSection title="Technical Specifications">
+                                    <FormField
+                                        control={form.control}
+                                        name="fuelType"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Fuel Type</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select Fuel Type" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {["petrol", "diesel", "electric", "hybrid"].map((type) => (
+                                                            <SelectItem key={type} value={type}>
+                                                                {type}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="transmission"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Transmission</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select Transmission" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {Object.values(Transmission).map((transmission) => (
+                                                            <SelectItem key={transmission} value={transmission}>
+                                                                {transmission}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </FormSection>
+
+                                <FormSection title="Dates">
+                                    <FormField
+                                        control={form.control}
+                                        name="insuranceExpiry"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Insurance Expiry</FormLabel>
+                                                <FormControl>
+                                                    <Input type="date" {...field} value={field.value.toISOString().split('T')[0]} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="lastInspectionDate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Last Inspection Date</FormLabel>
+                                                <FormControl>
+                                                    <Input type="date" {...field} value={field.value?.toISOString().split('T')[0] || ""} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </FormSection>
+
+                                <FormSection title="Images">
+                                    <FormField
+                                        control={form.control}
+                                        name="frontViewImage"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Front View Image URL</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="https://example.com/front.jpg" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="rearViewImage"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Rear View Image URL</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="https://example.com/rear.jpg" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </FormSection>
+                            </div>
+                        </form>
+                    </Form>
+                </ScrollArea>
+                <DialogFooter className="mt-6">
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Close
+                        </Button>
+                    </DialogClose>
+                    <Button type="submit" disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
+                        {isLoading ? "Adding Vehicle..." : "Add Vehicle"}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export default AddVehicleDialog;
