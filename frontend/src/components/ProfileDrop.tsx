@@ -48,7 +48,7 @@ export default function ProfileDrop({
         if (file) {
             try {
                 setIsUploading(true);
-                const imageUrl = getTransformedImageUrl(await uploadToCloudinary(file), 'default');
+                const imageUrl = getTransformedImageUrl(await uploadToCloudinary(file), 'face');
                 setProfilePicture(imageUrl);
                 onImageUpload(imageUrl); // Pass URL to parent
                 toast.success("Image uploaded successfully!");

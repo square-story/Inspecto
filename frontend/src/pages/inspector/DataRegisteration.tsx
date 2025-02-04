@@ -126,7 +126,7 @@ export default function InspectorForm() {
             const signature = form.getValues('signature');
             const certificates = form.getValues('certificates');
 
-            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'default') : '';
+            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'face') : '';
             const signatureUrl = signature ? getTransformedImageUrl(await uploadToCloudinary(signature.file), 'signature') : '';
             const certificateUrls = await Promise.all(
                 certificates.map(async cert => getTransformedImageUrl(await uploadToCloudinary(cert.file), 'certificate'))

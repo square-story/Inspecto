@@ -16,7 +16,7 @@ const cloudinary = new Cloudinary({
  */
 export const getTransformedImageUrl = (
     publicId: string,
-    uploadType: "certificate" | "signature" | "default" = "default"
+    uploadType: "certificate" | "signature" | "face" | "none" = "none"
 ): string => {
     let transformation;
 
@@ -36,12 +36,15 @@ export const getTransformedImageUrl = (
             // Makes the background white
             break;
 
-        default:
-            // Default profile image settings
+        case "face":
             transformation = cloudinary
                 .image(publicId)
                 .resize(
                     crop().width(300).height(300).gravity(focusOn(face())));
+            break;
+        default:
+            transformation = cloudinary
+                .image(publicId)
             break;
     }
 

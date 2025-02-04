@@ -84,6 +84,7 @@ export interface Vehicle {
     lastInspectionDate?: Date;
     frontViewImage?: string;
     rearViewImage?: string;
+    color?: string;
 }
 
 // Vehicles state interface
