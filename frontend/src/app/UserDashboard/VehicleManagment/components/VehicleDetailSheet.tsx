@@ -130,7 +130,7 @@ export const VehicleDetailSheet = ({
                                     <DetailItem
                                         icon={<Calendar className="h-5 w-5" />}
                                         label="Insurance Expiry"
-                                        value={formatDate(vehicle.insuranceExpiry)}
+                                        value={vehicle.insuranceExpiry ? formatDate(vehicle.insuranceExpiry) : 'N/A'}
                                     />
                                     <DetailItem
                                         icon={<ClipboardCheck className="h-5 w-5" />}

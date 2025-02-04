@@ -94,7 +94,7 @@ export interface Vehicle {
     chassisNumber: string;
     fuelType: "petrol" | "diesel" | "electric" | "hybrid";
     transmission: Transmission;
-    insuranceExpiry: Date;
+    insuranceExpiry?: Date;
     lastInspectionDate?: Date;
     frontViewImage?: string;
     rearViewImage?: string;

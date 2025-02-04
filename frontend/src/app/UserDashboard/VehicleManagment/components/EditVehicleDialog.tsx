@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { VehicleType, Transmission, Vehicle, updateVehicle } from "@/features/vehicle/vehicleSlice";
-import { format } from 'date-fns';
+import { format, } from 'date-fns';
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store";
 
@@ -37,8 +37,14 @@ const editVehicleSchema = z.object({
     chassisNumber: z.string().min(6, { message: "Chassis number is required." }),
     fuelType: z.enum(["petrol", "diesel", "electric", "hybrid"]),
     transmission: z.nativeEnum(Transmission),
-    insuranceExpiry: z.date().optional(),
-    lastInspectionDate: z.date().optional(),
+    insuranceExpiry: z.union([
+        z.date(),
+        z.string().transform((val) => val ? new Date(val) : undefined)
+    ]).optional(),
+    lastInspectionDate: z.union([
+        z.date(),
+        z.string().transform((val) => val ? new Date(val) : undefined)
+    ]).optional(),
     frontViewImage: z.string().url().optional(),
     rearViewImage: z.string().url().optional(),
     color: z.string().optional(),
@@ -63,8 +69,16 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
             chassisNumber: vehicle.chassisNumber,
             fuelType: vehicle.fuelType,
             transmission: vehicle.transmission,
-            insuranceExpiry: vehicle.insuranceExpiry,
-            lastInspectionDate: vehicle.lastInspectionDate,
+            insuranceExpiry: vehicle.insuranceExpiry
+                ? (typeof vehicle.insuranceExpiry === 'string'
+                    ? new Date(vehicle.insuranceExpiry)
+                    : vehicle.insuranceExpiry)
+                : undefined,
+            lastInspectionDate: vehicle.lastInspectionDate
+                ? (typeof vehicle.lastInspectionDate === 'string'
+                    ? new Date(vehicle.lastInspectionDate)
+                    : vehicle.lastInspectionDate)
+                : undefined,
             frontViewImage: vehicle.frontViewImage || "",
             rearViewImage: vehicle.rearViewImage || "",
             color: vehicle.color || "",
@@ -77,8 +91,15 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
             const updatedVehicle = {
                 ...data,
                 _id: vehicle._id,
-                insuranceExpiry: data.insuranceExpiry ?? new Date(), // Provide a default value if undefined
-            };
+                // Ensure dates are converted to Date objects or ISO strings
+                insuranceExpiry: data.insuranceExpiry instanceof Date
+                    ? data.insuranceExpiry
+                    : (data.insuranceExpiry ? new Date(data.insuranceExpiry) : undefined),
+                lastInspectionDate: data.lastInspectionDate instanceof Date
+                    ? data.lastInspectionDate
+                    : (data.lastInspectionDate ? new Date(data.lastInspectionDate) : undefined),
+            } as Vehicle;
+
             await dispatch(updateVehicle(updatedVehicle)).unwrap();
             toast.success("Vehicle updated successfully");
             onOpenChange(false);
