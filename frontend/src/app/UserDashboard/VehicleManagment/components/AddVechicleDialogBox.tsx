@@ -23,6 +23,8 @@ import { VehicleType, Transmission, addVehicle } from "@/features/vehicle/vehicl
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store";
 import { format } from 'date-fns';
+import { Card } from "@/components/ui/card";
+import { PlusCircle } from "lucide-react";
 
 interface AddVehicleDialogProps {
     onSuccess?: () => void;
@@ -96,7 +98,10 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
     return (
         <Dialog onOpenChange={(isOpen) => !isOpen && form.reset()}>
             <DialogTrigger asChild>
-                <Button>Add New Vehicle</Button>
+                <Card className="w-72 flex flex-col items-center justify-center p-6 border-dashed border-2 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer text-center">
+                    <PlusCircle className="w-10 h-10 mb-5" />
+                    <Button>Add New Vehicle</Button>
+                </Card>
             </DialogTrigger>
             <DialogContent className="w-full sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[1000px] h-[90vh]">
                 <DialogHeader>

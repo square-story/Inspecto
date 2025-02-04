@@ -5,8 +5,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DisplayVehicle from "./components/DisplayVehicle";
 import AddVehicleDialog from "./components/AddVechicleDialogBox";
-import { Card } from "@/components/ui/card";
-import { PlusCircle } from "lucide-react";
 
 const VehicleManagement = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -34,10 +32,7 @@ const VehicleManagement = () => {
                         vehicle={vehicle}
                     />
                 ))}
-                <Card className="w-72 flex flex-col items-center justify-center p-6 border-dashed border-2 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer text-center">
-                    <PlusCircle className="w-10 h-10 mb-5" />
-                    <AddVehicleDialog onSuccess={refreshVehicles} />
-                </Card>
+                <AddVehicleDialog onSuccess={refreshVehicles} />
             </div>
         </ContentSection>
     );
