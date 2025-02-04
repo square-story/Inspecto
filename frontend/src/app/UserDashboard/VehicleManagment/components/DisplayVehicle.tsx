@@ -55,7 +55,7 @@ const VehicleDetailSheet = ({
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
             <SheetContent>
                 <SheetHeader>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center pt-10">
                         <SheetTitle>{carDetails.make} {carDetails.vehicleModel}</SheetTitle>
                         <div className="flex gap-2">
                             <Button variant="outline" size="icon" onClick={onEdit}>
