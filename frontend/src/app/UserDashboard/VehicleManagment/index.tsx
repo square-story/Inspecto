@@ -31,9 +31,7 @@ const VehicleManagement = () => {
                 {vehicles.map((vehicle) => (
                     <DisplayVehicle
                         key={vehicle._id}
-                        CarDetails={vehicle}
-                        onEdit={refreshVehicles}
-                        onDelete={refreshVehicles}
+                        vehicle={vehicle}
                     />
                 ))}
                 <Card className="w-72 flex flex-col items-center justify-center p-6 border-dashed border-2 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer text-center">
