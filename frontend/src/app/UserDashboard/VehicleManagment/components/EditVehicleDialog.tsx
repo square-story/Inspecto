@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Transmission, Vehicle, VehicleType } from "@/features/vehicle/vehicleSlice";
 import { useState } from "react";
 
@@ -39,12 +40,12 @@ export const EditVehicleDialog = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[80h] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl">Edit Vehicle Details</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-8 py-4">
+                <ScrollArea className="h-full max-h-[calc(90vh-8rem)] px-5">
                     <div className="space-y-4">
                         <h4 className="text-lg font-medium">General Information</h4>
                         <div className="space-y-4">
@@ -218,9 +219,9 @@ export const EditVehicleDialog = ({
                             </div>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
 
-                <div className="flex justify-end gap-4 mt-6">
+                <div className="flex justify-end gap-5 mt-6">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                     <Button onClick={() => onSave(editedVehicle)}>Save Changes</Button>
                 </div>

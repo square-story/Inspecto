@@ -22,6 +22,7 @@ import { z } from "zod";
 import { VehicleType, Transmission, addVehicle } from "@/features/vehicle/vehicleSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store";
+import { format } from 'date-fns';
 
 interface AddVehicleDialogProps {
     onSuccess?: () => void;
@@ -36,8 +37,8 @@ const addVehicleSchema = z.object({
     chassisNumber: z.string().min(6, { message: "Chassis number is required." }),
     fuelType: z.enum(["petrol", "diesel", "electric", "hybrid"]),
     transmission: z.nativeEnum(Transmission),
-    insuranceExpiry: z.coerce.date(),
-    lastInspectionDate: z.coerce.date().optional(),
+    insuranceExpiry: z.date().optional(),
+    lastInspectionDate: z.date().optional(),
     frontViewImage: z.string().url().optional(),
     rearViewImage: z.string().url().optional(),
     color: z.string().optional(),
@@ -271,28 +272,54 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
                                     <FormField
                                         control={form.control}
                                         name="insuranceExpiry"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Insurance Expiry</FormLabel>
-                                                <FormControl>
-                                                    <Input type="date" {...field} value={field.value.toISOString().split('T')[0]} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+                                        render={({ field }) => {
+                                            // Convert the Date object to a string in the format YYYY-MM-DD
+                                            const value = field.value ? format(field.value, 'yyyy-MM-dd') : '';
+                                            return (
+                                                <FormItem>
+                                                    <FormLabel>Insurance Expiry</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="date"
+                                                            {...field}
+                                                            value={value}
+                                                            onChange={(e) => {
+                                                                // Convert the string back to a Date object
+                                                                const date = e.target.value ? new Date(e.target.value) : null;
+                                                                field.onChange(date);
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            );
+                                        }}
                                     />
                                     <FormField
                                         control={form.control}
                                         name="lastInspectionDate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Last Inspection Date</FormLabel>
-                                                <FormControl>
-                                                    <Input type="date" {...field} value={field.value?.toISOString().split('T')[0] || ""} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+                                        render={({ field }) => {
+                                            // Convert the Date object to a string in the format YYYY-MM-DD
+                                            const value = field.value ? format(field.value, 'yyyy-MM-dd') : '';
+                                            return (
+                                                <FormItem>
+                                                    <FormLabel>Last Inspection Date</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="date"
+                                                            {...field}
+                                                            value={value}
+                                                            onChange={(e) => {
+                                                                // Convert the string back to a Date object
+                                                                const date = e.target.value ? new Date(e.target.value) : null;
+                                                                field.onChange(date);
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            );
+                                        }}
                                     />
                                 </FormSection>
 
