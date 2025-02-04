@@ -18,15 +18,22 @@ export const fetchVehicles = createAsyncThunk("vehicles/fetchVehicles", async (_
 
 
 // Async thunk for adding a vehicle
-export const addVehicle = createAsyncThunk("vehicles/addVehicle", async (vehicleData, { rejectWithValue }) => {
+export const addVehicle = createAsyncThunk("vehicles/addVehicle", async (vehicleData: Partial<Vehicle>, { rejectWithValue }) => {
     try {
         const response = await axiosInstance.post("/vehicles", vehicleData);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue({
+                status: error.response.status,
+                error: error.response.data.error,
+                duplicateField: error.response.data.duplicateField
+            });
         }
-        return rejectWithValue(error);
+        return rejectWithValue({
+            error: "An unexpected error occurred",
+            status: 500
+        });
     }
 });
 
@@ -37,9 +44,16 @@ export const updateVehicle = createAsyncThunk("vehicles/updateVehicle", async (v
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue({
+                status: error.response.status,
+                error: error.response.data.error,
+                duplicateField: error.response.data.duplicateField
+            });
         }
-        return rejectWithValue(error);
+        return rejectWithValue({
+            error: "An unexpected error occurred",
+            status: 500
+        });
     }
 });
 

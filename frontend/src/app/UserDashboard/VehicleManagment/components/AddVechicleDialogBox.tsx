@@ -14,7 +14,6 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage, Form } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -76,13 +75,25 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
             toast.success("Vehicle added successfully");
             onSuccess?.();
             form.reset();
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message || "Failed to add vehicle.");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            if (error.status === 409) {
+                // Duplicate key error
+                const duplicateField = error.duplicateField || 'registrationNumber';
+
+                // Set specific field error
+                form.setError(duplicateField, {
+                    type: 'manual',
+                    message: error.error || `This ${duplicateField} is already in use`
+                });
+
+                // Optional: Show a toast for additional visibility
+                toast.error(error.error || "Duplicate entry error");
             } else {
-                toast.error("An unexpected error occurred.");
+                // Handle other types of errors
+                toast.error("An unexpected error occurred");
+                console.error("Error in onSubmit:", error);
             }
-            console.error("Error in onSubmit:", error);
         } finally {
             setIsLoading(false);
         }

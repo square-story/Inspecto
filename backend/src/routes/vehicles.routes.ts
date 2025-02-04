@@ -18,12 +18,12 @@ router.post("/", authenticateToken, (req, res) => vehicleController.createVehicl
 router.get("/", authenticateToken, (req, res) => vehicleController.getVehiclesByUser(req, res));
 
 // Get a single vehicle by ID
-router.get("/:vehicleId", (req, res) => vehicleController.getVehicleById(req, res));
+router.get("/:vehicleId", authenticateToken, (req, res) => vehicleController.getVehicleById(req, res));
 
 // Update a vehicle
 router.put("/:vehicleId", authenticateToken, (req, res) => vehicleController.updateVehicle(req, res));
 
 // Delete a vehicle
-router.delete("/:vehicleId", (req, res) => vehicleController.deleteVehicle(req, res));
+router.delete("/:vehicleId", authenticateToken, (req, res) => vehicleController.deleteVehicle(req, res));
 
 export default router;

@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
-import { deleteVehicle, updateVehicle, Vehicle, } from '@/features/vehicle/vehicleSlice';
+import { deleteVehicle, Vehicle, } from '@/features/vehicle/vehicleSlice';
 import { EditVehicleDialog } from './EditVehicleDialog';
 import { VehicleDetailSheet } from './VehicleDetailSheet';
 
@@ -17,9 +17,10 @@ interface DisplayVehicleProps {
 
 
 const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ vehicle }) => {
+    const dispatch = useDispatch<AppDispatch>()
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const dispatch = useDispatch<AppDispatch>();
+
 
     const handleDelete = async () => {
         try {
@@ -30,14 +31,6 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ vehicle }) => {
         }
     };
 
-    const handleSave = async (editedVehicle: Vehicle) => {
-        try {
-            await dispatch(updateVehicle(editedVehicle)).unwrap();
-            setIsEditOpen(false);
-        } catch (error) {
-            console.error('Failed to update vehicle:', error);
-        }
-    };
 
     return (
         <>
@@ -84,7 +77,6 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ vehicle }) => {
                 isOpen={isEditOpen}
                 onOpenChange={setIsEditOpen}
                 vehicle={vehicle}
-                onSave={handleSave}
             />
         </>
     );
