@@ -51,8 +51,11 @@ export default class VehicleController {
 
     async updateVehicle(req: Request, res: Response): Promise<void> {
         try {
-            const updatedVehicle = await this.vehicleService.updateVehicle(req.params.id, req.body);
-            if (!updatedVehicle) res.status(404).json({ message: "Vehicle not found" });
+            const updatedVehicle = await this.vehicleService.updateVehicle(req.params.vehicleId, req.body);
+            if (!updatedVehicle) {
+                res.status(404).json({ message: "Vehicle not found" });
+                return
+            }
             res.json(updatedVehicle);
         } catch (error) {
             res.status(500).json({ message: "Error updating vehicle", error });

@@ -14,6 +14,25 @@ import {
     SheetDescription,
     SheetClose
 } from "@/components/ui/sheet";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
 import {
     ArrowRight,
@@ -21,8 +40,13 @@ import {
     Calendar,
     Wrench,
     ShieldCheck,
+    Edit,
+    Trash2,
     BookText
 } from "lucide-react";
+import { useDispatch } from 'react-redux';
+import { deleteVehicle, updateVehicle } from '@/features/vehicle/vehicleSlice';
+import { AppDispatch } from '@/store';
 
 interface DisplayVehicleProps {
     CarDetails: Vehicle;
@@ -30,15 +54,60 @@ interface DisplayVehicleProps {
 
 const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [editedVehicle, setEditedVehicle] = useState<Vehicle>(CarDetails);
+
+    const dispatch = useDispatch<AppDispatch>();
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setEditedVehicle(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveEdit = () => {
+        // Dispatch update action
+        dispatch(updateVehicle(editedVehicle));
+        setIsEditModalOpen(false);
+        setIsDetailOpen(false);
+    };
+
+    const handleDelete = () => {
+        // Dispatch delete action
+        dispatch(deleteVehicle(CarDetails._id));
+        setIsDeleteDialogOpen(false);
+        setIsDetailOpen(false);
+    };
 
     const VehicleDetailSheet = () => (
         <Sheet open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-            <SheetContent className="w-[500px] overflow-y-auto">
+            <SheetContent className="w-[500px] overflow-y-auto pt-14">
                 <SheetHeader className="mb-6">
-                    <SheetTitle className="flex items-center gap-3">
-                        <Car className="h-6 w-6 text-primary" />
-                        <span>{CarDetails.make} {CarDetails.vehicleModel}</span>
-                    </SheetTitle>
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <Car className="h-6 w-6 text-primary" />
+                            <SheetTitle>{CarDetails.make} {CarDetails.vehicleModel}</SheetTitle>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setIsEditModalOpen(true)}
+                            >
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
                     <SheetDescription>
                         Comprehensive Vehicle Details
                     </SheetDescription>
@@ -116,12 +185,7 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
                         </div>
                     )}
                 </div>
-                <Button variant="default" className="w-full mt-6">
-                    Edit Vehicle
-                </Button>
-                <Button variant="destructive" className="w-full mt-6">
-                    Delete Vehicle
-                </Button>
+
                 <SheetClose asChild>
                     <Button variant="outline" className="w-full mt-6">
                         Close Details
@@ -129,6 +193,93 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
                 </SheetClose>
             </SheetContent>
         </Sheet>
+    );
+
+    const EditVehicleDialog = () => (
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+            <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle>Edit Vehicle Details</DialogTitle>
+                    <DialogDescription>
+                        Make changes to your vehicle information here.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="make" className="text-right">
+                            Make
+                        </Label>
+                        <Input
+                            id="make"
+                            name="make"
+                            value={editedVehicle.make}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="vehicleModel" className="text-right">
+                            Model
+                        </Label>
+                        <Input
+                            id="vehicleModel"
+                            name="vehicleModel"
+                            value={editedVehicle.vehicleModel}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="year" className="text-right">
+                            Year
+                        </Label>
+                        <Input
+                            id="year"
+                            name="year"
+                            type="number"
+                            value={editedVehicle.year}
+                            onChange={handleInputChange}
+                            className="col-span-3"
+                        />
+                    </div>
+                    {/* Add more fields as needed */}
+                </div>
+                <div className="flex justify-end space-x-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsEditModalOpen(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveEdit}>
+                        Save Changes
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+
+    const DeleteConfirmationDialog = () => (
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will permanently delete the vehicle from your records.
+                        This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={handleDelete}
+                    >
+                        Delete Vehicle
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 
     const DetailItem = ({
@@ -204,6 +355,8 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ CarDetails }) => {
             </Card>
 
             <VehicleDetailSheet />
+            <EditVehicleDialog />
+            <DeleteConfirmationDialog />
         </>
     );
 };
