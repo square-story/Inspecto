@@ -21,6 +21,7 @@ import { VehicleType, Transmission, Vehicle, updateVehicle } from "@/features/ve
 import { format, } from 'date-fns';
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store";
+import ProfileDrop from "@/components/ProfileDrop";
 
 interface EditVehicleDialogProps {
     isOpen: boolean;
@@ -84,6 +85,14 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
             color: vehicle.color || "",
         },
     });
+
+    const handleFront = (url: string | null) => {
+        form.setValue("frontViewImage", url || '');
+    }
+
+    const handleBack = (url: string | null) => {
+        form.setValue('rearViewImage', url || "")
+    }
 
     async function onSubmit(data: z.infer<typeof editVehicleSchema>) {
         try {
@@ -368,32 +377,10 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
                                 </FormSection>
 
                                 <FormSection title="Images">
-                                    <FormField
-                                        control={form.control}
-                                        name="frontViewImage"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Front View Image URL</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="https://example.com/front.jpg" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="rearViewImage"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Rear View Image URL</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="https://example.com/rear.jpg" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="flex flex-row gap-5">
+                                        <ProfileDrop onImageUpload={handleFront} defaultImage={vehicle.frontViewImage || ""} headerTitle="Front Image" />
+                                        <ProfileDrop onImageUpload={handleBack} defaultImage={vehicle.rearViewImage || ""} headerTitle="Rear Image" />
+                                    </div>
                                 </FormSection>
                             </div>
                         </form>

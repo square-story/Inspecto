@@ -24,6 +24,7 @@ import { AppDispatch } from "@/store";
 import { format } from 'date-fns';
 import { Card } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
+import ProfileDrop from "@/components/ProfileDrop";
 
 interface AddVehicleDialogProps {
     onSuccess?: () => void;
@@ -44,6 +45,9 @@ const addVehicleSchema = z.object({
     rearViewImage: z.string().url().optional(),
     color: z.string().optional(),
 });
+
+
+
 
 const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +72,13 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
         },
     });
 
+    const handleFront = (url: string | null) => {
+        form.setValue("frontViewImage", url || '');
+    }
+
+    const handleBack = (url: string | null) => {
+        form.setValue('rearViewImage', url || "")
+    }
     async function onSubmit(data: z.infer<typeof addVehicleSchema>) {
         try {
             setIsLoading(true);
@@ -340,32 +351,10 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
                                 </FormSection>
 
                                 <FormSection title="Images">
-                                    <FormField
-                                        control={form.control}
-                                        name="frontViewImage"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Front View Image URL</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="https://example.com/front.jpg" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="rearViewImage"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Rear View Image URL</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="https://example.com/rear.jpg" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="flex flex-row gap-5">
+                                        <ProfileDrop onImageUpload={handleFront} defaultImage={''} headerTitle="Front Image" />
+                                        <ProfileDrop onImageUpload={handleBack} defaultImage={''} headerTitle="Rear Image" />
+                                    </div>
                                 </FormSection>
                             </div>
                         </form>
