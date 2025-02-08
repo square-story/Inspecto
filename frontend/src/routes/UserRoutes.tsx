@@ -7,6 +7,7 @@ import UserInputOTP from "../pages/user/UserInputOTP";
 import SettingsProfile from "@/app/UserDashboard/profile";
 import UserDashboardView from "@/app/UserDashboard/dashboard";
 import VehicleManagement from "@/app/UserDashboard/VehicleManagment";
+import InspectionManagement from "@/app/UserDashboard/InspectionManagement";
 
 const UserRoutes = () => (
     <Routes>
@@ -17,6 +18,7 @@ const UserRoutes = () => (
             <Route path="" element={<UserDashboardView />} />
             <Route path="settings" element={<SettingsProfile />} />
             <Route path="vehicles" element={<VehicleManagement />} />
+            <Route path="inspection" element={<InspectionManagement />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
