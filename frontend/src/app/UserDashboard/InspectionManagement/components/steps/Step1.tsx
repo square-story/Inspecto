@@ -1,4 +1,3 @@
-// components/steps/Step1.tsx
 "use client";
 
 import { useFormContext } from "react-hook-form";
@@ -11,9 +10,15 @@ import {
     FormControl,
     FormMessage,
 } from "@/components/ui/form";
+import AddressAutocomplete from "../AddressAutocomplete";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const Step1 = () => {
-    const { control } = useFormContext();
+    const { control, setValue, watch } = useFormContext();
+    const locationValue = watch("location");
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // State to manage dialog visibility
 
     return (
         <div className="space-y-4">
@@ -34,17 +39,31 @@ const Step1 = () => {
             <FormField
                 control={control}
                 name="location"
-                render={({ field, fieldState: { error } }) => (
+                render={({ fieldState: { error } }) => (
                     <FormItem>
                         <FormLabel>Location</FormLabel>
                         <FormControl>
-                            <Input placeholder="Enter Location" {...field} />
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="w-full">
+                                        {locationValue ? locationValue : "Select a location"}
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-lg w-full space-y-4">
+                                    <DialogHeader>
+                                        <DialogTitle>Choose a Location</DialogTitle>
+                                    </DialogHeader>
+                                    <AddressAutocomplete setValue={setValue} closeDialog={() => setIsDialogOpen(false)} />
+                                </DialogContent>
+                            </Dialog>
                         </FormControl>
                         {error && <FormMessage>{error.message}</FormMessage>}
                     </FormItem>
                 )}
             />
-
+            {/* Hidden fields to store latitude & longitude */}
+            <input type="hidden" {...control.register("latitude")} />
+            <input type="hidden" {...control.register("longitude")} />
             <FormField
                 control={control}
                 name="phone"
@@ -58,6 +77,7 @@ const Step1 = () => {
                     </FormItem>
                 )}
             />
+
 
             <FormField
                 control={control}

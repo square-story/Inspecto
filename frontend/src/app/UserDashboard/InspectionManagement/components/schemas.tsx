@@ -4,10 +4,12 @@ import { z } from "zod";
 export const Step1Schema = z.object({
     vehicleId: z.string().min(1, "Vehicle selection is required"),
     location: z.string().min(1, "Location is required"),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
     phone: z
         .string()
         .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-    inspectionType: z.string().min(1, "Select an inspection type").default("basic")
+    inspectionType: z.string().min(1, "Select an inspection type").default("basic"),
 })
 
 
