@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Command, CommandEmpty, CommandGroup, CommandList, CommandInput } from "@/components/ui/command";
+import { Command, CommandGroup, CommandList, CommandInput } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface AddressAutocompleteProps {
     setValue: (name: string, value: string) => void;
@@ -17,6 +18,7 @@ const AddressAutocomplete = ({ setValue, closeDialog }: AddressAutocompleteProps
     const [filteredAddresses, setFilteredAddresses] = useState<{ id: string; text: string; lat: number; lng: number }[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const debouncedSearch = useDebounce(search, 500);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!debouncedSearch.trim()) {
@@ -26,6 +28,7 @@ const AddressAutocomplete = ({ setValue, closeDialog }: AddressAutocompleteProps
 
         const fetchAddresses = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
                     params: {
                         q: debouncedSearch,
@@ -46,6 +49,8 @@ const AddressAutocomplete = ({ setValue, closeDialog }: AddressAutocompleteProps
             } catch (error) {
                 console.error("Error fetching addresses:", error);
                 setFilteredAddresses([]);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -83,7 +88,7 @@ const AddressAutocomplete = ({ setValue, closeDialog }: AddressAutocompleteProps
             },
             (error) => {
                 console.error("Geolocation error:", error);
-                alert("Unable to retrieve location.");
+                toast("Unable to retrieve location.");
             }
         );
     };
@@ -105,7 +110,11 @@ const AddressAutocomplete = ({ setValue, closeDialog }: AddressAutocompleteProps
                         <CommandList>
                             <div className="absolute z-50 w-full bg-background border rounded-md shadow-md">
                                 <CommandGroup>
-                                    {filteredAddresses.length > 0 ? (
+                                    {isLoading ? (
+                                        <div className="h-28 flex items-center justify-center">
+                                            <Loader2 className="size-6 animate-spin" />
+                                        </div>
+                                    ) : (
                                         filteredAddresses.map((address) => (
                                             <Button
                                                 key={address.id}
@@ -121,8 +130,13 @@ const AddressAutocomplete = ({ setValue, closeDialog }: AddressAutocompleteProps
                                                 {address.text}
                                             </Button>
                                         ))
-                                    ) : (
-                                        <CommandEmpty>No locations found.</CommandEmpty>
+                                    )}
+                                    {!isLoading && filteredAddresses.length === 0 && (
+                                        <div className="py-4 flex items-center justify-center">
+                                            {search === ""
+                                                ? "Please enter an address"
+                                                : "No address found"}
+                                        </div>
                                     )}
                                 </CommandGroup>
                             </div>
