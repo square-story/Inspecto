@@ -5,8 +5,8 @@ export default function InspectionManagement() {
 
     return (
         <ContentSection
-            title='Profile'
-            desc='This is how others will see you on the site.'
+            title='Inspection'
+            desc='Complete the step to follow the instruction'
         >
             <MultiStepForm />
         </ContentSection>

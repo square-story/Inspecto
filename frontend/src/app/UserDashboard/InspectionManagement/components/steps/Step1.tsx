@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     FormField,
     FormItem,
@@ -14,6 +14,15 @@ import AddressAutocomplete from "../AddressAutocomplete";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
+
+const vehicles = [
+    { id: "V001", name: "Toyota Camry" },
+    { id: "V002", name: "Honda Civic" },
+    { id: "V003", name: "Ford F-150" },
+    { id: "V004", name: "Tesla Model 3" },
+    { id: "V005", name: "Chevrolet Malibu" },
+]
 
 const Step1 = () => {
     const { control, setValue, watch } = useFormContext();
@@ -28,9 +37,20 @@ const Step1 = () => {
                 render={({ field, fieldState: { error } }) => (
                     <FormItem>
                         <FormLabel>Vehicle</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Enter Vehicle ID" {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a vehicle" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {vehicles.map((vehicle) => (
+                                    <SelectItem key={vehicle.id} value={vehicle.id}>
+                                        {vehicle.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         {error && <FormMessage>{error.message}</FormMessage>}
                     </FormItem>
                 )}
@@ -91,12 +111,8 @@ const Step1 = () => {
                                 onValueChange={field.onChange}
                                 value={field.value}
                             >
-                                <SelectTrigger className="w-full">
-                                    {field.value === "basic"
-                                        ? "Basic Inspection"
-                                        : field.value === "full"
-                                            ? "Full Inspection"
-                                            : "Select an Inspection Type"}
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select an Inspection type" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="basic">Basic Inspection</SelectItem>
