@@ -1,7 +1,6 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     FormField,
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { AppDispatch, RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 const Step1 = () => {
     const { control, setValue, watch } = useFormContext();
@@ -92,16 +92,18 @@ const Step1 = () => {
             {/* Hidden fields to store latitude & longitude */}
             <input type="hidden" {...control.register("latitude")} />
             <input type="hidden" {...control.register("longitude")} />
+
+
             <FormField
                 control={control}
                 name="phone"
-                render={({ field, fieldState: { error } }) => (
-                    <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                        <FormLabel htmlFor="phone">Phone Number</FormLabel>
                         <FormControl>
-                            <Input placeholder="Enter Phone Number" {...field} />
+                            <PhoneInput {...field} defaultCountry="IN" />
                         </FormControl>
-                        {error && <FormMessage>{error.message}</FormMessage>}
+                        <FormMessage />
                     </FormItem>
                 )}
             />
