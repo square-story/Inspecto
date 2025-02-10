@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -11,9 +12,11 @@ import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 import Step5 from "./steps/Step5";
 import { toast } from "sonner";
+import axiosInstance from "@/api/axios";
 
 const MultiStepForm = () => {
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
 
     const methods = useForm({
         mode: "onChange",
@@ -30,16 +33,30 @@ const MultiStepForm = () => {
         ),
     });
 
-    const onSubmit = (data: unknown) => {
+    const onSubmit = async (data: unknown) => {
         toast.success(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
             <code className="text-white">{JSON.stringify(data, null, 2)}</code>
         </pre>)
         if (step < 5) {
             setStep(step + 1);
-        } else {
-            toast.success(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                <code className="text-white">{JSON.stringify(methods.getValues(), null, 2)}</code>
-            </pre>)
+            return;
+        } try {
+            setLoading(true);
+
+            // Send booking request to backend
+            const response = await axiosInstance.post("/inspections/book", methods.getValues());
+
+            toast.success("Inspection booked successfully!");
+            console.log("Response:", response.data);
+
+            // Reset form after success
+            methods.reset();
+            setStep(1);
+        } catch (error: any) {
+            console.error("Error booking inspection:", error);
+            toast.error(error.response?.data?.message || "Something went wrong");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -59,7 +76,7 @@ const MultiStepForm = () => {
                         </Button>
                     )}
                     <Button type="submit" className="btn">
-                        {step === 5 ? "Pay Now" : "Next"}
+                        {loading ? "Processing..." : step === 5 ? "Pay Now" : "Next"}
                     </Button>
                 </div>
             </form>
