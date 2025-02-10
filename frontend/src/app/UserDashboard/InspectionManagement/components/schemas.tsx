@@ -9,7 +9,7 @@ export const Step1Schema = z.object({
     phone: z
         .string()
         .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-    inspectionType: z.string().min(1, "Select an inspection type").default("basic"),
+    inspectionType: z.string().min(1, "Select an inspection type"),
 })
 
 

@@ -18,11 +18,15 @@ const MultiStepForm = () => {
     const methods = useForm({
         mode: "onChange",
         resolver: zodResolver(
-            step === 1 ? Step1Schema :
-                step === 2 ? Step2Schema :
-                    step === 3 ? Step3Schema :
-                        step === 4 ? Step4Schema :
-                            Step5Schema
+            step === 1
+                ? Step1Schema
+                : step === 2
+                    ? Step2Schema
+                    : step === 3
+                        ? Step3Schema
+                        : step === 4
+                            ? Step4Schema
+                            : Step5Schema
         ),
     });
 
@@ -32,11 +36,9 @@ const MultiStepForm = () => {
         </pre>)
         if (step < 5) {
             setStep(step + 1);
-            console.log(step)
         } else {
-            // Handle final submission (e.g., trigger payment)
             toast.success(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+                <code className="text-white">{JSON.stringify(methods.getValues(), null, 2)}</code>
             </pre>)
         }
     };
