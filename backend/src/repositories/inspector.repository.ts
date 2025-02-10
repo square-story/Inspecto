@@ -27,4 +27,17 @@ export class InspectorRepository implements IinspectorRepository {
     async updateInspectorProfileCompletion(userId: string) {
         return await inspectorModel.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true }).select('-password')
     }
+    async getNearbyInspectors(latitude: string, longitude: string) {
+        return await inspectorModel.find({
+            location: {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [parseFloat(longitude), parseFloat(latitude)]
+                    },
+                    $maxDistance: 10000
+                }
+            }
+        })
+    }
 }

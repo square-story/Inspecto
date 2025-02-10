@@ -28,5 +28,8 @@ export const inspectorService = {
     },
     changePassword: async (data: passwordFormSchema) => {
         return await axiosInstance.put('/inspector/change-password', data)
+    },
+    getInspectorsBasedOnLocation: async (latitude: string, longitude: string) => {
+        return await axiosInstance.get(`/inspector?latitude=${latitude}&longitude=${longitude}`)
     }
 }

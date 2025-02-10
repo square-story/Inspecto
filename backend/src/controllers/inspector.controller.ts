@@ -250,4 +250,25 @@ export class InspectorController {
             return
         }
     }
+
+    static getNearbyInspectors: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const { latitude, longitude } = req.query;
+            if (!latitude || !longitude) {
+                res.status(400).json({ message: "Latitude and Longitude are required" });
+                return
+            }
+            const inspectors = await inspectorService.getNearbyInspectors(latitude as string, longitude as string);
+            res.status(200).json(inspectors);
+            return;
+        } catch (error: any) {
+            console.error("Error in getNearbyInspectors:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message || "Internal Server Error. Please try again later."
+            });
+            return
+        }
+    }
+
 }

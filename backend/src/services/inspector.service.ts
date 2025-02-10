@@ -149,4 +149,7 @@ export class InspectorService {
             throw error;
         }
     }
+    async getNearbyInspectors(latitude: string, longitude: string) {
+        return await this.inspectorRepository.getNearbyInspectors(latitude, longitude)
+    }
 }
