@@ -11,23 +11,28 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import AddressAutocomplete from "../AddressAutocomplete";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-
-const vehicles = [
-    { id: "V001", name: "Toyota Camry" },
-    { id: "V002", name: "Honda Civic" },
-    { id: "V003", name: "Ford F-150" },
-    { id: "V004", name: "Tesla Model 3" },
-    { id: "V005", name: "Chevrolet Malibu" },
-]
+import { AppDispatch, RootState } from "@/store";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
 
 const Step1 = () => {
     const { control, setValue, watch } = useFormContext();
     const locationValue = watch("location");
-    const [isDialogOpen, setIsDialogOpen] = useState(false); // State to manage dialog visibility
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const dispatch = useDispatch<AppDispatch>()
+    const vehicles = useSelector((state: RootState) => state.vehicle.vehicles);
+
+
+    const refreshVehicles = useCallback(() => {
+        dispatch(fetchVehicles());
+    }, [dispatch]);
+
+    useEffect(() => {
+        refreshVehicles();
+    }, [refreshVehicles]);
 
     return (
         <div className="space-y-4">
@@ -39,14 +44,17 @@ const Step1 = () => {
                         <FormLabel>Vehicle</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger className="h-20" >
                                     <SelectValue placeholder="Select a vehicle" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="max-h-72 overflow-auto">
                                 {vehicles.map((vehicle) => (
-                                    <SelectItem key={vehicle.id} value={vehicle.id}>
-                                        {vehicle.name}
+                                    <SelectItem key={vehicle._id} value={vehicle._id}>
+                                        <div className="flex flex-col gap-2">
+                                            <span className="font-medium">{vehicle.make} ({vehicle.vehicleModel})</span>
+                                            <span className="text-sm text-gray-500">{vehicle.registrationNumber || "N/A"}</span>
+                                        </div>
                                     </SelectItem>
                                 ))}
                             </SelectContent>
