@@ -13,15 +13,21 @@ export class InspectorService {
     constructor() {
         this.inspectorRepository = new InspectorRepository()
     }
+
+
     async getInspectorDetails(inspectorId: string) {
         return await this.inspectorRepository.findInspectorById(inspectorId)
     }
+
+
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
         const response = await this.inspectorRepository.updateInspector(userId, data)
         if (response) {
             return await this.inspectorRepository.updateInspectorProfileCompletion(userId)
         }
     }
+
+
     async approveInspector(inspectorId: string) {
         try {
             const updates = {
@@ -44,6 +50,8 @@ export class InspectorService {
             throw error;
         }
     }
+
+
     async denyInspector(inspectorId: string, reason: string) {
         try {
             const updates = {
@@ -70,6 +78,8 @@ export class InspectorService {
             throw error;
         }
     }
+
+
     async BlockHandler(inspectorId: string) {
         try {
             const currentInspector = await this.inspectorRepository.findInspectorById(inspectorId);
@@ -93,9 +103,13 @@ export class InspectorService {
             throw error;
         }
     }
+
+
     async updateDetails(userId: string, data: Partial<IInspector>) {
         return await this.inspectorRepository.updateInspector(userId, data)
     }
+
+
     async changePassword(currentPassword: string, newPassword: string, inspectorId: string): Promise<ChangePasswordResponse> {
         try {
             const isValid = await this.inspectorRepository.findInspectorById(inspectorId)

@@ -22,17 +22,25 @@ export interface IInspectorInput {
     yearOfExp: number;
     phone: string;
     signature: string;
-    specialization: [string],
+    specialization: [string];
     start_time: string;
     end_time: string;
-    avaliable_days: number;
+    availableSlots: { date: Date, timeSlots: [string] }[];
+    bookedSlots: { date: Date, timeSlot: string, bookedBy: ObjectId }[];
+    available_days: number;
     isListed: boolean;
     isCompleted: boolean;
     approvedAt?: Date;
     deniedAt?: Date;
     denialReason?: string;
+    coverageRadius: number;
+    serviceAreas: string[];
     createdAt: Date;
     updatedAt: Date;
+    location: {
+        type: string;
+        coordinates: [number];  // [longitude, latitude]
+    };
 }
 
 export interface IInspector extends Document, IInspectorInput {
@@ -55,12 +63,25 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     specialization: { type: [String] },
     start_time: { type: String },
     end_time: { type: String },
-    avaliable_days: { type: Number },
+
+    availableSlots: [{ date: Date, timeSlots: [String] }],
+    bookedSlots: [{ date: Date, timeSlot: String, bookedBy: { type: Schema.Types.ObjectId, ref: "User" } }],
+
+    available_days: { type: Number },
     isListed: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     approvedAt: { type: Date },
     deniedAt: { type: Date },
-    denialReason: { type: String }
-}, { timestamps: true })
+    denialReason: { type: String },
+
+    coverageRadius: { type: Number, default: 10 },  // 10 km default
+    serviceAreas: [{ type: String }],
+
+    location: {
+        type: { type: String, enum: ['Point'], default: 'Point' },
+        coordinates: { type: [Number], index: '2dsphere' } // [longitude, latitude]
+    }
+
+}, { timestamps: true });
 
 export default mongoose.model<IInspector>("Inspector", InspectorSchema);

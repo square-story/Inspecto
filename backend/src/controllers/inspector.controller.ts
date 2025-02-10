@@ -24,12 +24,27 @@ export class InspectorController {
     static completeProfile: RequestHandler = async (req: Request, res: Response) => {
         try {
             const userId = req.user?.userId
-            const data = req.body
+            const { longitude, latitude, ...restData } = req.body; // Extract location data separately
+
             if (!userId) {
-                res.status(400).json('User Id is missing in the token')
+                res.status(400).json({ message: 'User ID is missing in the token' });
                 return;
             }
-            const response = await inspectorService.completeInspectorProfile(userId, data)
+
+            // Validate longitude and latitude
+            if (!longitude || !latitude) {
+                res.status(400).json({ message: 'Longitude and Latitude are required' });
+                return
+            }
+
+            // Ensure location follows MongoDB's GeoJSON format
+            const location = {
+                type: 'Point',
+                coordinates: [parseFloat(longitude), parseFloat(latitude)] // Convert to numbers
+            };
+
+            const updatedData = { ...restData, location }; // Merge with other form data
+            const response = await inspectorService.completeInspectorProfile(userId, updatedData)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
