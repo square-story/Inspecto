@@ -79,8 +79,13 @@ const InspectorSchema: Schema = new Schema<IInspector>({
 
     location: {
         type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], index: '2dsphere' } // [longitude, latitude]
+        coordinates: {
+            type: [Number],
+            default: [76.300288, 10.0368384], // [longitude, latitude]
+            index: '2dsphere'
+        }
     }
+
 
 }, { timestamps: true });
 

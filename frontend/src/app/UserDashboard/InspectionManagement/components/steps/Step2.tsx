@@ -25,6 +25,7 @@ const Step2 = () => {
         }
         fetchInspectors();
     }, [latitude, longitude]);
+    const availableInspectors = inspectors.filter(inspector => inspector.status === "APPROVED");
     return (
         <div className="space-y-4">
             <FormField
@@ -40,8 +41,8 @@ const Step2 = () => {
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                                {inspectors.length > 0 ? (
-                                    inspectors.map((inspector) => (
+                                {availableInspectors.length > 0 ? (
+                                    availableInspectors.map((inspector) => (
                                         <SelectItem key={inspector._id} value={inspector._id}>
                                             {inspector.firstName} {inspector.lastName} ({inspector.specialization?.join(", ") || "No specialization"})
                                         </SelectItem>
