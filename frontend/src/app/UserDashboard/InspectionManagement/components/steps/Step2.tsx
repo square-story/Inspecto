@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { inspectorService } from "@/services/inspector.service";
@@ -28,7 +28,7 @@ const Step2 = () => {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Choose Inspector</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={availableInspectors.length === 0} >
                             <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select an inspector" />
@@ -47,6 +47,11 @@ const Step2 = () => {
                             </SelectContent>
                         </Select>
                         <FormMessage />
+                        {availableInspectors.length === 0 && (
+                            <FormDescription className="text-red-500">
+                                No inspectors are available at this moment. Please try again later.
+                            </FormDescription>
+                        )}
                     </FormItem>
                 )}
             />
