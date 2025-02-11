@@ -15,12 +15,12 @@ export const Step1Schema = z.object({
 
 export const Step2Schema = z.object({
     inspectorId: z.string().min(1, "Select an inspector"),
-    date: z.date({
-        required_error: "A date of birth is required.",
-    }),
 })
 
 export const Step3Schema = z.object({
+    date: z.date({
+        required_error: "A date of slot is required.",
+    }),
     timeSlot: z.string().min(1, "Select a time slot")
 })
 
