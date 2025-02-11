@@ -15,7 +15,6 @@ axiosInstance.interceptors.request.use(
         const state = store.getState();
         const token = state.auth.accessToken;
         const isBlocked = !state.auth.status;
-        console.log('The blocked state', isBlocked)
         if (isBlocked) {
             const allowedEndpoints = [
                 '/support',

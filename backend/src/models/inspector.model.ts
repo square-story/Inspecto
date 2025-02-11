@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, ObjectId } from 'mongoose'
 
-
 export enum InspectorStatus {
     PENDING = 'PENDING',
     APPROVED = 'APPROVED',
@@ -8,6 +7,20 @@ export enum InspectorStatus {
     BLOCKED = 'BLOCKED'
 }
 
+// Simplified day availability interface
+export interface IDayAvailability {
+    enabled: boolean;
+    slots: number;
+}
+
+export type WeeklyAvailability = {
+    Monday: IDayAvailability;
+    Tuesday: IDayAvailability;
+    Wednesday: IDayAvailability;
+    Thursday: IDayAvailability;
+    Friday: IDayAvailability;
+    Saturday: IDayAvailability;
+};
 
 export interface IInspectorInput {
     firstName: string;
@@ -23,11 +36,13 @@ export interface IInspectorInput {
     phone: string;
     signature: string;
     specialization: [string];
-    start_time: string;
-    end_time: string;
-    availableSlots: { date: Date, timeSlots: [string] }[];
-    bookedSlots: { date: Date, timeSlot: string, bookedBy: ObjectId }[];
-    available_days: number;
+    availableSlots: WeeklyAvailability;
+    // to track dates and remaining slots
+    bookedSlots: {
+        date: Date,
+        slotsBooked: number,
+        bookedBy: ObjectId[]
+    }[];
     isListed: boolean;
     isCompleted: boolean;
     approvedAt?: Date;
@@ -47,6 +62,15 @@ export interface IInspector extends Document, IInspectorInput {
     _id: ObjectId
 }
 
+// Simplified day availability schema
+const DayAvailabilitySchema = new Schema<IDayAvailability>(
+    {
+        enabled: { type: Boolean, required: true, default: false },
+        slots: { type: Number, required: true, default: 0, min: 0, max: 10 }
+    },
+    { _id: false }
+);
+
 const InspectorSchema: Schema = new Schema<IInspector>({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -62,8 +86,22 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     signature: { type: String },
     specialization: { type: [String] },
 
-    availableSlots: [{ date: Date, timeSlots: [String] }],
-    bookedSlots: [{ date: Date, timeSlot: String, bookedBy: { type: Schema.Types.ObjectId, ref: "User" } }],
+    // Modified available slots structure
+    availableSlots: {
+        Monday: { type: DayAvailabilitySchema, required: true, default: { enabled: true, slots: 5 } },
+        Tuesday: { type: DayAvailabilitySchema, required: true, default: { enabled: true, slots: 5 } },
+        Wednesday: { type: DayAvailabilitySchema, required: true, default: { enabled: true, slots: 5 } },
+        Thursday: { type: DayAvailabilitySchema, required: true, default: { enabled: true, slots: 5 } },
+        Friday: { type: DayAvailabilitySchema, required: true, default: { enabled: true, slots: 5 } },
+        Saturday: { type: DayAvailabilitySchema, required: true, default: { enabled: false, slots: 0 } },
+    },
+
+    // Modified booked slots structure
+    bookedSlots: [{
+        date: { type: Date, required: true },
+        slotsBooked: { type: Number, required: true, min: 1 },
+        bookedBy: [{ type: Schema.Types.ObjectId, ref: "User" }]
+    }],
 
     isListed: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
@@ -82,8 +120,6 @@ const InspectorSchema: Schema = new Schema<IInspector>({
             index: '2dsphere'
         }
     }
-
-
 }, { timestamps: true });
 
 export default mongoose.model<IInspector>("Inspector", InspectorSchema);

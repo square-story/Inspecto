@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -22,6 +23,7 @@ import { getTransformedImageUrl } from "@/utils/cloudinary";
 import { SpecializationSelect } from "@/components/fancy-multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
+import AvailabilityPicker, { WeeklyAvailability } from "@/components/AvailabilityPicker"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -36,6 +38,15 @@ const FileSchema = z.object({
     preview: z.string()
 })
 
+const defaultAvailability: WeeklyAvailability = {
+    Monday: { enabled: true, slots: 5 },
+    Tuesday: { enabled: true, slots: 5 },
+    Wednesday: { enabled: true, slots: 5 },
+    Thursday: { enabled: true, slots: 5 },
+    Friday: { enabled: true, slots: 5 },
+    Saturday: { enabled: false, slots: 0 },
+};
+
 // Validation schema
 const formSchema = z.object({
     location: z.string().min(3, "Address must be at least 3 characters"),
@@ -47,13 +58,40 @@ const formSchema = z.object({
     signature: FileSchema.nullable(),
     specialization: z.array(z.string()).min(1, "At least one specialization is required"),
     longitude: z.string().optional().nullable(),
-    latitude: z.string().optional().nullable()
+    latitude: z.string().optional().nullable(),
+    availableSlots: z.object({
+        Monday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Tuesday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Wednesday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Thursday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Friday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Saturday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+    }),
 });
 
 interface FileWithPreview {
     file: File,
     preview: string
 }
+
 
 export default function InspectorForm() {
     const [isUploadingFiles, setIsUploadingFiles] = useState(false);
@@ -68,7 +106,8 @@ export default function InspectorForm() {
             specialization: [],
             certificates: [],
             profile_image: null,
-            signature: null
+            signature: null,
+            availableSlots: defaultAvailability,
         }
     });
 
@@ -150,9 +189,9 @@ export default function InspectorForm() {
                 yearOfExp: data.yearOfExp,
                 specialization: data.specialization,
                 longitude: data.longitude,
-                latitude: data.latitude
+                latitude: data.latitude,
+                availableSlots: data.availableSlots
             };
-            console.log(submitData)
             const response = await inspectorService.completeProfile(submitData)
             if (response.data) {
                 toast.success("Profile updated successfully!");
@@ -268,6 +307,27 @@ export default function InspectorForm() {
                             </div>
 
                             {/* Time and Days */}
+                            <FormField
+                                control={form.control}
+                                name="availableSlots"
+                                render={({ field, fieldState: { error } }) => (
+                                    <FormItem>
+                                        <FormLabel>Available Slots</FormLabel>
+                                        <FormControl>
+                                            <AvailabilityPicker
+                                                value={field.value || defaultAvailability}
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Set your available slots for booking (for each day).
+                                        </FormDescription>
+                                        <FormMessage>{error && error.message}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+
+
 
 
                             {/* Certificates */}
