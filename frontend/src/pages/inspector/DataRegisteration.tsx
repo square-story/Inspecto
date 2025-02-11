@@ -46,18 +46,8 @@ const formSchema = z.object({
         .max(50, "Experience must not exceed 50 years"),
     signature: FileSchema.nullable(),
     specialization: z.array(z.string()).min(1, "At least one specialization is required"),
-    start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
-    end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
-    available_days: z.number().min(1).max(7, "Days must be between 1-7"),
     longitude: z.string().optional().nullable(),
     latitude: z.string().optional().nullable()
-}).refine(data => {
-    const start = new Date(`1970-01-01T${data.start_time}`);
-    const end = new Date(`1970-01-01T${data.end_time}`);
-    return end > start
-}, {
-    message: "End time must be after start time",
-    path: ["end_time"]
 });
 
 interface FileWithPreview {
@@ -77,7 +67,6 @@ export default function InspectorForm() {
         defaultValues: {
             specialization: [],
             certificates: [],
-            available_days: 5,
             profile_image: null,
             signature: null
         }
@@ -160,9 +149,6 @@ export default function InspectorForm() {
                 certificates: certificateUrls,
                 yearOfExp: data.yearOfExp,
                 specialization: data.specialization,
-                start_time: data.start_time,
-                end_time: data.end_time,
-                avaliable_days: data.available_days,
                 longitude: data.longitude,
                 latitude: data.latitude
             };
@@ -282,55 +268,7 @@ export default function InspectorForm() {
                             </div>
 
                             {/* Time and Days */}
-                            <div className="grid md:grid-cols-3 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="start_time"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Start Time</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
 
-                                <FormField
-                                    control={form.control}
-                                    name="end_time"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>End Time</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="available_days"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Available Days</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    max="7"
-                                                    {...field}
-                                                    onChange={e => field.onChange(parseInt(e.target.value))}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
 
                             {/* Certificates */}
                             <FormField

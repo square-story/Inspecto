@@ -61,13 +61,10 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     phone: { type: String, required: true },
     signature: { type: String },
     specialization: { type: [String] },
-    start_time: { type: String },
-    end_time: { type: String },
 
     availableSlots: [{ date: Date, timeSlots: [String] }],
     bookedSlots: [{ date: Date, timeSlot: String, bookedBy: { type: Schema.Types.ObjectId, ref: "User" } }],
 
-    available_days: { type: Number },
     isListed: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     approvedAt: { type: Date },

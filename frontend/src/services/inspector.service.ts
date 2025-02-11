@@ -9,9 +9,6 @@ interface IsubmitData {
     certificates: string[];
     yearOfExp: number;
     specialization: string[];
-    start_time: string;
-    end_time: string;
-    avaliable_days: number;
 }
 
 
