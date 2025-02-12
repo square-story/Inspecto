@@ -28,7 +28,6 @@ export interface IInspectionInput {
     slotNumber: number;           // Track which slot was booked (1-10)
     bookingReference: string;     // Unique booking reference
     confirmAgreement: boolean;
-    paymentMethod: string;
     status: InspectionStatus;
     notes?: string;
     version: number;              // For optimistic locking
@@ -58,7 +57,6 @@ const InspectionSchema: Schema = new Schema<IInspectionDocument>(
             unique: true
         },
         confirmAgreement: { type: Boolean, required: true },
-        paymentMethod: { type: String, required: true },
         status: {
             type: String,
             enum: Object.values(InspectionStatus),

@@ -11,20 +11,8 @@ class InspectionService {
         this.inspectionRepository = new InspectionRepository();
         this.inspectorService = new InspectorService()
     }
-    private async isReplicaSet(): Promise<boolean> {
-        try {
-            if (!mongoose.connection.db) {
-                throw new Error('Database connection is not established');
-            }
-            const status = await mongoose.connection.db.admin().replSetGetStatus();
-            return !!status;
-        } catch (e) {
-            return false;
-        }
-    }
-    async bookSlot(inspectionData: IInspectionInput): Promise<IInspectionDocument> {
-        return await this.inspectionRepository.createInspection(inspectionData);
-    }
+
+
     async updateInspection(id: string, updateData: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
         return await this.inspectionRepository.updateInspection(id, updateData);
     }
@@ -76,7 +64,6 @@ class InspectionService {
                 throw new Error('Inspector is not available on this day');
             }
 
-
             await this.inspectorService.bookingHandler(bookingData.inspector!.toString(), bookingData.user!.toString(), bookingData.date!);
 
             await session.commitTransaction();
@@ -87,6 +74,18 @@ class InspectionService {
             throw error;
         } finally {
             session.endSession();
+        }
+    }
+
+    private async isReplicaSet(): Promise<boolean> {
+        try {
+            if (!mongoose.connection.db) {
+                throw new Error('Database connection is not established');
+            }
+            const status = await mongoose.connection.db.admin().replSetGetStatus();
+            return !!status;
+        } catch (e) {
+            return false;
         }
     }
 
