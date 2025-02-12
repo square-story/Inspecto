@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
 import { InspectorRepository } from "../repositories/inspector.repository";
 import { EmailService } from "./email.service";
@@ -151,5 +152,9 @@ export class InspectorService {
     }
     async getNearbyInspectors(latitude: string, longitude: string) {
         return await this.inspectorRepository.getNearbyInspectors(latitude, longitude)
+    }
+
+    async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
+        return await this.inspectorRepository.bookingHandler(inspectorId, userId, date,)
     }
 }

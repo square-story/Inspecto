@@ -98,4 +98,20 @@ export default class InspectionController {
             });
         }
     }
+    public async getAvailableSlots(req: Request, res: Response): Promise<Response> {
+        try {
+            const { inspectorId, date } = req.params;
+            const slots = await inspectionService.getAvailableSlots(inspectorId, new Date(date));
+            return res.status(200).json({
+                success: true,
+                slots,
+            });
+        } catch (error: any) {
+            console.error("Error retrieving slots:", error);
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    }
 }

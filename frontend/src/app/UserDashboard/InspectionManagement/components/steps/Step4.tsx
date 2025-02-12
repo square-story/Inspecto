@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
+import { TimeSlotMap } from "./Step3";
 
 const Step4 = () => {
     const { getValues, control } = useFormContext();
@@ -37,10 +38,10 @@ const Step4 = () => {
                     <strong>Inspection Type:</strong> {values.inspectionType || "Not provided"}
                 </p>
                 <p>
-                    <strong>Time Slot:</strong> {values.timeSlot || "Not provided"}
+                    <strong>Time Slot:</strong> {TimeSlotMap[values.slotNumber] || "Not provided"}
                 </p>
                 <p>
-                    <strong>date Slot:</strong> {format(values.date, "EEEE") || "Not provided"}
+                    <strong>date Slot:</strong> {format(values.date, "PPPP") || "Not provided"}
                 </p>
                 {/* Add any additional fields as needed */}
             </div>

@@ -1,4 +1,5 @@
 import inspectionModel, { IInspectionDocument, IInspectionInput } from "../../models/inspection.model";
+import { IDayAvailability } from "../../models/inspector.model";
 
 
 export interface IInspectionRepository {
@@ -26,4 +27,23 @@ export interface IInspectionRepository {
      */
 
     getInspectionById(id: string): Promise<IInspectionDocument | null>;
+
+    /**
+     * Checks if a slot is available for booking.
+     * @param inspectorId ObjectId
+     * @param date Date
+     * @param slotNumber number
+     * @returns Promise<boolean>
+     */
+    checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean>;
+
+    /**
+     * Retrieves available slots for a given inspector and date.
+     * @param inspectorId ObjectId
+     * @param date Date
+     * @param dayAvailability IDayAvailability
+     * @returns Promise<number[]>
+     */
+
+    getAvailableSlots(inspectorId: string, date: Date, dayAvailability: IDayAvailability): Promise<number[]>;
 }

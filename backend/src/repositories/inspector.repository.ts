@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import inspectorModel, { IInspector } from "../models/inspector.model";
 import { IinspectorRepository } from "./interfaces/inspector.repository.interface";
 
@@ -39,5 +40,30 @@ export class InspectorRepository implements IinspectorRepository {
                 }
             }
         })
+    }
+
+    async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
+        const updateOperation = {
+            $push: {
+                bookedSlots: {
+                    date: date,
+                    slotsBooked: 1,
+                    bookedBy: userId
+                }
+            }
+        };
+
+        if (session) {
+            return await inspectorModel.findByIdAndUpdate(
+                inspectorId,
+                updateOperation,
+                { session }
+            );
+        } else {
+            return await inspectorModel.findByIdAndUpdate(
+                inspectorId,
+                updateOperation
+            );
+        }
     }
 }

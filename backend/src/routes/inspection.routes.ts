@@ -22,6 +22,10 @@ router.put('/update', authenticateToken, authorizeRole('user'), (req: Request, r
     inspectionController.updateInspection(req, res).catch(next)
 })
 
+router.get('/available-slots/:inspectorId/:date', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
+    inspectionController.getAvailableSlots(req, res).catch(next)
+});
+
 
 
 export default router;
