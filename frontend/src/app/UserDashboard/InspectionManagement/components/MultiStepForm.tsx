@@ -43,7 +43,7 @@ const MultiStepForm = () => {
             // Send booking request to backend
             const response = await axiosInstance.post("/inspections/book", methods.getValues());
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 toast.success("Inspection booked successfully!");
             }
             // Reset form after success
