@@ -14,7 +14,6 @@ import {
     FormControl,
     FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -24,25 +23,18 @@ import {
     DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Info, Car } from "lucide-react";
+import { Info } from "lucide-react";
 import AddressAutocomplete from "../AddressAutocomplete";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
-import { fetchVehicles, Vehicle } from "@/features/vehicle/vehicleSlice";
-import { format } from 'date-fns';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
+import { INSPECTION_TYPE, InspectionTypeCard } from '@/components/InspectionTypeCard';
+import { VehicleDetails } from '@/components/VehicleDetailsCard';
 
 
 
-type INSPECTION_TYPE = {
-    id: string;
-    name: string;
-    price: number;
-    platformFee: number,
-    duration: string;
-    features: string[];
-};
+
 
 
 const INSPECTION_TYPES: INSPECTION_TYPE[] = [
@@ -78,126 +70,9 @@ const INSPECTION_TYPES: INSPECTION_TYPE[] = [
 
 
 
-const VehicleDetails = ({ vehicle }: { vehicle: Vehicle }) => (
-    <div className="space-y-4">
-        <div className="flex items-center gap-2">
-            <Car className="w-5 h-5" />
-            <h3 className="text-lg font-semibold">{vehicle.make} {vehicle.vehicleModel}</h3>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-                <p className="text-gray-500">Registration</p>
-                <p className="font-medium">{vehicle.registrationNumber || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Year</p>
-                <p className="font-medium">{vehicle.year || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Vehicle Type</p>
-                <p className="font-medium capitalize">{vehicle.type || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Color</p>
-                <p className="font-medium capitalize">{vehicle.color || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Fuel Type</p>
-                <p className="font-medium capitalize">{vehicle.fuelType || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Transmission</p>
-                <p className="font-medium capitalize">{vehicle.transmission || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Chassis Number</p>
-                <p className="font-medium">{vehicle.chassisNumber || "N/A"}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Insurance Expiry</p>
-                <p className="font-medium">
-                    {vehicle.insuranceExpiry
-                        ? format(new Date(vehicle.insuranceExpiry), 'dd MMM yyyy')
-                        : "N/A"}
-                </p>
-            </div>
-            <div>
-                <p className="text-gray-500">Last Inspection</p>
-                <p className="font-medium">
-                    {vehicle.lastInspectionDate
-                        ? format(new Date(vehicle.lastInspectionDate), 'dd MMM yyyy')
-                        : "N/A"}
-                </p>
-            </div>
-        </div>
 
-        {(vehicle.frontViewImage || vehicle.rearViewImage) && (
-            <div className="grid grid-cols-2 gap-4 pt-2">
-                {vehicle.frontViewImage && (
-                    <div>
-                        <p className="text-sm text-gray-500 mb-2">Front View</p>
-                        <img
-                            src={vehicle.frontViewImage}
-                            alt="Vehicle front view"
-                            className="rounded-md w-full h-32 object-cover"
-                        />
-                    </div>
-                )}
-                {vehicle.rearViewImage && (
-                    <div>
-                        <p className="text-sm text-gray-500 mb-2">Rear View</p>
-                        <img
-                            src={vehicle.rearViewImage}
-                            alt="Vehicle rear view"
-                            className="rounded-md w-full h-32 object-cover"
-                        />
-                    </div>
-                )}
-            </div>
-        )}
-    </div>
-);
 
-const InspectionTypeCard = ({ type, selected, onSelect }: { type: INSPECTION_TYPE, selected: boolean, onSelect: (id: string) => void }) => (
-    <Card
-        className={`cursor-pointer transition-all ${selected ? 'ring-2 ring-primary' : 'hover:shadow-md'
-            }`}
-        onClick={() => onSelect(type.id)}
-    >
-        <CardContent className="p-4">
-            <div className="flex justify-between items-start mb-3">
-                <div>
-                    <h3 className="font-semibold text-lg">{type.name}</h3>
-                    <p className="text-sm text-gray-500">Duration: {type.duration}</p>
-                </div>
-                <div className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                        <p className="text-xl font-bold">₹ {type.price + type.platformFee}</p>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger className="cursor-help">
-                                    <Info className="w-4 h-4 text-gray-500 hover:text-gray-700" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Platform fee: ₹{type.platformFee} included</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                </div>
-            </div>
-            <ul className="space-y-2">
-                {type.features.map((feature, index) => (
-                    <li key={index} className="text-sm flex items-center gap-2">
-                        <div className="w-1 h-1 bg-primary rounded-full" />
-                        {feature}
-                    </li>
-                ))}
-            </ul>
-        </CardContent>
-    </Card>
-);
 
 const Step1 = () => {
     const { control, setValue, watch } = useFormContext();
