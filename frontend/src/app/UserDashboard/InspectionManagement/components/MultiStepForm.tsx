@@ -59,7 +59,7 @@ const MultiStepForm = () => {
 
     return (
         <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4 px-5">
                 {step === 1 && <Step1 />}
                 {step === 2 && <Step2 />}
                 {step === 3 && <Step3 />}
@@ -67,11 +67,11 @@ const MultiStepForm = () => {
 
                 <div className="flex justify-between mt-4">
                     {step > 1 && (
-                        <Button type="button" className="btn btn-outline" onClick={() => setStep(step - 1)}>
+                        <Button type="button" variant='secondary' onClick={() => setStep(step - 1)}>
                             Back
                         </Button>
                     )}
-                    <Button type="submit" className="btn">
+                    <Button type="submit" variant='default'>
                         {loading ? "Processing..." : step === 4 ? "Pay Now" : "Next"}
                     </Button>
                 </div>

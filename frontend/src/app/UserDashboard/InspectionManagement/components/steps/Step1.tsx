@@ -1,7 +1,12 @@
-"use client";
-
+import { useEffect, useState } from 'react';
 import { useFormContext } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 import {
     FormField,
     FormItem,
@@ -9,56 +14,258 @@ import {
     FormControl,
     FormMessage,
 } from "@/components/ui/form";
-import AddressAutocomplete from "../AddressAutocomplete";
-import { useCallback, useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogDescription
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AppDispatch, RootState } from "@/store";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
+import { Info, Car } from "lucide-react";
+import AddressAutocomplete from "../AddressAutocomplete";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store";
+import { fetchVehicles, Vehicle } from "@/features/vehicle/vehicleSlice";
+import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+
+
+type INSPECTION_TYPE = {
+    id: string;
+    name: string;
+    price: number;
+    platformFee: number,
+    duration: string;
+    features: string[];
+};
+
+
+const INSPECTION_TYPES: INSPECTION_TYPE[] = [
+    {
+        id: 'basic',
+        name: 'Basic Inspection',
+        price: 200,
+        platformFee: 50,
+        duration: '45-60 mins',
+        features: [
+            'External visual inspection',
+            'Basic engine diagnostics',
+            'Tire condition check',
+            'Brake system check'
+        ]
+    },
+    {
+        id: 'full',
+        name: 'Full Inspection',
+        price: 250,
+        platformFee: 50,
+        duration: '90-120 mins',
+        features: [
+            'Complete external & internal inspection',
+            'Advanced computer diagnostics',
+            'Suspension system check',
+            'Electrical systems check',
+            'Test drive evaluation',
+            'Detailed report with photos'
+        ]
+    }
+];
+
+
+
+const VehicleDetails = ({ vehicle }: { vehicle: Vehicle }) => (
+    <div className="space-y-4">
+        <div className="flex items-center gap-2">
+            <Car className="w-5 h-5" />
+            <h3 className="text-lg font-semibold">{vehicle.make} {vehicle.vehicleModel}</h3>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p className="text-gray-500">Registration</p>
+                <p className="font-medium">{vehicle.registrationNumber || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Year</p>
+                <p className="font-medium">{vehicle.year || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Vehicle Type</p>
+                <p className="font-medium capitalize">{vehicle.type || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Color</p>
+                <p className="font-medium capitalize">{vehicle.color || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Fuel Type</p>
+                <p className="font-medium capitalize">{vehicle.fuelType || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Transmission</p>
+                <p className="font-medium capitalize">{vehicle.transmission || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Chassis Number</p>
+                <p className="font-medium">{vehicle.chassisNumber || "N/A"}</p>
+            </div>
+            <div>
+                <p className="text-gray-500">Insurance Expiry</p>
+                <p className="font-medium">
+                    {vehicle.insuranceExpiry
+                        ? format(new Date(vehicle.insuranceExpiry), 'dd MMM yyyy')
+                        : "N/A"}
+                </p>
+            </div>
+            <div>
+                <p className="text-gray-500">Last Inspection</p>
+                <p className="font-medium">
+                    {vehicle.lastInspectionDate
+                        ? format(new Date(vehicle.lastInspectionDate), 'dd MMM yyyy')
+                        : "N/A"}
+                </p>
+            </div>
+        </div>
+
+        {(vehicle.frontViewImage || vehicle.rearViewImage) && (
+            <div className="grid grid-cols-2 gap-4 pt-2">
+                {vehicle.frontViewImage && (
+                    <div>
+                        <p className="text-sm text-gray-500 mb-2">Front View</p>
+                        <img
+                            src={vehicle.frontViewImage}
+                            alt="Vehicle front view"
+                            className="rounded-md w-full h-32 object-cover"
+                        />
+                    </div>
+                )}
+                {vehicle.rearViewImage && (
+                    <div>
+                        <p className="text-sm text-gray-500 mb-2">Rear View</p>
+                        <img
+                            src={vehicle.rearViewImage}
+                            alt="Vehicle rear view"
+                            className="rounded-md w-full h-32 object-cover"
+                        />
+                    </div>
+                )}
+            </div>
+        )}
+    </div>
+);
+
+const InspectionTypeCard = ({ type, selected, onSelect }: { type: INSPECTION_TYPE, selected: boolean, onSelect: (id: string) => void }) => (
+    <Card
+        className={`cursor-pointer transition-all ${selected ? 'ring-2 ring-primary' : 'hover:shadow-md'
+            }`}
+        onClick={() => onSelect(type.id)}
+    >
+        <CardContent className="p-4">
+            <div className="flex justify-between items-start mb-3">
+                <div>
+                    <h3 className="font-semibold text-lg">{type.name}</h3>
+                    <p className="text-sm text-gray-500">Duration: {type.duration}</p>
+                </div>
+                <div className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                        <p className="text-xl font-bold">₹ {type.price + type.platformFee}</p>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger className="cursor-help">
+                                    <Info className="w-4 h-4 text-gray-500 hover:text-gray-700" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Platform fee: ₹{type.platformFee} included</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                </div>
+            </div>
+            <ul className="space-y-2">
+                {type.features.map((feature, index) => (
+                    <li key={index} className="text-sm flex items-center gap-2">
+                        <div className="w-1 h-1 bg-primary rounded-full" />
+                        {feature}
+                    </li>
+                ))}
+            </ul>
+        </CardContent>
+    </Card>
+);
 
 const Step1 = () => {
     const { control, setValue, watch } = useFormContext();
     const locationValue = watch("location");
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const dispatch = useDispatch<AppDispatch>()
+    const selectedVehicleId = watch("vehicleId");
+    const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+    const [isVehicleDetailsOpen, setIsVehicleDetailsOpen] = useState(false);
+
+    const dispatch = useDispatch<AppDispatch>();
     const vehicles = useSelector((state: RootState) => state.vehicle.vehicles);
 
+    const selectedVehicle = vehicles.find(v => v._id === selectedVehicleId);
 
-    const refreshVehicles = useCallback(() => {
+    useEffect(() => {
         dispatch(fetchVehicles());
     }, [dispatch]);
 
-    useEffect(() => {
-        refreshVehicles();
-    }, [refreshVehicles]);
-
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <FormField
                 control={control}
                 name="vehicleId"
                 render={({ field, fieldState: { error } }) => (
                     <FormItem>
                         <FormLabel>Vehicle</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                                <SelectTrigger className="h-20" >
-                                    <SelectValue placeholder="Select a vehicle" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-72 overflow-auto">
-                                {vehicles.map((vehicle) => (
-                                    <SelectItem key={vehicle._id} value={vehicle._id}>
-                                        <div className="flex flex-col gap-2">
-                                            <span className="font-medium">{vehicle.make} ({vehicle.vehicleModel})</span>
-                                            <span className="text-sm text-gray-500">{vehicle.registrationNumber || "N/A"}</span>
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="space-y-2">
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                    <SelectTrigger className="h-20">
+                                        <SelectValue placeholder="Select a vehicle" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-72">
+                                    {vehicles.map((vehicle) => (
+                                        <SelectItem key={vehicle._id} value={vehicle._id}>
+                                            <div className="flex flex-col gap-2 text-start">
+                                                <span className="font-medium">
+                                                    {vehicle.make} ({vehicle.vehicleModel})
+                                                </span>
+                                                <span className="text-sm text-gray-500">
+                                                    {vehicle.registrationNumber || "N/A"}
+                                                </span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {selectedVehicle && (
+                                <Dialog open={isVehicleDetailsOpen} onOpenChange={setIsVehicleDetailsOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="w-full"
+                                        >
+                                            <Info className="w-4 h-4 mr-2" />
+                                            View Vehicle Details
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Vehicle Details</DialogTitle>
+                                        </DialogHeader>
+                                        <VehicleDetails vehicle={selectedVehicle} />
+                                    </DialogContent>
+                                </Dialog>
+                            )}
+                        </div>
                         {error && <FormMessage>{error.message}</FormMessage>}
                     </FormItem>
                 )}
@@ -71,17 +278,23 @@ const Step1 = () => {
                     <FormItem>
                         <FormLabel>Location</FormLabel>
                         <FormControl>
-                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button variant="outline" className="w-full">
-                                        {locationValue ? locationValue : "Select a location"}
+                                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                        {locationValue || "Select a location"}
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-lg w-full space-y-4">
+                                <DialogContent className="max-w-lg">
                                     <DialogHeader>
                                         <DialogTitle>Choose a Location</DialogTitle>
+                                        <DialogDescription>
+                                            Enter your address for the vehicle inspection
+                                        </DialogDescription>
                                     </DialogHeader>
-                                    <AddressAutocomplete setValue={setValue} closeDialog={() => setIsDialogOpen(false)} />
+                                    <AddressAutocomplete
+                                        setValue={setValue}
+                                        closeDialog={() => setIsLocationDialogOpen(false)}
+                                    />
                                 </DialogContent>
                             </Dialog>
                         </FormControl>
@@ -89,17 +302,13 @@ const Step1 = () => {
                     </FormItem>
                 )}
             />
-            {/* Hidden fields to store latitude & longitude */}
-            <input type="hidden" {...control.register("latitude")} />
-            <input type="hidden" {...control.register("longitude")} />
-
 
             <FormField
                 control={control}
                 name="phone"
                 render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                        <FormLabel htmlFor="phone">Phone Number</FormLabel>
+                    <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
                         <FormControl>
                             <PhoneInput {...field} defaultCountry="IN" />
                         </FormControl>
@@ -108,32 +317,28 @@ const Step1 = () => {
                 )}
             />
 
-
             <FormField
                 control={control}
                 name="inspectionType"
-                render={({ field, fieldState: { error } }) => (
+                render={({ field }) => (
                     <FormItem>
                         <FormLabel>Inspection Type</FormLabel>
-                        <FormControl>
-                            <Select
-                                defaultValue="basic"
-                                onValueChange={field.onChange}
-                                value={field.value}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select an Inspection type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="basic">Basic Inspection</SelectItem>
-                                    <SelectItem value="full">Full Inspection</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormControl>
-                        {error && <FormMessage>{error.message}</FormMessage>}
+                        <div className="grid gap-4 mt-2 ">
+                            {INSPECTION_TYPES.map((type) => (
+                                <InspectionTypeCard
+                                    key={type.id}
+                                    type={type}
+                                    selected={field.value === type.id}
+                                    onSelect={(value) => field.onChange(value)}
+                                />
+                            ))}
+                        </div>
                     </FormItem>
                 )}
             />
+
+            <input type="hidden" {...control.register("latitude")} />
+            <input type="hidden" {...control.register("longitude")} />
         </div>
     );
 };
