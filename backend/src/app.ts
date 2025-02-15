@@ -7,16 +7,31 @@ import userRoutes from './routes/user.routes'
 import inspectorRoutes from "./routes/inspector.routes";
 import vehiclesRoutes from "./routes/vehicles.routes"
 import inspectionRoutes from "./routes/inspection.routes"
+import paymentsRoutes from './routes/payment.routes'
 import cors from "cors";
 
 const app = express()
 
-app.use(express.json({ limit: '50mb' })); //for Parsing JSON request bodies
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Regular routes should use JSON parsing
+app.use((req, res, next) => {
+    if (req.originalUrl === '/payments/webhook') {
+        next();
+    } else {
+        express.json({ limit: '50mb' })(req, res, next);
+    }
+});
+
+app.use((req, res, next) => {
+    if (req.originalUrl === '/payments/webhook') {
+        next();
+    } else {
+        express.urlencoded({ limit: '50mb', extended: true })(req, res, next);
+    }
+});
 
 app.use(cookieParser());
 
-//connect Database
+// Connect Database
 connectToDatabase();
 
 app.use(cors({
@@ -37,20 +52,16 @@ app.post('/logout', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Logged out successfully' });
 })
 
-//for Admin Operations
+// Routes
 app.use('/admin', adminRoutes)
-//inspectors Operations
 app.use('/inspector', inspectorRoutes)
-//user Operations
 app.use('/user', userRoutes)
-//vehicles operations
 app.use('/vehicles', vehiclesRoutes)
-//inspection operations
 app.use('/inspections', inspectionRoutes)
-
+app.use('/payments', paymentsRoutes)
 
 app.use((req: Request, res: Response) => {
-    res.status(404).send('rote not found')
+    res.status(404).send('route not found')
 })
 
 app.listen(appConfig.port, () => {

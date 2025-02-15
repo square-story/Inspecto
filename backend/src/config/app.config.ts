@@ -16,6 +16,8 @@ interface AppConfig {
     smtpUser: string;
     smtpPass: string;
     otpExp: number;
+    stripSecret: string;
+    stripWebhook: string;
 }
 
 const appConfig: AppConfig = {
@@ -31,7 +33,9 @@ const appConfig: AppConfig = {
     smtpPort: parseInt(process.env.SMTP_PORT || "587", 10),
     smtpUser: process.env.SMTP_USER || '',
     smtpPass: process.env.SMTP_PASS || '',
-    otpExp: parseInt(process.env.OTP_EXPIRY || '300', 10)
+    otpExp: parseInt(process.env.OTP_EXPIRY || '300', 10),
+    stripSecret: process.env.STRIPE_SECRET_KEY || '',
+    stripWebhook: process.env.STRIPE_WEBHOOK_SECRET || '',
 };
 
 export default appConfig;
