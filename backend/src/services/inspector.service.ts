@@ -157,4 +157,7 @@ export class InspectorService {
     async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
         return await this.inspectorRepository.bookingHandler(inspectorId, userId, date,)
     }
+    async unBookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
+        return await this.inspectorRepository.unbookingHandler(inspectorId, userId, date)
+    }
 }

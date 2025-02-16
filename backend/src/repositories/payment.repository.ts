@@ -2,7 +2,7 @@ import paymentModel, { IPaymentInput, IPaymentDocument } from "../models/payment
 import { IPaymentRepository } from "./interfaces/payment.repository.interface";
 
 class PaymentRepository implements IPaymentRepository {
-    async createPayment(data: IPaymentInput): Promise<IPaymentDocument> {
+    async createPayment(data: Partial<IPaymentInput>): Promise<IPaymentDocument> {
         const payment = new paymentModel(data);
         return await payment.save();
     }

@@ -95,8 +95,6 @@ const InspectorSchema: Schema = new Schema<IInspector>({
         Friday: { type: DayAvailabilitySchema, required: true, default: { enabled: true, slots: 5 } },
         Saturday: { type: DayAvailabilitySchema, required: true, default: { enabled: false, slots: 0 } },
     },
-
-    // Modified booked slots structure
     bookedSlots: [{
         date: { type: Date, required: true },
         slotsBooked: { type: Number, required: true, min: 1 },

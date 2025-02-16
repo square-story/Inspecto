@@ -35,7 +35,7 @@ app.use(cookieParser());
 connectToDatabase();
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: appConfig.frontEndUrl,
     credentials: true
 }));
 

@@ -20,9 +20,7 @@ class InspectionService {
         return await this.inspectionRepository.getInspectionById(id);
     }
     async checkSlotAvaliability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean> {
-        const response = await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber);
-        console.log(response)
-        return response
+        return await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber);
     }
     async getAvailableSlots(inspectorId: string, date: Date): Promise<number[]> {
         const inspector = await this.inspectorService.getInspectorDetails(inspectorId);
@@ -69,6 +67,25 @@ class InspectionService {
             await session.commitTransaction();
             return booking;
 
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
+    }
+
+    async cancelInspection(inspectionId: string): Promise<void> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const inspection = await this.inspectionRepository.getInspectionById(inspectionId);
+            if (!inspection) {
+                throw new Error('Inspection not found');
+            }
+            const response = await this.inspectorService.unBookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
+            console.log(response)
+            await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();
             throw error;

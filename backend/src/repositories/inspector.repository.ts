@@ -66,4 +66,28 @@ export class InspectorRepository implements IinspectorRepository {
             );
         }
     }
+
+    async unbookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
+        const updateOperation = {
+            $pull: {
+                bookedSlots: {
+                    date: date,
+                    bookedBy: userId
+                }
+            }
+        };
+
+        if (session) {
+            return await inspectorModel.findByIdAndUpdate(
+                inspectorId,
+                updateOperation,
+                { session }
+            );
+        } else {
+            return await inspectorModel.findByIdAndUpdate(
+                inspectorId,
+                updateOperation
+            );
+        }
+    }
 }

@@ -6,16 +6,15 @@ import mongoose from "mongoose";
 import inspectionService from "./inspection.service";
 import { InspectionStatus } from "../models/inspection.model";
 
-
-
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
-})
+});
 
 class PaymentService {
     private paymentRepository: PaymentRepository;
+
     constructor() {
-        this.paymentRepository = new PaymentRepository()
+        this.paymentRepository = new PaymentRepository();
     }
 
     async createPaymentIntent(inspectionId: string, userId: string, amount: number): Promise<Stripe.PaymentIntent> {
@@ -44,41 +43,56 @@ class PaymentService {
             throw error;
         }
     }
+
     async handleWebhookEvent(event: Stripe.Event): Promise<void> {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
+            let payment;
+
             switch (event.type) {
-                case "payment_intent.succeeded":
+                case "payment_intent.succeeded": {
                     const paymentIntent = event.data.object as Stripe.PaymentIntent;
-                    let payment = await this.paymentRepository.updatePayment(
+                    payment = await this.paymentRepository.updatePayment(
                         paymentIntent.id,
                         { status: PaymentStatus.SUCCEEDED }
                     );
+
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
+
                     await inspectionService.updateInspection(
                         payment.inspection.toString(),
                         { status: InspectionStatus.CONFIRMED }
                     );
                     break;
-                case "payment_intent.payment_failed":
+                }
+
+                case "payment_intent.payment_failed": {
                     const failedPayment = event.data.object as Stripe.PaymentIntent;
                     payment = await this.paymentRepository.updatePayment(
                         failedPayment.id,
                         { status: PaymentStatus.FAILED }
                     );
+
+
+
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
+                    console.log('the inspection details', payment.inspection.toString())
+
                     await inspectionService.updateInspection(
                         payment.inspection.toString(),
                         { status: InspectionStatus.PAYMENT_PENDING }
                     );
 
+                    await inspectionService.cancelInspection(payment.inspection.toString())
                     break;
+                }
             }
+
             await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();
@@ -91,9 +105,9 @@ class PaymentService {
 
     async verifyPayment(paymentIntentId: string) {
         try {
-            return await this.paymentRepository.getPaymentByIntentId(paymentIntentId)
+            return await this.paymentRepository.getPaymentByIntentId(paymentIntentId);
         } catch (error) {
-            console.error('Error handling webhook:', error);
+            console.error('Error verifying payment:', error);
             throw error;
         }
     }

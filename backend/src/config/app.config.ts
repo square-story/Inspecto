@@ -18,6 +18,7 @@ interface AppConfig {
     otpExp: number;
     stripSecret: string;
     stripWebhook: string;
+    frontEndUrl: string;
 }
 
 const appConfig: AppConfig = {
@@ -36,6 +37,7 @@ const appConfig: AppConfig = {
     otpExp: parseInt(process.env.OTP_EXPIRY || '300', 10),
     stripSecret: process.env.STRIPE_SECRET_KEY || '',
     stripWebhook: process.env.STRIPE_WEBHOOK_SECRET || '',
+    frontEndUrl: process.env.FRONTEND_URL || '',
 };
 
 export default appConfig;
