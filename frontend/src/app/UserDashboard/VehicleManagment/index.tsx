@@ -23,7 +23,7 @@ const VehicleManagement = () => {
             title="Vehicle Section"
             desc="Manage Your Vehicles Here"
             className="p-4 bg-background rounded-lg border"
-            scrollAreaClassName="p-3"
+            scrollAreaClassName=""
         >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {vehicles.map((vehicle) => (
