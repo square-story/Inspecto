@@ -1,134 +1,83 @@
-"use client"
-
-import { CalendarClock, CreditCard } from "lucide-react"
-import { useMemo, useState } from "react"
+import { CalendarClock, ChevronLeft, ChevronRight, CreditCard, Info } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ContentSection from "@/components/content-section"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "@/store"
+import { fetchAppointments } from "@/features/inspection/inspectionSlice"
+import { fetchPayments } from "@/features/payments/paymentSlice"
+import LoadingSpinner from "@/components/LoadingSpinner"
 
-const payments = [
-    {
-        id: 1,
-        date: "Feb 15, 2024",
-        amount: "$150.00",
-        description: "Vehicle Inspection - Toyota Camry",
-        status: "completed",
-    },
-    {
-        id: 2,
-        date: "Jan 30, 2024",
-        amount: "$85.00",
-        description: "Oil Change Service",
-        status: "completed",
-    },
-    {
-        id: 3,
-        date: "Feb 20, 2024",
-        amount: "$220.00",
-        description: "Brake Inspection and Service",
-        status: "pending",
-    },
-    {
-        id: 4,
-        date: "Feb 18, 2024",
-        amount: "$175.00",
-        description: "Tire Rotation Service",
-        status: "failed",
-    },
-]
-
-const appointments = [
-    {
-        id: 1,
-        date: "2024-02-17",
-        time: "10:00 AM",
-        service: "Annual Vehicle Inspection",
-        vehicle: "Toyota Camry",
-        price: "$150.00",
-        status: "scheduled",
-    },
-    {
-        id: 2,
-        date: "2024-02-18",
-        time: "2:30 PM",
-        service: "Oil Change Service",
-        vehicle: "Toyota Camry",
-        price: "$85.00",
-        status: "scheduled",
-    },
-    {
-        id: 3,
-        date: "2024-02-22",
-        time: "11:00 AM",
-        service: "Brake Service",
-        vehicle: "Toyota Camry",
-        price: "$220.00",
-        status: "confirmed",
-    },
-    {
-        id: 4,
-        date: "2024-02-17",
-        time: "4:00 PM",
-        service: "Tire Rotation",
-        vehicle: "Toyota Camry",
-        price: "$175.00",
-        status: "scheduled",
-    },
-]
+const ITEMS_PER_PAGE = 5
 
 export default function PaymentHistory() {
-    const [paymentFilter, setPaymentFilter] = useState<string>("all")
-    const [appointmentFilter, setAppointmentFilter] = useState<string>("all")
+    const [paymentFilter, setPaymentFilter] = useState("all")
+    const [appointmentFilter, setAppointmentFilter] = useState("all")
+    const [paymentPage, setPaymentPage] = useState(1)
+    const [appointmentPage, setAppointmentPage] = useState(1)
+    const dispatch = useDispatch<AppDispatch>()
+    const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
+    const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
+
+    useEffect(() => {
+        dispatch(fetchAppointments())
+        dispatch(fetchPayments())
+    }, [dispatch])
 
     const filteredPayments = useMemo(() => {
+        if (!payments) return []
         if (paymentFilter === "all") return payments
         return payments.filter((payment) => payment.status === paymentFilter)
-    }, [paymentFilter])
+    }, [payments, paymentFilter])
 
-    const getAppointmentGroup = (date: string) => {
-        const today = new Date()
-        const appointmentDate = new Date(date)
-        const tomorrow = new Date(today)
-        tomorrow.setDate(tomorrow.getDate() + 1)
+    const filteredInspections = useMemo(() => {
+        if (!inspections) return []
+        if (appointmentFilter === "all") return inspections
+        return inspections.filter((inspection) => inspection.status === appointmentFilter)
+    }, [inspections, appointmentFilter])
 
-        if (appointmentDate.toDateString() === today.toDateString()) return "Today"
-        if (appointmentDate.toDateString() === tomorrow.toDateString()) return "Tomorrow"
-        if (appointmentDate <= new Date(today.setDate(today.getDate() + 7))) return "This Week"
-        return "Upcoming"
-    }
+    const paginatedPayments = useMemo(() => {
+        const startIndex = (paymentPage - 1) * ITEMS_PER_PAGE
+        return filteredPayments.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+    }, [filteredPayments, paymentPage])
 
-    const groupedAppointments = useMemo(() => {
-        const filtered =
-            appointmentFilter === "all" ? appointments : appointments.filter((apt) => apt.status === appointmentFilter)
-
-        return filtered.reduce(
-            (groups, appointment) => {
-                const group = getAppointmentGroup(appointment.date)
-                if (!groups[group]) groups[group] = []
-                groups[group].push(appointment)
-                return groups
-            },
-            {} as Record<string, typeof appointments>,
-        )
-    }, [appointmentFilter]) // Removed getAppointmentGroup from dependencies
+    const paginatedInspections = useMemo(() => {
+        const startIndex = (appointmentPage - 1) * ITEMS_PER_PAGE
+        return filteredInspections.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+    }, [filteredInspections, appointmentPage])
 
     const getStatusBadgeColor = (status: string) => {
-        switch (status) {
-            case "completed":
+        switch (status.toLowerCase()) {
+            case "succeeded":
+            case "confirmed":
                 return "bg-green-100 text-green-800"
             case "pending":
                 return "bg-yellow-100 text-yellow-800"
             case "failed":
                 return "bg-red-100 text-red-800"
-            case "scheduled":
-                return "bg-blue-100 text-blue-800"
-            case "confirmed":
-                return "bg-purple-100 text-purple-800"
             default:
                 return "bg-gray-100 text-gray-800"
+        }
+    }
+
+    const formatDateTime = (dateString: string) => {
+        const date = new Date(dateString)
+        return {
+            date: date.toLocaleDateString(),
+            time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
     }
 
@@ -141,7 +90,7 @@ export default function PaymentHistory() {
             <Tabs defaultValue="payments" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
                     <TabsTrigger value="payments">Payment History</TabsTrigger>
-                    <TabsTrigger value="appointments">Upcoming Appointments</TabsTrigger>
+                    <TabsTrigger value="appointments">Upcoming Inspections</TabsTrigger>
                 </TabsList>
                 <TabsContent value="payments" className="space-y-4">
                     <Card>
@@ -157,7 +106,7 @@ export default function PaymentHistory() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">All Payments</SelectItem>
-                                        <SelectItem value="completed">Completed</SelectItem>
+                                        <SelectItem value="succeeded">Succeeded</SelectItem>
                                         <SelectItem value="pending">Pending</SelectItem>
                                         <SelectItem value="failed">Failed</SelectItem>
                                     </SelectContent>
@@ -166,27 +115,86 @@ export default function PaymentHistory() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {filteredPayments.map((payment) => (
-                                    <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2 rounded-full bg-primary/10">
-                                                <CreditCard className="h-5 w-5 text-primary" />
+                                {paymentsLoading ? (
+                                    <div className="text-center py-4">Loading payments...</div>
+                                ) : (
+                                    paginatedPayments.map((payment) => (
+                                        <div key={payment._id} className="flex items-center justify-between p-4 border rounded-lg">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 rounded-full bg-primary/10">
+                                                    <CreditCard className="h-5 w-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium">
+                                                        Inspection Payment - {payment.inspection.bookingReference}
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {formatDateTime(payment.createdAt).date}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-medium">{payment.description}</p>
-                                                <p className="text-sm text-muted-foreground">{payment.date}</p>
+                                            <div className="text-right flex items-center gap-4">
+                                                <p className="font-medium">
+                                                    {payment.currency.toUpperCase()} {payment.amount}
+                                                </p>
+                                                <Badge variant="secondary" className={getStatusBadgeColor(payment.status)}>
+                                                    {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                                                </Badge>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <Info className="h-4 w-4" />
+                                                            <span className="sr-only">More info</span>
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>Payment Details</DialogTitle>
+                                                            <DialogDescription>
+                                                                Additional information about this payment.
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <div className="space-y-2">
+                                                            <p><strong>Reference:</strong> {payment.inspection.bookingReference}</p>
+                                                            <p><strong>Amount:</strong> {payment.currency.toUpperCase()} {payment.amount}</p>
+                                                            <p><strong>Status:</strong> {payment.status}</p>
+                                                            <p><strong>Date:</strong> {formatDateTime(payment.createdAt).date}</p>
+                                                            <p><strong>Time:</strong> {formatDateTime(payment.createdAt).time}</p>
+                                                            <p><strong>Payment ID:</strong> {payment.stripePaymentIntentId}</p>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
                                             </div>
                                         </div>
-                                        <div className="text-right flex items-center gap-4">
-                                            <p className="font-medium">{payment.amount}</p>
-                                            <Badge variant="secondary" className={getStatusBadgeColor(payment.status)}>
-                                                {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </CardContent>
+                        <CardFooter className="flex justify-between">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPaymentPage((page) => Math.max(1, page - 1))}
+                                disabled={paymentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-2" />
+                                Previous
+                            </Button>
+                            <span className="text-sm text-muted-foreground">
+                                Page {paymentPage} of {Math.ceil(filteredPayments.length / ITEMS_PER_PAGE)}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                    setPaymentPage((page) => Math.min(Math.ceil(filteredPayments.length / ITEMS_PER_PAGE), page + 1))
+                                }
+                                disabled={paymentPage === Math.ceil(filteredPayments.length / ITEMS_PER_PAGE)}
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-2" />
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </TabsContent>
                 <TabsContent value="appointments" className="space-y-4">
@@ -194,56 +202,109 @@ export default function PaymentHistory() {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle>Upcoming Appointments</CardTitle>
-                                    <CardDescription>Your scheduled inspections and services</CardDescription>
+                                    <CardTitle>Upcoming Inspections</CardTitle>
+                                    <CardDescription>Your scheduled vehicle inspections</CardDescription>
                                 </div>
                                 <Select value={appointmentFilter} onValueChange={setAppointmentFilter}>
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Filter by status" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Appointments</SelectItem>
-                                        <SelectItem value="scheduled">Scheduled</SelectItem>
+                                        <SelectItem value="all">All Inspections</SelectItem>
                                         <SelectItem value="confirmed">Confirmed</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-6">
-                                {Object.entries(groupedAppointments).map(([group, appointments]) => (
-                                    <div key={group} className="space-y-4">
-                                        <h3 className="font-semibold text-lg text-muted-foreground">{group}</h3>
-                                        {appointments.map((appointment) => (
-                                            <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="p-2 rounded-full bg-primary/10">
-                                                        <CalendarClock className="h-5 w-5 text-primary" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium">{appointment.service}</p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {appointment.vehicle} • {new Date(appointment.date).toLocaleDateString()} at{" "}
-                                                            {appointment.time}
-                                                        </p>
-                                                    </div>
+                                {inspectionsLoading ? (
+
+                                    <div className="text-center py-4"><LoadingSpinner />Loading inspections...</div>
+                                ) : (
+                                    paginatedInspections.map((inspection) => (
+                                        <div key={inspection._id} className="flex items-center justify-between p-4 border rounded-lg">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 rounded-full bg-primary/10">
+                                                    <CalendarClock className="h-5 w-5 text-primary" />
                                                 </div>
-                                                <div className="text-right flex items-center gap-4">
-                                                    <p className="font-medium">{appointment.price}</p>
-                                                    <Badge variant="secondary" className={getStatusBadgeColor(appointment.status)}>
-                                                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                                                    </Badge>
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {inspection.inspectionType.charAt(0).toUpperCase() +
+                                                            inspection.inspectionType.slice(1)} Inspection
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {inspection.bookingReference} • {formatDateTime(inspection.date as unknown as string).date} at{" "}
+                                                        {formatDateTime(inspection.date as unknown as string).time}
+                                                    </p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                ))}
+                                            <div className="text-right flex items-center gap-4">
+                                                <Badge variant="secondary" className={getStatusBadgeColor(inspection.status)}>
+                                                    {inspection.status.charAt(0).toUpperCase() + inspection.status.slice(1)}
+                                                </Badge>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <Info className="h-4 w-4" />
+                                                            <span className="sr-only">More info</span>
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>Inspection Details</DialogTitle>
+                                                            <DialogDescription>
+                                                                Additional information about this inspection.
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <div className="space-y-2">
+                                                            <p><strong>Reference:</strong> {inspection.bookingReference}</p>
+                                                            <p><strong>Type:</strong> {inspection.inspectionType}</p>
+                                                            <p><strong>Date:</strong> {formatDateTime(inspection.date as unknown as string).date}</p>
+                                                            <p><strong>Time:</strong> {formatDateTime(inspection.date as unknown as string).time}</p>
+                                                            <p><strong>Status:</strong> {inspection.status}</p>
+                                                            <p><strong>Location:</strong> {inspection.location}</p>
+                                                            <p><strong>Slot Number:</strong> {inspection.slotNumber}</p>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </CardContent>
+                        <CardFooter className="flex justify-between">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setAppointmentPage((page) => Math.max(1, page - 1))}
+                                disabled={appointmentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-2" />
+                                Previous
+                            </Button>
+                            <span className="text-sm text-muted-foreground">
+                                Page {appointmentPage} of {Math.ceil(filteredInspections.length / ITEMS_PER_PAGE)}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                    setAppointmentPage((page) =>
+                                        Math.min(Math.ceil(filteredInspections.length / ITEMS_PER_PAGE), page + 1)
+                                    )
+                                }
+                                disabled={appointmentPage === Math.ceil(filteredInspections.length / ITEMS_PER_PAGE)}
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-2" />
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </TabsContent>
             </Tabs>
         </ContentSection>
     )
 }
-

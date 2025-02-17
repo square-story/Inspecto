@@ -99,13 +99,13 @@ export default class PaymentController {
             if (!response) {
                 return res.status(404).json({
                     success: false,
-                    message: "Not Found Any Datas"
+                    message: "Not found any data"
                 })
             }
 
             return res.status(200).json({
                 success: true,
-                message: "Payment Getting",
+                message: "Payment getted successfully",
                 payments: response
             })
         } catch (error: any) {
