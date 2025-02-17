@@ -46,4 +46,11 @@ export interface IInspectionRepository {
      */
 
     getAvailableSlots(inspectorId: string, date: Date, dayAvailability: IDayAvailability): Promise<number[]>;
+
+    /** 
+     * Retrieves User inspection by userId
+     * @param userId ObjectId
+     * @return Promise<IInspectionDocument | null>
+    */
+    findUserInspections(userId: string): Promise<IInspectionDocument[]>
 }

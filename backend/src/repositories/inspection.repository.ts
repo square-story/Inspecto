@@ -28,6 +28,9 @@ class InspectionRepository implements IInspectionRepository {
         return Array.from({ length: dayAvailability.slots }, (_, i) => i + 1)
             .filter(slot => !bookedSlotNumbers.has(slot));
     }
+    async findUserInspections(userId: string): Promise<IInspectionDocument[]> {
+        return await inspectionModel.find({ user: userId }).populate('vehicle').populate('inspector').sort({ date: -1 });
+    }
 }
 
 export default InspectionRepository

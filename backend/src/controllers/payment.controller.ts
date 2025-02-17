@@ -85,6 +85,37 @@ export default class PaymentController {
             });
         }
     }
+    public async findPayments(req: Request, res: Response): Promise<Response> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+            }
+            const response = await paymentService.findPayments(userId)
+
+            if (!response) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Not Found Any Datas"
+                })
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Payment Getting",
+                payments: response
+            })
+        } catch (error: any) {
+            console.error('Error verifying payment:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 }
 
 

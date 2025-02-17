@@ -110,6 +110,14 @@ class PaymentService {
             throw error;
         }
     }
+    async findPayments(userId: string) {
+        try {
+            return await this.paymentRepository.findUserPayments(userId)
+        } catch (error) {
+            console.error('Error getting payments data:', error);
+            throw error;
+        }
+    }
 }
 
 export default new PaymentService();

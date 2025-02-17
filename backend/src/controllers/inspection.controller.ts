@@ -71,15 +71,15 @@ export default class InspectionController {
 
     public async getInspectionById(req: Request, res: Response): Promise<Response> {
         try {
-            const id = req.user?.userId;
+            const { inspectionId } = req.params
 
-            if (!id) {
+            if (!inspectionId) {
                 return res.status(404).json({
                     success: false,
-                    message: "User not found.",
+                    message: "inspections not found.",
                 });
             }
-            const inspection = await inspectionService.getInspectionById(id);
+            const inspection = await inspectionService.getInspectionById(inspectionId);
             if (!inspection) {
                 return res.status(404).json({
                     success: false,
@@ -108,6 +108,34 @@ export default class InspectionController {
             });
         } catch (error: any) {
             console.error("Error retrieving slots:", error);
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    }
+    public async findInspections(req: Request, res: Response): Promise<Response> {
+        try {
+            const userId = req.user?.userId
+            if (!userId) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found.",
+                });
+            }
+            const inspections = await inspectionService.findInspections(userId);
+            if (!inspections) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Inspection not found.",
+                });
+            }
+            return res.status(200).json({
+                success: true,
+                inspections,
+            });
+        } catch (error: any) {
+            console.error("Error retrieving inspections Details:", error);
             return res.status(500).json({
                 success: false,
                 message: error.message,

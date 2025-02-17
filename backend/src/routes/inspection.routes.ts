@@ -7,10 +7,15 @@ const router = Router();
 const inspectionController = new InspectionController();
 
 
+//get all inspections
 router.get('/', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
-    inspectionController.getInspectionById(req, res).catch(next)
+    inspectionController.findInspections(req, res).catch(next)
 })
 
+//get single inspections
+router.get('/:inspectionId', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
+    inspectionController.getInspectionById(req, res).catch(next)
+})
 
 router.post("/book", authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
     inspectionController

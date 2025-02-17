@@ -16,6 +16,11 @@ class PaymentRepository implements IPaymentRepository {
             { new: true }
         );
     }
+    async findUserPayments(userId: string): Promise<IPaymentDocument[]> {
+        return await paymentModel.find({
+            user: userId
+        }).populate('inspection').sort({ createdAt: -1 });
+    }
 }
 
 export default PaymentRepository;
