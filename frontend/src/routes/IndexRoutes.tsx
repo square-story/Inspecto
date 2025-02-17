@@ -3,9 +3,9 @@ import PublicRoutes from "./PublicRoutes";
 import UserRoutes from "./UserRoutes";
 import AdminRoutes from "./AdminRoutes";
 import InspectorRoutes from "./InspectorRoutes";
-import BlockedAccount from "@/pages/BlockedAccount";
+import BlockedAccount from "@/pages/common/BlockedAccount";
 import { PublicRoute } from "./ProtectedRoute";
-import SupportPage from "@/pages/SupportPage";
+import SupportPage from "@/pages/common/SupportPage";
 
 const IndexRoutes = () => (
     <Routes>
