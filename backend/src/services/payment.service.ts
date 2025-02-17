@@ -81,11 +81,10 @@ class PaymentService {
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
-                    console.log('the inspection details', payment.inspection.toString())
 
                     await inspectionService.updateInspection(
                         payment.inspection.toString(),
-                        { status: InspectionStatus.PAYMENT_PENDING }
+                        { status: InspectionStatus.CANCELLED }
                     );
 
                     await inspectionService.cancelInspection(payment.inspection.toString())

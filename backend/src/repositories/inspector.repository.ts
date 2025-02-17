@@ -72,6 +72,7 @@ export class InspectorRepository implements IinspectorRepository {
             $pull: {
                 bookedSlots: {
                     date: date,
+                    slotsBooked: 1,
                     bookedBy: userId
                 }
             }
