@@ -7,6 +7,7 @@ export default function InspectionManagement() {
         <ContentSection
             title='Inspection'
             desc='Complete the step to follow the instruction'
+            scrollAreaClassName=''
         >
             <MultiStepForm />
         </ContentSection>
