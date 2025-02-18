@@ -12,7 +12,7 @@ export const stripe = new Stripe(appConfig.stripSecret, {
 
 class PaymentService {
     private paymentRepository: PaymentRepository;
-    private readonly PENDING_TIMEOUT_MS = 60 * 60 * 1000;
+    private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
     constructor() {
         this.paymentRepository = new PaymentRepository();
     }
@@ -124,6 +124,7 @@ class PaymentService {
         session.startTransaction();
 
         try {
+
             // Find payments that are pending for more than 1 hour
             const staleDate = new Date(Date.now() - this.PENDING_TIMEOUT_MS);
             const stalePayments = await this.paymentRepository.findStalePayments(

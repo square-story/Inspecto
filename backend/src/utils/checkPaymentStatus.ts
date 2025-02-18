@@ -1,8 +1,9 @@
 import cron from 'node-cron';
 import paymentService from '../services/payment.service';
 
-// Run every 15 minutes
-cron.schedule('*/15 * * * *', async () => {
+
+cron.schedule('*/5 * * * *', async () => {
+    console.log('Cron job triggered at:', new Date().toISOString());
     try {
         await paymentService.handleStaleTransactions();
     } catch (error) {

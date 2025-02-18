@@ -48,8 +48,6 @@ export default function InspectionTable() {
     }, [dispatch])
     const { data } = useSelector((state: RootState) => state.inspections)
 
-    console.log("The Data is:", data)
-
     const columns: ColumnDef<Inspection>[] = [
         {
             accessorKey: "bookingReference",

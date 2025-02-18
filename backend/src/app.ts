@@ -9,6 +9,7 @@ import vehiclesRoutes from "./routes/vehicles.routes"
 import inspectionRoutes from "./routes/inspection.routes"
 import paymentsRoutes from './routes/payment.routes'
 import cors from "cors";
+import './utils/checkPaymentStatus';
 
 const app = express()
 
@@ -59,6 +60,7 @@ app.use('/user', userRoutes)
 app.use('/vehicles', vehiclesRoutes)
 app.use('/inspections', inspectionRoutes)
 app.use('/payments', paymentsRoutes)
+
 
 app.use((req: Request, res: Response) => {
     res.status(404).send('route not found')
