@@ -235,8 +235,8 @@ export default function PaymentHistory() {
                                                             inspection.inspectionType.slice(1)} Inspection
                                                     </p>
                                                     <p className="text-sm text-muted-foreground">
-                                                        {inspection.bookingReference} • {formatDateTime(inspection.date as unknown as string).date} at{" "}
-                                                        {formatDateTime(inspection.date as unknown as string).time}
+                                                        {inspection.bookingReference} • {formatDateTime(inspection.date as unknown as string).date} at{" "} {inspection.slotNumber <= 2 ? "Morning" : inspection.slotNumber <= 4 ? "Afternoon" : "Evening"}
+
                                                     </p>
                                                 </div>
                                             </div>
@@ -262,7 +262,6 @@ export default function PaymentHistory() {
                                                             <p><strong>Reference:</strong> {inspection.bookingReference}</p>
                                                             <p><strong>Type:</strong> {inspection.inspectionType}</p>
                                                             <p><strong>Date:</strong> {formatDateTime(inspection.date as unknown as string).date}</p>
-                                                            <p><strong>Time:</strong> {formatDateTime(inspection.date as unknown as string).time}</p>
                                                             <p><strong>Status:</strong> {inspection.status}</p>
                                                             <p><strong>Location:</strong> {inspection.location}</p>
                                                             <p><strong>Slot Number:</strong> {inspection.slotNumber}</p>
