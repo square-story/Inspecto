@@ -8,7 +8,7 @@ const inspectionController = new InspectionController();
 
 
 //get all inspections
-router.get('/', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
+router.get('/', authenticateToken, authorizeRole('user', 'inspector'), (req: Request, res: Response, next: NextFunction) => {
     inspectionController.findInspections(req, res).catch(next)
 })
 

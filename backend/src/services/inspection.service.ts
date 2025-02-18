@@ -22,6 +22,9 @@ class InspectionService {
     async findInspections(userId: string): Promise<IInspectionDocument[]> {
         return await this.inspectionRepository.findUserInspections(userId)
     }
+    async findInspectionsByInspector(inspectorId: string): Promise<IInspectionDocument[]> {
+        return await this.inspectionRepository.findInspectorInspections(inspectorId)
+    }
     async checkSlotAvaliability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean> {
         return await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber);
     }

@@ -1,6 +1,8 @@
+import InspectionTable from "@/app/assignedInspections/components/data-table"
+
 const InspectionsAssigned = () => {
     return (
-        <div>InspectionsAssigned</div>
+        <InspectionTable />
     )
 }
 

@@ -53,4 +53,12 @@ export interface IInspectionRepository {
      * @return Promise<IInspectionDocument | null>
     */
     findUserInspections(userId: string): Promise<IInspectionDocument[]>
+
+    /** 
+     * Retrieves inspector inspection by inspectorId
+     * @param inspectorId ObjectId
+     * @return Promise<IInspectionDocument | null>
+    */
+
+    findInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]>
 }

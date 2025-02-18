@@ -8,7 +8,7 @@ import { InspectorStatus } from "../models/inspector.model";
 
 declare module "express-serve-static-core" {
     interface Request {
-        user?: { userId: string; role: string }; // Extend the type to include user information
+        user?: { userId: string; role: string };
     }
 }
 

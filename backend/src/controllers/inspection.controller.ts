@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IInspectionInput } from "../models/inspection.model";
+import { IInspectionDocument, IInspectionInput } from "../models/inspection.model";
 import inspectionService from "../services/inspection.service";
 import { ObjectId } from "mongoose";
 
@@ -117,13 +117,19 @@ export default class InspectionController {
     public async findInspections(req: Request, res: Response): Promise<Response> {
         try {
             const userId = req.user?.userId
-            if (!userId) {
+            const role = req.user?.role
+            if (!userId || !role) {
                 return res.status(404).json({
                     success: false,
                     message: "User not found.",
                 });
             }
-            const inspections = await inspectionService.findInspections(userId);
+            let inspections;
+            if (role == 'user') {
+                inspections = await inspectionService.findInspections(userId);
+            } else {
+                inspections = await inspectionService.findInspectionsByInspector(userId)
+            }
             if (!inspections) {
                 return res.status(404).json({
                     success: false,

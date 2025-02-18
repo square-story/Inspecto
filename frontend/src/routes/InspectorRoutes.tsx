@@ -12,6 +12,7 @@ import InspectorSettings from "@/app/InspectorSettings";
 import AddressManagment from "@/app/InspectorSettings/AddressManagement";
 import DocumentManagment from "@/app/InspectorSettings/DocumentManagment";
 import SlotManagment from "@/app/InspectorSettings/SlotManagment";
+import InspectionsAssigned from "@/pages/inspector/InspectionsAssigned";
 
 const InspectorRoutes = () => (
     <Routes>
@@ -28,6 +29,7 @@ const InspectorRoutes = () => (
         >
             <Route path="" element={<InspectorDashBoardHome />} />
             <Route path="earnings" element={<EarningsOverview />} />
+            <Route path="inspection" element={<InspectionsAssigned />} />
             <Route path="settings" element={<ProfileSettings />}>
                 <Route path="" element={<InspectorSettings />} />
                 <Route path="address" element={<AddressManagment />} />
