@@ -32,7 +32,7 @@ class InspectionRepository implements IInspectionRepository {
         return await inspectionModel.find({ user: userId }).populate('vehicle').populate('inspector').sort({ date: -1 });
     }
     async findInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
-        return await inspectionModel.find({ inspector: inspectorId }).populate('vehicle').populate('inspector').sort({ date: -1 });
+        return await inspectionModel.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').sort({ date: -1 });
     }
 }
 

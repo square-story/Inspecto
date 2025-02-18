@@ -27,7 +27,7 @@ const inspectionSlice = createSlice({
             })
             .addCase(fetchAppointments.fulfilled, (state, action) => {
                 state.loading = false
-                state.data = action.payload
+                state.data = (action.payload as unknown as Inspection[]) || []
                 state.error = null
             })
             .addCase(fetchAppointments.rejected, (state, action) => {

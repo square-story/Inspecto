@@ -30,7 +30,7 @@ export interface Inspection {
     notes?: string;
     version: number;
     vehicle: Vehicle;
-    inspector: InspectorState
-    bookingReference: string
+    inspector: InspectorState;
+    bookingReference: string;
 }
 
