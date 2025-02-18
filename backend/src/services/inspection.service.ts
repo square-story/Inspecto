@@ -40,6 +40,10 @@ class InspectionService {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
+            if (!bookingData.user || !bookingData.inspector || !bookingData.date || !bookingData.slotNumber) {
+                throw new Error('Missing required booking data');
+            }
+
             const isAvailable = await this.checkSlotAvaliability(
                 bookingData.inspector!.toString(),
                 bookingData.date!,
@@ -75,7 +79,7 @@ class InspectionService {
 
         } catch (error) {
             await session.abortTransaction();
-            throw error;
+            throw error
         } finally {
             session.endSession();
         }
@@ -89,8 +93,7 @@ class InspectionService {
             if (!inspection) {
                 throw new Error('Inspection not found');
             }
-            const response = await this.inspectorService.unBookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
-            console.log(response)
+            await this.inspectorService.unBookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
             await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();

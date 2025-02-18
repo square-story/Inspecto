@@ -39,6 +39,7 @@ export interface IInspectorInput {
     availableSlots: WeeklyAvailability;
     // to track dates and remaining slots
     bookedSlots: {
+        _id: any;
         date: Date,
         slotsBooked: number,
         bookedBy: ObjectId[]
