@@ -1,4 +1,4 @@
-import paymentModel, { IPaymentInput, IPaymentDocument } from "../models/payment.model";
+import paymentModel, { IPaymentInput, IPaymentDocument, PaymentStatus } from "../models/payment.model";
 import { IPaymentRepository } from "./interfaces/payment.repository.interface";
 
 class PaymentRepository implements IPaymentRepository {
@@ -20,6 +20,12 @@ class PaymentRepository implements IPaymentRepository {
         return await paymentModel.find({
             user: userId
         }).populate('inspection').sort({ createdAt: -1 });
+    }
+    async findStalePayments(status: PaymentStatus, beforeDate: Date): Promise<IPaymentDocument[]> {
+        return await paymentModel.find({
+            status: status,
+            createdAt: { $lt: beforeDate }
+        });
     }
 }
 

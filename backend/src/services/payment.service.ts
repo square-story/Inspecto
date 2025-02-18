@@ -12,7 +12,7 @@ export const stripe = new Stripe(appConfig.stripSecret, {
 
 class PaymentService {
     private paymentRepository: PaymentRepository;
-
+    private readonly PENDING_TIMEOUT_MS = 60 * 60 * 1000;
     constructor() {
         this.paymentRepository = new PaymentRepository();
     }
@@ -116,6 +116,65 @@ class PaymentService {
         } catch (error) {
             console.error('Error getting payments data:', error);
             throw error;
+        }
+    }
+
+    async handleStaleTransactions(): Promise<void> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            // Find payments that are pending for more than 1 hour
+            const staleDate = new Date(Date.now() - this.PENDING_TIMEOUT_MS);
+            const stalePayments = await this.paymentRepository.findStalePayments(
+                PaymentStatus.PENDING,
+                staleDate
+            );
+
+            for (const payment of stalePayments) {
+                try {
+                    // Retrieve the payment intent from Stripe
+                    const paymentIntent = await stripe.paymentIntents.retrieve(
+                        payment.stripePaymentIntentId
+                    );
+
+                    // If the payment is still pending in Stripe, cancel it
+                    if (paymentIntent.status === 'requires_payment_method' ||
+                        paymentIntent.status === 'requires_confirmation' ||
+                        paymentIntent.status === 'requires_action') {
+
+                        await stripe.paymentIntents.cancel(payment.stripePaymentIntentId);
+                    }
+
+                    // Update local payment status
+                    await this.paymentRepository.updatePayment(
+                        payment.stripePaymentIntentId,
+                        { status: PaymentStatus.FAILED }
+                    );
+
+                    // Update inspection status
+                    await inspectionService.updateInspection(
+                        payment.inspection.toString(),
+                        { status: InspectionStatus.CANCELLED }
+                    );
+
+                    // Cancel the inspection
+                    await inspectionService.cancelInspection(payment.inspection.toString());
+
+                } catch (error) {
+                    console.error(`Error handling stale payment ${payment.stripePaymentIntentId}:`, error);
+                    // Continue with other payments even if one fails
+                    continue;
+                }
+            }
+
+            await session.commitTransaction();
+        } catch (error) {
+            await session.abortTransaction();
+            console.error('Error handling stale transactions:', error);
+            throw error;
+        } finally {
+            session.endSession();
         }
     }
 }
