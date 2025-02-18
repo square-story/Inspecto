@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <App />
-        <Toaster />
+        <Toaster richColors />
       </ThemeProvider>
     </Provider>
   </ConfirmDialogProvider>
