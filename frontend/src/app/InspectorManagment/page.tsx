@@ -1,6 +1,3 @@
-// app/InspectorManagement/DemoPage.tsx
-"use client";
-
 import { useEffect, useState } from "react";
 import { InspectorDataTable } from "./components/InspectorDataTable";
 import { Inspectors, columns } from "./columns";

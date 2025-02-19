@@ -1,4 +1,3 @@
-//contain our column definitions.
 
 import { ColumnDef } from "@tanstack/react-table";
 import { CircleCheck } from "lucide-react"

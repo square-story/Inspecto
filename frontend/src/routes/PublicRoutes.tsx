@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import HomePage from "../pages/HomePage";
-import FAQPage from "../pages/FAQPage";
-import ContactPage from "../pages/ContactPage";
+import HomePage from "../pages/common/HomePage";
+import FAQPage from "../pages/common/FAQPage";
+import ContactPage from "../pages/common/ContactPage";
 import { PublicRoute } from "./ProtectedRoute";
 import UserForget from "../pages/user/ForgetPasswordPreview";
 import ResetPasswordPreview from "@/pages/user/ResetPassword";

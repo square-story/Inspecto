@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Hero01 = () => {
     return (
@@ -25,8 +26,11 @@ const Hero01 = () => {
                             variant="outline"
                             size="lg"
                             className="rounded-full text-base shadow-none"
+
                         >
-                            <ChevronRight className="!h-5 !w-5" /> Learn More
+                            <Link
+                                key={'/questions'}
+                                to={'/questions'} className="flex flex-row"><ChevronRight className="!h-5 !w-5" /> Learn More</Link>
                         </Button>
                     </div>
                 </div>

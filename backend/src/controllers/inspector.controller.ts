@@ -24,12 +24,27 @@ export class InspectorController {
     static completeProfile: RequestHandler = async (req: Request, res: Response) => {
         try {
             const userId = req.user?.userId
-            const data = req.body
+            const { longitude, latitude, ...restData } = req.body; // Extract location data separately
+
             if (!userId) {
-                res.status(400).json('User Id is missing in the token')
+                res.status(400).json({ message: 'User ID is missing in the token' });
                 return;
             }
-            const response = await inspectorService.completeInspectorProfile(userId, data)
+
+            // Validate longitude and latitude
+            if (!longitude || !latitude) {
+                res.status(400).json({ message: 'Longitude and Latitude are required' });
+                return
+            }
+
+            // Ensure location follows MongoDB's GeoJSON format
+            const location = {
+                type: 'Point',
+                coordinates: [parseFloat(longitude), parseFloat(latitude)] // Convert to numbers
+            };
+
+            const updatedData = { ...restData, location }; // Merge with other form data
+            const response = await inspectorService.completeInspectorProfile(userId, updatedData)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -207,7 +222,6 @@ export class InspectorController {
             }
             const { currentPassword, newPassword } = req.body
             if (!currentPassword) {
-                console.log("Error: Request Body doesn't have enough data to complete")
                 res.status(400).json({
                     success: false,
                     message: "Request Body doesn't have enough data to complete"
@@ -235,4 +249,25 @@ export class InspectorController {
             return
         }
     }
+
+    static getNearbyInspectors: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const { latitude, longitude } = req.query;
+            if (!latitude || !longitude) {
+                res.status(400).json({ message: "Latitude and Longitude are required" });
+                return
+            }
+            const inspectors = await inspectorService.getNearbyInspectors(latitude as string, longitude as string);
+            res.status(200).json(inspectors);
+            return;
+        } catch (error: any) {
+            console.error("Error in getNearbyInspectors:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message || "Internal Server Error. Please try again later."
+            });
+            return
+        }
+    }
+
 }

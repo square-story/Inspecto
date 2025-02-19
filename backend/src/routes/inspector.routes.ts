@@ -29,5 +29,7 @@ router.put('/update', authenticateToken, authorizeRole('inspector'), InspectorCo
 //change password
 router.put('/change-password', authenticateToken, authorizeRole('inspector'), InspectorController.changePassword)
 
+router.get('/', InspectorController.getNearbyInspectors)
+
 
 export default router

@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { useForm, } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,9 @@ import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { inspectorService } from "@/services/inspector.service";
 import { getTransformedImageUrl } from "@/utils/cloudinary";
 import { SpecializationSelect } from "@/components/fancy-multi-select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
+import AvailabilityPicker, { WeeklyAvailability } from "@/components/AvailabilityPicker"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -34,9 +38,18 @@ const FileSchema = z.object({
     preview: z.string()
 })
 
+const defaultAvailability: WeeklyAvailability = {
+    Monday: { enabled: true, slots: 5 },
+    Tuesday: { enabled: true, slots: 5 },
+    Wednesday: { enabled: true, slots: 5 },
+    Thursday: { enabled: true, slots: 5 },
+    Friday: { enabled: true, slots: 5 },
+    Saturday: { enabled: false, slots: 0 },
+};
+
 // Validation schema
 const formSchema = z.object({
-    address: z.string().min(3, "Address must be at least 3 characters"),
+    location: z.string().min(3, "Address must be at least 3 characters"),
     profile_image: FileSchema.nullable(),
     certificates: z.array(FileSchema).min(1, "At least One Certificate is required"),
     yearOfExp: z.coerce.number()
@@ -44,16 +57,34 @@ const formSchema = z.object({
         .max(50, "Experience must not exceed 50 years"),
     signature: FileSchema.nullable(),
     specialization: z.array(z.string()).min(1, "At least one specialization is required"),
-    start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
-    end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
-    avaliable_days: z.number().min(1).max(7, "Days must be between 1-7")
-}).refine(data => {
-    const start = new Date(`1970-01-01T${data.start_time}`);
-    const end = new Date(`1970-01-01T${data.end_time}`);
-    return end > start
-}, {
-    message: "End time must be after start time",
-    path: ["end_time"]
+    longitude: z.string().optional().nullable(),
+    latitude: z.string().optional().nullable(),
+    availableSlots: z.object({
+        Monday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Tuesday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Wednesday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Thursday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Friday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+        Saturday: z.object({
+            enabled: z.boolean(),
+            slots: z.number(),
+        }),
+    }),
 });
 
 interface FileWithPreview {
@@ -61,21 +92,26 @@ interface FileWithPreview {
     preview: string
 }
 
+
 export default function InspectorForm() {
     const [isUploadingFiles, setIsUploadingFiles] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate()
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             specialization: [],
             certificates: [],
-            avaliable_days: 5,
             profile_image: null,
-            signature: null
+            signature: null,
+            availableSlots: defaultAvailability,
         }
     });
+
+    const locationValue = form.watch("location");
 
     const handleFileUpload = async (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -126,7 +162,7 @@ export default function InspectorForm() {
             const signature = form.getValues('signature');
             const certificates = form.getValues('certificates');
 
-            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'default') : '';
+            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'face') : '';
             const signatureUrl = signature ? getTransformedImageUrl(await uploadToCloudinary(signature.file), 'signature') : '';
             const certificateUrls = await Promise.all(
                 certificates.map(async cert => getTransformedImageUrl(await uploadToCloudinary(cert.file), 'certificate'))
@@ -146,15 +182,15 @@ export default function InspectorForm() {
             setIsSubmitting(true);
             const { profileUrl, signatureUrl, certificateUrls } = await uploadFiles();
             const submitData = {
-                address: data.address,
+                address: data.location,
                 profile_image: profileUrl,
                 signature: signatureUrl,
                 certificates: certificateUrls,
                 yearOfExp: data.yearOfExp,
                 specialization: data.specialization,
-                start_time: data.start_time,
-                end_time: data.end_time,
-                avaliable_days: data.avaliable_days
+                longitude: data.longitude,
+                latitude: data.latitude,
+                availableSlots: data.availableSlots
             };
             const response = await inspectorService.completeProfile(submitData)
             if (response.data) {
@@ -223,17 +259,32 @@ export default function InspectorForm() {
                             <div className="grid md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="address"
-                                    render={({ field }) => (
+                                    name="location"
+                                    render={({ fieldState: { error } }) => (
                                         <FormItem>
-                                            <FormLabel>Address</FormLabel>
+                                            <FormLabel>Location</FormLabel>
                                             <FormControl>
-                                                <Input {...field} placeholder="Enter your address" />
+                                                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                                    <DialogTrigger asChild>
+                                                        <Button variant="outline" className="w-full">
+                                                            {locationValue ? locationValue : "Select a location"}
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-lg w-full space-y-4">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Choose a Location</DialogTitle>
+                                                        </DialogHeader>
+                                                        <AddressAutocomplete setValue={form.setValue as (name: string, value: unknown) => void} closeDialog={() => setIsDialogOpen(false)} />
+                                                    </DialogContent>
+                                                </Dialog>
                                             </FormControl>
-                                            <FormMessage />
+                                            {error && <FormMessage>{error.message}</FormMessage>}
                                         </FormItem>
                                     )}
                                 />
+
+                                <input type="hidden" {...form.control.register("latitude")} />
+                                <input type="hidden" {...form.control.register("longitude")} />
 
                                 <FormField
                                     control={form.control}
@@ -256,55 +307,28 @@ export default function InspectorForm() {
                             </div>
 
                             {/* Time and Days */}
-                            <div className="grid md:grid-cols-3 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="start_time"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Start Time</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                            <FormField
+                                control={form.control}
+                                name="availableSlots"
+                                render={({ field, fieldState: { error } }) => (
+                                    <FormItem>
+                                        <FormLabel>Available Slots</FormLabel>
+                                        <FormControl>
+                                            <AvailabilityPicker
+                                                value={field.value || defaultAvailability}
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Set your available slots for booking (for each day).
+                                        </FormDescription>
+                                        <FormMessage>{error && error.message}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
 
-                                <FormField
-                                    control={form.control}
-                                    name="end_time"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>End Time</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
 
-                                <FormField
-                                    control={form.control}
-                                    name="avaliable_days"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Available Days</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    max="7"
-                                                    {...field}
-                                                    onChange={e => field.onChange(parseInt(e.target.value))}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+
 
                             {/* Certificates */}
                             <FormField
