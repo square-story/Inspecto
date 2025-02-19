@@ -74,6 +74,6 @@ const InspectionSchema: Schema = new Schema<IInspectionDocument>(
 );
 
 // compound index for slot uniqueness
-InspectionSchema.index({ date: 1, inspector: 1, slotNumber: 1 }, { unique: true });
+InspectionSchema.index({ date: 1, inspector: 1, slotNumber: 1 }, { unique: true, partialFilterExpression: { status: { $ne: InspectionStatus.CANCELLED } } });
 
 export default mongoose.model<IInspectionDocument>("Inspection", InspectionSchema);
