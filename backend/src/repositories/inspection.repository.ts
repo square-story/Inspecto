@@ -34,6 +34,9 @@ class InspectionRepository implements IInspectionRepository {
     async findInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
         return await inspectionModel.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').sort({ date: -1 });
     }
+    async existingInspection(data: { date: Date, inspector: string, slotNumber: number }): Promise<IInspectionDocument | null> {
+        return await inspectionModel.findOne(data)
+    }
 }
 
 export default InspectionRepository

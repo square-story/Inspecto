@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IInspectionInput, IInspectionDocument } from "../models/inspection.model";
+import { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
 import { WeeklyAvailability } from "../models/inspector.model";
 import InspectionRepository from "../repositories/inspection.repository";
 import { InspectorService } from "./inspector.service";
@@ -36,12 +36,24 @@ class InspectionService {
         if (!dayAvailability.enabled) throw new Error('Inspector is not available on this day');
         return await this.inspectionRepository.getAvailableSlots(inspectorId, date, dayAvailability);
     }
-    async createInspection(bookingData: Partial<IInspectionInput>): Promise<IInspectionDocument> {
+    async createInspection(bookingData: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
             if (!bookingData.user || !bookingData.inspector || !bookingData.date || !bookingData.slotNumber) {
                 throw new Error('Missing required booking data');
+            }
+            const existingBooking = await this.inspectionRepository.existingInspection({
+                date: bookingData.date,
+                inspector: bookingData.inspector.toString(),
+                slotNumber: bookingData.slotNumber,
+            });
+
+            console.log('the exisiing booking:', existingBooking)
+
+            // If there's an existing booking and it's not cancelled, throw error
+            if (existingBooking && existingBooking.status !== InspectionStatus.CANCELLED) {
+                throw new Error('Slot is no longer available');
             }
 
             const isAvailable = await this.checkSlotAvaliability(
@@ -63,7 +75,6 @@ class InspectionService {
                 throw new Error('Inspector not found');
             }
 
-            const booking = await this.inspectionRepository.createInspection({ ...bookingData, bookingReference, version: 0, user: bookingData.user! });
             const validDate = this.validateDate(bookingData.date);
             const dayOfWeek = validDate.toLocaleDateString('en-US', { weekday: 'long' });
 
@@ -72,8 +83,33 @@ class InspectionService {
                 throw new Error('Inspector is not available on this day');
             }
 
-            await this.inspectorService.bookingHandler(bookingData.inspector!.toString(), bookingData.user!.toString(), bookingData.date!);
+            let booking;
+            if (existingBooking) {
+                booking = await this.inspectionRepository.updateInspection(
+                    existingBooking.id,
+                    {
+                        ...bookingData,
+                        bookingReference,
+                        status: InspectionStatus.PENDING,
+                        version: existingBooking.version + 1
+                    },
+                );
+            } else {
+                // Create new booking if no existing one found
+                booking = await this.inspectionRepository.createInspection({
+                    ...bookingData,
+                    bookingReference,
+                    version: 0,
+                    status: InspectionStatus.PENDING,
+                    user: bookingData.user
+                });
+            }
 
+            const response = await this.inspectorService.bookingHandler(
+                bookingData.inspector.toString(),
+                bookingData.user.toString(),
+                bookingData.date
+            );
             await session.commitTransaction();
             return booking;
 
