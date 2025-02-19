@@ -1,21 +1,43 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState, useEffect } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, PaymentIntent } from '@stripe/stripe-js';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import axiosInstance from '@/api/axios';
 
+// Types
+interface CheckoutFormProps {
+    clientSecret: string;
+    onSuccess: (paymentIntent: PaymentIntent) => void;
+    onError: (message: string) => void;
+}
+
+interface StripePaymentWrapperProps {
+    amount: number;
+    inspectionId: string;
+    onPaymentSuccess: (payment: PaymentResponse) => void;
+    onPaymentError: (message: string) => void;
+}
+
+interface PaymentResponse {
+    id: string;
+    amount: number;
+    status: string;
+    created: number;
+}
+
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const CheckoutForm = ({ clientSecret, onSuccess, onError }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!stripe || !elements) return;
 
@@ -28,7 +50,7 @@ const CheckoutForm = ({ clientSecret, onSuccess, onError }) => {
 
             if (error) {
                 onError(error.message);
-            } else if (paymentIntent.status === 'succeeded') {
+            } else if (paymentIntent?.status === 'succeeded') {
                 onSuccess(paymentIntent);
             }
         } catch (err) {
@@ -52,36 +74,49 @@ const CheckoutForm = ({ clientSecret, onSuccess, onError }) => {
     );
 };
 
-const StripePaymentWrapper = ({ amount, inspectionId, onPaymentSuccess, onPaymentError }) => {
-    const [clientSecret, setClientSecret] = useState(null);
+const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = ({
+    amount,
+    inspectionId,
+    onPaymentSuccess,
+    onPaymentError
+}) => {
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+    const [success, setSuccess] = useState<boolean>(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const initializePayment = async () => {
             try {
-                const response = await axiosInstance.post('/payments/create-payment-intent', {
+                const response = await axiosInstance.post<{ clientSecret: string }>('/payments/create-payment-intent', {
                     amount,
                     inspectionId
                 });
                 setClientSecret(response.data.clientSecret);
             } catch (err) {
-                setError('Failed to initialize payment');
+                const errorMessage = err instanceof Error ? err.message : 'Failed to initialize payment';
+                setError(errorMessage);
+                onPaymentError(errorMessage);
             }
         };
 
         initializePayment();
-    }, [amount, inspectionId]);
+    }, [amount, inspectionId, onPaymentError]);
 
-    const handlePaymentSuccess = async (paymentIntent) => {
+    const handlePaymentSuccess = async (paymentIntent: PaymentIntent) => {
         try {
-            const response = await axiosInstance.get(`/payments/verify/${paymentIntent.id}`);
+            const response = await axiosInstance.get<{ success: boolean; payment: PaymentResponse }>(
+                `/payments/verify/${paymentIntent.id}`
+            );
+
             if (response.data.success) {
                 setSuccess(true);
                 onPaymentSuccess(response.data.payment);
+            } else {
+                throw new Error('Payment verification failed');
             }
         } catch (err) {
-            onPaymentError('Payment verification failed');
+            const errorMessage = err instanceof Error ? err.message : 'Payment verification failed';
+            onPaymentError(errorMessage);
         }
     };
 
@@ -105,32 +140,34 @@ const StripePaymentWrapper = ({ amount, inspectionId, onPaymentSuccess, onPaymen
         );
     }
 
+    if (!clientSecret) {
+        return null; // Or a loading state
+    }
+
     return (
         <Card className="w-full">
             <CardHeader>
                 <CardTitle>Complete Payment</CardTitle>
             </CardHeader>
             <CardContent>
-                {clientSecret && (
-                    <Elements
-                        stripe={stripePromise}
-                        options={{
-                            clientSecret,
-                            appearance: {
-                                theme: 'stripe',
-                            },
+                <Elements
+                    stripe={stripePromise}
+                    options={{
+                        clientSecret,
+                        appearance: {
+                            theme: 'stripe',
+                        },
+                    }}
+                >
+                    <CheckoutForm
+                        clientSecret={clientSecret}
+                        onSuccess={handlePaymentSuccess}
+                        onError={(msg) => {
+                            setError(msg);
+                            onPaymentError(msg);
                         }}
-                    >
-                        <CheckoutForm
-                            clientSecret={clientSecret}
-                            onSuccess={handlePaymentSuccess}
-                            onError={(msg) => {
-                                setError(msg);
-                                onPaymentError(msg);
-                            }}
-                        />
-                    </Elements>
-                )}
+                    />
+                </Elements>
             </CardContent>
         </Card>
     );
