@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "@/store"
 import { fetchAppointments } from "@/features/inspection/inspectionSlice"
 import { format } from "date-fns"
+import InspectionDetailsDialog from "@/components/inspector/InspectionDetailsDialog"
 
 
 const statusColors = {
@@ -41,6 +42,8 @@ export default function InspectionTable() {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnVisibility, setColumnVisibility] = useState({})
     const [globalFilter, setGlobalFilter] = useState("")
+    const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
     const dispatch = useDispatch<AppDispatch>()
 
     useEffect(() => {
@@ -118,9 +121,16 @@ export default function InspectionTable() {
         {
             id: "actions",
             header: "Actions",
-            cell: () => (
+            cell: ({ row }) => (
                 <div className="text-right">
-                    <Button variant="ghost" size="sm">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                            setSelectedInspection(row.original)
+                            setDialogOpen(true)
+                        }}
+                    >
                         View Details
                     </Button>
                 </div>
@@ -226,6 +236,11 @@ export default function InspectionTable() {
                     Next
                 </Button>
             </div>
+            <InspectionDetailsDialog
+                inspection={selectedInspection}
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+            />
         </div>
     )
 }

@@ -1,4 +1,5 @@
 import { InspectorState } from "../inspector/inspectorSlice";
+import { UserState } from "../user/userSlice";
 import { Vehicle } from "../vehicle/vehicleSlice";
 
 export enum InspectionType {
@@ -32,5 +33,6 @@ export interface Inspection {
     vehicle: Vehicle;
     inspector: InspectorState;
     bookingReference: string;
+    user: UserState;
 }
 
