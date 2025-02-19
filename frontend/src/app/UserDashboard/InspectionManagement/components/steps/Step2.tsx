@@ -72,7 +72,7 @@ const Step2 = () => {
                                                                 <div className="font-medium">
                                                                     {inspector.firstName} {inspector.lastName}
                                                                 </div>
-                                                                <div className="text-sm text-muted-foreground">{inspector.phone}</div>
+                                                                <div className="text-sm text-muted-foreground">{inspector.email}</div>
                                                             </div>
                                                         </div>
                                                     </TableCell>
