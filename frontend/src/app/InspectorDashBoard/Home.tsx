@@ -1,13 +1,13 @@
-"use client"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Activity, AlertCircle, ArrowRight, Calendar, DollarSign, FileCheck, User, Users } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function Dashboard() {
+    const navigate = useNavigate();
     // Mock data - replace with real data from your API
     const stats = {
         totalInspections: 145,
@@ -96,13 +96,13 @@ export default function Dashboard() {
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-4">
-                <Button>
+                {/* <Button>
                     Schedule New Inspection
-                </Button>
-                <Button variant="outline">
+                </Button> */}
+                <Button onClick={() => navigate('/inspector/dashboard/inspection')}>
                     View All Inspections
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => navigate('/inspector/dashboard/earnings')}>
                     View Earnings Report
                 </Button>
             </div>
@@ -199,7 +199,7 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {[1, 2, 3].map((_, i) => (
+                            {[1, 2,].map((_, i) => (
                                 <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                                     <div className="space-y-1">
                                         <p className="font-medium">Vehicle Inspection #{i + 1}</p>
