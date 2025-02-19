@@ -76,7 +76,6 @@ const StripePaymentWrapper = ({ amount, inspectionId, onPaymentSuccess, onPaymen
     const handlePaymentSuccess = async (paymentIntent) => {
         try {
             const response = await axiosInstance.get(`/payments/verify/${paymentIntent.id}`);
-            console.log("the response when check the status", response)
             if (response.data.success) {
                 setSuccess(true);
                 onPaymentSuccess(response.data.payment);

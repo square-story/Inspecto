@@ -18,6 +18,7 @@ const MultiStepForm = () => {
     const [showPayment, setShowPayment] = useState(false);
     const [bookingData, setBookingData] = useState(null);
 
+
     const methods = useForm({
         mode: "onChange",
         resolver: zodResolver(
@@ -65,6 +66,7 @@ const MultiStepForm = () => {
     const handlePaymentError = (message) => {
         toast.error(message);
     };
+    const values = methods.getValues()
 
     return (
         <FormProvider {...methods}>
@@ -93,7 +95,7 @@ const MultiStepForm = () => {
                     </form>
                 ) : (
                     <StripePaymentWrapper
-                        amount={100}
+                        amount={values.inspectionType === "basic" ? 250 : 300}
                         inspectionId={bookingData?._id}
                         onPaymentSuccess={handlePaymentSuccess}
                         onPaymentError={handlePaymentError}
