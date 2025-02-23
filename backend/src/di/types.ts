@@ -1,33 +1,42 @@
 export const TYPES = {
-    //repository
-    UserRepository: Symbol.for('UserRepository'),
-    InspectorRepository: Symbol.for('InspectorRepository'),
-    InspectionRepository: Symbol.for('InspectionRepository'),
-    PaymentRepository: Symbol.for('PaymentRepository'),
-    VehicleRepository: Symbol.for('VehicleRepository'),
+    //Admin
     AdminRepository: Symbol.for('AdminRepository'),
-
-    //services
-    UserService: Symbol.for('UserServices'),
-    InspectorService: Symbol.for('InspectorService'),
-    InspectionService: Symbol.for('InspectionService'),
-    PaymentService: Symbol.for('PaymentService'),
-    VehicleService: Symbol.for('VehicleService'),
-    EmailService: Symbol.for('EmailService'),
     AdminService: Symbol.for('AdminService'),
+    AdminController: Symbol.for('AdminController'),
+
+    //User
+    UserRepository: Symbol.for('UserRepository'),
+    UserService: Symbol.for('UserServices'),
+    UserController: Symbol.for('UserController'),
+
+    //Inspector
+    InspectorRepository: Symbol.for('InspectorRepository'),
+    InspectorService: Symbol.for('InspectorService'),
+    InspectorController: Symbol.for('InspectorController'),
+
+    //Inspection
+    InspectionRepository: Symbol.for('InspectionRepository'),
+    InspectionService: Symbol.for('InspectionService'),
+    InspectionController: Symbol.for('InspectionController'),
+
+    //Payment
+    PaymentRepository: Symbol.for('PaymentRepository'),
+    PaymentService: Symbol.for('PaymentService'),
+    PaymentController: Symbol.for('PaymentController'),
+
+    //Vehicle
+    VehicleRepository: Symbol.for('VehicleRepository'),
+    VehicleService: Symbol.for('VehicleService'),
+    VehicleController: Symbol.for('VehicleController'),
+
+    //Email
+    EmailService: Symbol.for('EmailService'),
+
 
     //Auth Services
     AdminAuthService: Symbol.for('AdminAuthService'),
     InspectorAuthService: Symbol.for('InspectorAuthService'),
     UserAuthService: Symbol.for('UserAuthService'),
-
-    //Controllers
-    UserController: Symbol.for('UserController'),
-    InspectorController: Symbol.for('InspectorController'),
-    InspectionController: Symbol.for('InspectionController'),
-    PaymentController: Symbol.for('PaymentController'),
-    VehicleController: Symbol.for('VehicleController'),
-    AdminController: Symbol.for('AdminController'),
 
     //Auth Controllers
     AdminAuthController: Symbol.for('AdminAuthController'),
