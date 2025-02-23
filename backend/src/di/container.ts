@@ -72,7 +72,7 @@ import { PaymentStatusChecker } from "../utils/checkPaymentStatus";
 
 
 
-import { IAuthService } from "../core/interfaces/services/auth.service.interface";
+import { IAdminAuthService, IInspectorAuthService, IUserAuthService } from "../core/interfaces/services/auth.service.interface";
 import { IAuthController } from "../core/interfaces/controllers/auth.controller.interface";
 
 
@@ -114,9 +114,9 @@ container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController
 container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
 
 //Auth Services
-container.bind<IAuthService>(TYPES.InspectorAuthService).to(InspectorAuthService);
-container.bind<IAuthService>(TYPES.UserAuthService).to(UserAuthService);
-container.bind<IAuthService>(TYPES.AdminAuthService).to(AdminAuthService);
+container.bind<IInspectorAuthService>(TYPES.InspectorAuthService).to(InspectorAuthService);
+container.bind<IUserAuthService>(TYPES.UserAuthService).to(UserAuthService);
+container.bind<IAdminAuthService>(TYPES.AdminAuthService).to(AdminAuthService);
 
 //Auth controller
 container.bind<IAuthController>(TYPES.UserAuthController).to(UserAuthController);

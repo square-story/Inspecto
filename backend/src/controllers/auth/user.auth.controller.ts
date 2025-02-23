@@ -97,7 +97,14 @@ export class UserAuthController implements IAuthController {
     async verifyOTP(req: Request, res: Response): Promise<void> {
         try {
             const { email, otp } = req.body
-            const result = await this.userAuthService.verifyOTP(email, otp, res)
+            const { accessToken, message, refreshToken } = await this.userAuthService.verifyOTP(email, otp)
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            });
+            const result = { accessToken, message }
+
             res.status(200).json(result)
         } catch (error) {
             if (error instanceof Error) {

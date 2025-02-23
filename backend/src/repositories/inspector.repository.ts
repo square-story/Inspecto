@@ -10,6 +10,15 @@ export class InspectorRepository extends BaseRepository<IInspector> implements I
     constructor() {
         super(Inspector)
     }
+    async createInspector(inspectorData: Partial<IInspector>): Promise<IInspector> {
+        try {
+            const inspector = new this.model(inspectorData);
+            return await inspector.save();
+        } catch (error) {
+            console.error('Error in createInspector:', error);
+            throw error;
+        }
+    }
     updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
         return this.model.findByIdAndUpdate(userId, updates, { new: true });
     }

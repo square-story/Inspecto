@@ -9,14 +9,6 @@ export abstract class BaseAuthService {
         return { accessToken, refreshToken };
     }
 
-    protected setRefreshTokenCookie(res: Response, refreshToken: string) {
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        });
-    }
-
     async refreshToken(token: string) {
         const payload = await verifyRefreshToken(token);
         if (!payload?.userId || !payload?.role) {

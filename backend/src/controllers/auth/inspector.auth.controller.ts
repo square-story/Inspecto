@@ -2,20 +2,25 @@ import { Request, Response } from "express";
 import { inject, injectable, } from "inversify";
 import { IAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
 import { TYPES } from "../../di/types";
-import { InspectorAuthService } from "../../services/auth/inspector.auth.service";
+import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
 
 
 @injectable()
 export class InspectorAuthController implements IAuthController {
     constructor(
-        @inject(TYPES.InspectorAuthService) private inspectorAuthService: InspectorAuthService
+        @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: IInspectorAuthService
     ) { }
 
     async login(req: Request, res: Response): Promise<void> {
         try {
             const { email, password } = req.body
-            const response = await this.inspectorAuthService.loginOfInspector(email, password, res)
-            res.status(200).json(response)
+            const { accessToken, refreshToken } = await this.inspectorAuthService.login(email, password)
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            });
+            res.status(200).json(accessToken)
         } catch (error) {
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message })
@@ -78,7 +83,13 @@ export class InspectorAuthController implements IAuthController {
     async verifyOTP(req: Request, res: Response): Promise<void> {
         try {
             const { email, otp } = req.body
-            const result = await this.inspectorAuthService.verifyOTP(email, otp, res)
+            const { accessToken, refreshToken, message } = await this.inspectorAuthService.verifyOTP(email, otp)
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            })
+            const result = { accessToken, message }
             res.status(200).json(result)
         } catch (error) {
             if (error instanceof Error) {

@@ -8,20 +8,20 @@ import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from 'crypto'
 import { InspectorStatus } from "../../models/inspector.model";
-import { IAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { IAuthService, IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { BaseAuthService } from "../../core/abstracts/base.auth.service";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
+import { IInspectorRepository } from "../../core/interfaces/repositories/inspector.repository.interface";
 
 @injectable()
-export class InspectorAuthService extends BaseAuthService implements IAuthService {
+export class InspectorAuthService extends BaseAuthService implements IInspectorAuthService {
 
     constructor(
-        @inject(TYPES.InspectorRepository)
-        private readonly inspectorRepository: InspectorRepository
+        @inject(TYPES.InspectorRepository) private readonly inspectorRepository: IInspectorRepository
     ) {
-        super()
+        super();
     }
 
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
@@ -110,13 +110,13 @@ export class InspectorAuthService extends BaseAuthService implements IAuthServic
             throw new Error('User Already Exising')
         }
         const hashPassword = await bcrypt.hash(password, 10)
-        const otp = await generateOtp()
+        const otp = generateOtp()
         const redisKey = `inspector:register:${email}`;
         await redisClient.set(redisKey, JSON.stringify({ email, hashPassword, firstName, lastName, otp, phone }), { EX: appConfig.otpExp });
         await sendEmail(email, 'Your Inspecto OTP', `Your OTP is ${otp}`);
         return { message: 'OTP send successfully' }
     }
-    async verifyOTP(email: string, otp: string, res: Response) {
+    async verifyOTP(email: string, otp: string) {
         const redisKey = `inspector:register:${email}`;
         const userData = await redisClient.get(redisKey)
         if (!userData) {
@@ -126,17 +126,11 @@ export class InspectorAuthService extends BaseAuthService implements IAuthServic
         if (parsedData.otp !== otp) {
             throw new Error('Invalid OTP');
         }
-        const newInspector = await this.inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
+        const newInspector = await this.inspectorRepository.createInspector({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
         await redisClient.del(redisKey)
         const payload = { userId: newInspector.id, role: newInspector.role }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        })
-        return { message: "Inspector registered successfully", user: newInspector, accessToken }
+        const { accessToken, refreshToken } = this.generateTokens(payload)
+        return { message: "Inspector registered successfully", accessToken, refreshToken }
     }
     async resendOTP(email: string) {
         const redisKey = `inspector:register:${email}`

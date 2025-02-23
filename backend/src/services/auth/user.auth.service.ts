@@ -8,13 +8,13 @@ import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from "crypto";
 import { BaseAuthService } from "../../core/abstracts/base.auth.service";
-import { IAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { IAuthService, IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
 
 @injectable()
-export class UserAuthService extends BaseAuthService implements IAuthService {
+export class UserAuthService extends BaseAuthService implements IUserAuthService {
 
     constructor(
         @inject(TYPES.UserRepository) private userRepository: UserRepository
@@ -109,7 +109,7 @@ export class UserAuthService extends BaseAuthService implements IAuthService {
         await sendEmail(email, 'Your Inspecto OTP', `Your OTP is ${otp}`);
         return { message: 'OTP send successfully' }
     }
-    async verifyOTP(email: string, otp: string, res: Response) {
+    async verifyOTP(email: string, otp: string,) {
         const redisKey = `user:register:${email}`;
         const userData = await redisClient.get(redisKey)
 
@@ -125,14 +125,8 @@ export class UserAuthService extends BaseAuthService implements IAuthService {
         const newUser = await this.userRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
         await redisClient.del(redisKey)
         const payload = { userId: newUser.id, role: newUser.role }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        })
-        return { message: "User registerd successfully", user: newUser, accessToken }
+        const { accessToken, refreshToken } = this.generateTokens(payload)
+        return { message: "User registerd successfully", accessToken, refreshToken }
     }
     async resendOTP(email: string) {
         const redisKey = `user:register:${email}`

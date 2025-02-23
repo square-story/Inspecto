@@ -6,7 +6,7 @@ export const TYPES = {
 
     //User
     UserRepository: Symbol.for('UserRepository'),
-    UserService: Symbol.for('UserServices'),
+    UserService: Symbol.for('UserService'),
     UserController: Symbol.for('UserController'),
 
     //Inspector
@@ -31,7 +31,6 @@ export const TYPES = {
 
     //Email
     EmailService: Symbol.for('EmailService'),
-
 
     //Auth Services
     AdminAuthService: Symbol.for('AdminAuthService'),

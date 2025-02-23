@@ -1,5 +1,5 @@
 import { IInspector } from "../../../models/inspector.model";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export interface IInspectorRepository {
     findInspectorByEmail(email: string): Promise<IInspector | null>;
@@ -11,4 +11,6 @@ export interface IInspectorRepository {
     getNearbyInspectors(latitude: string, longitude: string): Promise<IInspector[]>;
     bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession): Promise<IInspector | null>;
     unbookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession): Promise<IInspector | null>;
+    findById(id: Types.ObjectId): Promise<IInspector | null>;
+    createInspector(inspectorData: Partial<IInspector>): Promise<IInspector>;
 }
