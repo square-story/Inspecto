@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
-import VehicleService from "../services/vehicle.service";
+import { VehicleService } from "../services/vehicle.service";
 import { IVehicleDocument } from "../models/vehicle.model";
 import { ObjectId } from "mongoose";
+import { controller, httpDelete, httpGet, httpPost, httpPut } from "inversify-express-utils";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
 
 
 interface MongoErrorWithCode extends Error {
@@ -10,11 +14,19 @@ interface MongoErrorWithCode extends Error {
     keyValue?: Record<string, string>;
 }
 
-export default class VehicleController {
-    private vehicleService: VehicleService;
 
-    constructor(vehicleService: VehicleService) {
-        this.vehicleService = vehicleService;
+
+
+@injectable()
+export class VehicleController implements IVehicleController {
+    constructor(
+        @inject(TYPES.VehicleService) private vehicleService: VehicleService
+    ) { }
+    getVehicleDetails(req: Request, res: Response): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    getUserVehicles(req: Request, res: Response): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
     private handleError(res: Response, error: unknown): void {
@@ -88,7 +100,6 @@ export default class VehicleController {
             this.handleError(res, error);
         }
     }
-
     async getVehicleById(req: Request, res: Response): Promise<void> {
         try {
             const vehicleId = req.params.vehicleId;
@@ -148,7 +159,6 @@ export default class VehicleController {
             });
         }
     }
-
     async getVehiclesByUser(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.userId;
@@ -191,7 +201,6 @@ export default class VehicleController {
             });
         }
     }
-
     async updateVehicle(req: Request, res: Response): Promise<void> {
         try {
             const vehicleId = req.params.vehicleId;

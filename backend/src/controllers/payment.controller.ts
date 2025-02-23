@@ -1,9 +1,25 @@
 import { Request, Response } from "express";
-import paymentService, { stripe } from "../services/payment.service";
+import { PaymentService, stripe } from "../services/payment.service";
 import appConfig from "../config/app.config";
+import { controller, httpGet, httpPost } from "inversify-express-utils";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { IPaymentController } from "../core/interfaces/controllers/payment.controller.interface";
 
-export default class PaymentController {
-    public async createPaymentIntent(req: Request, res: Response): Promise<Response> {
+@injectable()
+export class PaymentController implements IPaymentController {
+    constructor(
+        @inject(TYPES.PaymentService) private paymentService: PaymentService
+    ) { }
+    createPayment(req: Request, res: Response): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    getUserPayments(req: Request, res: Response): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+
+    async createPaymentIntent(req: Request, res: Response): Promise<Response> {
         try {
             const { inspectionId, amount } = req.body;
             const userId = req.user?.userId;
@@ -15,7 +31,7 @@ export default class PaymentController {
                 });
             }
 
-            const paymentIntent = await paymentService.createPaymentIntent(
+            const paymentIntent = await this.paymentService.createPaymentIntent(
                 inspectionId,
                 userId,
                 amount
@@ -33,7 +49,8 @@ export default class PaymentController {
             });
         }
     }
-    public async handleWebhook(req: Request, res: Response): Promise<Response> {
+
+    async handleWebhook(req: Request, res: Response): Promise<Response> {
         const sig = req.headers['stripe-signature'];
 
         try {
@@ -47,7 +64,7 @@ export default class PaymentController {
                 appConfig.stripWebhook
             );
 
-            await paymentService.handleWebhookEvent(event);
+            await this.paymentService.handleWebhookEvent(event);
 
             return res.status(200).json({ received: true });
         } catch (error: any) {
@@ -58,11 +75,12 @@ export default class PaymentController {
             });
         }
     }
-    public async verifyPayment(req: Request, res: Response): Promise<Response> {
+
+    async verifyPayment(req: Request, res: Response): Promise<Response> {
         try {
             const { paymentIntentId } = req.params;
 
-            const payment = await paymentService.verifyPayment(paymentIntentId);
+            const payment = await this.paymentService.verifyPayment(paymentIntentId);
             if (!payment) {
                 return res.status(404).json({
                     success: false,
@@ -85,7 +103,7 @@ export default class PaymentController {
             });
         }
     }
-    public async findPayments(req: Request, res: Response): Promise<Response> {
+    async findPayments(req: Request, res: Response): Promise<Response> {
         try {
             const userId = req.user?.userId;
             if (!userId) {
@@ -94,7 +112,7 @@ export default class PaymentController {
                     message: 'User not authenticated'
                 });
             }
-            const response = await paymentService.findPayments(userId)
+            const response = await this.paymentService.findPayments(userId)
 
             if (!response) {
                 return res.status(404).json({

@@ -1,11 +1,19 @@
+import { inject, injectable } from "inversify";
+import { BaseService } from "../core/abstracts/base.service";
+import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 import { IVehicleDocument } from "../models/vehicle.model";
-import { IVehicleRepository } from "../repositories/interfaces/vehicle.repository.interface";
+import { TYPES } from "../di/types";
+import { VehicleRepository } from "../repositories/vehicle.repository";
 
-class VehicleService {
-    private vehicleRepository: IVehicleRepository;
-
-    constructor(vehicleRepository: IVehicleRepository) {
-        this.vehicleRepository = vehicleRepository;
+@injectable()
+export class VehicleService extends BaseService<IVehicleDocument> implements IVehicleService {
+    constructor(
+        @inject(TYPES.VehicleRepository) private vehicleRepository: VehicleRepository
+    ) {
+        super(vehicleRepository)
+    }
+    async getUserVehicles(userId: string): Promise<IVehicleDocument[]> {
+        return await this.vehicleRepository.find({ user: userId })
     }
 
     async createVehicle(vehicleData: IVehicleDocument): Promise<IVehicleDocument> {
@@ -29,4 +37,3 @@ class VehicleService {
     }
 }
 
-export default VehicleService;

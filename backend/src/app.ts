@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import express, { Request, Response } from "express";
 import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
@@ -9,7 +10,6 @@ import vehiclesRoutes from "./routes/vehicles.routes"
 import inspectionRoutes from "./routes/inspection.routes"
 import paymentsRoutes from './routes/payment.routes'
 import cors from "cors";
-import './utils/checkPaymentStatus';
 
 const app = express()
 
@@ -69,3 +69,4 @@ app.use((req: Request, res: Response) => {
 app.listen(appConfig.port, () => {
     console.log(`server is running on port ${appConfig.port}`)
 })
+

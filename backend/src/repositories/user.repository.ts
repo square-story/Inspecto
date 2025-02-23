@@ -1,35 +1,23 @@
-import { IUsers } from '../models/user.model';
-import Users from '../models/user.model';
-import { IUserRepository } from './interfaces/user.repository.interface';
+import { injectable } from 'inversify';
+import { BaseRepository } from '../core/abstracts/base.repository';
+import Users, { IUsers } from '../models/user.model';
+import { IUserRepository } from '../core/interfaces/repositories/user.repository.interface';
 
-class UserRepository implements IUserRepository {
-    async createUser(userData: Partial<IUsers>): Promise<IUsers> {
-        const user = new Users(userData);
-        return await user.save();
-    }
-
-    async findById(userId: string): Promise<IUsers | null> {
-        return await Users.findById(userId)
+@injectable()
+export class UserRepository extends BaseRepository<IUsers> implements IUserRepository {
+    constructor() {
+        super(Users);
     }
 
     async findUserByEmail(email: string): Promise<IUsers | null> {
-        return await Users.findOne({ email });
-    }
-
-    async updateUser(userId: string, updates: Partial<IUsers>): Promise<IUsers | null> {
-        return await Users.findByIdAndUpdate(userId, updates, { new: true });
-    }
-
-    async deleteUser(userId: string): Promise<IUsers | null> {
-        return await Users.findByIdAndDelete(userId);
+        return await this.findOne({ email: email });
     }
 
     async getAllUsers(): Promise<IUsers[]> {
-        return await Users.find().select('-password').sort({ createdAt: -1 });
+        return await this.findAll()
     }
+
     async updateUserPassword(email: string, password: string): Promise<IUsers | null> {
-        return await Users.findOneAndUpdate({ email }, { password }, { new: true })
+        return await this.findOneAndUpdate({ email }, { password });
     }
 }
-
-export default UserRepository;

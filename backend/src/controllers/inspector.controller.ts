@@ -1,27 +1,49 @@
 import { Request, RequestHandler, Response } from "express";
 import { InspectorService } from "../services/inspector.service";
+import { controller, httpGet, httpPatch, httpPost } from "inversify-express-utils";
+import { inject, injectable } from "inversify";
+import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
+import { TYPES } from "../di/types";
+import { CustomRequest } from "../core/types/custom.request.type";
 
-const inspectorService = new InspectorService()
+@injectable()
+export class InspectorController implements IInspectorController {
+    constructor(
+        @inject(TYPES.InspectorService) private inspectorService: InspectorService
+    ) { }
 
-export class InspectorController {
-    static getInspectorDetails: RequestHandler = async (req: Request, res: Response) => {
+
+    updateInspectorDetails(req: Request, res: Response): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    getAllInspectors(req: Request, res: Response): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    async getInspectorDetails(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.userId;
             if (!userId) {
                 res.status(400).json({ message: "User ID is missing from the token" });
                 return;
             }
-            const response = await inspectorService.getInspectorDetails(userId)
+            const response = await this.inspectorService.getInspectorDetails(userId)
             if (!response) {
                 res.status(404).json({ message: "Inspector not found" });
                 return;
             }
             res.status(200).json(response);
         } catch (error) {
-            console.error(error)
+            // Add proper error handling
+            res.status(500).json({
+                message: error instanceof Error ? error.message : 'Internal server error'
+            });
         }
     }
-    static completeProfile: RequestHandler = async (req: Request, res: Response) => {
+
+
+
+    async completeProfile(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.userId
             const { longitude, latitude, ...restData } = req.body; // Extract location data separately
@@ -44,7 +66,7 @@ export class InspectorController {
             };
 
             const updatedData = { ...restData, location }; // Merge with other form data
-            const response = await inspectorService.completeInspectorProfile(userId, updatedData)
+            const response = await this.inspectorService.completeInspectorProfile(userId, updatedData)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -63,14 +85,16 @@ export class InspectorController {
             return;
         }
     }
-    static approvalProfile: RequestHandler = async (req: Request, res: Response) => {
+
+
+    async approvalProfile(req: Request, res: Response): Promise<void> {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const isExist = await inspectorService.getInspectorDetails(inspectorId)
+            const isExist = await this.inspectorService.getInspectorDetails(inspectorId)
             if (!isExist) {
                 res.status(404).json("Inspector not found in the database")
                 return
@@ -79,7 +103,7 @@ export class InspectorController {
                 res.status(400).json({ message: "Inspector is already approved" });
                 return;
             }
-            const response = await inspectorService.approveInspector(inspectorId)
+            const response = await this.inspectorService.approveInspector(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -97,7 +121,7 @@ export class InspectorController {
             return;
         }
     }
-    static denyProfile: RequestHandler = async (req: Request, res: Response) => {
+    async denyProfile(req: Request, res: Response): Promise<void> {
         try {
             const inspectorId = req.params.inspectorId;
             const { reason } = req.body;
@@ -112,14 +136,14 @@ export class InspectorController {
                 return
             }
 
-            const inspector = await inspectorService.getInspectorDetails(inspectorId);
+            const inspector = await this.inspectorService.getInspectorDetails(inspectorId);
 
             if (!inspector) {
                 res.status(404).json({ message: "Inspector not found in the database" });
                 return
             }
 
-            const updatedInspector = await inspectorService.denyInspector(inspectorId, reason);
+            const updatedInspector = await this.inspectorService.denyInspector(inspectorId, reason);
 
             if (!updatedInspector) {
                 res.status(400).json({ message: 'Failed to deny profile' });
@@ -141,14 +165,14 @@ export class InspectorController {
             return;
         }
     }
-    static handleBlock: RequestHandler = async (req: Request, res: Response) => {
+    async handleBlock(req: Request, res: Response): Promise<void> {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const response = await inspectorService.BlockHandler(inspectorId)
+            const response = await this.inspectorService.BlockHandler(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: `Profile ${response} successfully`,
@@ -165,7 +189,7 @@ export class InspectorController {
             return;
         }
     }
-    static updateInspector: RequestHandler = async (req: Request, res: Response) => {
+    async updateInspector(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.user?.userId;
             if (!userId) {
@@ -186,7 +210,7 @@ export class InspectorController {
                 return
             }
 
-            const inspector = inspectorService.completeInspectorProfile(userId, data)
+            const inspector = this.inspectorService.completeInspectorProfile(userId, data)
             if (!inspector) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
@@ -209,7 +233,7 @@ export class InspectorController {
             return
         }
     }
-    static changePassword: RequestHandler = async (req: Request, res: Response) => {
+    async changePassword(req: Request, res: Response): Promise<void> {
         try {
             const inspectorId = req.user?.userId
             if (!inspectorId) {
@@ -228,7 +252,7 @@ export class InspectorController {
                 })
                 return;
             }
-            const response = await inspectorService.changePassword(currentPassword, newPassword, inspectorId)
+            const response = await this.inspectorService.changePassword(currentPassword, newPassword, inspectorId)
             if (response.status) {
                 res.status(200).json({
                     success: true,
@@ -250,14 +274,14 @@ export class InspectorController {
         }
     }
 
-    static getNearbyInspectors: RequestHandler = async (req: Request, res: Response) => {
+    async getNearbyInspectors(req: Request, res: Response): Promise<void> {
         try {
             const { latitude, longitude } = req.query;
             if (!latitude || !longitude) {
                 res.status(400).json({ message: "Latitude and Longitude are required" });
                 return
             }
-            const inspectors = await inspectorService.getNearbyInspectors(latitude as string, longitude as string);
+            const inspectors = await this.inspectorService.getNearbyInspectors(latitude as string, longitude as string);
             res.status(200).json(inspectors);
             return;
         } catch (error: any) {

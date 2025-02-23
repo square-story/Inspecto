@@ -1,18 +1,29 @@
 import mongoose from "mongoose";
 import { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
 import { WeeklyAvailability } from "../models/inspector.model";
-import InspectionRepository from "../repositories/inspection.repository";
-import { InspectorService } from "./inspector.service";
+import { BaseService } from "../core/abstracts/base.service";
+import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { InspectionRepository } from "../repositories/inspection.repository";
+import { InspectorRepository } from "../repositories/inspector.repository";
+import { Types } from "mongoose";
 
-class InspectionService {
-    private inspectionRepository: InspectionRepository;
-    private inspectorService: InspectorService;
-    constructor() {
-        this.inspectionRepository = new InspectionRepository();
-        this.inspectorService = new InspectorService()
+
+@injectable()
+export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
+    constructor(
+        @inject(TYPES.InspectionRepository) private inspectionRepository: InspectionRepository,
+        @inject(TYPES.InspectorRepository) private inspectorRepository: InspectorRepository,
+    ) {
+        super(inspectionRepository)
     }
-
-
+    async getUserInspections(userId: string): Promise<IInspectionDocument[]> {
+        return await this.inspectionRepository.find({ user: userId })
+    }
+    async getInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
+        return await this.inspectionRepository.find({ inspector: inspectorId })
+    }
     async updateInspection(id: string, updateData: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
         return await this.inspectionRepository.updateInspection(id, updateData);
     }
@@ -29,24 +40,25 @@ class InspectionService {
         return await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber);
     }
     async getAvailableSlots(inspectorId: string, date: Date): Promise<number[]> {
-        const inspector = await this.inspectorService.getInspectorDetails(inspectorId);
+        const inspector = await this.inspectorRepository.findById(new Types.ObjectId(inspectorId));
         if (!inspector) throw new Error('Inspector not found');
         const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' }) as keyof WeeklyAvailability;
         const dayAvailability = inspector.availableSlots[dayOfWeek];
         if (!dayAvailability.enabled) throw new Error('Inspector is not available on this day');
         return await this.inspectionRepository.getAvailableSlots(inspectorId, date, dayAvailability);
     }
-    async createInspection(bookingData: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
+
+    async createInspection(data: IInspectionInput): Promise<IInspectionDocument> {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            if (!bookingData.user || !bookingData.inspector || !bookingData.date || !bookingData.slotNumber) {
+            if (!data.user || !data.inspector || !data.date || !data.slotNumber) {
                 throw new Error('Missing required booking data');
             }
             const existingBooking = await this.inspectionRepository.existingInspection({
-                date: bookingData.date,
-                inspector: bookingData.inspector.toString(),
-                slotNumber: bookingData.slotNumber,
+                date: data.date,
+                inspector: data.inspector.toString(),
+                slotNumber: data.slotNumber,
             });
 
             console.log('the exisiing booking:', existingBooking)
@@ -57,25 +69,25 @@ class InspectionService {
             }
 
             const isAvailable = await this.checkSlotAvaliability(
-                bookingData.inspector!.toString(),
-                bookingData.date!,
-                bookingData.slotNumber!
+                data.inspector!.toString(),
+                data.date!,
+                data.slotNumber!
             );
             if (!isAvailable) {
                 throw new Error('Slot is no longer available');
             }
             const bookingReference = await this.generateBookingReference();
-            if (!bookingData.user) {
+            if (!data.user) {
                 throw new Error('User is required for booking');
             }
 
-            const inspector = await this.inspectorService.getInspectorDetails(bookingData.inspector!.toString());
+            const inspector = await this.inspectorRepository.findById(new Types.ObjectId(data.inspector!.toString()));
 
             if (!inspector) {
                 throw new Error('Inspector not found');
             }
 
-            const validDate = this.validateDate(bookingData.date);
+            const validDate = this.validateDate(data.date);
             const dayOfWeek = validDate.toLocaleDateString('en-US', { weekday: 'long' });
 
             const dayAvailability = inspector.availableSlots[dayOfWeek as keyof WeeklyAvailability];
@@ -88,7 +100,7 @@ class InspectionService {
                 booking = await this.inspectionRepository.updateInspection(
                     existingBooking.id,
                     {
-                        ...bookingData,
+                        ...data,
                         bookingReference,
                         status: InspectionStatus.PENDING,
                         version: existingBooking.version + 1
@@ -97,20 +109,23 @@ class InspectionService {
             } else {
                 // Create new booking if no existing one found
                 booking = await this.inspectionRepository.createInspection({
-                    ...bookingData,
+                    ...data,
                     bookingReference,
                     version: 0,
                     status: InspectionStatus.PENDING,
-                    user: bookingData.user
+                    user: data.user
                 });
             }
 
-            const response = await this.inspectorService.bookingHandler(
-                bookingData.inspector.toString(),
-                bookingData.user.toString(),
-                bookingData.date
+            const response = await this.inspectorRepository.bookingHandler(
+                data.inspector.toString(),
+                data.user.toString(),
+                data.date
             );
             await session.commitTransaction();
+            if (!booking) {
+                throw new Error('Failed to create or update booking');
+            }
             return booking;
 
         } catch (error) {
@@ -129,7 +144,7 @@ class InspectionService {
             if (!inspection) {
                 throw new Error('Inspection not found');
             }
-            await this.inspectorService.unBookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
+            await this.inspectorRepository.unbookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
             await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();
@@ -171,6 +186,3 @@ class InspectionService {
         return `${prefix}-${timestamp}-${random}`.toUpperCase();
     }
 }
-
-
-export default new InspectionService();

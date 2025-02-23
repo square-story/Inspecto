@@ -1,12 +1,15 @@
 import express, { Request, Response } from "express";
-import PaymentController from "../controllers/payment.controller";
-import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRole } from "../middlewares/role.middleware";
+import { container } from "../di/container";
+import { PaymentController } from "../controllers/payment.controller";
+import { TYPES } from "../di/types";
+import { AuthMiddleware } from "../middlewares/auth.middleware";
 
 const router = express.Router()
 
-const paymentController = new PaymentController()
-
+const paymentController = container.get<PaymentController>(TYPES.PaymentController)
+const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware)
+const authenticateToken = authMiddleware.authenticateToken
 
 //for get all payments
 router.get('/', authenticateToken, authorizeRole('user'), async (req: Request, res: Response) => {

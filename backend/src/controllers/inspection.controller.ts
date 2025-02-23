@@ -1,11 +1,29 @@
 import { Request, Response } from "express";
-import { IInspectionDocument, IInspectionInput } from "../models/inspection.model";
-import inspectionService from "../services/inspection.service";
+import { IInspectionInput } from "../models/inspection.model";
 import { ObjectId } from "mongoose";
+import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { InspectionService } from "../services/inspection.service";
 
 
-export default class InspectionController {
-    public async createInspection(req: Request, res: Response): Promise<Response> {
+@injectable()
+export class InspectionController implements IInspectionController {
+    constructor(
+        @inject(TYPES.InspectionService) private inspectionService: InspectionService
+    ) { }
+
+    getInspectionDetails(req: Request, res: Response): Promise<Response> {
+        throw new Error("Method not implemented.");
+    }
+    getUserInspections(req: Request, res: Response): Promise<Response> {
+        throw new Error("Method not implemented.");
+    }
+    getInspectorInspections(req: Request, res: Response): Promise<Response> {
+        throw new Error("Method not implemented.");
+    }
+
+    async createInspection(req: Request, res: Response): Promise<Response> {
         try {
             const user = req.user?.userId
             if (!user) {
@@ -19,7 +37,7 @@ export default class InspectionController {
             inspectionData.user = user as unknown as ObjectId
             inspectionData.inspector = inspectorId as unknown as ObjectId
             inspectionData.vehicle = vehicleId as unknown as ObjectId
-            const inspection = await inspectionService.createInspection(inspectionData);
+            const inspection = await this.inspectionService.createInspection(inspectionData);
             return res.status(201).json({
                 success: true,
                 data: inspection,
@@ -34,8 +52,7 @@ export default class InspectionController {
         }
     }
 
-
-    public async updateInspection(req: Request, res: Response): Promise<Response> {
+    async updateInspection(req: Request, res: Response): Promise<Response> {
         try {
             const id = req.user?.userId;
 
@@ -47,7 +64,7 @@ export default class InspectionController {
             }
 
             const updateData: Partial<IInspectionInput> = req.body;
-            const updatedInspection = await inspectionService.updateInspection(id, updateData);
+            const updatedInspection = await this.inspectionService.updateInspection(id, updateData);
             if (!updatedInspection) {
                 return res.status(404).json({
                     success: false,
@@ -68,8 +85,7 @@ export default class InspectionController {
         }
     }
 
-
-    public async getInspectionById(req: Request, res: Response): Promise<Response> {
+    async getInspectionById(req: Request, res: Response): Promise<Response> {
         try {
             const { inspectionId } = req.params
 
@@ -79,7 +95,7 @@ export default class InspectionController {
                     message: "inspections not found.",
                 });
             }
-            const inspection = await inspectionService.getInspectionById(inspectionId);
+            const inspection = await this.inspectionService.getInspectionById(inspectionId);
             if (!inspection) {
                 return res.status(404).json({
                     success: false,
@@ -98,10 +114,11 @@ export default class InspectionController {
             });
         }
     }
-    public async getAvailableSlots(req: Request, res: Response): Promise<Response> {
+
+    async getAvailableSlots(req: Request, res: Response): Promise<Response> {
         try {
             const { inspectorId, date } = req.params;
-            const slots = await inspectionService.getAvailableSlots(inspectorId, new Date(date));
+            const slots = await this.inspectionService.getAvailableSlots(inspectorId, new Date(date));
             return res.status(200).json({
                 success: true,
                 slots,
@@ -114,7 +131,8 @@ export default class InspectionController {
             });
         }
     }
-    public async findInspections(req: Request, res: Response): Promise<Response> {
+
+    async findInspections(req: Request, res: Response): Promise<Response> {
         try {
             const userId = req.user?.userId
             const role = req.user?.role
@@ -126,9 +144,9 @@ export default class InspectionController {
             }
             let inspections;
             if (role == 'user') {
-                inspections = await inspectionService.findInspections(userId);
+                inspections = await this.inspectionService.findInspections(userId);
             } else {
-                inspections = await inspectionService.findInspectionsByInspector(userId)
+                inspections = await this.inspectionService.findInspectionsByInspector(userId)
             }
             if (!inspections) {
                 return res.status(404).json({

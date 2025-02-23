@@ -1,25 +1,42 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
 import { InspectorRepository } from "../repositories/inspector.repository";
 import { EmailService } from "./email.service";
 import bcrypt from 'bcrypt';
+import { inject, injectable } from "inversify";
+import { BaseService } from "../core/abstracts/base.service";
+import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
+import { TYPES } from "../di/types";
+import { InspectionRepository } from "../repositories/inspection.repository";
+import { IInspectionInput, IInspectionDocument } from "../models/inspection.model";
+import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 
 export type ChangePasswordResponse = {
     status: boolean;
     message: string;
 };
 
-export class InspectorService {
-    private inspectorRepository: InspectorRepository;
-    constructor() {
-        this.inspectorRepository = new InspectorRepository()
+@injectable()
+export class InspectorService extends BaseService<IInspector> implements IInspectorService {
+    constructor(
+        @inject(TYPES.InspectorRepository) private inspectorRepository: InspectorRepository,
+        @inject(TYPES.EmailService) private emailService: EmailService,
+    ) {
+        super(inspectorRepository);
     }
-
+    async findInspectorById(id: string): Promise<IInspector | null> {
+        return await this.findById(new Types.ObjectId(id))
+    }
+    async updateInspector(id: string, updates: Partial<IInspector>): Promise<IInspector | null> {
+        return await this.update(new Types.ObjectId(id), updates)
+    }
+    async getAllInspectors(): Promise<IInspector[]> {
+        return await this.inspectorRepository.findAll()
+    }
 
     async getInspectorDetails(inspectorId: string) {
-        return await this.inspectorRepository.findInspectorById(inspectorId)
+        return await this.inspectorRepository.findById(new Types.ObjectId(inspectorId))
     }
-
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
         const response = await this.inspectorRepository.updateInspector(userId, data)
@@ -27,7 +44,6 @@ export class InspectorService {
             return await this.inspectorRepository.updateInspectorProfileCompletion(userId)
         }
     }
-
 
     async approveInspector(inspectorId: string) {
         try {
@@ -40,7 +56,7 @@ export class InspectorService {
             const updatedInspector = await this.inspectorRepository.updateInspector(inspectorId, updates)
             if (updatedInspector) {
                 // Send approval email
-                await EmailService.sendApprovalEmail(
+                await this.emailService.sendApprovalEmail(
                     updatedInspector.email,
                     updatedInspector.firstName
                 );
@@ -66,7 +82,7 @@ export class InspectorService {
 
             if (updatedInspector) {
                 // Send denial email
-                await EmailService.sendDenialEmail(
+                await this.emailService.sendDenialEmail(
                     updatedInspector.email,
                     updatedInspector.firstName,
                     reason
@@ -83,7 +99,7 @@ export class InspectorService {
 
     async BlockHandler(inspectorId: string) {
         try {
-            const currentInspector = await this.inspectorRepository.findInspectorById(inspectorId);
+            const currentInspector = await this.inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!currentInspector) {
                 throw new Error('Inspector not found');
             }
@@ -106,14 +122,9 @@ export class InspectorService {
     }
 
 
-    async updateDetails(userId: string, data: Partial<IInspector>) {
-        return await this.inspectorRepository.updateInspector(userId, data)
-    }
-
-
     async changePassword(currentPassword: string, newPassword: string, inspectorId: string): Promise<ChangePasswordResponse> {
         try {
-            const isValid = await this.inspectorRepository.findInspectorById(inspectorId)
+            const isValid = await this.inspectorRepository.findById(new Types.ObjectId(inspectorId))
             if (!isValid) {
                 return {
                     status: false,

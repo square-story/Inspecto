@@ -1,6 +1,5 @@
-import inspectionModel, { IInspectionDocument, IInspectionInput } from "../../models/inspection.model";
-import { IDayAvailability } from "../../models/inspector.model";
-
+import { IInspectionDocument, IInspectionInput } from "../../../models/inspection.model";
+import { IDayAvailability } from "../../../models/inspector.model";
 
 export interface IInspectionRepository {
     /**

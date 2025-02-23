@@ -1,8 +1,18 @@
 // services/email.service.ts
+import { injectable } from 'inversify';
+import { BaseService } from '../core/abstracts/base.service';
+import { IEmailService } from '../core/interfaces/services/email.service.interface';
 import { sendEmail } from '../utils/email';
 
-export class EmailService {
-    static async sendApprovalEmail(inspectorEmail: string, firstName: string) {
+@injectable()
+export class EmailService implements IEmailService {
+    sendOTP(email: string, otp: string): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+    sendInspectionConfirmation(email: string, details: any): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+    async sendApprovalEmail(inspectorEmail: string, firstName: string) {
         const subject = 'Your Inspector Account Has Been Approved';
         const text = `
 Dear ${firstName},
@@ -29,7 +39,7 @@ The Inspecto Team
         }
     }
 
-    static async sendDenialEmail(inspectorEmail: string, firstName: string, reason: string) {
+    async sendDenialEmail(inspectorEmail: string, firstName: string, reason: string) {
         const subject = 'Update Regarding Your Inspector Account Application';
         const text = `
 Dear ${firstName},

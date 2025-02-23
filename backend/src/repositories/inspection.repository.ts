@@ -1,25 +1,34 @@
+import { injectable } from "inversify";
+import { BaseRepository } from "../core/abstracts/base.repository";
 import inspectionModel, { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
-import { IDayAvailability, WeeklyAvailability } from "../models/inspector.model";
-import { IInspectionRepository } from "./interfaces/inspection.repository.interface";
+import { IDayAvailability, } from "../models/inspector.model";
+import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { Types } from "mongoose";
 
-class InspectionRepository implements IInspectionRepository {
+
+@injectable()
+export class InspectionRepository extends BaseRepository<IInspectionDocument> implements IInspectionRepository {
+    constructor() {
+        super(inspectionModel);
+    }
+    updateInspection(id: string, data: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
+        const inspectionId = new Types.ObjectId(id);
+        return this.model.findByIdAndUpdate(inspectionId, data, { new: true });
+    }
     async createInspection(inspectionData: Partial<IInspectionInput>): Promise<IInspectionDocument> {
-        const inspection = new inspectionModel(inspectionData)
-        return await inspection.save();
+        return await this.create(inspectionData);
     }
-    async updateInspection(id: string, data: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
-        return await inspectionModel.findByIdAndUpdate(id, data, { new: true })
-    }
+
     async getInspectionById(id: string): Promise<IInspectionDocument | null> {
-        return await inspectionModel.findById(id);
+        return await this.findById(new Types.ObjectId(id));
     }
     async checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean> {
-        const existingBooking = await inspectionModel.findOne({ inspector: inspectorId, date, slotNumber, status: { $nin: [InspectionStatus.CANCELLED] } });
+        const existingBooking = await this.findOne({ inspector: inspectorId, date, slotNumber, status: { $nin: [InspectionStatus.CANCELLED] } });
         return !existingBooking;
     }
 
     async getAvailableSlots(inspectorId: string, date: Date, dayAvailability: IDayAvailability): Promise<number[]> {
-        const bookedSlots = await inspectionModel.find({
+        const bookedSlots = await this.model.find({
             inspector: inspectorId,
             date: date,
             status: { $nin: [InspectionStatus.CANCELLED] }
@@ -29,14 +38,12 @@ class InspectionRepository implements IInspectionRepository {
             .filter(slot => !bookedSlotNumbers.has(slot));
     }
     async findUserInspections(userId: string): Promise<IInspectionDocument[]> {
-        return await inspectionModel.find({ user: userId }).populate('vehicle').populate('inspector').sort({ date: -1 });
+        return await this.model.find({ user: userId }).populate('vehicle').populate('inspector').sort({ date: -1 });
     }
     async findInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
-        return await inspectionModel.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').sort({ date: -1 });
+        return await this.model.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').sort({ date: -1 });
     }
     async existingInspection(data: { date: Date, inspector: string, slotNumber: number }): Promise<IInspectionDocument | null> {
-        return await inspectionModel.findOne(data)
+        return await this.findOne(data)
     }
 }
-
-export default InspectionRepository

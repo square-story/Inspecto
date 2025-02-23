@@ -1,13 +1,13 @@
 import { Router } from "express";
-import VehicleController from "../controllers/vehicle.controller";
-import VehicleService from "../services/vehicle.service";
-import { authenticateToken } from "../middlewares/auth.middleware";
-import VehicleRepository from "../repositories/vehicle.repository";
+import { container } from "../di/container";
+import { VehicleController } from "../controllers/vehicle.controller";
+import { TYPES } from "../di/types";
+import { AuthMiddleware } from "../middlewares/auth.middleware";
 
-// Create instances
-const vehicleRepository = new VehicleRepository();
-const vehicleService = new VehicleService(vehicleRepository);
-const vehicleController = new VehicleController(vehicleService);
+
+const vehicleController = container.get<VehicleController>(TYPES.VehicleController)
+const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware)
+const authenticateToken = authMiddleware.authenticateToken
 
 const router = Router();
 

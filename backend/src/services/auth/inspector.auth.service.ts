@@ -3,17 +3,44 @@ import { InspectorRepository } from "../../repositories/inspector.repository";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 import { generateOtp } from "../../utils/otp";
-import redisClient from "../../config/redis";
+import redisClient from "../../config/redis.config";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from 'crypto'
 import { InspectorStatus } from "../../models/inspector.model";
+import { IAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { BaseAuthService } from "../../core/abstracts/base.auth.service";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../di/types";
+import { Types } from "mongoose";
 
-export class InspectorAuthService {
-    private inspectorRepository: InspectorRepository;
+@injectable()
+export class InspectorAuthService extends BaseAuthService implements IAuthService {
 
-    constructor() {
-        this.inspectorRepository = new InspectorRepository()
+    constructor(
+        @inject(TYPES.InspectorRepository)
+        private readonly inspectorRepository: InspectorRepository
+    ) {
+        super()
+    }
+
+    async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
+        const inspector = await this.inspectorRepository.findInspectorByEmail(email);
+        if (!inspector) {
+            throw new Error('Inspector not found');
+        }
+        if (!inspector.password) {
+            throw new Error('Password is required');
+        }
+        const isPasswordValid = await bcrypt.compare(password, inspector.password);
+        if (!isPasswordValid) {
+            throw new Error('Invalid password');
+        }
+        if (inspector.status === InspectorStatus.BLOCKED) {
+            throw new Error('Account is blocked');
+        }
+        const payload = { userId: inspector.id, role: inspector.role };
+        return this.generateTokens(payload);
     }
 
     async loginOfInspector(email: string, password: string, res: Response) {
@@ -64,18 +91,18 @@ export class InspectorAuthService {
             return;
         }
     }
-    async refreshToken(token: string) {
-        const payload = verifyRefreshToken(token)
+    async refreshToken(token: string): Promise<{ accessToken: string }> {
+        const payload = verifyRefreshToken(token);
         if (!payload?.userId || !payload?.role) {
-            throw new Error('Invalid token payload')
+            throw new Error('Invalid token payload');
         }
-        const inspector = await this.inspectorRepository.findInspectorById(payload.userId.toString());
+        const inspector = await this.inspectorRepository.findById(new Types.ObjectId(payload.userId.toString()));
 
         if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
-            return { status: false, blockReason: "This Inspector Account is Blocked" }
+            throw new Error("This Inspector Account is Blocked");
         }
-        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken, status: true, blockReason: '' }
+        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role });
+        return { accessToken: newAccessToken };
     }
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
         const existing = await this.inspectorRepository.findInspectorByEmail(email)
@@ -99,7 +126,7 @@ export class InspectorAuthService {
         if (parsedData.otp !== otp) {
             throw new Error('Invalid OTP');
         }
-        const newInspector = await this.inspectorRepository.createInspector({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
+        const newInspector = await this.inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
         await redisClient.del(redisKey)
         const payload = { userId: newInspector.id, role: newInspector.role }
         const accessToken = generateAccessToken(payload)

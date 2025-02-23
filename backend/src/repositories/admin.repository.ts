@@ -1,10 +1,11 @@
-import { AdminModal } from "../models/admin.model";
+import { injectable } from "inversify";
+import { IAdmin } from "../models/admin.model";
+import { BaseRepository } from "../core/abstracts/base.repository";
+import { IAdminRepository } from "../core/interfaces/repositories/admin.repository.interface";
 
-export class AdminRepository {
+@injectable()
+export class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository {
     async findByEmail(email: string) {
-        return AdminModal.findOne({ email })
-    }
-    async findById(id: string) {
-        return AdminModal.findById(id)
+        return this.model.findOne({ email: email })
     }
 }

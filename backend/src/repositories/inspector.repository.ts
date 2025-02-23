@@ -1,35 +1,36 @@
+import { injectable } from "inversify";
+import Inspector, { IInspector } from "../models/inspector.model";
+import { BaseRepository } from "../core/abstracts/base.repository";
 import mongoose from "mongoose";
-import inspectorModel, { IInspector } from "../models/inspector.model";
-import { IinspectorRepository } from "./interfaces/inspector.repository.interface";
+import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 
-export class InspectorRepository implements IinspectorRepository {
-    async createInspector(userData: Partial<IInspector>): Promise<IInspector> {
-        const inspector = new inspectorModel(userData)
-        return await inspector.save()
+
+@injectable()
+export class InspectorRepository extends BaseRepository<IInspector> implements IInspectorRepository {
+    constructor() {
+        super(Inspector)
+    }
+    updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
+        return this.model.findByIdAndUpdate(userId, updates, { new: true });
+    }
+    deleteInspector(userId: string): Promise<IInspector | null> {
+        return this.model.findByIdAndDelete(userId);
+    }
+    getAllInspector(): Promise<IInspector[]> {
+        return this.model.find({});
     }
     async findInspectorByEmail(email: string): Promise<IInspector | null> {
-        return await inspectorModel.findOne({ email }).exec()
-    }
-    async getAllInspector(): Promise<IInspector[]> {
-        return await inspectorModel.find().select('-password').sort({ createdAt: -1 })
-    }
-    async findInspectorById(inspectorId: string): Promise<IInspector | null> {
-        return await inspectorModel.findById(inspectorId)
-    }
-    async deleteInspector(userId: string): Promise<IInspector | null> {
-        return await inspectorModel.findByIdAndDelete(userId)
+        return await this.model.findOne({ email }).exec()
     }
     async updateInspectorPassword(email: string, password: string): Promise<IInspector | null> {
-        return await inspectorModel.findOneAndUpdate({ email }, { password }, { new: true })
+        return await this.findOneAndUpdate({ email }, { password })
     }
-    async updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
-        return await inspectorModel.findOneAndUpdate({ _id: userId }, { ...updates }, { new: true })
-    }
+
     async updateInspectorProfileCompletion(userId: string) {
-        return await inspectorModel.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true }).select('-password')
+        return await this.model.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true }).select('-password')
     }
     async getNearbyInspectors(latitude: string, longitude: string) {
-        return await inspectorModel.find({
+        return await this.find({
             location: {
                 $near: {
                     $geometry: {
@@ -43,27 +44,30 @@ export class InspectorRepository implements IinspectorRepository {
     }
 
     async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
-        const updateOperation = {
-            $push: {
-                bookedSlots: {
-                    date: date,
-                    slotsBooked: 1,
-                    bookedBy: userId
+        try {
+            const updateOperation = {
+                $push: {
+                    bookedSlots: {
+                        date: date,
+                        slotsBooked: 1,
+                        bookedBy: userId
+                    }
                 }
-            }
-        };
+            };
 
-        if (session) {
-            return await inspectorModel.findByIdAndUpdate(
+            const options = {
+                new: true,
+                ...(session && { session })
+            };
+
+            return await this.model.findByIdAndUpdate(
                 inspectorId,
                 updateOperation,
-                { session }
+                options
             );
-        } else {
-            return await inspectorModel.findByIdAndUpdate(
-                inspectorId,
-                updateOperation
-            );
+        } catch (error) {
+            console.error('Error in bookingHandler:', error);
+            throw error;
         }
     }
 
@@ -82,7 +86,7 @@ export class InspectorRepository implements IinspectorRepository {
             endOfDay.setHours(23, 59, 59, 999);
 
             // First find the document to ensure it exists
-            const inspector = await inspectorModel.findById(inspectorId);
+            const inspector = await this.model.findById(inspectorId);
             if (!inspector) {
                 throw new Error('Inspector not found');
             }
@@ -113,7 +117,7 @@ export class InspectorRepository implements IinspectorRepository {
                 ...(session && { session })
             };
 
-            const updatedInspector = await inspectorModel.findByIdAndUpdate(
+            const updatedInspector = await this.model.findByIdAndUpdate(
                 inspectorId,
                 updateOperation,
                 options

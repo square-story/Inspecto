@@ -1,21 +1,41 @@
 import Stripe from "stripe";
 import appConfig from "../config/app.config";
-import PaymentRepository from "../repositories/payment.repository";
-import { PaymentStatus } from "../models/payment.model";
-import mongoose from "mongoose";
-import inspectionService from "./inspection.service";
+import { IPaymentDocument, IPaymentInput, PaymentStatus } from "../models/payment.model";
+import mongoose, { Types } from "mongoose";
 import { InspectionStatus } from "../models/inspection.model";
+import { BaseService } from "../core/abstracts/base.service";
+import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { PaymentRepository } from "../repositories/payment.repository";
+import { InspectionRepository } from "../repositories/inspection.repository";
+import { InspectionService } from "./inspection.service";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
 });
 
-class PaymentService {
-    private paymentRepository: PaymentRepository;
+
+@injectable()
+export class PaymentService extends BaseService<IPaymentDocument> implements IPaymentService {
     private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
-    constructor() {
-        this.paymentRepository = new PaymentRepository();
+    constructor(
+        @inject(TYPES.PaymentRepository) private paymentRepository: PaymentRepository,
+        @inject(TYPES.InspectionRepository) private inspectionRepository: InspectionRepository,
+        @inject(TYPES.InspectionService) private inspectionService: InspectionService,
+    ) {
+        super(paymentRepository)
     }
+    async createPayment(data: IPaymentInput): Promise<IPaymentDocument> {
+        return await this.create(data)
+    }
+    async updatePayment(paymentIntentId: string, data: Partial<IPaymentInput>): Promise<IPaymentDocument | null> {
+        return await this.update(new Types.ObjectId(paymentIntentId), data)
+    }
+    async getUserPayments(userId: string): Promise<IPaymentDocument[]> {
+        return await this.find({ user: userId })
+    }
+
 
     async createPaymentIntent(inspectionId: string, userId: string, amount: number): Promise<Stripe.PaymentIntent> {
         try {
@@ -62,7 +82,7 @@ class PaymentService {
                         throw new Error('Payment not found');
                     }
 
-                    await inspectionService.updateInspection(
+                    await this.inspectionRepository.updateInspection(
                         payment.inspection.toString(),
                         { status: InspectionStatus.CONFIRMED }
                     );
@@ -82,12 +102,12 @@ class PaymentService {
                         throw new Error('Payment not found');
                     }
 
-                    await inspectionService.updateInspection(
+                    await this.inspectionRepository.updateInspection(
                         payment.inspection.toString(),
                         { status: InspectionStatus.CANCELLED }
                     );
 
-                    await inspectionService.cancelInspection(payment.inspection.toString())
+                    await this.inspectionService.cancelInspection(payment.inspection.toString())
                     break;
                 }
             }
@@ -154,13 +174,13 @@ class PaymentService {
                     );
 
                     // Update inspection status
-                    await inspectionService.updateInspection(
+                    await this.inspectionRepository.updateInspection(
                         payment.inspection.toString(),
                         { status: InspectionStatus.CANCELLED }
                     );
 
                     // Cancel the inspection
-                    await inspectionService.cancelInspection(payment.inspection.toString());
+                    await this.inspectionService.cancelInspection(payment.inspection.toString());
 
                 } catch (error) {
                     console.error(`Error handling stale payment ${payment.stripePaymentIntentId}:`, error);
@@ -179,5 +199,3 @@ class PaymentService {
         }
     }
 }
-
-export default new PaymentService();

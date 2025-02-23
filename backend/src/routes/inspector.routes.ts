@@ -1,35 +1,43 @@
 import { Router } from "express";
-import { InspectorAuthController } from "../controllers/auth/inspector.auth.controller";
-import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRole } from "../middlewares/role.middleware";
+import { container } from "../di/container";
 import { InspectorController } from "../controllers/inspector.controller";
+import { TYPES } from "../di/types";
+import { InspectorAuthController } from "../controllers/auth/inspector.auth.controller";
+import { AuthMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router()
 
+const inspectorController = container.get<InspectorController>(TYPES.InspectorController)
+const inspectorAuthController = container.get<InspectorAuthController>(TYPES.InspectorAuthController)
+const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware)
+const authenticateToken = authMiddleware.authenticateToken
+
+
 //inspector auth routes
-router.post('/login', InspectorAuthController.inspectorLogin)
-router.post('/refresh', InspectorAuthController.refreshToken)
-router.post('/register', InspectorAuthController.registerInspector)
-router.post('/verify-otp', InspectorAuthController.verifyOTP)
-router.post('/resend-otp', InspectorAuthController.resendOTP)
-router.post('/forget', InspectorAuthController.forgetPassword)
-router.post('/reset', InspectorAuthController.resetPassword)
-router.get('/details', authenticateToken, authorizeRole('inspector'), InspectorController.getInspectorDetails)
-router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), InspectorController.completeProfile)
+router.post('/login', inspectorAuthController.login)
+router.post('/refresh', inspectorAuthController.refreshToken)
+router.post('/register', inspectorAuthController.register)
+router.post('/verify-otp', inspectorAuthController.verifyOTP)
+router.post('/resend-otp', inspectorAuthController.resendOTP)
+router.post('/forget', inspectorAuthController.forgetPassword)
+router.post('/reset', inspectorAuthController.resetPassword)
+router.get('/details', authenticateToken, authorizeRole('inspector'), (req, res) => inspectorController.getInspectorDetails(req, res))
+router.post('/complete-profile', authenticateToken, authorizeRole('inspector'), (req, res) => inspectorController.completeProfile(req, res))
 
 //approval and rejection
-router.patch('/approve/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.approvalProfile)
-router.post('/deny/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.denyProfile)
+router.patch('/approve/:inspectorId', authenticateToken, authorizeRole('admin'), inspectorController.approvalProfile)
+router.post('/deny/:inspectorId', authenticateToken, authorizeRole('admin'), (req, res) => inspectorController.denyProfile(req, res))
 
 //block and unblock
-router.patch('/block/:inspectorId', authenticateToken, authorizeRole('admin'), InspectorController.handleBlock)
+router.patch('/block/:inspectorId', authenticateToken, authorizeRole('admin'), (req, res) => inspectorController.handleBlock(req, res))
 
 //updates
-router.put('/update', authenticateToken, authorizeRole('inspector'), InspectorController.updateInspector)
+router.put('/update', authenticateToken, authorizeRole('inspector'), inspectorController.updateInspector)
 //change password
-router.put('/change-password', authenticateToken, authorizeRole('inspector'), InspectorController.changePassword)
+router.put('/change-password', authenticateToken, authorizeRole('inspector'), (req, res) => inspectorController.changePassword(req, res))
 
-router.get('/', InspectorController.getNearbyInspectors)
+router.get('/', (req, res) => inspectorController.getNearbyInspectors(req, res))
 
 
 export default router

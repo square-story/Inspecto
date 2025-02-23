@@ -1,14 +1,18 @@
+import { inject, injectable } from "inversify";
 import { IUsers } from "../models/user.model";
-import UserRepository from "../repositories/user.repository";
+import { UserRepository } from "../repositories/user.repository";
 import { ChangePasswordResponse } from "./inspector.service";
 import bcrypt from 'bcrypt'
+import { BaseService } from "../core/abstracts/base.service";
+import { IUserService } from "../core/interfaces/services/user.service.interface";
+import { TYPES } from "../di/types";
+import { Types } from "mongoose";
 
 
-
-export class UserService {
-    private userRepository: UserRepository
-    constructor() {
-        this.userRepository = new UserRepository()
+@injectable()
+export class UserService extends BaseService<IUsers> implements IUserService {
+    constructor(@inject(TYPES.UserRepository) private userRepository: UserRepository) {
+        super(userRepository);
     }
     async createUser(userData: IUsers) {
         const existingUser = await this.userRepository.findUserByEmail(userData.email)
@@ -17,25 +21,25 @@ export class UserService {
             throw new Error('Email already exists')
         }
 
-        return await this.userRepository.createUser(userData);
+        return await this.userRepository.create(userData);
     }
     async findUsersByEmail(email: string) {
         return await this.userRepository.findUserByEmail(email)
     }
     async findUserByUserId(userId: string) {
-        return await this.userRepository.findById(userId)
+        return await this.userRepository.findById(new Types.ObjectId(userId))
     }
     async updateUser(userId: string, updates: Partial<IUsers>) {
-        return await this.userRepository.updateUser(userId, updates)
+        return await this.userRepository.update(new Types.ObjectId(userId), updates)
     }
     async deleteUser(userId: string) {
-        return await this.userRepository.deleteUser(userId)
+        return await this.userRepository.deleteOne(new Types.ObjectId(userId))
     }
     async getAllUsers() {
         return await this.userRepository.getAllUsers();
     }
     async toggleStatus(userId: string) {
-        const user = await this.userRepository.findById(userId);
+        const user = await this.userRepository.findById(new Types.ObjectId(userId));
         if (!user) {
             throw new Error('User not found');
         }
@@ -43,8 +47,8 @@ export class UserService {
         const updateData = {
             status: !user.status
         }
-        const updatedUser = await this.userRepository.updateUser(
-            userId,
+        const updatedUser = await this.userRepository.update(
+            new Types.ObjectId(userId),
             updateData
         );
         if (!updatedUser) {
@@ -54,7 +58,7 @@ export class UserService {
     }
     async changePassword(currentPassword: string, newPassword: string, userId: string): Promise<ChangePasswordResponse> {
         try {
-            const isValid = await this.userRepository.findById(userId)
+            const isValid = await this.userRepository.findById(new Types.ObjectId(userId))
             if (!isValid) {
                 return {
                     status: false,
@@ -70,7 +74,7 @@ export class UserService {
             }
 
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            const response = await this.userRepository.updateUser(userId, {
+            const response = await this.userRepository.update(new Types.ObjectId(userId), {
                 password: hashedNewPassword,
             });
             if (response) {

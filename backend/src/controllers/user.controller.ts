@@ -1,11 +1,19 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import mongoose from "mongoose";
+import { injectable, inject } from 'inversify';
+import { controller, httpGet, httpPost, httpPut } from 'inversify-express-utils';
+import { TYPES } from '../di/types';
+import { authorizeRole } from "../middlewares/role.middleware";
+import { IUserController } from "../core/interfaces/controllers/user.controller.interface";
 
-const userService = new UserService();
+@injectable()
+export class UserController implements IUserController {
+    constructor(
+        @inject(TYPES.UserService) private userService: UserService
+    ) { }
 
-export class UserController {
-    public static getUserDetails: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async getUserDetails(req: Request, res: Response): Promise<void> {
         try {
             // Extract user ID from the authenticated token
             const userId = req.user?.userId;
@@ -15,7 +23,7 @@ export class UserController {
             }
 
             // Fetch user details from the database
-            const user = await userService.findUserByUserId(userId);
+            const user = await this.userService.findUserByUserId(userId);
             if (!user) {
                 res.status(404).json({ message: "User not found" });
                 return;
@@ -25,7 +33,7 @@ export class UserController {
             console.error(error)
         }
     };
-    public static updateUserDetails: RequestHandler = async (req: Request, res: Response) => {
+    async updateUserDetails(req: Request, res: Response) {
         try {
             const userId = req.user?.userId; // Extract user ID from the token
             if (!userId) {
@@ -47,7 +55,7 @@ export class UserController {
                 return
             }
 
-            const user = await userService.updateUser(userId, data); // Call the service to update the user
+            const user = await this.userService.updateUser(userId, data); // Call the service to update the user
             if (!user) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
@@ -70,7 +78,7 @@ export class UserController {
             return
         }
     };
-    public static updateStatus: RequestHandler = async (req: Request, res: Response) => {
+    async updateStatus(req: Request, res: Response) {
         try {
             const { userId } = req.params
 
@@ -81,7 +89,7 @@ export class UserController {
                 });
                 return;
             }
-            const response = await userService.toggleStatus(userId)
+            const response = await this.userService.toggleStatus(userId)
 
             res.status(200).json({
                 success: true,
@@ -100,7 +108,7 @@ export class UserController {
             return
         }
     }
-    public static changePassword: RequestHandler = async (req: Request, res: Response) => {
+    async changePassword(req: Request, res: Response) {
         try {
             const userId = req.user?.userId
             if (!userId) {
@@ -120,7 +128,7 @@ export class UserController {
                 })
                 return;
             }
-            const response = await userService.changePassword(currentPassword, newPassword, userId)
+            const response = await this.userService.changePassword(currentPassword, newPassword, userId)
             if (response.status) {
                 res.status(200).json({
                     success: true,

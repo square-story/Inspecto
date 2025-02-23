@@ -1,20 +1,52 @@
 import { Response } from "express";
-import UserRepository from "../../repositories/user.repository";
+import { UserRepository } from "../../repositories/user.repository";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 import bcrypt from 'bcrypt'
 import { generateOtp } from "../../utils/otp";
-import redisClient from "../../config/redis";
+import redisClient from "../../config/redis.config";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from "crypto";
+import { BaseAuthService } from "../../core/abstracts/base.auth.service";
+import { IAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../di/types";
+import { Types } from "mongoose";
 
-export class UserAuthService {
-    private userRepository: UserRepository
-    constructor() {
-        this.userRepository = new UserRepository()
+@injectable()
+export class UserAuthService extends BaseAuthService implements IAuthService {
+
+    constructor(
+        @inject(TYPES.UserRepository) private userRepository: UserRepository
+    ) {
+        super();
     }
-    async login(email: string, password: string, res: Response) {
+    async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string; }> {
+        console.log('helloooo', email)
+        const user = await this.userRepository.findUserByEmail(email);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if (!user.password) {
+            throw new Error('Password is required');
+        }
+        const comparePassword = await bcrypt.compare(password, user.password);
+        if (!comparePassword) {
+            throw new Error('Invalid password');
+        }
+        if (!user.status) {
+            throw new Error('Account is blocked');
+        }
+        const payload = { userId: user.id, role: user.role };
+        return this.generateTokens(payload);
+    }
+    logout(token: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    async loginUser(email: string, password: string, res: Response) {
+        console.log(email, password)
         const user = await this.userRepository.findUserByEmail(email)
+        console.log(user)
         if (!user) {
             res.status(400).json({ field: 'email', message: 'User not found' })
             return
@@ -38,8 +70,8 @@ export class UserAuthService {
             return;
         }
         const payload = { userId: user.id, role: user.role, }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
+        const { accessToken, refreshToken } = this.generateTokens(payload)
+
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -51,17 +83,17 @@ export class UserAuthService {
             status: user.status
         })
     }
-    async refreshToken(token: string) {
+    async refreshToken(token: string): Promise<{ accessToken: string }> {
         const payload = await verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
-        const user = await this.userRepository.findById(payload.userId.toString())
+        const user = await this.userRepository.findById(new Types.ObjectId(payload.userId.toString()))
         if (!user || !user.status) {
-            return { status: false, blockReason: "This User Account is Blocked" }
+            throw new Error("This User Account is Blocked");
         }
         const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken, status: true, blockReason: "" }
+        return { accessToken: newAccessToken }
     }
 
     async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {
@@ -90,7 +122,7 @@ export class UserAuthService {
             throw new Error('Invalid OTP');
         }
 
-        const newUser = await this.userRepository.createUser({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
+        const newUser = await this.userRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
         await redisClient.del(redisKey)
         const payload = { userId: newUser.id, role: newUser.role }
         const accessToken = generateAccessToken(payload)
@@ -119,14 +151,14 @@ export class UserAuthService {
         await sendEmail(email, "Your Inspecto OTP(resent)", `Your new OTP is ${newOTP}`)
         return { message: 'OTP resent successfully' }
     }
-    async googleLoginOrRegister(email: string | undefined, name: string | undefined, picture: string | undefined, family_name: string | undefined, res: Response) {
+    async googleLoginOrRegister(email: string | undefined, name: string | undefined, picture: string | undefined, family_name: string | undefined) {
         if (!email || !name) {
             throw new Error("Google account lacks required information");
         }
         let user = await this.userRepository.findUserByEmail(email);
 
         if (!user) {
-            await this.userRepository.createUser({
+            await this.userRepository.create({
                 email,
                 firstName: name,
                 lastName: family_name,
@@ -135,20 +167,11 @@ export class UserAuthService {
                 password: null
             })
         }
-        const token = this.generateTokens(user, res)
-        return { user, token };
-    }
-    private generateTokens(user: any, res: Response) {
-        const payload = { userId: user._id, role: user.role }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        })
-
-        return { accessToken };
+        if (!user) {
+            throw new Error("User not found");
+        }
+        const { accessToken, refreshToken } = this.generateTokens({ userId: user.id, role: user.role });
+        return { user, accessToken, refreshToken };
     }
     async forgetPassword(email: string, role: string) {
         const user = await this.userRepository.findUserByEmail(email)

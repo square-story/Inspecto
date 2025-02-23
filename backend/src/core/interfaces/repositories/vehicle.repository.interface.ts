@@ -1,4 +1,4 @@
-import { IVehicleDocument } from "../../models/vehicle.model";
+import { IVehicleDocument, IVehicleInput } from "../../../models/vehicle.model";
 
 export interface IVehicleRepository {
     /**
@@ -6,7 +6,7 @@ export interface IVehicleRepository {
      * @param vehicleData - Vehicle details to be added
      * @returns The created vehicle document
      */
-    createVehicle(vehicleData: IVehicleDocument): Promise<IVehicleDocument>;
+    createVehicle(vehicleData: IVehicleInput): Promise<IVehicleDocument>;
 
     /**
      * Find a vehicle by its ID
@@ -28,7 +28,7 @@ export interface IVehicleRepository {
      * @param updateData - The fields to update
      * @returns The updated vehicle document
      */
-    updateVehicle(vehicleId: string, updateData: Partial<IVehicleDocument>): Promise<IVehicleDocument | null>;
+    updateVehicle(vehicleId: string, updateData: Partial<IVehicleInput>): Promise<IVehicleDocument | null>;
 
     /**
      * Delete a vehicle by its ID
