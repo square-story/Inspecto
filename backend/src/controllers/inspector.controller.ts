@@ -13,14 +13,14 @@ export class InspectorController implements IInspectorController {
     ) { }
 
 
-    updateInspectorDetails(req: Request, res: Response): Promise<void> {
+    updateInspectorDetails = async (req: Request, res: Response): Promise<void> => {
         throw new Error("Method not implemented.");
     }
-    getAllInspectors(req: Request, res: Response): Promise<void> {
+    getAllInspectors = async (req: Request, res: Response): Promise<void> => {
         throw new Error("Method not implemented.");
     }
 
-    async getInspectorDetails(req: Request, res: Response): Promise<void> {
+    getInspectorDetails = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
             if (!userId) {
@@ -43,7 +43,7 @@ export class InspectorController implements IInspectorController {
 
 
 
-    async completeProfile(req: Request, res: Response): Promise<void> {
+    completeProfile = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId
             const { longitude, latitude, ...restData } = req.body; // Extract location data separately
@@ -87,7 +87,7 @@ export class InspectorController implements IInspectorController {
     }
 
 
-    async approvalProfile(req: Request, res: Response): Promise<void> {
+    approvalProfile = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
@@ -121,7 +121,7 @@ export class InspectorController implements IInspectorController {
             return;
         }
     }
-    async denyProfile(req: Request, res: Response): Promise<void> {
+    denyProfile = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.params.inspectorId;
             const { reason } = req.body;
@@ -165,7 +165,7 @@ export class InspectorController implements IInspectorController {
             return;
         }
     }
-    async handleBlock(req: Request, res: Response): Promise<void> {
+    handleBlock = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
@@ -189,7 +189,7 @@ export class InspectorController implements IInspectorController {
             return;
         }
     }
-    async updateInspector(req: Request, res: Response): Promise<void> {
+    updateInspector = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
             if (!userId) {
@@ -233,7 +233,7 @@ export class InspectorController implements IInspectorController {
             return
         }
     }
-    async changePassword(req: Request, res: Response): Promise<void> {
+    changePassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.user?.userId
             if (!inspectorId) {
@@ -274,7 +274,7 @@ export class InspectorController implements IInspectorController {
         }
     }
 
-    async getNearbyInspectors(req: Request, res: Response): Promise<void> {
+    getNearbyInspectors = async (req: Request, res: Response): Promise<void> => {
         try {
             const { latitude, longitude } = req.query;
             if (!latitude || !longitude) {

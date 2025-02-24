@@ -11,7 +11,7 @@ export class InspectorAuthController implements IAuthController {
         @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: IInspectorAuthService
     ) { }
 
-    async login(req: Request, res: Response): Promise<void> {
+    login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body
             const { accessToken, refreshToken } = await this.inspectorAuthService.login(email, password)
@@ -30,7 +30,7 @@ export class InspectorAuthController implements IAuthController {
         }
     }
 
-    async refreshToken(req: Request, res: Response): Promise<void> {
+    refreshToken = async (req: Request, res: Response): Promise<void> => {
         try {
             const refreshToken = await req.cookies.refreshToken
             if (!refreshToken) {
@@ -49,7 +49,7 @@ export class InspectorAuthController implements IAuthController {
     }
 
 
-    async forgetPassword(req: Request, res: Response): Promise<void> {
+    forgetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, role = 'inspector' } = req.body
             const response = await this.inspectorAuthService.forgetPassword(email, role)
@@ -63,7 +63,7 @@ export class InspectorAuthController implements IAuthController {
         }
     }
 
-    async register(req: Request, res: Response): Promise<void> {
+    register = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password, firstName, lastName, phone } = req.body
             const response = await this.inspectorAuthService.registerInspector(email, password, firstName, lastName, phone)
@@ -80,7 +80,7 @@ export class InspectorAuthController implements IAuthController {
     }
 
 
-    async verifyOTP(req: Request, res: Response): Promise<void> {
+    verifyOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, otp } = req.body
             const { accessToken, refreshToken, message } = await this.inspectorAuthService.verifyOTP(email, otp)
@@ -101,7 +101,7 @@ export class InspectorAuthController implements IAuthController {
     }
 
 
-    async resendOTP(req: Request, res: Response): Promise<void> {
+    resendOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email } = req.body
             const response = await this.inspectorAuthService.resendOTP(email)
@@ -115,7 +115,7 @@ export class InspectorAuthController implements IAuthController {
         }
     }
 
-    async resetPassword(req: Request, res: Response): Promise<void> {
+    resetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { token, email, password } = req.body
             const response = await this.inspectorAuthService.resetPassword(token, email, password)

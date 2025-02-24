@@ -8,7 +8,7 @@ import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from "crypto";
 import { BaseAuthService } from "../../core/abstracts/base.auth.service";
-import { IAuthService, IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
