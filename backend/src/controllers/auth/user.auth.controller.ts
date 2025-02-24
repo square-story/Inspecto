@@ -19,11 +19,15 @@ export class UserAuthController implements IAuthController {
     async login(req: Request, res: Response): Promise<void> {
         try {
             const { email, password } = req.body;
-            console.log(req.body)
-            const response = await this.userAuthService.login(email, password);
+            const { accessToken, refreshToken } = await this.userAuthService.login(email, password);
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            });
+            const response = { accessToken: accessToken, role: 'user' }
             res.status(200).json(response);
         } catch (error) {
-            console.log(error, 'kkke')
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message });
             } else {

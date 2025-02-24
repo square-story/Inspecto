@@ -21,7 +21,7 @@ export class AuthMiddleware {
         @inject(TYPES.UserService) private userService: UserService
     ) { }
 
-    async authenticateToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const authHeader = req.headers.authorization;
         if (!authHeader) {
             res.status(401).json({ message: "Token missing" });
