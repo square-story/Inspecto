@@ -22,7 +22,6 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         super();
     }
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string; }> {
-        console.log('helloooo', email)
         const user = await this.userRepository.findUserByEmail(email);
         if (!user) {
             throw new Error('User not found');
@@ -44,9 +43,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         throw new Error("Method not implemented.");
     }
     async loginUser(email: string, password: string, res: Response) {
-        console.log(email, password)
         const user = await this.userRepository.findUserByEmail(email)
-        console.log(user)
         if (!user) {
             res.status(400).json({ field: 'email', message: 'User not found' })
             return

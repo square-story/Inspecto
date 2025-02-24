@@ -61,8 +61,6 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 slotNumber: data.slotNumber,
             });
 
-            console.log('the exisiing booking:', existingBooking)
-
             // If there's an existing booking and it's not cancelled, throw error
             if (existingBooking && existingBooking.status !== InspectionStatus.CANCELLED) {
                 throw new Error('Slot is no longer available');

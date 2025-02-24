@@ -27,7 +27,7 @@ export class UserService extends BaseService<IUsers> implements IUserService {
         return await this.userRepository.findUserByEmail(email)
     }
     async findUserByUserId(userId: string) {
-        return await this.userRepository.findById(new Types.ObjectId(userId))
+        return await this.repository.findById(new Types.ObjectId(userId))
     }
     async updateUser(userId: string, updates: Partial<IUsers>) {
         return await this.userRepository.update(new Types.ObjectId(userId), updates)

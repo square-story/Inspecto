@@ -33,7 +33,6 @@ export class AuthMiddleware {
             const payload = verifyAccessToken(token) as unknown as { userId: string; role: string; }
             if (payload.role === 'inspector') {
                 const inspector = await this.inspectorService.getInspectorDetails(payload.userId)
-
                 if (!inspector) {
                     res.status(404).json({
                         success: false,

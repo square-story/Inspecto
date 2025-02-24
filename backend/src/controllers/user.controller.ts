@@ -121,7 +121,6 @@ export class UserController implements IUserController {
             }
             const { currentPassword, newPassword } = req.body
             if (!currentPassword) {
-                console.log("Error: Request Body doesn't have enough data to complete")
                 res.status(400).json({
                     success: false,
                     message: "Request Body doesn't have enough data to complete"

@@ -31,15 +31,15 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
         return await this.update(new Types.ObjectId(id), updates)
     }
     async getAllInspectors(): Promise<IInspector[]> {
-        return await this.inspectorRepository.findAll()
+        return await this.repository.findAll()
     }
 
     async getInspectorDetails(inspectorId: string) {
-        return await this.inspectorRepository.findById(new Types.ObjectId(inspectorId))
+        return await this.repository.findById(new Types.ObjectId(inspectorId))
     }
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
-        const response = await this.inspectorRepository.updateInspector(userId, data)
+        const response = await this.repository.findByIdAndUpdate(new Types.ObjectId(userId), data)
         if (response) {
             return await this.inspectorRepository.updateInspectorProfileCompletion(userId)
         }
@@ -53,7 +53,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                 denialReason: '',
                 approvedAt: new Date(),
             };
-            const updatedInspector = await this.inspectorRepository.updateInspector(inspectorId, updates)
+            const updatedInspector = await this.repository.findByIdAndUpdate(new Types.ObjectId(inspectorId), updates)
             if (updatedInspector) {
                 // Send approval email
                 await this.emailService.sendApprovalEmail(
