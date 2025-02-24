@@ -1,4 +1,3 @@
-import { Response } from "express";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 import { Types } from "mongoose";
 
