@@ -21,8 +21,8 @@ export class AdminAuthController implements IAuthController {
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
-
-            res.status(200).json(accessToken);
+            const response = { accessToken: accessToken, role: 'admin' }
+            res.status(200).json(response);
         } catch (error) {
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message });
