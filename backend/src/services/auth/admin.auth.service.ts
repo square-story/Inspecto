@@ -24,20 +24,10 @@ export class AdminAuthService extends BaseAuthService implements IAdminAuthServi
         }
         const payload = {
             userId: new Types.ObjectId(admin._id.toString()),
-            role: admin.role || 'admin' // Providing default role if undefined
+            role: admin.role || 'admin'
         }
         const { accessToken, refreshToken } = this.generateTokens(payload)
 
         return { accessToken, refreshToken }
     }
-
-    async refreshToken(token: string) {
-        const payload = await verifyRefreshToken(token)
-        if (!payload?.userId || !payload?.role) {
-            throw new Error('Invalid token payload')
-        }
-        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken }
-    }
-
 }

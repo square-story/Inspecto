@@ -39,47 +39,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         const payload = { userId: user.id, role: user.role };
         return this.generateTokens(payload);
     }
-    logout(token: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    async loginUser(email: string, password: string, res: Response) {
-        const user = await this.userRepository.findUserByEmail(email)
-        if (!user) {
-            res.status(400).json({ field: 'email', message: 'User not found' })
-            return
-        }
-        if (!user.password) {
-            res.status(400).json({ field: 'password', message: 'User Want To Enter Password' })
-            return;
-        }
-        if (user.password === null) {
-            res.status(400).json({ field: 'password', message: 'Password is required' });
-            return;
-        }
-        const comparePassword = await bcrypt.compare(password, user.password)
 
-        if (!comparePassword) {
-            res.status(400).json({ field: 'password', message: 'Password is mismatch' })
-            return;
-        }
-        if (!user.status) {
-            res.status(400).json({ field: 'email', message: 'This User Account is Blocked' })
-            return;
-        }
-        const payload = { userId: user.id, role: user.role, }
-        const { accessToken, refreshToken } = this.generateTokens(payload)
-
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        })
-        return ({
-            accessToken,
-            role: 'user',
-            status: user.status
-        })
-    }
     async refreshToken(token: string): Promise<{ accessToken: string }> {
         const payload = await verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {

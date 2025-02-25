@@ -3,12 +3,13 @@ import { inject, injectable, } from "inversify";
 import { IAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
 import { TYPES } from "../../di/types";
 import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { InspectorAuthService } from "../../services/auth/inspector.auth.service";
 
 
 @injectable()
 export class InspectorAuthController implements IAuthController {
     constructor(
-        @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: IInspectorAuthService
+        @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: InspectorAuthService
     ) { }
 
     login = async (req: Request, res: Response): Promise<void> => {
@@ -20,7 +21,7 @@ export class InspectorAuthController implements IAuthController {
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
-            res.status(200).json(accessToken)
+            res.status(200).json({ accessToken: accessToken, role: 'inspector', status: true })
         } catch (error) {
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message })

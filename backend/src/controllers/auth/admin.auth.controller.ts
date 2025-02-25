@@ -3,12 +3,13 @@ import { IAuthController } from '../../core/interfaces/controllers/auth.controll
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../di/types';
 import { IAdminAuthService } from '../../core/interfaces/services/auth.service.interface';
+import { AdminAuthService } from '../../services/auth/admin.auth.service';
 
 
 @injectable()
 export class AdminAuthController implements IAuthController {
     constructor(
-        @inject(TYPES.AdminAuthService) private adminAuthService: IAdminAuthService
+        @inject(TYPES.AdminAuthService) private adminAuthService: AdminAuthService
     ) { }
 
     async login(req: Request, res: Response): Promise<void> {
@@ -21,7 +22,7 @@ export class AdminAuthController implements IAuthController {
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
-            const response = { accessToken: accessToken, role: 'admin' }
+            const response = { accessToken: accessToken, role: 'admin', status: true }
             res.status(200).json(response);
         } catch (error) {
             if (error instanceof Error) {
@@ -34,7 +35,7 @@ export class AdminAuthController implements IAuthController {
 
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
-            const refreshToken = await req.cookies.refreshToken; // Get the refresh token from the HTTP-only cookie
+            const refreshToken = await req.cookies.refreshToken;
             if (!refreshToken) {
                 res.status(401).json({ message: 'Refresh token missing' });
                 return;

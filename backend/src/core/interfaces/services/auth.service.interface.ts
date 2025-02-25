@@ -3,7 +3,6 @@ import { UserRole } from "../../types/user.role.type";
 
 export interface IAuthService {
     login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }>;
-    refreshToken(token: string): Promise<{ accessToken: string }>;
 }
 
 export interface IInspectorAuthService extends IAuthService {

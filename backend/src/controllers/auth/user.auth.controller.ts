@@ -25,7 +25,7 @@ export class UserAuthController implements IAuthController {
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
-            const response = { accessToken: accessToken, role: 'user' }
+            const response = { accessToken: accessToken, role: 'user', status: true }
             res.status(200).json(response);
         } catch (error) {
             if (error instanceof Error) {
@@ -51,18 +51,6 @@ export class UserAuthController implements IAuthController {
             } else {
                 res.status(403).json({ message: 'Forbidden' });
             }
-        }
-    }
-
-
-    async logout(req: Request, res: Response): Promise<void> {
-        try {
-            const token = req.cookies.refreshToken;
-            await this.userAuthService.logout(token);
-            res.clearCookie('refreshToken');
-            res.status(200).json({ message: 'Logged out successfully' });
-        } catch (error) {
-            res.status(500).json({ message: 'Error during logout' });
         }
     }
 

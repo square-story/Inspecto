@@ -104,6 +104,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
         const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role });
         return { accessToken: newAccessToken };
     }
+
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
         const existing = await this.inspectorRepository.findInspectorByEmail(email)
         if (existing) {
