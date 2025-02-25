@@ -33,4 +33,11 @@ export class AdminAuthService extends BaseAuthService implements IAdminAuthServi
             throw new ServiceError('Login Failed', 'email')
         }
     }
+    async refreshToken(token: string) {
+        try {
+            return await super.refreshToken(token);
+        } catch (error) {
+            throw new ServiceError('Token refresh failed', 'token');
+        }
+    }
 }

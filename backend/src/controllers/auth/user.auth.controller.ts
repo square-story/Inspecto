@@ -5,6 +5,7 @@ import { IAuthController } from "../../core/interfaces/controllers/auth.controll
 import { inject, injectable, } from "inversify";
 import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
+import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
@@ -12,7 +13,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 export class UserAuthController implements IAuthController {
 
     constructor(
-        @inject(TYPES.UserAuthService) private userAuthService: UserAuthService
+        @inject(TYPES.UserAuthService) private userAuthService: IUserAuthService
     ) { }
 
 
@@ -95,7 +96,7 @@ export class UserAuthController implements IAuthController {
     async register(req: Request, res: Response): Promise<void> {
         try {
             const { email, password, firstName, lastName } = req.body
-            const response = await this.userAuthService.registerUser(email, password, firstName, lastName, res)
+            const response = await this.userAuthService.registerUser(email, password, firstName, lastName)
             res.status(200).json({
                 response
             })
@@ -204,6 +205,10 @@ export class UserAuthController implements IAuthController {
                 return;
             }
             const { email, name, picture, family_name } = payload;
+            if (!email || !name || !picture || !family_name) {
+                res.status(400).json({ message: 'Missing required Google account information' });
+                return;
+            }
             const { refreshToken, accessToken, user } = await this.userAuthService.googleLoginOrRegister(email, name, picture, family_name);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,

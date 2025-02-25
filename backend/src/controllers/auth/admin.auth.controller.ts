@@ -10,7 +10,7 @@ import { ServiceError } from '../../core/errors/service.error';
 @injectable()
 export class AdminAuthController implements IAuthController {
     constructor(
-        @inject(TYPES.AdminAuthService) private adminAuthService: AdminAuthService
+        @inject(TYPES.AdminAuthService) private adminAuthService: IAdminAuthService
     ) { }
 
     async login(req: Request, res: Response): Promise<void> {

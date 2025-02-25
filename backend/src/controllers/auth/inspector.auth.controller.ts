@@ -10,7 +10,7 @@ import { ServiceError } from "../../core/errors/service.error";
 @injectable()
 export class InspectorAuthController implements IAuthController {
     constructor(
-        @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: InspectorAuthService
+        @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: IInspectorAuthService
     ) { }
 
     login = async (req: Request, res: Response): Promise<void> => {

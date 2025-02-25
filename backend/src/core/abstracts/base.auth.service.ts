@@ -1,7 +1,8 @@
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 import { Types } from "mongoose";
+import { IBaseAuthService } from "../interfaces/services/base/base.auth.service.interface";
 
-export abstract class BaseAuthService {
+export abstract class BaseAuthService implements IBaseAuthService {
     protected generateTokens(payload: { userId: Types.ObjectId; role: string }) {
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);

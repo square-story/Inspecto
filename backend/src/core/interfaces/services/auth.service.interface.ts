@@ -10,6 +10,7 @@ export interface IInspectorAuthService extends IAuthService {
     resendOTP(email: string): Promise<{ message: string }>
     forgetPassword(email: string, role: UserRole): Promise<{ message: string }>
     resetPassword(token: string, email: string, password: string): Promise<{ message: string }>
+    refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }>
 }
 
 export interface IUserAuthService extends IAuthService {
@@ -18,8 +19,10 @@ export interface IUserAuthService extends IAuthService {
     resendOTP(email: string): Promise<{ message: string }>
     forgetPassword(email: string, role: UserRole): Promise<{ message: string }>
     resetPassword(token: string, email: string, password: string): Promise<{ message: string }>
+    refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }>
+    registerUser(email: string, password: string, firstName: string, lastName: string): Promise<{ message: string }>
 }
 
 export interface IAdminAuthService extends IAuthService {
-
+    refreshToken(token: string): Promise<{ accessToken: string }>;
 }

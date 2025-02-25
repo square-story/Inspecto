@@ -64,7 +64,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         }
     }
 
-    async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {
+    async registerUser(email: string, password: string, firstName: string, lastName: string): Promise<{ message: string }> {
         const existingUser = await this.userRepository.findUserByEmail(email)
 
         if (existingUser) {
@@ -77,6 +77,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         await sendEmail(email, 'Your Inspecto OTP', `Your OTP is ${otp}`);
         return { message: 'OTP send successfully' }
     }
+
     async verifyOTP(email: string, otp: string,) {
         const redisKey = `user:register:${email}`;
         const userData = await redisClient.get(redisKey)
