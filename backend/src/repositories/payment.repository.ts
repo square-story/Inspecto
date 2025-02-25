@@ -5,6 +5,9 @@ import { BaseRepository } from "../core/abstracts/base.repository";
 
 @injectable()
 export class PaymentRepository extends BaseRepository<IPaymentDocument> implements IPaymentRepository {
+    constructor() {
+        super(paymentModel)
+    }
     async createPayment(data: Partial<IPaymentInput>): Promise<IPaymentDocument> {
         return await this.create(data);
     }
