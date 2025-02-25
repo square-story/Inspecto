@@ -12,6 +12,7 @@ import { IUserAuthService } from "../../core/interfaces/services/auth.service.in
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
+import { ServiceError } from "../../core/errors/service.error";
 
 @injectable()
 export class UserAuthService extends BaseAuthService implements IUserAuthService {
@@ -22,35 +23,45 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         super();
     }
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string; }> {
-        const user = await this.userRepository.findUserByEmail(email);
-        if (!user) {
-            throw new Error('User not found');
+        try {
+            const user = await this.userRepository.findUserByEmail(email);
+            if (!user) {
+                throw new ServiceError('User not found', 'email');
+            }
+            if (!user.password) {
+                throw new ServiceError('Password is required', 'password');
+            }
+            const comparePassword = await bcrypt.compare(password, user.password);
+            if (!comparePassword) {
+                throw new ServiceError('Invalid password', 'password');
+            }
+            if (!user.status) {
+                throw new ServiceError('Account is blocked', 'email');
+            }
+            const payload = { userId: user.id, role: user.role };
+            return this.generateTokens(payload);
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('login failed', 'email');
         }
-        if (!user.password) {
-            throw new Error('Password is required');
-        }
-        const comparePassword = await bcrypt.compare(password, user.password);
-        if (!comparePassword) {
-            throw new Error('Invalid password');
-        }
-        if (!user.status) {
-            throw new Error('Account is blocked');
-        }
-        const payload = { userId: user.id, role: user.role };
-        return this.generateTokens(payload);
     }
 
     async refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }> {
-        const payload = await verifyRefreshToken(token)
-        if (!payload?.userId || !payload?.role) {
-            throw new Error('Invalid token payload')
+        try {
+            const payload = await verifyRefreshToken(token)
+            if (!payload?.userId || !payload?.role) {
+                throw new ServiceError('Invalid token payload', 'token')
+            }
+            const user = await this.userRepository.findById(new Types.ObjectId(payload.userId.toString()))
+            if (!user || !user.status) {
+                return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
+            }
+            const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
+            return { accessToken: newAccessToken, status: true, blockReason: "" }
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Refresh Failed', 'refresh')
         }
-        const user = await this.userRepository.findById(new Types.ObjectId(payload.userId.toString()))
-        if (!user || !user.status) {
-            return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
-        }
-        const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken, status: true, blockReason: "" }
     }
 
     async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {

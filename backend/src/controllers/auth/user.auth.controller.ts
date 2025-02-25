@@ -4,6 +4,7 @@ import { OAuth2Client } from "google-auth-library";
 import { IAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
 import { inject, injectable, } from "inversify";
 import { TYPES } from "../../di/types";
+import { ServiceError } from "../../core/errors/service.error";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
@@ -28,10 +29,17 @@ export class UserAuthController implements IAuthController {
             const response = { accessToken: accessToken, role: 'user', status: true }
             res.status(200).json(response);
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(400).json({ message: 'Some issue in the login section' });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -46,10 +54,17 @@ export class UserAuthController implements IAuthController {
             const accessToken = await this.userAuthService.refreshToken(refreshToken);
             res.status(200).json(accessToken);
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(403).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(403).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(403).json({ message: 'Forbidden' });
+                res.status(403).json({
+                    success: false,
+                    message: 'forbidden',
+                });
             }
         }
     }

@@ -1,14 +1,12 @@
-import { Response } from "express";
-import { InspectorRepository } from "../../repositories/inspector.repository";
 import bcrypt from "bcrypt";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
+import { generateAccessToken, verifyRefreshToken } from "../../utils/token.utils";
 import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis.config";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from 'crypto'
 import { InspectorStatus } from "../../models/inspector.model";
-import { IAuthService, IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { BaseAuthService } from "../../core/abstracts/base.auth.service";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
@@ -58,7 +56,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
         if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
             return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
         }
-        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role });
+        const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role });
         return { accessToken: newAccessToken, status: true, blockReason: "" };
     }
 
