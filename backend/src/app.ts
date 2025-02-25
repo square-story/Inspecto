@@ -63,7 +63,7 @@ app.use('/inspections', inspectionRoutes)
 app.use('/payments', paymentsRoutes)
 
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, res: Response) => {
     res.status(404).json({
         success: false,
         message: 'Route not found'
@@ -71,8 +71,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    errorHandler(err, req, res, next);
+app.use((err: Error, req: Request, res: Response) => {
+    errorHandler(err, req, res);
 });
 
 app.listen(appConfig.port, () => {

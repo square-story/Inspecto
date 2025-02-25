@@ -1,6 +1,4 @@
-import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import appConfig from "../config/app.config";
 import { verifyAccessToken } from "../utils/token.utils";
 import { InspectorService } from "../services/inspector.service";
 import { UserService } from "../services/user.service";
@@ -67,7 +65,8 @@ export class AuthMiddleware {
             }
             req.user = payload;
             next();
-        } catch (error: any) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
             res.status(401).json({ message: "Token expired" });
         }
     }

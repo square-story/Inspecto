@@ -1,8 +1,7 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { IAdminController } from "../core/interfaces/controllers/admin.controller.interface";
 import { TYPES } from "../di/types";
-import { AdminService } from "../services/admin.service";
 import { IAdminService } from "../core/interfaces/services/admin.service.interface";
 
 @injectable()

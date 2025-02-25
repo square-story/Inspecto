@@ -3,6 +3,7 @@ import { InspectorService } from "../services/inspector.service";
 import { inject, injectable } from "inversify";
 import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
 import { TYPES } from "../di/types";
+import { ServiceError } from "../core/errors/service.error";
 
 @injectable()
 export class InspectorController implements IInspectorController {
@@ -24,10 +25,18 @@ export class InspectorController implements IInspectorController {
             }
             res.status(200).json(response);
         } catch (error) {
-            // Add proper error handling
-            res.status(500).json({
-                message: error instanceof Error ? error.message : 'Internal server error'
-            });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -66,13 +75,19 @@ export class InspectorController implements IInspectorController {
             }
             res.status(400).json({ message: 'Failed to update profile' });
             return;
-        } catch (error: any) {
-            console.error('Profile completion error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -102,13 +117,19 @@ export class InspectorController implements IInspectorController {
             }
             res.status(400).json({ message: 'Failed to update profile' });
             return;
-        } catch (error: any) {
-            console.error('Profile completion error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
     denyProfile = async (req: Request, res: Response): Promise<void> => {
@@ -146,13 +167,19 @@ export class InspectorController implements IInspectorController {
             });
             return
 
-        } catch (error: any) {
-            console.error('Profile denial error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
     handleBlock = async (req: Request, res: Response): Promise<void> => {
@@ -170,13 +197,19 @@ export class InspectorController implements IInspectorController {
                 return;
             }
             res.status(400).json({ message: 'Failed to update profile' });
-        } catch (error: any) {
-            console.error('Profile denial error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
     updateInspector = async (req: Request, res: Response): Promise<void> => {
@@ -215,12 +248,18 @@ export class InspectorController implements IInspectorController {
                 inspector
             });
         } catch (error) {
-            console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
-                success: false,
-                message: "Internal server error. Please try again later."
-            });
-            return
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
     changePassword = async (req: Request, res: Response): Promise<void> => {
@@ -255,12 +294,18 @@ export class InspectorController implements IInspectorController {
                 })
             }
         } catch (error) {
-            console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
-                success: false,
-                message: "Internal server error. Please try again later."
-            });
-            return
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -274,13 +319,19 @@ export class InspectorController implements IInspectorController {
             const inspectors = await this.inspectorService.getNearbyInspectors(latitude as string, longitude as string);
             res.status(200).json(inspectors);
             return;
-        } catch (error: any) {
-            console.error("Error in getNearbyInspectors:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message || "Internal Server Error. Please try again later."
-            });
-            return
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 }

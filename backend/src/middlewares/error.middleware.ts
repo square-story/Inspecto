@@ -1,12 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { ServiceError } from '../core/errors/service.error';
 
 export const errorHandler = (
-    err: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+    err: Error, req: Request, res: Response) => {
     // Handle ServiceError
     if (err instanceof ServiceError) {
         return res.status(err.statusCode).json({

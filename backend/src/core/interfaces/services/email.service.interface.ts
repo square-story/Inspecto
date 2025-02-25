@@ -1,4 +1,4 @@
 export interface IEmailService {
-    sendOTP(email: string, otp: string): Promise<boolean>;
-    sendInspectionConfirmation(email: string, details: any): Promise<boolean>;
+    sendApprovalEmail(inspectorEmail: string, firstName: string): Promise<void>;
+    sendDenialEmail(inspectorEmail: string, firstName: string, reason: string): Promise<void>;
 }

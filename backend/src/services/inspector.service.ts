@@ -1,14 +1,11 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
 import { InspectorRepository } from "../repositories/inspector.repository";
 import { EmailService } from "./email.service";
 import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import { BaseService } from "../core/abstracts/base.service";
-import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { TYPES } from "../di/types";
-import { InspectionRepository } from "../repositories/inspection.repository";
-import { IInspectionInput, IInspectionDocument } from "../models/inspection.model";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 
 export type ChangePasswordResponse = {
@@ -165,10 +162,10 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
         return await this.inspectorRepository.getNearbyInspectors(latitude, longitude)
     }
 
-    async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
+    async bookingHandler(inspectorId: string, userId: string, date: Date) {
         return await this.inspectorRepository.bookingHandler(inspectorId, userId, date,)
     }
-    async unBookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
+    async unBookingHandler(inspectorId: string, userId: string, date: Date) {
         return await this.inspectorRepository.unbookingHandler(inspectorId, userId, date)
     }
 }

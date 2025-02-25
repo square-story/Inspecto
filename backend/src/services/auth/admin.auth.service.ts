@@ -1,8 +1,5 @@
-import { Response } from "express";
-import { AdminRepository } from "../../repositories/admin.repository";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
 import { inject, injectable } from "inversify";
-import { IAdminAuthService, IAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { IAdminAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { TYPES } from "../../di/types";
 import { BaseAuthService } from "../../core/abstracts/base.auth.service";
 import { Types } from "mongoose";
@@ -37,6 +34,7 @@ export class AdminAuthService extends BaseAuthService implements IAdminAuthServi
         try {
             return await super.refreshToken(token);
         } catch (error) {
+            if (error instanceof ServiceError) throw error;
             throw new ServiceError('Token refresh failed', 'token');
         }
     }

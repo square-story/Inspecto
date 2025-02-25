@@ -49,8 +49,8 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             });
 
             await this.paymentRepository.createPayment({
-                inspection: inspectionId as any,
-                user: userId as any,
+                inspection: new Types.ObjectId(inspectionId),
+                user: new Types.ObjectId(userId),
                 amount: amount,
                 currency: 'inr',
                 stripePaymentIntentId: paymentIntent.id,

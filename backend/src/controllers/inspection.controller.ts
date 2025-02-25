@@ -5,6 +5,7 @@ import { IInspectionController } from "../core/interfaces/controllers/inspection
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 
 @injectable()
@@ -33,12 +34,19 @@ export class InspectionController implements IInspectionController {
                 data: inspection,
                 message: "Inspection booking saved successfully.",
             });
-        } catch (error: any) {
-            console.error("Error creating inspection:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -66,12 +74,19 @@ export class InspectionController implements IInspectionController {
                 inspection: updatedInspection,
                 message: "Inspection updated successfully.",
             });
-        } catch (error: any) {
-            console.error("Error updating inspection:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -96,12 +111,19 @@ export class InspectionController implements IInspectionController {
                 success: true,
                 inspection,
             });
-        } catch (error: any) {
-            console.error("Error retrieving inspection:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -113,12 +135,19 @@ export class InspectionController implements IInspectionController {
                 success: true,
                 slots,
             });
-        } catch (error: any) {
-            console.error("Error retrieving slots:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -148,12 +177,19 @@ export class InspectionController implements IInspectionController {
                 success: true,
                 inspections,
             });
-        } catch (error: any) {
-            console.error("Error retrieving inspections Details:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 }

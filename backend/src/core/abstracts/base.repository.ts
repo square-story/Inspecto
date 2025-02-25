@@ -52,7 +52,7 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
         return this.model.findOneAndUpdate(filter, update, { upsert: true, new: true });
     }
 
-    async addToSet(id: string, field: string, value: any): Promise<T | null> {
+    async addToSet(id: string, field: string, value: unknown): Promise<T | null> {
         const updatedDocument = await this.model.findByIdAndUpdate(
             id,
             { $addToSet: { [field]: value } } as UpdateQuery<T>,
@@ -61,7 +61,7 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
         return updatedDocument as unknown as T | null;
     }
 
-    async pull(id: string, field: string, value: any): Promise<T | null> {
+    async pull(id: string, field: string, value: unknown): Promise<T | null> {
         const updatedDocument = await this.model.findByIdAndUpdate(
             id,
             { $pull: { [field]: value } } as UpdateQuery<T>,

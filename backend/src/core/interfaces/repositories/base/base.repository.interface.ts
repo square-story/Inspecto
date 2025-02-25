@@ -88,7 +88,7 @@ export interface IBaseRepository<T extends Document> {
      * @param value
      * @return Promise<Document | null>
     */
-    addToSet(id: string, field: string, value: any): Promise<T | null>;
+    addToSet(id: string, field: string, value: unknown): Promise<T | null>;
 
     /**
      * Remove a value from an array field
@@ -97,5 +97,5 @@ export interface IBaseRepository<T extends Document> {
      * @param value
      * @return Promise<Document | null>
     */
-    pull(id: string, field: string, value: any): Promise<T | null>;
+    pull(id: string, field: string, value: unknown): Promise<T | null>;
 }

@@ -1,6 +1,4 @@
-import { Response } from "express";
-import { UserRepository } from "../../repositories/user.repository";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
+import { generateAccessToken, verifyRefreshToken } from "../../utils/token.utils";
 import bcrypt from 'bcrypt'
 import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis.config";
@@ -11,7 +9,6 @@ import { BaseAuthService } from "../../core/abstracts/base.auth.service";
 import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
-import { Types } from "mongoose";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserRepository } from "../../core/interfaces/repositories/user.repository.interface";
 
@@ -119,7 +116,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         if (!email || !name) {
             throw new Error("Google account lacks required information");
         }
-        let user = await this.userRepository.findUserByEmail(email);
+        const user = await this.userRepository.findUserByEmail(email);
 
         if (!user) {
             await this.userRepository.create({

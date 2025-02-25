@@ -1,4 +1,4 @@
-import { IPaymentDocument, IPaymentInput, PaymentStatus } from "../../../models/payment.model";
+import { IPaymentDocument, PaymentStatus } from "../../../models/payment.model";
 import { BaseRepository } from "../../abstracts/base.repository";
 
 export interface IPaymentRepository extends BaseRepository<IPaymentDocument> {

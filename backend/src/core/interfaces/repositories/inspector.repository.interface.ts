@@ -1,5 +1,5 @@
 import { IInspector } from "../../../models/inspector.model";
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { BaseRepository } from "../../abstracts/base.repository";
 
 export interface IInspectorRepository extends BaseRepository<IInspector> {

@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { IUsers } from '../../../models/user.model'
 
 import { BaseRepository } from '../../abstracts/base.repository';

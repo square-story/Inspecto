@@ -115,7 +115,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 });
             }
 
-            const response = await this.inspectorRepository.bookingHandler(
+            await this.inspectorRepository.bookingHandler(
                 data.inspector.toString(),
                 data.user.toString(),
                 data.date
@@ -152,19 +152,8 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         }
     }
 
-    private async isReplicaSet(): Promise<boolean> {
-        try {
-            if (!mongoose.connection.db) {
-                throw new Error('Database connection is not established');
-            }
-            const status = await mongoose.connection.db.admin().replSetGetStatus();
-            return !!status;
-        } catch (e) {
-            return false;
-        }
-    }
 
-    private validateDate(date: any): Date {
+    private validateDate(date: Date): Date {
         if (!date) {
             throw new Error('Date is required');
         }

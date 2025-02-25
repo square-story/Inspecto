@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { IAdminAuthController, IAuthController } from '../../core/interfaces/controllers/auth.controller.interface';
+import { IAdminAuthController } from '../../core/interfaces/controllers/auth.controller.interface';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../di/types';
 import { IAdminAuthService } from '../../core/interfaces/services/auth.service.interface';

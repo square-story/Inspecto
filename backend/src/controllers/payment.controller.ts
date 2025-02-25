@@ -4,6 +4,7 @@ import appConfig from "../config/app.config";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IPaymentController } from "../core/interfaces/controllers/payment.controller.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 @injectable()
 export class PaymentController implements IPaymentController {
@@ -33,11 +34,19 @@ export class PaymentController implements IPaymentController {
                 success: true,
                 clientSecret: paymentIntent.client_secret
             });
-        } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -58,12 +67,19 @@ export class PaymentController implements IPaymentController {
             await this.paymentService.handleWebhookEvent(event);
 
             res.status(200).json({ received: true });
-        } catch (error: any) {
-            console.error('Webhook error:', error);
-            res.status(400).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -83,12 +99,19 @@ export class PaymentController implements IPaymentController {
                 success: true,
                 payment
             });
-        } catch (error: any) {
-            console.error('Error verifying payment:', error);
-            res.status(500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
     findPayments = async (req: Request, res: Response): Promise<void> => {
@@ -114,12 +137,19 @@ export class PaymentController implements IPaymentController {
                 message: "Payment getted successfully",
                 payments: response
             })
-        } catch (error: any) {
-            console.error('Error verifying payment:', error);
-            res.status(500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 }

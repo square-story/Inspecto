@@ -5,9 +5,7 @@ export interface IAuthController {
     refreshToken: (req: Request, res: Response) => Promise<void>;
 }
 
-export interface IAdminAuthController extends IAuthController {
-
-}
+export type IAdminAuthController = IAuthController
 
 export interface IUserAuthController extends IAuthController {
     googleLogin: (req: Request, res: Response) => Promise<void>

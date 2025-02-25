@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { CustomRequest } from "../../types/custom.request.type";
 
 export interface IUserController {
     getUserDetails: (req: Request, res: Response) => Promise<void>;

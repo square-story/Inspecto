@@ -1,3 +1,4 @@
+import { IUsers } from "../../../models/user.model";
 import { UserRole } from "../../types/user.role.type";
 import { IBaseAuthService } from "./base/base.auth.service.interface";
 
@@ -15,7 +16,11 @@ export interface IInspectorAuthService extends IAuthService {
 }
 
 export interface IUserAuthService extends IAuthService {
-    googleLoginOrRegister(email: string, name: string, picture: string, familyName: string): Promise<any>
+    googleLoginOrRegister(email: string, name: string, picture: string, familyName: string): Promise<{
+        user: IUsers;
+        accessToken: string;
+        refreshToken: string;
+    }>
     verifyOTP(email: string, otp: string): Promise<{ message: string, accessToken: string, refreshToken: string }>;
     resendOTP(email: string): Promise<{ message: string }>
     forgetPassword(email: string, role: UserRole): Promise<{ message: string }>
