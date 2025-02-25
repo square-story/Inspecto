@@ -51,10 +51,17 @@ export class AdminAuthController implements IAuthController {
             const { accessToken } = await this.adminAuthService.refreshToken(refreshToken);
             res.status(200).json({ accessToken, status: true });
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(403).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(403).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(403).json({ message: 'Forbidden' });
+                res.status(403).json({
+                    success: false,
+                    message: 'forbidden',
+                });
             }
         }
     }

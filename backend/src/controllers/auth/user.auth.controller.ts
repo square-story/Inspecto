@@ -75,10 +75,17 @@ export class UserAuthController implements IAuthController {
             const response = await this.userAuthService.forgetPassword(email, role)
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Server Error" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -93,10 +100,17 @@ export class UserAuthController implements IAuthController {
                 response
             })
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -114,10 +128,17 @@ export class UserAuthController implements IAuthController {
 
             res.status(200).json(result)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -128,10 +149,17 @@ export class UserAuthController implements IAuthController {
             const result = await this.userAuthService.resendOTP(email);
             res.status(200).json(result);
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -142,8 +170,18 @@ export class UserAuthController implements IAuthController {
             const response = await this.userAuthService.resetPassword(token, email, password)
             res.status(200).json(response)
         } catch (error) {
-            console.error('Error in reset password:', error);
-            res.status(500).json({ message: 'Server error' });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
@@ -174,8 +212,18 @@ export class UserAuthController implements IAuthController {
             })
             res.status(200).json({ message: 'Authentication successful', response: { accessToken, user }, status: user?.status });
         } catch (error) {
-            console.error('Google auth error:', error);
-            res.status(500).json({ message: 'Authentication failed' });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 }

@@ -23,12 +23,12 @@ interface AppConfig {
 
 const appConfig: AppConfig = {
     port: parseInt(process.env.PORT || '3000', 10),
-    databaseUrl: process.env.DATABASE_URL || 'mongodb://localhost:27017/inspectodb',
-    accessToken: process.env.ACCESS_TOKEN_SECRET || 'Access Secret',
-    refreshToken: process.env.REFRESH_TOKEN_SECRET || 'Refresh Secret',
-    accessTime: process.env.ACCESS_TOKEN_EXPIRATION || '15m',
-    refreshTime: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
-    redisHost: process.env.REDIS_HOST || 'localhost',
+    databaseUrl: process.env.DATABASE_URL as string,
+    accessToken: process.env.ACCESS_TOKEN_SECRET as string,
+    refreshToken: process.env.REFRESH_TOKEN_SECRET as string,
+    accessTime: process.env.ACCESS_TOKEN_EXPIRATION as string,
+    refreshTime: process.env.REFRESH_TOKEN_EXPIRATION as string,
+    redisHost: process.env.REDIS_HOST as string,
     redisPort: parseInt(process.env.REDIS_PORT || '6379', 10),
     smtpHost: process.env.SMTP_HOST || '',
     smtpPort: parseInt(process.env.SMTP_PORT || "587", 10),

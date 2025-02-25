@@ -49,10 +49,17 @@ export class InspectorAuthController implements IAuthController {
             const response = await this.inspectorAuthService.refreshToken(refreshToken)
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message })
+            if (error instanceof ServiceError) {
+                res.status(403).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(400).json({ message: 'some issue in the login section' })
+                res.status(403).json({
+                    success: false,
+                    message: 'forbidden',
+                });
             }
         }
     }
@@ -64,10 +71,17 @@ export class InspectorAuthController implements IAuthController {
             const response = await this.inspectorAuthService.forgetPassword(email, role)
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -80,10 +94,17 @@ export class InspectorAuthController implements IAuthController {
                 response
             })
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message })
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(400).json({ message: 'some issue in the login section' })
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -101,10 +122,17 @@ export class InspectorAuthController implements IAuthController {
             const result = { accessToken, message }
             res.status(200).json(result)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -116,10 +144,17 @@ export class InspectorAuthController implements IAuthController {
             const response = await this.inspectorAuthService.resendOTP(email)
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -130,10 +165,17 @@ export class InspectorAuthController implements IAuthController {
             const response = await this.inspectorAuthService.resetPassword(token, email, password)
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message });
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(500).json({ message: "Something went wrong" });
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
