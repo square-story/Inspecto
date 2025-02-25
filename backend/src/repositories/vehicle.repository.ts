@@ -7,6 +7,9 @@ import { Types } from "mongoose";
 
 @injectable()
 export class VehicleRepository extends BaseRepository<IVehicleDocument> implements IVehicleRepository {
+    constructor() {
+        super(Vehicle);
+    }
     async createVehicle(vehicleData: IVehicleDocument): Promise<IVehicleDocument> {
         return await this.create(vehicleData)
     }
