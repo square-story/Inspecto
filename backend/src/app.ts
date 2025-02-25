@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
 import cookieParser from 'cookie-parser'
@@ -11,6 +11,7 @@ import inspectionRoutes from "./routes/inspection.routes"
 import paymentsRoutes from './routes/payment.routes'
 import cors from "cors";
 import { errorHandler } from './middlewares/error.middleware';
+import morgan from 'morgan';
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use((req, res, next) => {
     }
 });
 
+app.use(morgan('dev'));
 app.use(cookieParser());
 
 // Connect Database
