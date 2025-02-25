@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
 import cookieParser from 'cookie-parser'
@@ -10,6 +10,7 @@ import vehiclesRoutes from "./routes/vehicles.routes"
 import inspectionRoutes from "./routes/inspection.routes"
 import paymentsRoutes from './routes/payment.routes'
 import cors from "cors";
+import { errorHandler } from './middlewares/error.middleware';
 
 const app = express()
 
@@ -62,9 +63,17 @@ app.use('/inspections', inspectionRoutes)
 app.use('/payments', paymentsRoutes)
 
 
-app.use((req: Request, res: Response) => {
-    res.status(404).send('route not found')
-})
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
+});
+
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    errorHandler(err, req, res, next);
+});
 
 app.listen(appConfig.port, () => {
     console.log(`server is running on port ${appConfig.port}`)

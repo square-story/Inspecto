@@ -4,6 +4,7 @@ import { IAuthController } from "../../core/interfaces/controllers/auth.controll
 import { TYPES } from "../../di/types";
 import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { InspectorAuthService } from "../../services/auth/inspector.auth.service";
+import { ServiceError } from "../../core/errors/service.error";
 
 
 @injectable()
@@ -23,10 +24,17 @@ export class InspectorAuthController implements IAuthController {
             });
             res.status(200).json({ accessToken: accessToken, role: 'inspector', status: true })
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(400).json({ message: error.message })
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
             } else {
-                res.status(400).json({ message: 'some issue in the login section' })
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -38,8 +46,8 @@ export class InspectorAuthController implements IAuthController {
                 res.status(401).json({ message: 'Refresh token missing' })
                 return
             }
-            const accessToken = await this.inspectorAuthService.refreshToken(refreshToken)
-            res.status(200).json(accessToken)
+            const response = await this.inspectorAuthService.refreshToken(refreshToken)
+            res.status(200).json(response)
         } catch (error) {
             if (error instanceof Error) {
                 res.status(400).json({ message: error.message })

@@ -14,6 +14,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
 import { IInspectorRepository } from "../../core/interfaces/repositories/inspector.repository.interface";
+import { ServiceError } from '../../core/errors/service.error';
 
 @injectable()
 export class InspectorAuthService extends BaseAuthService implements IInspectorAuthService {
@@ -25,70 +26,26 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
     }
 
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
-        const inspector = await this.inspectorRepository.findInspectorByEmail(email);
-        if (!inspector) {
-            throw new Error('Inspector not found');
-        }
-        if (!inspector.password) {
-            throw new Error('Password is required');
-        }
-        const isPasswordValid = await bcrypt.compare(password, inspector.password);
-        if (!isPasswordValid) {
-            throw new Error('Invalid password');
-        }
-        if (inspector.status === InspectorStatus.BLOCKED) {
-            throw new Error('Account is blocked');
-        }
-        const payload = { userId: inspector.id, role: inspector.role };
-        return this.generateTokens(payload);
-    }
-
-    async loginOfInspector(email: string, password: string, res: Response) {
         try {
             const inspector = await this.inspectorRepository.findInspectorByEmail(email);
             if (!inspector) {
-                res.status(400).json({ field: 'email', message: 'Inspector not found' });
-                return
+                throw new ServiceError('Inspector not found', 'email');
             }
-
             if (!inspector.password) {
-                res.status(400).json({ field: 'password', message: 'Inspector needs to set a password' });
-                return
+                throw new ServiceError('Password is required', 'Password');
             }
-
             const isPasswordValid = await bcrypt.compare(password, inspector.password);
             if (!isPasswordValid) {
-                res.status(400).json({ field: 'password', message: 'Password is incorrect' });
-                return
+                throw new ServiceError('Password is incorrect', 'password');
             }
-
             if (inspector.status === InspectorStatus.BLOCKED) {
-                res.status(400).json({ field: 'email', message: 'This account is blocked' });
-                return
+                throw new ServiceError('Account is Blocked', 'email');
             }
-
-            const payload = {
-                userId: inspector.id,
-                role: inspector.role,
-            };
-            const accessToken = generateAccessToken(payload);
-            const refreshToken = generateRefreshToken(payload);
-
-            res.cookie('refreshToken', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
-            });
-
-            return {
-                accessToken,
-                role: 'inspector',
-                status: true
-            };
+            const payload = { userId: inspector.id, role: inspector.role };
+            return this.generateTokens(payload);
         } catch (error) {
-            console.error('Error in loginOfInspector:', error);
-            res.status(500).json({ message: 'Internal server error' });
-            return;
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('login failed', 'email');
         }
     }
     async refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }> {
