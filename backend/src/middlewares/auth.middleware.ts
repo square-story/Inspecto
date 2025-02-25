@@ -62,6 +62,7 @@ export class AuthMiddleware {
                         message: "user account is blocked",
                         code: "ACCOUNT_BLOCKED"
                     })
+                    return;
                 }
             }
             req.user = payload;

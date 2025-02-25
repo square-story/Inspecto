@@ -2,9 +2,7 @@ import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
 import mongoose from "mongoose";
 import { injectable, inject } from 'inversify';
-import { controller, httpGet, httpPost, httpPut } from 'inversify-express-utils';
 import { TYPES } from '../di/types';
-import { authorizeRole } from "../middlewares/role.middleware";
 import { IUserController } from "../core/interfaces/controllers/user.controller.interface";
 
 @injectable()
@@ -13,7 +11,7 @@ export class UserController implements IUserController {
         @inject(TYPES.UserService) private userService: UserService
     ) { }
 
-    async getUserDetails(req: Request, res: Response): Promise<void> {
+    getUserDetails = async (req: Request, res: Response): Promise<void> => {
         try {
             // Extract user ID from the authenticated token
             const userId = req.user?.userId;
@@ -33,7 +31,8 @@ export class UserController implements IUserController {
             console.error(error)
         }
     };
-    async updateUserDetails(req: Request, res: Response) {
+
+    updateUserDetails = async (req: Request, res: Response) => {
         try {
             const userId = req.user?.userId; // Extract user ID from the token
             if (!userId) {
@@ -78,7 +77,7 @@ export class UserController implements IUserController {
             return
         }
     };
-    async updateStatus(req: Request, res: Response) {
+    updateStatus = async (req: Request, res: Response) => {
         try {
             const { userId } = req.params
 
@@ -108,7 +107,7 @@ export class UserController implements IUserController {
             return
         }
     }
-    async changePassword(req: Request, res: Response) {
+    changePassword = async (req: Request, res: Response) => {
         try {
             const userId = req.user?.userId
             if (!userId) {

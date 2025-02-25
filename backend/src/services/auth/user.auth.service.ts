@@ -13,12 +13,13 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
 import { ServiceError } from "../../core/errors/service.error";
+import { IUserRepository } from "../../core/interfaces/repositories/user.repository.interface";
 
 @injectable()
 export class UserAuthService extends BaseAuthService implements IUserAuthService {
 
     constructor(
-        @inject(TYPES.UserRepository) private userRepository: UserRepository
+        @inject(TYPES.UserRepository) private userRepository: IUserRepository
     ) {
         super();
     }
@@ -52,7 +53,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
             if (!payload?.userId || !payload?.role) {
                 throw new ServiceError('Invalid token payload', 'token')
             }
-            const user = await this.userRepository.findById(new Types.ObjectId(payload.userId.toString()))
+            const user = await this.userRepository.findById(payload.userId)
             if (!user || !user.status) {
                 return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
             }

@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import { inject, injectable, } from "inversify";
-import { IAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
+import { IInspectorAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
 import { TYPES } from "../../di/types";
 import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
-import { InspectorAuthService } from "../../services/auth/inspector.auth.service";
 import { ServiceError } from "../../core/errors/service.error";
 
 
 @injectable()
-export class InspectorAuthController implements IAuthController {
+export class InspectorAuthController implements IInspectorAuthController {
     constructor(
         @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: IInspectorAuthService
     ) { }

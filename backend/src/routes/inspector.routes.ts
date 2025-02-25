@@ -1,15 +1,15 @@
 import { Router } from "express";
 import { authorizeRole } from "../middlewares/role.middleware";
 import { container } from "../di/container";
-import { InspectorController } from "../controllers/inspector.controller";
 import { TYPES } from "../di/types";
-import { InspectorAuthController } from "../controllers/auth/inspector.auth.controller";
 import { AuthMiddleware } from "../middlewares/auth.middleware";
+import { IInspectorAuthController } from "../core/interfaces/controllers/auth.controller.interface";
+import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
 
 const router = Router()
 
-const inspectorController = container.get<InspectorController>(TYPES.InspectorController)
-const inspectorAuthController = container.get<InspectorAuthController>(TYPES.InspectorAuthController)
+const inspectorController = container.get<IInspectorController>(TYPES.InspectorController)
+const inspectorAuthController = container.get<IInspectorAuthController>(TYPES.InspectorAuthController)
 const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware)
 const authenticateToken = authMiddleware.authenticateToken
 

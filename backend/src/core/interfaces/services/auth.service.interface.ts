@@ -1,6 +1,7 @@
 import { UserRole } from "../../types/user.role.type";
+import { IBaseAuthService } from "./base/base.auth.service.interface";
 
-export interface IAuthService {
+export interface IAuthService extends IBaseAuthService {
     login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }>;
 }
 

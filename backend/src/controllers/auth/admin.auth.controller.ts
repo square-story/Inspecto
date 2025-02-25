@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
-import { IAuthController } from '../../core/interfaces/controllers/auth.controller.interface';
+import { IAdminAuthController, IAuthController } from '../../core/interfaces/controllers/auth.controller.interface';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../di/types';
 import { IAdminAuthService } from '../../core/interfaces/services/auth.service.interface';
-import { AdminAuthService } from '../../services/auth/admin.auth.service';
 import { ServiceError } from '../../core/errors/service.error';
 
 
 @injectable()
-export class AdminAuthController implements IAuthController {
+export class AdminAuthController implements IAdminAuthController {
     constructor(
         @inject(TYPES.AdminAuthService) private adminAuthService: IAdminAuthService
     ) { }
 
-    async login(req: Request, res: Response): Promise<void> {
+    login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body;
             const { accessToken, refreshToken } = await this.adminAuthService.login(email, password);
@@ -41,7 +40,7 @@ export class AdminAuthController implements IAuthController {
         }
     }
 
-    async refreshToken(req: Request, res: Response): Promise<void> {
+    refreshToken = async (req: Request, res: Response): Promise<void> => {
         try {
             const refreshToken = await req.cookies.refreshToken;
             if (!refreshToken) {

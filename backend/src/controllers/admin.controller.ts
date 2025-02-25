@@ -3,15 +3,16 @@ import { inject, injectable } from "inversify";
 import { IAdminController } from "../core/interfaces/controllers/admin.controller.interface";
 import { TYPES } from "../di/types";
 import { AdminService } from "../services/admin.service";
+import { IAdminService } from "../core/interfaces/services/admin.service.interface";
 
 @injectable()
 export class AdminController implements IAdminController {
 
     constructor(
-        @inject(TYPES.AdminService) private adminService: AdminService
+        @inject(TYPES.AdminService) private adminService: IAdminService
     ) { }
 
-    async getAllInspectors(req: Request, res: Response): Promise<void> {
+    getAllInspectors = async (req: Request, res: Response): Promise<void> => {
         try {
             const response = await this.adminService.getAllInspectors()
             res.status(200).json(response)
@@ -22,7 +23,7 @@ export class AdminController implements IAdminController {
         }
     }
 
-    async getAllUsers(req: Request, res: Response): Promise<void> {
+    getAllUsers = async (req: Request, res: Response): Promise<void> => {
         try {
             const response = await this.adminService.getAllUsers()
             res.status(200).json(response)

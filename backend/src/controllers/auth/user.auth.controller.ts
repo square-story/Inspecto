@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import { UserAuthService } from "../../services/auth/user.auth.service";
 import { OAuth2Client } from "google-auth-library";
-import { IAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
+import { IUserAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
 import { inject, injectable, } from "inversify";
 import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
@@ -10,15 +9,15 @@ import { IUserAuthService } from "../../core/interfaces/services/auth.service.in
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
 @injectable()
-export class UserAuthController implements IAuthController {
+export class UserAuthController implements IUserAuthController {
 
     constructor(
-        @inject(TYPES.UserAuthService) private userAuthService: IUserAuthService
+        @inject(TYPES.UserAuthService) private readonly userAuthService: IUserAuthService
     ) { }
 
 
 
-    async login(req: Request, res: Response): Promise<void> {
+    login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body;
             const { accessToken, refreshToken } = await this.userAuthService.login(email, password);
@@ -45,7 +44,7 @@ export class UserAuthController implements IAuthController {
         }
     }
 
-    async refreshToken(req: Request, res: Response): Promise<void> {
+    refreshToken = async (req: Request, res: Response): Promise<void> => {
         try {
             const refreshToken = req.cookies.refreshToken;
             if (!refreshToken) {
@@ -70,7 +69,7 @@ export class UserAuthController implements IAuthController {
         }
     }
 
-    async forgetPassword(req: Request, res: Response): Promise<void> {
+    forgetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, role } = req.body;
             const response = await this.userAuthService.forgetPassword(email, role)
@@ -93,7 +92,7 @@ export class UserAuthController implements IAuthController {
 
 
 
-    async register(req: Request, res: Response): Promise<void> {
+    register = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password, firstName, lastName } = req.body
             const response = await this.userAuthService.registerUser(email, password, firstName, lastName)
@@ -116,7 +115,7 @@ export class UserAuthController implements IAuthController {
         }
     }
 
-    async verifyOTP(req: Request, res: Response): Promise<void> {
+    verifyOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, otp } = req.body
             const { accessToken, message, refreshToken } = await this.userAuthService.verifyOTP(email, otp)
@@ -144,7 +143,7 @@ export class UserAuthController implements IAuthController {
         }
     }
 
-    async resendOTP(req: Request, res: Response): Promise<void> {
+    resendOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email } = req.body;
             const result = await this.userAuthService.resendOTP(email);
@@ -165,7 +164,7 @@ export class UserAuthController implements IAuthController {
         }
     }
 
-    async resetPassword(req: Request, res: Response): Promise<void> {
+    resetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { token, email, password } = req.body
             const response = await this.userAuthService.resetPassword(token, email, password)
@@ -186,7 +185,7 @@ export class UserAuthController implements IAuthController {
         }
     }
 
-    async googleLogin(req: Request, res: Response): Promise<void> {
+    googleLogin = async (req: Request, res: Response): Promise<void> => {
         try {
             const { token } = req.body;
 

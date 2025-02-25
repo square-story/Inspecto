@@ -1,24 +1,14 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, Response } from "express";
 import { InspectorService } from "../services/inspector.service";
-import { controller, httpGet, httpPatch, httpPost } from "inversify-express-utils";
 import { inject, injectable } from "inversify";
 import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
 import { TYPES } from "../di/types";
-import { CustomRequest } from "../core/types/custom.request.type";
 
 @injectable()
 export class InspectorController implements IInspectorController {
     constructor(
         @inject(TYPES.InspectorService) private inspectorService: InspectorService
     ) { }
-
-
-    updateInspectorDetails = async (req: Request, res: Response): Promise<void> => {
-        throw new Error("Method not implemented.");
-    }
-    getAllInspectors = async (req: Request, res: Response): Promise<void> => {
-        throw new Error("Method not implemented.");
-    }
 
     getInspectorDetails = async (req: Request, res: Response): Promise<void> => {
         try {
@@ -293,5 +283,4 @@ export class InspectorController implements IInspectorController {
             return
         }
     }
-
 }

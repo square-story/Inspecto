@@ -1,7 +1,8 @@
 import { IInspectionDocument, IInspectionInput } from "../../../models/inspection.model";
 import { IDayAvailability } from "../../../models/inspector.model";
+import { BaseRepository } from "../../abstracts/base.repository";
 
-export interface IInspectionRepository {
+export interface IInspectionRepository extends BaseRepository<IInspectionDocument> {
     /**
  * Creates a new inspection document.
  * @param data IInspectionInput data

@@ -6,12 +6,14 @@ import { UserRepository } from "../repositories/user.repository";
 import { AdminRepository } from "../repositories/admin.repository";
 import { IAdmin } from "../models/admin.model";
 import { BaseService } from "../core/abstracts/base.service";
+import { IUserRepository } from "../core/interfaces/repositories/user.repository.interface";
+import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 
 @injectable()
 export class AdminService extends BaseService<IAdmin> implements IAdminService {
     constructor(
-        @inject(TYPES.UserRepository) private userRepository: UserRepository,
-        @inject(TYPES.InspectorRepository) private inspectorRepository: InspectorRepository,
+        @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+        @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
         @inject(TYPES.AdminRepository) private adminRepository: AdminRepository
     ) {
         super(adminRepository)
@@ -21,7 +23,7 @@ export class AdminService extends BaseService<IAdmin> implements IAdminService {
     }
 
     async getAllInspectors() {
-        return await this.inspectorRepository.getAllInspector()
+        return await this.inspectorRepository.findAll()
     }
     async getAllUsers() {
         return await this.userRepository.getAllUsers()

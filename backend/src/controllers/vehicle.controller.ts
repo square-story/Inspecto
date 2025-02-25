@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { VehicleService } from "../services/vehicle.service";
 import { IVehicleDocument } from "../models/vehicle.model";
 import { ObjectId } from "mongoose";
-import { controller, httpDelete, httpGet, httpPost, httpPut } from "inversify-express-utils";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
@@ -22,12 +21,6 @@ export class VehicleController implements IVehicleController {
     constructor(
         @inject(TYPES.VehicleService) private vehicleService: VehicleService
     ) { }
-    getVehicleDetails(req: Request, res: Response): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    getUserVehicles(req: Request, res: Response): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
 
     private handleError(res: Response, error: unknown): void {
         // Type guard to check if error is a MongoDB duplicate key error
@@ -46,7 +39,7 @@ export class VehicleController implements IVehicleController {
                     duplicateField: duplicateKey,
                     duplicateValue: duplicateValue
                 });
-                return;
+                ;
             }
         }
 
@@ -73,7 +66,7 @@ export class VehicleController implements IVehicleController {
         }
     }
 
-    async createVehicle(req: Request, res: Response): Promise<void> {
+    createVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleData: IVehicleDocument = req.body;
             const userId = req.user?.userId;
@@ -84,7 +77,7 @@ export class VehicleController implements IVehicleController {
                     message: "Unauthorized: User authentication required",
                     error: "No user ID found in request"
                 });
-                return;
+                ;
             }
 
             // Attach user ID to vehicle data
@@ -100,7 +93,7 @@ export class VehicleController implements IVehicleController {
             this.handleError(res, error);
         }
     }
-    async getVehicleById(req: Request, res: Response): Promise<void> {
+    getVehicleById = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
             const userId = req.user?.userId;
@@ -110,14 +103,14 @@ export class VehicleController implements IVehicleController {
                 res.status(400).json({
                     message: "Vehicle ID is required"
                 });
-                return;
+                ;
             }
 
             if (!userId) {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                return;
+                ;
             }
 
             try {
@@ -128,14 +121,12 @@ export class VehicleController implements IVehicleController {
                     res.status(403).json({
                         message: "Forbidden: You do not have access to this vehicle"
                     });
-                    return;
                 }
 
                 if (!vehicle) {
                     res.status(404).json({
                         message: "Vehicle not found"
                     });
-                    return;
                 }
 
                 res.json(vehicle);
@@ -159,7 +150,7 @@ export class VehicleController implements IVehicleController {
             });
         }
     }
-    async getVehiclesByUser(req: Request, res: Response): Promise<void> {
+    getVehiclesByUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
 
@@ -167,17 +158,15 @@ export class VehicleController implements IVehicleController {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                return;
             }
 
             try {
-                const vehicles = await this.vehicleService.getVehiclesByUser(userId);
+                const vehicles = await this.vehicleService.getVehiclesByUser(userId as string);
 
                 if (vehicles.length === 0) {
                     res.status(404).json({
                         message: "No vehicles found for this user"
                     });
-                    return;
                 }
 
                 res.json(vehicles);
@@ -201,7 +190,7 @@ export class VehicleController implements IVehicleController {
             });
         }
     }
-    async updateVehicle(req: Request, res: Response): Promise<void> {
+    updateVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
             const updateData = req.body;
@@ -212,21 +201,21 @@ export class VehicleController implements IVehicleController {
                 res.status(400).json({
                     message: "Vehicle ID is required"
                 });
-                return;
+                ;
             }
 
             if (!userId) {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                return;
+                ;
             }
 
             if (Object.keys(updateData).length === 0) {
                 res.status(400).json({
                     message: "No update data provided"
                 });
-                return;
+                ;
             }
 
             try {
@@ -237,14 +226,13 @@ export class VehicleController implements IVehicleController {
                     res.status(404).json({
                         message: "Vehicle not found"
                     });
-                    return;
                 }
 
-                if (existingVehicle.user.toString() !== userId) {
+                if (existingVehicle && existingVehicle.user.toString() !== userId) {
                     res.status(403).json({
                         message: "Forbidden: You do not have permission to update this vehicle"
                     });
-                    return;
+                    ;
                 }
 
                 // Proceed with update
@@ -259,7 +247,7 @@ export class VehicleController implements IVehicleController {
         }
     }
 
-    async deleteVehicle(req: Request, res: Response): Promise<void> {
+    deleteVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
             const userId = req.user?.userId;
@@ -269,14 +257,14 @@ export class VehicleController implements IVehicleController {
                 res.status(400).json({
                     message: "Vehicle ID is required"
                 });
-                return;
+                ;
             }
 
             if (!userId) {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                return;
+                ;
             }
 
             try {
@@ -287,14 +275,13 @@ export class VehicleController implements IVehicleController {
                     res.status(404).json({
                         message: "Vehicle not found"
                     });
-                    return;
+                    ;
                 }
 
-                if (existingVehicle.user.toString() !== userId) {
+                if (existingVehicle && existingVehicle.user.toString() !== userId) {
                     res.status(403).json({
                         message: "Forbidden: You do not have permission to delete this vehicle"
                     });
-                    return;
                 }
 
                 // Proceed with deletion
@@ -304,7 +291,7 @@ export class VehicleController implements IVehicleController {
                     res.status(500).json({
                         message: "Failed to delete vehicle"
                     });
-                    return;
+                    ;
                 }
 
                 res.status(204).send();

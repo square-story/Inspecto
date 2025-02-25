@@ -1,6 +1,7 @@
 import { IVehicleDocument, IVehicleInput } from "../../../models/vehicle.model";
+import { BaseRepository } from "../../abstracts/base.repository";
 
-export interface IVehicleRepository {
+export interface IVehicleRepository extends BaseRepository<IVehicleDocument> {
     /**
      * Create a new vehicle
      * @param vehicleData - Vehicle details to be added

@@ -6,4 +6,7 @@ export interface IInspectionService {
     getInspectionById(id: string): Promise<IInspectionDocument | null>;
     getUserInspections(userId: string): Promise<IInspectionDocument[]>;
     getInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]>;
+    getAvailableSlots(inspectorId: string, date: Date): Promise<number[]>;
+    findInspections(userId: string): Promise<IInspectionDocument[]>;
+    findInspectionsByInspector(inspectorId: string): Promise<IInspectionDocument[]>;
 }

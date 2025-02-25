@@ -25,7 +25,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
 
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
         try {
-            const inspector = await this.inspectorRepository.findInspectorByEmail(email);
+            const inspector = await this.inspectorRepository.findOne({ email });
             if (!inspector) {
                 throw new ServiceError('Inspector not found', 'email');
             }
@@ -43,12 +43,13 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             return this.generateTokens(payload);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
+            console.log(error)
             throw new ServiceError('login failed', 'email');
         }
     }
     async refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }> {
         try {
-            const payload = verifyRefreshToken(token);
+            const payload = await verifyRefreshToken(token);
             if (!payload?.userId || !payload?.role) {
                 throw new ServiceError('Invalid token payload', 'token');
             }
@@ -67,7 +68,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
 
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
         try {
-            const existing = await this.inspectorRepository.findInspectorByEmail(email)
+            const existing = await this.inspectorRepository.findOne({ email })
             if (existing) {
                 throw new ServiceError('User Already Exising', 'email')
             }
@@ -95,7 +96,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             if (parsedData.otp !== otp) {
                 throw new ServiceError('Invalid OTP');
             }
-            const newInspector = await this.inspectorRepository.createInspector({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
+            const newInspector = await this.inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
             await redisClient.del(redisKey)
             const payload = { userId: newInspector.id, role: newInspector.role }
             const { accessToken, refreshToken } = this.generateTokens(payload)
@@ -132,7 +133,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
 
     async forgetPassword(email: string, role: string) {
         try {
-            const user = await this.inspectorRepository.findInspectorByEmail(email)
+            const user = await this.inspectorRepository.findOne({ email })
             if (!user) {
                 throw new ServiceError('User not found', 'email')
             }
