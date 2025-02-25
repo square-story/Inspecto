@@ -91,7 +91,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             return;
         }
     }
-    async refreshToken(token: string): Promise<{ accessToken: string }> {
+    async refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }> {
         const payload = verifyRefreshToken(token);
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload');
@@ -99,10 +99,10 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
         const inspector = await this.inspectorRepository.findById(new Types.ObjectId(payload.userId.toString()));
 
         if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
-            throw new Error("This Inspector Account is Blocked");
+            return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
         }
         const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role });
-        return { accessToken: newAccessToken };
+        return { accessToken: newAccessToken, status: true, blockReason: "" };
     }
 
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {

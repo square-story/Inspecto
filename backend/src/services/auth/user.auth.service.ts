@@ -40,17 +40,17 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         return this.generateTokens(payload);
     }
 
-    async refreshToken(token: string): Promise<{ accessToken: string }> {
+    async refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }> {
         const payload = await verifyRefreshToken(token)
         if (!payload?.userId || !payload?.role) {
             throw new Error('Invalid token payload')
         }
         const user = await this.userRepository.findById(new Types.ObjectId(payload.userId.toString()))
         if (!user || !user.status) {
-            throw new Error("This User Account is Blocked");
+            return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
         }
         const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken }
+        return { accessToken: newAccessToken, status: true, blockReason: "" }
     }
 
     async registerUser(email: string, password: string, firstName: string, lastName: string, res: Response): Promise<{ message: string }> {

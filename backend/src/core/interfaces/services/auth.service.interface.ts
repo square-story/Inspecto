@@ -1,4 +1,3 @@
-import { Response } from "express";
 import { UserRole } from "../../types/user.role.type";
 
 export interface IAuthService {
