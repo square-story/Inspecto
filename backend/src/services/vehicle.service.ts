@@ -3,12 +3,13 @@ import { BaseService } from "../core/abstracts/base.service";
 import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 import { IVehicleDocument } from "../models/vehicle.model";
 import { TYPES } from "../di/types";
-import { VehicleRepository } from "../repositories/vehicle.repository";
+import { IVehicleRepository } from "../core/interfaces/repositories/vehicle.repository.interface";
+import { Types } from "mongoose";
 
 @injectable()
 export class VehicleService extends BaseService<IVehicleDocument> implements IVehicleService {
     constructor(
-        @inject(TYPES.VehicleRepository) private vehicleRepository: VehicleRepository
+        @inject(TYPES.VehicleRepository) private vehicleRepository: IVehicleRepository
     ) {
         super(vehicleRepository)
     }
@@ -17,11 +18,11 @@ export class VehicleService extends BaseService<IVehicleDocument> implements IVe
     }
 
     async createVehicle(vehicleData: IVehicleDocument): Promise<IVehicleDocument> {
-        return await this.vehicleRepository.createVehicle(vehicleData);
+        return await this.vehicleRepository.create(vehicleData);
     }
 
     async getVehicleById(vehicleId: string): Promise<IVehicleDocument | null> {
-        return await this.vehicleRepository.findVehicleById(vehicleId);
+        return await this.vehicleRepository.findById(new Types.ObjectId(vehicleId));
     }
 
     async getVehiclesByUser(userId: string): Promise<IVehicleDocument[]> {
@@ -29,7 +30,7 @@ export class VehicleService extends BaseService<IVehicleDocument> implements IVe
     }
 
     async updateVehicle(vehicleId: string, updateData: Partial<IVehicleDocument>): Promise<IVehicleDocument | null> {
-        return await this.vehicleRepository.updateVehicle(vehicleId, updateData);
+        return await this.vehicleRepository.update(new Types.ObjectId(vehicleId), updateData);
     }
 
     async deleteVehicle(vehicleId: string): Promise<boolean> {

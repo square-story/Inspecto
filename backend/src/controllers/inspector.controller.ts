@@ -4,6 +4,7 @@ import { inject, injectable } from "inversify";
 import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
 import { TYPES } from "../di/types";
 import { ServiceError } from "../core/errors/service.error";
+import { Types } from "mongoose";
 
 @injectable()
 export class InspectorController implements IInspectorController {
@@ -18,7 +19,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: "User ID is missing from the token" });
                 return;
             }
-            const response = await this.inspectorService.getInspectorDetails(userId)
+            const response = await this.inspectorService.findById(new Types.ObjectId(userId))
             if (!response) {
                 res.status(404).json({ message: "Inspector not found" });
                 return;
@@ -99,7 +100,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const isExist = await this.inspectorService.getInspectorDetails(inspectorId)
+            const isExist = await this.inspectorService.findById(new Types.ObjectId(inspectorId))
             if (!isExist) {
                 res.status(404).json("Inspector not found in the database")
                 return
@@ -147,7 +148,7 @@ export class InspectorController implements IInspectorController {
                 return
             }
 
-            const inspector = await this.inspectorService.getInspectorDetails(inspectorId);
+            const inspector = await this.inspectorService.findById(new Types.ObjectId(inspectorId))
 
             if (!inspector) {
                 res.status(404).json({ message: "Inspector not found in the database" });

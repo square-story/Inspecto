@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
-import { InspectorRepository } from "../repositories/inspector.repository";
 import { EmailService } from "./email.service";
 import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import { BaseService } from "../core/abstracts/base.service";
 import { TYPES } from "../di/types";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
+import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 
 export type ChangePasswordResponse = {
     status: boolean;
@@ -16,7 +16,7 @@ export type ChangePasswordResponse = {
 @injectable()
 export class InspectorService extends BaseService<IInspector> implements IInspectorService {
     constructor(
-        @inject(TYPES.InspectorRepository) private inspectorRepository: InspectorRepository,
+        @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
         @inject(TYPES.EmailService) private emailService: EmailService,
     ) {
         super(inspectorRepository);
@@ -75,7 +75,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                 deniedAt: new Date(),
                 denialReason: reason
             };
-            const updatedInspector = await this.inspectorRepository.updateInspector(inspectorId, updates);
+            const updatedInspector = await this.inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
 
             if (updatedInspector) {
                 // Send denial email
@@ -103,7 +103,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
             const updates = {
                 status: currentInspector.status === InspectorStatus.BLOCKED ? InspectorStatus.APPROVED : InspectorStatus.BLOCKED,
             };
-            await this.inspectorRepository.updateInspector(inspectorId, updates);
+            await this.inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
             // if (updatedInspector) {
             //     if (updates.status === InspectorStatus.BLOCKED) {
             //         await EmailService.sendBlockNotification(updatedInspector.email, updatedInspector.firstName);
@@ -138,7 +138,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                 };
             }
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            const response = await this.inspectorRepository.updateInspector(inspectorId, {
+            const response = await this.inspectorRepository.update(new Types.ObjectId(inspectorId), {
                 password: hashedNewPassword,
             });
 

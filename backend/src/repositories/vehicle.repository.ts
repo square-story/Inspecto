@@ -10,13 +10,6 @@ export class VehicleRepository extends BaseRepository<IVehicleDocument> implemen
     constructor() {
         super(Vehicle);
     }
-    async createVehicle(vehicleData: IVehicleDocument): Promise<IVehicleDocument> {
-        return await this.create(vehicleData)
-    }
-
-    async findVehicleById(vehicleId: string): Promise<IVehicleDocument | null> {
-        return await this.findById(new Types.ObjectId(vehicleId))
-    }
 
     async findVehiclesByUser(userId: string): Promise<IVehicleDocument[]> {
         return await this.find({ user: userId })
@@ -25,11 +18,6 @@ export class VehicleRepository extends BaseRepository<IVehicleDocument> implemen
     async deleteVehicle(vehicleId: string): Promise<boolean> {
         const result = await this.delete(new Types.ObjectId(vehicleId))
         return result !== null;
-    }
-
-    async updateVehicle(vehicleId: string, updateData: Partial<IVehicleDocument>): Promise<IVehicleDocument | null> {
-        const idObj = new Types.ObjectId(vehicleId);
-        return await this.update(idObj, updateData)
     }
 }
 

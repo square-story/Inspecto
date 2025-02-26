@@ -7,9 +7,9 @@ import { BaseService } from "../core/abstracts/base.service";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
-import { PaymentRepository } from "../repositories/payment.repository";
-import { InspectionRepository } from "../repositories/inspection.repository";
-import { InspectionService } from "./inspection.service";
+import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
+import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -20,9 +20,9 @@ export const stripe = new Stripe(appConfig.stripSecret, {
 export class PaymentService extends BaseService<IPaymentDocument> implements IPaymentService {
     private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
     constructor(
-        @inject(TYPES.PaymentRepository) private paymentRepository: PaymentRepository,
-        @inject(TYPES.InspectionRepository) private inspectionRepository: InspectionRepository,
-        @inject(TYPES.InspectionService) private inspectionService: InspectionService,
+        @inject(TYPES.PaymentRepository) private paymentRepository: IPaymentRepository,
+        @inject(TYPES.InspectionRepository) private inspectionRepository: IInspectionRepository,
+        @inject(TYPES.InspectionService) private inspectionService: IInspectionService,
     ) {
         super(paymentRepository)
     }
@@ -48,7 +48,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 }
             });
 
-            await this.paymentRepository.createPayment({
+            await this.paymentRepository.create({
                 inspection: new Types.ObjectId(inspectionId),
                 user: new Types.ObjectId(userId),
                 amount: amount,
@@ -82,8 +82,8 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                         throw new Error('Payment not found');
                     }
 
-                    await this.inspectionRepository.updateInspection(
-                        payment.inspection.toString(),
+                    await this.inspectionRepository.update(
+                        payment.inspection,
                         { status: InspectionStatus.CONFIRMED }
                     );
                     break;
@@ -102,8 +102,8 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                         throw new Error('Payment not found');
                     }
 
-                    await this.inspectionRepository.updateInspection(
-                        payment.inspection.toString(),
+                    await this.inspectionRepository.update(
+                        payment.inspection,
                         { status: InspectionStatus.CANCELLED }
                     );
 
@@ -174,8 +174,8 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                     );
 
                     // Update inspection status
-                    await this.inspectionRepository.updateInspection(
-                        payment.inspection.toString(),
+                    await this.inspectionRepository.update(
+                        payment.inspection,
                         { status: InspectionStatus.CANCELLED }
                     );
 

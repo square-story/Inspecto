@@ -8,9 +8,6 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
     constructor() {
         super(paymentModel)
     }
-    async createPayment(data: Partial<IPaymentInput>): Promise<IPaymentDocument> {
-        return await this.create(data);
-    }
     async getPaymentByIntentId(paymentIntentId: string): Promise<IPaymentDocument | null> {
         return await this.findOne({ stripePaymentIntentId: paymentIntentId });
     }

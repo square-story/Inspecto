@@ -1,26 +1,14 @@
 import { injectable } from "inversify";
 import { BaseRepository } from "../core/abstracts/base.repository";
-import inspectionModel, { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
+import inspectionModel, { IInspectionDocument, InspectionStatus } from "../models/inspection.model";
 import { IDayAvailability, } from "../models/inspector.model";
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
-import { Types } from "mongoose";
 
 
 @injectable()
 export class InspectionRepository extends BaseRepository<IInspectionDocument> implements IInspectionRepository {
     constructor() {
         super(inspectionModel);
-    }
-    updateInspection(id: string, data: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
-        const inspectionId = new Types.ObjectId(id);
-        return this.model.findByIdAndUpdate(inspectionId, data, { new: true });
-    }
-    async createInspection(inspectionData: Partial<IInspectionInput>): Promise<IInspectionDocument> {
-        return await this.create(inspectionData);
-    }
-
-    async getInspectionById(id: string): Promise<IInspectionDocument | null> {
-        return await this.findById(new Types.ObjectId(id));
     }
     async checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean> {
         const existingBooking = await this.findOne({ inspector: inspectorId, date, slotNumber, status: { $nin: [InspectionStatus.CANCELLED] } });

@@ -1,17 +1,17 @@
 import { inject, injectable } from "inversify";
 import { IUsers } from "../models/user.model";
-import { UserRepository } from "../repositories/user.repository";
 import { ChangePasswordResponse } from "./inspector.service";
 import bcrypt from 'bcrypt'
 import { BaseService } from "../core/abstracts/base.service";
 import { IUserService } from "../core/interfaces/services/user.service.interface";
 import { TYPES } from "../di/types";
 import { Types } from "mongoose";
+import { IUserRepository } from "../core/interfaces/repositories/user.repository.interface";
 
 
 @injectable()
 export class UserService extends BaseService<IUsers> implements IUserService {
-    constructor(@inject(TYPES.UserRepository) private userRepository: UserRepository) {
+    constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {
         super(userRepository);
     }
     async createUser(userData: IUsers) {
