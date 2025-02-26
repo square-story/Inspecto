@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import appConfig from "../config/app.config";
-import { IPaymentDocument, IPaymentInput, PaymentStatus } from "../models/payment.model";
+import { IPaymentDocument, PaymentStatus } from "../models/payment.model";
 import mongoose, { Types } from "mongoose";
 import { InspectionStatus } from "../models/inspection.model";
 import { BaseService } from "../core/abstracts/base.service";
@@ -26,16 +26,6 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
     ) {
         super(paymentRepository)
     }
-    async createPayment(data: IPaymentInput): Promise<IPaymentDocument> {
-        return await this.create(data)
-    }
-    async updatePayment(paymentIntentId: string, data: Partial<IPaymentInput>): Promise<IPaymentDocument | null> {
-        return await this.update(new Types.ObjectId(paymentIntentId), data)
-    }
-    async getUserPayments(userId: string): Promise<IPaymentDocument[]> {
-        return await this.find({ user: userId })
-    }
-
 
     async createPaymentIntent(inspectionId: string, userId: string, amount: number): Promise<Stripe.PaymentIntent> {
         try {

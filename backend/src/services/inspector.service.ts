@@ -21,19 +21,6 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
     ) {
         super(inspectorRepository);
     }
-    async findInspectorById(id: string): Promise<IInspector | null> {
-        return await this.findById(new Types.ObjectId(id))
-    }
-    async updateInspector(id: string, updates: Partial<IInspector>): Promise<IInspector | null> {
-        return await this.update(new Types.ObjectId(id), updates)
-    }
-    async getAllInspectors(): Promise<IInspector[]> {
-        return await this.repository.findAll()
-    }
-
-    async getInspectorDetails(inspectorId: string) {
-        return await this.repository.findById(new Types.ObjectId(inspectorId))
-    }
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
         const response = await this.repository.findByIdAndUpdate(new Types.ObjectId(userId), data)

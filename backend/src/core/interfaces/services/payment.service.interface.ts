@@ -1,8 +1,9 @@
-import { IPaymentDocument, IPaymentInput } from "../../../models/payment.model";
+import Stripe from "stripe";
+import { IPaymentDocument } from "../../../models/payment.model";
 import { IBaseService } from "./base/base.service.interface";
 
 export interface IPaymentService extends IBaseService<IPaymentDocument> {
-    createPayment(data: IPaymentInput): Promise<IPaymentDocument>;
-    updatePayment(paymentIntentId: string, data: Partial<IPaymentInput>): Promise<IPaymentDocument | null>;
-    getUserPayments(userId: string): Promise<IPaymentDocument[]>;
+    createPaymentIntent(inspectionId: string, userId: string, amount: number): Promise<Stripe.PaymentIntent>;
+    handleWebhookEvent(event: Stripe.Event): Promise<void>;
+    verifyPayment(paymentIntentId: string): Promise<IPaymentDocument | null>;
 }

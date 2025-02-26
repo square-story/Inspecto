@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
-import { PaymentService, stripe } from "../services/payment.service";
+import { stripe } from "../services/payment.service";
 import appConfig from "../config/app.config";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IPaymentController } from "../core/interfaces/controllers/payment.controller.interface";
 import { ServiceError } from "../core/errors/service.error";
+import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 
 @injectable()
 export class PaymentController implements IPaymentController {
     constructor(
-        @inject(TYPES.PaymentService) private paymentService: PaymentService
+        @inject(TYPES.PaymentService) private paymentService: IPaymentService
     ) { }
 
     createPaymentIntent = async (req: Request, res: Response): Promise<void> => {
@@ -123,7 +124,7 @@ export class PaymentController implements IPaymentController {
                     message: 'User not authenticated'
                 });
             }
-            const response = await this.paymentService.findPayments(userId as string)
+            const response = await this.paymentService.find({ user: userId })
 
             if (!response) {
                 res.status(404).json({

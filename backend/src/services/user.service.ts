@@ -14,30 +14,6 @@ export class UserService extends BaseService<IUsers> implements IUserService {
     constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {
         super(userRepository);
     }
-    async createUser(userData: IUsers) {
-        const existingUser = await this.userRepository.findUserByEmail(userData.email)
-
-        if (existingUser) {
-            throw new Error('Email already exists')
-        }
-
-        return await this.userRepository.create(userData);
-    }
-    async findUsersByEmail(email: string) {
-        return await this.userRepository.findUserByEmail(email)
-    }
-    async findUserByUserId(userId: string) {
-        return await this.repository.findById(new Types.ObjectId(userId))
-    }
-    async updateUser(userId: string, updates: Partial<IUsers>) {
-        return await this.userRepository.update(new Types.ObjectId(userId), updates)
-    }
-    async deleteUser(userId: string) {
-        return await this.userRepository.deleteOne(new Types.ObjectId(userId))
-    }
-    async getAllUsers() {
-        return await this.userRepository.getAllUsers();
-    }
     async toggleStatus(userId: string) {
         const user = await this.userRepository.findById(new Types.ObjectId(userId));
         if (!user) {

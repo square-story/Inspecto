@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/token.utils";
-import { InspectorService } from "../services/inspector.service";
-import { UserService } from "../services/user.service";
 import { InspectorStatus } from "../models/inspector.model";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
+import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
+import { IUserService } from "../core/interfaces/services/user.service.interface";
+import { Types } from "mongoose";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -15,8 +16,8 @@ declare module "express-serve-static-core" {
 @injectable()
 export class AuthMiddleware {
     constructor(
-        @inject(TYPES.InspectorService) private inspectorService: InspectorService,
-        @inject(TYPES.UserService) private userService: UserService
+        @inject(TYPES.InspectorService) private inspectorService: IInspectorService,
+        @inject(TYPES.UserService) private userService: IUserService
     ) { }
 
     authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -30,7 +31,7 @@ export class AuthMiddleware {
         try {
             const payload = verifyAccessToken(token) as unknown as { userId: string; role: string; }
             if (payload.role === 'inspector') {
-                const inspector = await this.inspectorService.getInspectorDetails(payload.userId)
+                const inspector = await this.inspectorService.findById(new Types.ObjectId(payload.userId))
                 if (!inspector) {
                     res.status(404).json({
                         success: false,
@@ -47,7 +48,7 @@ export class AuthMiddleware {
                     return;
                 }
             } else if (payload.role === 'user') {
-                const user = await this.userService.findUserByUserId(payload.userId)
+                const user = await this.userService.findById(new Types.ObjectId(payload.userId))
                 if (!user) {
                     res.status(404).json({
                         success: false,

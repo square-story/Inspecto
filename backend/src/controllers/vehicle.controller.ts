@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { VehicleService } from "../services/vehicle.service";
 import { IVehicleDocument } from "../models/vehicle.model";
-import { ObjectId } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
+import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 
 
 interface MongoErrorWithCode extends Error {
@@ -19,7 +19,7 @@ interface MongoErrorWithCode extends Error {
 @injectable()
 export class VehicleController implements IVehicleController {
     constructor(
-        @inject(TYPES.VehicleService) private vehicleService: VehicleService
+        @inject(TYPES.VehicleService) private vehicleService: IVehicleService
     ) { }
 
     private handleError(res: Response, error: unknown): void {
@@ -84,7 +84,7 @@ export class VehicleController implements IVehicleController {
             vehicleData.user = userId as unknown as ObjectId;
 
             try {
-                const vehicle = await this.vehicleService.createVehicle(vehicleData);
+                const vehicle = await this.vehicleService.create(vehicleData);
                 res.status(201).json(vehicle);
             } catch (error) {
                 this.handleError(res, error);
@@ -114,7 +114,7 @@ export class VehicleController implements IVehicleController {
             }
 
             try {
-                const vehicle = await this.vehicleService.getVehicleById(vehicleId);
+                const vehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
 
                 // Additional authorization check
                 if (vehicle && vehicle.user.toString() !== userId) {
@@ -161,9 +161,9 @@ export class VehicleController implements IVehicleController {
             }
 
             try {
-                const vehicles = await this.vehicleService.getVehiclesByUser(userId as string);
+                const vehicles = await this.vehicleService.find({ user: userId });
 
-                if (vehicles.length === 0) {
+                if (!vehicles || vehicles.length === 0) {
                     res.status(404).json({
                         message: "No vehicles found for this user"
                     });
@@ -220,7 +220,7 @@ export class VehicleController implements IVehicleController {
 
             try {
                 // First, verify vehicle ownership
-                const existingVehicle = await this.vehicleService.getVehicleById(vehicleId);
+                const existingVehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
 
                 if (!existingVehicle) {
                     res.status(404).json({
@@ -236,7 +236,7 @@ export class VehicleController implements IVehicleController {
                 }
 
                 // Proceed with update
-                const updatedVehicle = await this.vehicleService.updateVehicle(vehicleId, updateData);
+                const updatedVehicle = await this.vehicleService.update(new Types.ObjectId(vehicleId), updateData);
 
                 res.json(updatedVehicle);
             } catch (error) {
@@ -269,7 +269,7 @@ export class VehicleController implements IVehicleController {
 
             try {
                 // First, verify vehicle ownership
-                const existingVehicle = await this.vehicleService.getVehicleById(vehicleId);
+                const existingVehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
 
                 if (!existingVehicle) {
                     res.status(404).json({
@@ -285,7 +285,7 @@ export class VehicleController implements IVehicleController {
                 }
 
                 // Proceed with deletion
-                const deleted = await this.vehicleService.deleteVehicle(vehicleId);
+                const deleted = await this.vehicleService.delete(new Types.ObjectId(vehicleId));
 
                 if (!deleted) {
                     res.status(500).json({

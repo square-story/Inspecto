@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import { InspectorService } from "../services/inspector.service";
 import { inject, injectable } from "inversify";
 import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
 import { TYPES } from "../di/types";
 import { ServiceError } from "../core/errors/service.error";
 import { Types } from "mongoose";
+import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 
 @injectable()
 export class InspectorController implements IInspectorController {
     constructor(
-        @inject(TYPES.InspectorService) private inspectorService: InspectorService
+        @inject(TYPES.InspectorService) private inspectorService: IInspectorService
     ) { }
 
     getInspectorDetails = async (req: Request, res: Response): Promise<void> => {

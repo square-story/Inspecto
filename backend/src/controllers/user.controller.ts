@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { UserService } from "../services/user.service";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../di/types';
 import { IUserController } from "../core/interfaces/controllers/user.controller.interface";
+import { IUserService } from "../core/interfaces/services/user.service.interface";
 
 @injectable()
 export class UserController implements IUserController {
     constructor(
-        @inject(TYPES.UserService) private userService: UserService
+        @inject(TYPES.UserService) private userService: IUserService
     ) { }
 
     getUserDetails = async (req: Request, res: Response): Promise<void> => {
@@ -21,7 +21,7 @@ export class UserController implements IUserController {
             }
 
             // Fetch user details from the database
-            const user = await this.userService.findUserByUserId(userId);
+            const user = await this.userService.findById(new Types.ObjectId(userId));
             if (!user) {
                 res.status(404).json({ message: "User not found" });
                 return;
@@ -54,7 +54,7 @@ export class UserController implements IUserController {
                 return
             }
 
-            const user = await this.userService.updateUser(userId, data); // Call the service to update the user
+            const user = await this.userService.update(new Types.ObjectId(userId), data);
             if (!user) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
