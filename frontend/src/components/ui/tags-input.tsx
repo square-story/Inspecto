@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -211,9 +212,11 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
                         break;
 
                     case "Escape":
-                        const newIndex = activeIndex === -1 ? value.length - 1 : -1;
-                        setActiveIndex(newIndex);
-                        break;
+                        {
+                            const newIndex = activeIndex === -1 ? value.length - 1 : -1;
+                            setActiveIndex(newIndex);
+                            break;
+                        }
 
                     case "Enter":
                         if (inputValue.trim() !== "") {
