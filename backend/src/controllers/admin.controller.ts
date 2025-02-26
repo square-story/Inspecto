@@ -3,6 +3,7 @@ import { inject, injectable } from "inversify";
 import { IAdminController } from "../core/interfaces/controllers/admin.controller.interface";
 import { TYPES } from "../di/types";
 import { IAdminService } from "../core/interfaces/services/admin.service.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -16,8 +17,17 @@ export class AdminController implements IAdminController {
             const response = await this.adminService.getAllInspectors()
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json("Internal server Error")
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
@@ -27,8 +37,17 @@ export class AdminController implements IAdminController {
             const response = await this.adminService.getAllUsers()
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json("intenal server error")
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }

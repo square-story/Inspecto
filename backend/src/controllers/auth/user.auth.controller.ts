@@ -189,6 +189,7 @@ export class UserAuthController implements IUserAuthController {
         try {
             const { token } = req.body;
 
+
             if (!token) {
                 res.status(400).json({ message: 'Token is required' });
                 return;
@@ -204,7 +205,7 @@ export class UserAuthController implements IUserAuthController {
                 return;
             }
             const { email, name, picture, family_name } = payload;
-            if (!email || !name || !picture || !family_name) {
+            if (!email || !name || !picture) {
                 res.status(400).json({ message: 'Missing required Google account information' });
                 return;
             }

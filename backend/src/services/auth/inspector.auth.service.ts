@@ -43,7 +43,6 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             return this.generateTokens(payload);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
-            console.log(error)
             throw new ServiceError('login failed', 'email');
         }
     }

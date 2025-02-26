@@ -11,6 +11,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserRepository } from "../../core/interfaces/repositories/user.repository.interface";
+import { IUsers } from "../../models/user.model";
 
 @injectable()
 export class UserAuthService extends BaseAuthService implements IUserAuthService {
@@ -66,7 +67,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         const existingUser = await this.userRepository.findUserByEmail(email)
 
         if (existingUser) {
-            throw new Error('user already Exist');
+            throw new ServiceError('user already Exist');
         }
         const hashPassword = await bcrypt.hash(password, 10)
         const otp = generateOtp();
@@ -81,12 +82,12 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         const userData = await redisClient.get(redisKey)
 
         if (!userData) {
-            throw new Error("OTP expired or invalid");
+            throw new ServiceError("OTP expired or invalid");
         }
 
         const parsedData = JSON.parse(userData)
         if (parsedData.otp !== otp) {
-            throw new Error('Invalid OTP');
+            throw new ServiceError('Invalid OTP');
         }
 
         const newUser = await this.userRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
@@ -100,7 +101,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         const userData = await redisClient.get(redisKey)
 
         if (!userData) {
-            throw new Error("Cannot resend OTP. Registration session Expired.");
+            throw new ServiceError("Cannot resend OTP. Registration session Expired.");
         }
 
         const parsedData = JSON.parse(userData)
@@ -112,32 +113,38 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         await sendEmail(email, "Your Inspecto OTP(resent)", `Your new OTP is ${newOTP}`)
         return { message: 'OTP resent successfully' }
     }
-    async googleLoginOrRegister(email: string | undefined, name: string | undefined, picture: string | undefined, family_name: string | undefined) {
-        if (!email || !name) {
-            throw new Error("Google account lacks required information");
-        }
-        const user = await this.userRepository.findUserByEmail(email);
 
-        if (!user) {
-            await this.userRepository.create({
-                email,
-                firstName: name,
-                lastName: family_name,
-                profile_image: picture,
-                authProvider: "google",
-                password: null
-            })
+    async googleLoginOrRegister(email: string, name: string, picture: string, familyName?: string): Promise<{ user: IUsers; accessToken: string; refreshToken: string; }> {
+        try {
+            if (!email || !name) {
+                throw new ServiceError("Google account lacks required information");
+            }
+            const user = await this.userRepository.findUserByEmail(email);
+
+            if (!user) {
+                await this.userRepository.create({
+                    email,
+                    firstName: name,
+                    lastName: familyName,
+                    profile_image: picture,
+                    authProvider: "google",
+                    password: null
+                })
+            }
+            if (!user) {
+                throw new ServiceError("User not found");
+            }
+            const { accessToken, refreshToken } = this.generateTokens({ userId: user.id, role: user.role });
+            return { user, accessToken, refreshToken };
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Something Wrong in the google login, Please try again after some time')
         }
-        if (!user) {
-            throw new Error("User not found");
-        }
-        const { accessToken, refreshToken } = this.generateTokens({ userId: user.id, role: user.role });
-        return { user, accessToken, refreshToken };
     }
     async forgetPassword(email: string, role: string) {
         const user = await this.userRepository.findUserByEmail(email)
         if (!user) {
-            throw new Error('User not found')
+            throw new ServiceError('User not found')
         }
         const { hashedToken, resetToken } = this.generateToken()
 
@@ -150,7 +157,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
     async resetPassword(token: string, email: string, password: string) {
         const isValid = await this.validateToken(email, token);
         if (!isValid) {
-            throw new Error('Invalid or expired token');
+            throw new ServiceError('Invalid or expired token');
         }
         const hashPassword = await bcrypt.hash(password, 10)
         await this.userRepository.updateUserPassword(email, password = hashPassword)
