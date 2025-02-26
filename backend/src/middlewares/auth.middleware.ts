@@ -29,7 +29,7 @@ export class AuthMiddleware {
 
         const token = authHeader.split(" ")[1];
         try {
-            const payload = verifyAccessToken(token) as unknown as { userId: string; role: string; }
+            const payload = await verifyAccessToken(token) as unknown as { userId: string; role: string; }
             if (payload.role === 'inspector') {
                 const inspector = await this.inspectorService.findById(new Types.ObjectId(payload.userId))
                 if (!inspector) {

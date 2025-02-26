@@ -10,8 +10,10 @@ import vehiclesRoutes from "./routes/vehicles.routes"
 import inspectionRoutes from "./routes/inspection.routes"
 import paymentsRoutes from './routes/payment.routes'
 import cors from "cors";
+import jwt from "jsonwebtoken";
 import { errorHandler } from './middlewares/error.middleware';
 import morgan from 'morgan';
+import { blacklistToken } from "./utils/token.utils";
 
 const app = express()
 
@@ -47,14 +49,37 @@ app.get('/', (req: Request, res: Response) => {
     res.send('server is up and running')
 })
 
-app.post('/logout', (req: Request, res: Response) => {
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-    });
-    res.status(200).json({ message: 'Logged out successfully' });
-})
+app.post('/logout', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const accessToken = req.headers.authorization?.split(' ')[1];
+        const refreshToken = req.cookies.refreshToken;
+
+        if (accessToken) {
+            const decoded = jwt.decode(accessToken) as jwt.JwtPayload;
+            if (decoded.exp) {
+                const expirationTime = decoded.exp - Math.floor(Date.now() / 1000);
+                await blacklistToken(accessToken, expirationTime);
+            }
+        }
+
+        if (refreshToken) {
+            const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
+            if (decoded.exp) {
+                const expirationTime = decoded.exp - Math.floor(Date.now() / 1000);
+                await blacklistToken(refreshToken, expirationTime);
+            }
+        }
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to logout', error: (error as Error).message });
+    }
+});
 
 // Routes
 app.use('/admin', adminRoutes)

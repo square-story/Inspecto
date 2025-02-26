@@ -6,15 +6,11 @@ import { TYPES } from "../di/types";
 import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
 import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 
-
 interface MongoErrorWithCode extends Error {
     code?: number;
     keyPattern?: Record<string, 1>;
     keyValue?: Record<string, string>;
 }
-
-
-
 
 @injectable()
 export class VehicleController implements IVehicleController {
@@ -39,7 +35,7 @@ export class VehicleController implements IVehicleController {
                     duplicateField: duplicateKey,
                     duplicateValue: duplicateValue
                 });
-                ;
+                return;
             }
         }
 
@@ -77,22 +73,19 @@ export class VehicleController implements IVehicleController {
                     message: "Unauthorized: User authentication required",
                     error: "No user ID found in request"
                 });
-                ;
+                return;
             }
 
             // Attach user ID to vehicle data
             vehicleData.user = userId as unknown as ObjectId;
 
-            try {
-                const vehicle = await this.vehicleService.create(vehicleData);
-                res.status(201).json(vehicle);
-            } catch (error) {
-                this.handleError(res, error);
-            }
+            const vehicle = await this.vehicleService.create(vehicleData);
+            res.status(201).json(vehicle);
         } catch (error) {
             this.handleError(res, error);
         }
     }
+
     getVehicleById = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
@@ -103,53 +96,30 @@ export class VehicleController implements IVehicleController {
                 res.status(400).json({
                     message: "Vehicle ID is required"
                 });
-                ;
+                return;
             }
 
             if (!userId) {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                ;
+                return;
             }
 
-            try {
-                const vehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
-
-                // Additional authorization check
-                if (vehicle && vehicle.user.toString() !== userId) {
-                    res.status(403).json({
-                        message: "Forbidden: You do not have access to this vehicle"
-                    });
-                }
-
-                if (!vehicle) {
-                    res.status(404).json({
-                        message: "Vehicle not found"
-                    });
-                }
-
-                res.json(vehicle);
-            } catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({
-                        message: "Error retrieving vehicle",
-                        error: error.message
-                    });
-                } else {
-                    res.status(500).json({
-                        message: "Unexpected error retrieving vehicle",
-                        error: String(error)
-                    });
-                }
+            const vehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
+            if (!vehicle) {
+                res.status(404).json({
+                    message: "Vehicle not found"
+                });
+                return;
             }
+
+            res.json(vehicle);
         } catch (error) {
-            res.status(500).json({
-                message: "Unexpected server error",
-                error: String(error)
-            });
+            this.handleError(res, error);
         }
     }
+
     getVehiclesByUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
@@ -158,38 +128,23 @@ export class VehicleController implements IVehicleController {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
+                return;
             }
 
-            try {
-                const vehicles = await this.vehicleService.find({ user: userId });
-
-                if (!vehicles || vehicles.length === 0) {
-                    res.status(404).json({
-                        message: "No vehicles found for this user"
-                    });
-                }
-
-                res.json(vehicles);
-            } catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({
-                        message: "Error retrieving user's vehicles",
-                        error: error.message
-                    });
-                } else {
-                    res.status(500).json({
-                        message: "Unexpected error retrieving vehicles",
-                        error: String(error)
-                    });
-                }
+            const vehicles = await this.vehicleService.find({ user: userId });
+            if (!vehicles || vehicles.length === 0) {
+                res.status(404).json({
+                    message: "No vehicles found for this user"
+                });
+                return;
             }
+
+            res.json(vehicles);
         } catch (error) {
-            res.status(500).json({
-                message: "Unexpected server error",
-                error: String(error)
-            });
+            this.handleError(res, error);
         }
     }
+
     updateVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
@@ -201,47 +156,25 @@ export class VehicleController implements IVehicleController {
                 res.status(400).json({
                     message: "Vehicle ID is required"
                 });
-                ;
+                return;
             }
 
             if (!userId) {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                ;
+                return;
             }
 
             if (Object.keys(updateData).length === 0) {
                 res.status(400).json({
                     message: "No update data provided"
                 });
-                ;
+                return;
             }
 
-            try {
-                // First, verify vehicle ownership
-                const existingVehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
-
-                if (!existingVehicle) {
-                    res.status(404).json({
-                        message: "Vehicle not found"
-                    });
-                }
-
-                if (existingVehicle && existingVehicle.user.toString() !== userId) {
-                    res.status(403).json({
-                        message: "Forbidden: You do not have permission to update this vehicle"
-                    });
-                    ;
-                }
-
-                // Proceed with update
-                const updatedVehicle = await this.vehicleService.update(new Types.ObjectId(vehicleId), updateData);
-
-                res.json(updatedVehicle);
-            } catch (error) {
-                this.handleError(res, error);
-            }
+            const updatedVehicle = await this.vehicleService.update(new Types.ObjectId(vehicleId), updateData);
+            res.json(updatedVehicle);
         } catch (error) {
             this.handleError(res, error);
         }
@@ -257,62 +190,20 @@ export class VehicleController implements IVehicleController {
                 res.status(400).json({
                     message: "Vehicle ID is required"
                 });
-                ;
+                return;
             }
 
             if (!userId) {
                 res.status(401).json({
                     message: "Unauthorized: User authentication required"
                 });
-                ;
+                return;
             }
 
-            try {
-                // First, verify vehicle ownership
-                const existingVehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
-
-                if (!existingVehicle) {
-                    res.status(404).json({
-                        message: "Vehicle not found"
-                    });
-                    ;
-                }
-
-                if (existingVehicle && existingVehicle.user.toString() !== userId) {
-                    res.status(403).json({
-                        message: "Forbidden: You do not have permission to delete this vehicle"
-                    });
-                }
-
-                // Proceed with deletion
-                const deleted = await this.vehicleService.delete(new Types.ObjectId(vehicleId));
-
-                if (!deleted) {
-                    res.status(500).json({
-                        message: "Failed to delete vehicle"
-                    });
-                    ;
-                }
-
-                res.status(204).send();
-            } catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({
-                        message: "Error deleting vehicle",
-                        error: error.message
-                    });
-                } else {
-                    res.status(500).json({
-                        message: "Unexpected error deleting vehicle",
-                        error: String(error)
-                    });
-                }
-            }
+            await this.vehicleService.delete(new Types.ObjectId(vehicleId));
+            res.status(204).send();
         } catch (error) {
-            res.status(500).json({
-                message: "Unexpected server error",
-                error: String(error)
-            });
+            this.handleError(res, error);
         }
     }
 }
