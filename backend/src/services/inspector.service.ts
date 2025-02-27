@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
-import { EmailService } from "./email.service";
 import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import { BaseService } from "../core/abstracts/base.service";
 import { TYPES } from "../di/types";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
+import { IEmailService } from "../core/interfaces/services/email.service.interface";
 
 export type ChangePasswordResponse = {
     status: boolean;
@@ -17,7 +17,7 @@ export type ChangePasswordResponse = {
 export class InspectorService extends BaseService<IInspector> implements IInspectorService {
     constructor(
         @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
-        @inject(TYPES.EmailService) private emailService: EmailService,
+        @inject(TYPES.EmailService) private emailService: IEmailService,
     ) {
         super(inspectorRepository);
     }

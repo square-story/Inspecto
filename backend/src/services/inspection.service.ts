@@ -5,16 +5,16 @@ import { BaseService } from "../core/abstracts/base.service";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
-import { InspectionRepository } from "../repositories/inspection.repository";
-import { InspectorRepository } from "../repositories/inspector.repository";
 import { Types } from "mongoose";
 import { ServiceError } from "../core/errors/service.error";
+import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
+import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 
 @injectable()
 export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
     constructor(
-        @inject(TYPES.InspectionRepository) private inspectionRepository: InspectionRepository,
-        @inject(TYPES.InspectorRepository) private inspectorRepository: InspectorRepository,
+        @inject(TYPES.InspectionRepository) private inspectionRepository: IInspectionRepository,
+        @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
     ) {
         super(inspectionRepository);
     }

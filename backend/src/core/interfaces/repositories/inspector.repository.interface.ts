@@ -1,5 +1,5 @@
 import { IInspector } from "../../../models/inspector.model";
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { BaseRepository } from "../../abstracts/base.repository";
 
 export interface IInspectorRepository extends BaseRepository<IInspector> {
@@ -7,5 +7,6 @@ export interface IInspectorRepository extends BaseRepository<IInspector> {
     getNearbyInspectors(latitude: string, longitude: string): Promise<IInspector[]>;
     bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession): Promise<IInspector | null>;
     unbookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession): Promise<IInspector | null>;
-    updateInspectorProfileCompletion(userId: string): Promise<IInspector | null>
+    updateInspectorProfileCompletion(userId: string): Promise<IInspector | null>;
+    findInspectorById(id: string, session: ClientSession): Promise<IInspector | null>;
 }

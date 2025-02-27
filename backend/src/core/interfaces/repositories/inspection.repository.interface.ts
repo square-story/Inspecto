@@ -1,5 +1,5 @@
 import { ClientSession } from "mongoose";
-import { IInspectionDocument } from "../../../models/inspection.model";
+import { IInspectionDocument, IInspectionInput } from "../../../models/inspection.model";
 import { IDayAvailability } from "../../../models/inspector.model";
 import { BaseRepository } from "../../abstracts/base.repository";
 
@@ -51,4 +51,7 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
         inspector: string;
         slotNumber: number;
     }, session: ClientSession): Promise<IInspectionDocument | null>
+
+    updateInspection(id: string, updateData: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument | null>;
+    createInspection(data: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument>;
 }
