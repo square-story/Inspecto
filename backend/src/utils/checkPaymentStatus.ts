@@ -1,12 +1,12 @@
 import cron from 'node-cron';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../di/types';
-import { PaymentService } from '../services/payment.service';
+import { IPaymentService } from '../core/interfaces/services/payment.service.interface';
 
 @injectable()
 export class PaymentStatusChecker {
     constructor(
-        @inject(TYPES.PaymentService) private paymentService: PaymentService
+        @inject(TYPES.PaymentService) private paymentService: IPaymentService
     ) {
         this.initCronJob();
     }
