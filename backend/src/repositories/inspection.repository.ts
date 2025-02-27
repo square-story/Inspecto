@@ -4,12 +4,36 @@ import inspectionModel, { IInspectionDocument, IInspectionInput, InspectionStatu
 import { IDayAvailability, } from "../models/inspector.model";
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 import { ClientSession } from "mongoose";
+import { IInspectionStatsFromInspectionDB } from "../core/types/inspection.stats.type";
 
 
 @injectable()
 export class InspectionRepository extends BaseRepository<IInspectionDocument> implements IInspectionRepository {
     constructor() {
         super(inspectionModel);
+    }
+    async getInspectionStats(inspectorId: string): Promise<IInspectionStatsFromInspectionDB> {
+        try {
+            const totalInspections = await this.model.countDocuments({
+                inspector: inspectorId
+            })
+            const pendingInspections = await this.model.countDocuments({
+                inspector: inspectorId,
+                status: InspectionStatus.CONFIRMED
+            })
+            const completedInspections = await this.model.countDocuments({
+                inspector: inspectorId,
+                status: InspectionStatus.COMPLETED
+            })
+            return {
+                completedInspections,
+                pendingInspections,
+                totalInspections
+            }
+        } catch (error) {
+            console.log('The error from stats checking:', error)
+            throw error
+        }
     }
     async checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean> {
         const count = await this.model.countDocuments({

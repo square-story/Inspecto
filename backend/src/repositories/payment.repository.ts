@@ -2,6 +2,7 @@ import { injectable } from "inversify";
 import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
 import paymentModel, { IPaymentInput, IPaymentDocument, PaymentStatus } from "../models/payment.model";
 import { BaseRepository } from "../core/abstracts/base.repository";
+import { IInspectionStatesFromPaymentDB } from "../core/types/inspection.stats.type";
 
 @injectable()
 export class PaymentRepository extends BaseRepository<IPaymentDocument> implements IPaymentRepository {
@@ -27,5 +28,77 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
             status: status,
             createdAt: { $lt: beforeDate }
         });
+    }
+    async getInspectionStats(inspectorId: string): Promise<IInspectionStatesFromPaymentDB> {
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const totalEarningsResult = await this.model.aggregate([
+            {
+                $match: {
+                    status: PaymentStatus.SUCCEEDED
+                }
+            },
+            {
+                $lookup: {
+                    from: "inspections",
+                    localField: "inspection",
+                    foreignField: "_id",
+                    as: 'inspection'
+                }
+            },
+            {
+                $unwind: '$inspection'
+            },
+            {
+                $match: {
+                    'inspection.inspector': inspectorId
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: '$amount' }
+                }
+            }
+        ]);
+
+        const thisMonthEarningsResult = await this.model.aggregate([
+            {
+                $match: {
+                    status: PaymentStatus.SUCCEEDED,
+                    createdAt: { $gte: startOfMonth }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'inspections',
+                    localField: 'inspection',
+                    foreignField: '_id',
+                    as: 'inspection'
+                }
+            },
+            {
+                $unwind: '$inspection'
+            },
+            {
+                $match: {
+                    'inspection.inspector': inspectorId
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: '$amount' }
+                }
+            }
+        ]);
+
+        const totalEarnings = totalEarningsResult[0]?.total || 0;
+        const thisMonthEarnings = thisMonthEarningsResult[0]?.total || 0;
+
+        return {
+            thisMonthEarnings,
+            totalEarnings
+        }
     }
 }

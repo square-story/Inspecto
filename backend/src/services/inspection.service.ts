@@ -9,15 +9,43 @@ import { Types } from "mongoose";
 import { ServiceError } from "../core/errors/service.error";
 import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { IInspectionStats } from "../core/types/inspection.stats.type";
+import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
 
 @injectable()
 export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
     constructor(
         @inject(TYPES.InspectionRepository) private inspectionRepository: IInspectionRepository,
         @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
+        @inject(TYPES.PaymentRepository) private paymentRepository: IPaymentRepository,
     ) {
         super(inspectionRepository);
     }
+    async getStatsAboutInspector(inspectorId: string): Promise<IInspectionStats> {
+        try {
+            const { completedInspections, pendingInspections, totalInspections } = await this.inspectionRepository.getInspectionStats(inspectorId);
+            const { thisMonthEarnings, totalEarnings } = await this.paymentRepository.getInspectionStats(inspectorId)
+
+            const completionRate = totalInspections > 0
+                ? (completedInspections / totalInspections) * 100
+                : 0;
+
+            return {
+                totalEarnings,
+                completionRate: Math.round(completionRate),
+                pendingInspections,
+                thisMonthEarnings,
+                totalInspections
+            }
+
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new ServiceError(`Error getting user inspections: ${error.message}`);
+            }
+            throw error;
+        }
+    }
+
 
     async getUserInspections(userId: string): Promise<IInspectionDocument[]> {
         try {

@@ -1,49 +1,57 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Activity, AlertCircle, ArrowRight, Calendar, DollarSign, FileCheck, User, Users } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "@/store"
+import { useEffect, useState } from "react"
+import { fetchAppointments } from "@/features/inspection/inspectionSlice"
+import { format } from "date-fns"
+import { IInspectionStats } from "@/types/inspector.dashboard.stats"
+import { InspectionService } from "@/services/inspection.service"
+import { useLoadingState } from "@/hooks/useLoadingState";
+import LoadingSpinner from "@/components/LoadingSpinner"
 
 export default function Dashboard() {
-    const navigate = useNavigate();
-    // Mock data - replace with real data from your API
-    const stats = {
-        totalInspections: 145,
-        pendingInspections: 12,
-        totalEarnings: 28500,
-        thisMonthEarnings: 4500,
-        completionRate: 92,
-    }
+    const dispatch = useDispatch<AppDispatch>()
+    const [stats, setStats] = useState<IInspectionStats>({
+        totalInspections: 0,
+        totalEarnings: 0,
+        pendingInspections: 0,
+        completionRate: 0,
+        thisMonthEarnings: 0
+    })
+    const { loading, withLoading } = useLoadingState();
 
-    const recentInspections = [
-        {
-            id: "INS-001",
-            customerName: "John Doe",
-            date: "2024-02-19",
-            status: "completed",
-            amount: 350,
-            type: "Vehicle Inspection",
-        },
-        {
-            id: "INS-001",
-            customerName: "John Doe",
-            date: "2024-02-19",
-            status: "completed",
-            amount: 350,
-            type: "Vehicle Inspection",
-        },
-        {
-            id: "INS-001",
-            customerName: "John Doe",
-            date: "2024-02-19",
-            status: "completed",
-            amount: 250,
-            type: "Vehicle Inspection",
-        },
-        // Add more mock data as needed
-    ]
+    useEffect(() => {
+        const fetchStats = async () => {
+            await withLoading(async () => {
+                try {
+                    const response = await InspectionService.getStats();
+                    if (response) {
+                        setStats(response);
+                    } else {
+                        console.error("Received undefined stats");
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch stats", error);
+                }
+            });
+        };
+
+        fetchStats();
+    }, [withLoading]);
+
+    useEffect(() => {
+        dispatch(fetchAppointments());
+    }, [dispatch]);
+
+    const { data: Inspections } = useSelector((state: RootState) => state.inspections)
+
+    const navigate = useNavigate();
 
     return (
         <div className="flex flex-col gap-6 p-6">
@@ -55,7 +63,7 @@ export default function Dashboard() {
                         <FileCheck className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalInspections}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalInspections}</div>
                         <p className="text-xs text-muted-foreground">+12% from last month</p>
                     </CardContent>
                 </Card>
@@ -66,7 +74,7 @@ export default function Dashboard() {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${stats.totalEarnings}</div>
+                        <div className="text-2xl font-bold">${loading ? <LoadingSpinner /> : stats.totalEarnings}</div>
                         <p className="text-xs text-muted-foreground">+8% from last month</p>
                     </CardContent>
                 </Card>
@@ -77,7 +85,7 @@ export default function Dashboard() {
                         <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.pendingInspections}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.pendingInspections}</div>
                         <p className="text-xs text-muted-foreground">Requires attention</p>
                     </CardContent>
                 </Card>
@@ -88,7 +96,7 @@ export default function Dashboard() {
                         <Activity className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.completionRate}%</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.completionRate}%</div>
                         <p className="text-xs text-muted-foreground">+2% from last month</p>
                     </CardContent>
                 </Card>
@@ -127,27 +135,32 @@ export default function Dashboard() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {recentInspections.map((inspection) => (
-                                <TableRow key={inspection.id}>
-                                    <TableCell className="font-medium">{inspection.id}</TableCell>
+                            {Inspections.map((inspection) => (
+                                <TableRow key={inspection.bookingReference}>
+                                    <TableCell className="font-medium">{inspection.bookingReference}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Avatar className="h-8 w-8">
+                                                <AvatarImage
+                                                    src={inspection.user.profile_image}
+                                                    alt={`${inspection.user.firstName} ${inspection.user.lastName}`}
+                                                    className="object-cover"
+                                                />
                                                 <AvatarFallback>
                                                     <User className="h-4 w-4" />
                                                 </AvatarFallback>
                                             </Avatar>
-                                            {inspection.customerName}
+                                            {inspection.user.firstName}{" "}{inspection.user.lastName}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{inspection.date}</TableCell>
-                                    <TableCell>{inspection.type}</TableCell>
+                                    <TableCell>{format(inspection.date, "MM/dd/yyyy")}</TableCell>
+                                    <TableCell>{inspection.inspectionType}</TableCell>
                                     <TableCell>
-                                        <Badge variant={inspection.status === "completed" ? "default" : "destructive"}>
+                                        <Badge variant={inspection.status === "completed" ? "default" : "outline"}>
                                             {inspection.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>${inspection.amount}</TableCell>
+                                    <TableCell>{inspection.inspectionType == "basic" ? "250" : "300"}</TableCell>
                                     <TableCell>
                                         <Button variant="ghost" size="sm">
                                             <ArrowRight className="h-4 w-4" />

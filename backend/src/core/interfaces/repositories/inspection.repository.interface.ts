@@ -2,6 +2,7 @@ import { ClientSession } from "mongoose";
 import { IInspectionDocument, IInspectionInput } from "../../../models/inspection.model";
 import { IDayAvailability } from "../../../models/inspector.model";
 import { BaseRepository } from "../../abstracts/base.repository";
+import { IInspectionStatsFromInspectionDB } from "../../types/inspection.stats.type";
 
 export interface IInspectionRepository extends BaseRepository<IInspectionDocument> {
     /**
@@ -54,4 +55,5 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
 
     updateInspection(id: string, updateData: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument | null>;
     createInspection(data: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument>;
+    getInspectionStats(inspectorId: string): Promise<IInspectionStatsFromInspectionDB>;
 }
