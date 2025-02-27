@@ -1,8 +1,9 @@
 import { injectable } from "inversify";
 import { BaseRepository } from "../core/abstracts/base.repository";
-import inspectionModel, { IInspectionDocument, InspectionStatus } from "../models/inspection.model";
+import inspectionModel, { IInspectionDocument, IInspectionInput, InspectionStatus } from "../models/inspection.model";
 import { IDayAvailability, } from "../models/inspector.model";
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { ClientSession } from "mongoose";
 
 
 @injectable()
@@ -10,9 +11,14 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
     constructor() {
         super(inspectionModel);
     }
-    async checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean> {
-        const existingBooking = await this.findOne({ inspector: inspectorId, date, slotNumber, status: { $nin: [InspectionStatus.CANCELLED] } });
-        return !existingBooking;
+    async checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean> {
+        const count = await this.model.countDocuments({
+            inspector: inspectorId,
+            date: date,
+            slotNumber: slotNumber,
+            status: { $ne: InspectionStatus.CANCELLED }
+        }).session(session).exec();
+        return count === 0;
     }
 
     async getAvailableSlots(inspectorId: string, date: Date, dayAvailability: IDayAvailability): Promise<number[]> {
@@ -31,7 +37,14 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
     async findInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
         return await this.model.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').sort({ date: -1 });
     }
-    async existingInspection(data: { date: Date, inspector: string, slotNumber: number }): Promise<IInspectionDocument | null> {
-        return await this.findOne(data)
+    async existingInspection(data: { date: Date, inspector: string, slotNumber: number }, session: ClientSession): Promise<IInspectionDocument | null> {
+        return await this.model.findOne(data).session(session).exec();
+    }
+    async createInspection(data: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument> {
+        const inspection = new this.model(data);
+        return await inspection.save({ session });
+    }
+    async updateInspection(id: string, updateData: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument | null> {
+        return await this.model.findByIdAndUpdate(id, updateData, { new: true }).session(session).exec();
     }
 }

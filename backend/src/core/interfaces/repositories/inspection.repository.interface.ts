@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import { IInspectionDocument } from "../../../models/inspection.model";
 import { IDayAvailability } from "../../../models/inspector.model";
 import { BaseRepository } from "../../abstracts/base.repository";
@@ -10,7 +11,7 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
      * @param slotNumber number
      * @returns Promise<boolean>
      */
-    checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean>;
+    checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean>;
 
     /**
      * Retrieves available slots for a given inspector and date.
@@ -49,5 +50,5 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
         date: Date;
         inspector: string;
         slotNumber: number;
-    }): Promise<IInspectionDocument | null>;
+    }, session: ClientSession): Promise<IInspectionDocument | null>
 }

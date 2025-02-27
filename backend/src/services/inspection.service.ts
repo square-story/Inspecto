@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
 import { WeeklyAvailability } from "../models/inspector.model";
 import { BaseService } from "../core/abstracts/base.service";
@@ -85,9 +85,9 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         }
     }
 
-    async checkSlotAvaliability(inspectorId: string, date: Date, slotNumber: number): Promise<boolean> {
+    async checkSlotAvaliability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean> {
         try {
-            return await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber);
+            return await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber, session);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error checking slot availability: ${error.message}`);
@@ -113,17 +113,18 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
     }
 
     async createInspection(data: IInspectionInput): Promise<IInspectionDocument> {
-        const session = await mongoose.startSession();
+        const session: ClientSession = await mongoose.startSession();
         session.startTransaction();
         try {
             if (!data.user || !data.inspector || !data.date || !data.slotNumber) {
                 throw new ServiceError('Missing required booking data');
             }
+
             const existingBooking = await this.inspectionRepository.existingInspection({
                 date: data.date,
                 inspector: data.inspector.toString(),
                 slotNumber: data.slotNumber,
-            });
+            }, session);
 
             // If there's an existing booking and it's not cancelled, throw error
             if (existingBooking && existingBooking.status !== InspectionStatus.CANCELLED) {
@@ -133,17 +134,20 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             const isAvailable = await this.checkSlotAvaliability(
                 data.inspector!.toString(),
                 data.date!,
-                data.slotNumber!
+                data.slotNumber!,
+                session
             );
+
             if (!isAvailable) {
                 throw new ServiceError('Slot is no longer available');
             }
+
             const bookingReference = await this.generateBookingReference();
             if (!data.user) {
                 throw new ServiceError('User is required for booking');
             }
 
-            const inspector = await this.inspectorRepository.findById(new Types.ObjectId(data.inspector!.toString()));
+            const inspector = await this.inspectorRepository.findInspectorById(data.inspector!.toString(), session);
 
             if (!inspector) {
                 throw new ServiceError('Inspector not found');
@@ -159,7 +163,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
             let booking;
             if (existingBooking) {
-                booking = await this.inspectionRepository.update(
+                booking = await this.inspectionRepository.updateInspection(
                     existingBooking.id,
                     {
                         ...data,
@@ -167,22 +171,24 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                         status: InspectionStatus.PENDING,
                         version: existingBooking.version + 1
                     },
+                    session
                 );
             } else {
                 // Create new booking if no existing one found
-                booking = await this.inspectionRepository.create({
+                booking = await this.inspectionRepository.createInspection({
                     ...data,
                     bookingReference,
                     version: 0,
                     status: InspectionStatus.PENDING,
                     user: data.user
-                });
+                }, session);
             }
 
             await this.inspectorRepository.bookingHandler(
                 data.inspector.toString(),
                 data.user.toString(),
-                data.date
+                data.date,
+                session
             );
             await session.commitTransaction();
             if (!booking) {

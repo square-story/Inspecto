@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import Inspector, { IInspector } from "../models/inspector.model";
 import { BaseRepository } from "../core/abstracts/base.repository";
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 
 
@@ -18,6 +18,9 @@ export class InspectorRepository extends BaseRepository<IInspector> implements I
             console.error('Error in createInspector:', error);
             throw error;
         }
+    }
+    async findInspectorById(id: string, session: ClientSession): Promise<IInspector | null> {
+        return await this.model.findById(id).session(session)
     }
     updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
         return this.model.findByIdAndUpdate(userId, updates, { new: true });
@@ -38,18 +41,25 @@ export class InspectorRepository extends BaseRepository<IInspector> implements I
     async updateInspectorProfileCompletion(userId: string) {
         return await this.model.findOneAndUpdate({ _id: userId }, { isCompleted: true }, { new: true, runValidators: true }).select('-password')
     }
-    async getNearbyInspectors(latitude: string, longitude: string) {
-        return await this.find({
-            location: {
-                $near: {
-                    $geometry: {
-                        type: "Point",
-                        coordinates: [parseFloat(longitude), parseFloat(latitude)]
-                    },
-                    $maxDistance: 10000
+    async getNearbyInspectors(latitude: string, longitude: string): Promise<IInspector[]> {
+        try {
+            const response = await this.model.find({
+                location: {
+                    $near: {
+                        $geometry: {
+                            type: "Point",
+                            coordinates: [parseFloat(longitude), parseFloat(latitude)]
+                        },
+                        $maxDistance: 10000 // Adjust the distance as needed
+                    }
                 }
-            }
-        })
+            }).exec();
+            console.log('something:', response)
+            return response;
+        } catch (error) {
+            console.error('Error in getNearbyInspectors:', error);
+            throw error;
+        }
     }
 
     async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
