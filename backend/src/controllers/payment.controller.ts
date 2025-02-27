@@ -1,39 +1,57 @@
 import { Request, Response } from "express";
-import paymentService, { stripe } from "../services/payment.service";
+import { stripe } from "../services/payment.service";
 import appConfig from "../config/app.config";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { IPaymentController } from "../core/interfaces/controllers/payment.controller.interface";
+import { ServiceError } from "../core/errors/service.error";
+import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 
-export default class PaymentController {
-    public async createPaymentIntent(req: Request, res: Response): Promise<Response> {
+@injectable()
+export class PaymentController implements IPaymentController {
+    constructor(
+        @inject(TYPES.PaymentService) private paymentService: IPaymentService
+    ) { }
+
+    createPaymentIntent = async (req: Request, res: Response): Promise<void> => {
         try {
             const { inspectionId, amount } = req.body;
             const userId = req.user?.userId;
 
             if (!userId) {
-                return res.status(401).json({
+                res.status(401).json({
                     success: false,
                     message: 'User not authenticated'
                 });
             }
 
-            const paymentIntent = await paymentService.createPaymentIntent(
+            const paymentIntent = await this.paymentService.createPaymentIntent(
                 inspectionId,
-                userId,
+                userId as string,
                 amount
             );
 
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 clientSecret: paymentIntent.client_secret
             });
-        } catch (error: any) {
-            console.error('Error creating payment intent:', error);
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    public async handleWebhook(req: Request, res: Response): Promise<Response> {
+
+    handleWebhook = async (req: Request, res: Response): Promise<void> => {
         const sig = req.headers['stripe-signature'];
 
         try {
@@ -47,73 +65,92 @@ export default class PaymentController {
                 appConfig.stripWebhook
             );
 
-            await paymentService.handleWebhookEvent(event);
+            await this.paymentService.handleWebhookEvent(event);
 
-            return res.status(200).json({ received: true });
-        } catch (error: any) {
-            console.error('Webhook error:', error);
-            return res.status(400).json({
-                success: false,
-                message: error.message
-            });
+            res.status(200).json({ received: true });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    public async verifyPayment(req: Request, res: Response): Promise<Response> {
+
+    verifyPayment = async (req: Request, res: Response): Promise<void> => {
         try {
             const { paymentIntentId } = req.params;
 
-            const payment = await paymentService.verifyPayment(paymentIntentId);
+            const payment = await this.paymentService.verifyPayment(paymentIntentId);
             if (!payment) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: 'Payment not found'
                 });
             }
 
-            // Populate inspection details
-            await payment.populate('inspection');
-
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 payment
             });
-        } catch (error: any) {
-            console.error('Error verifying payment:', error);
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    public async findPayments(req: Request, res: Response): Promise<Response> {
+    findPayments = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
             if (!userId) {
-                return res.status(401).json({
+                res.status(401).json({
                     success: false,
                     message: 'User not authenticated'
                 });
             }
-            const response = await paymentService.findPayments(userId)
+            const response = await this.paymentService.find({ user: userId })
 
             if (!response) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "Not found any data"
                 })
             }
 
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 message: "Payment getted successfully",
                 payments: response
             })
-        } catch (error: any) {
-            console.error('Error verifying payment:', error);
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 }

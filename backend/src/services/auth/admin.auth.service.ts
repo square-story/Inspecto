@@ -1,37 +1,41 @@
-import { Response } from "express";
-import { AdminRepository } from "../../repositories/admin.repository";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
+import { inject, injectable } from "inversify";
+import { IAdminAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { TYPES } from "../../di/types";
+import { BaseAuthService } from "../../core/abstracts/base.auth.service";
+import { Types } from "mongoose";
+import { IAdminRepository } from "../../core/interfaces/repositories/admin.repository.interface";
+import { ServiceError } from "../../core/errors/service.error";
 
-export class AdminAuthService {
-    private adminRepository: AdminRepository;
+@injectable()
+export class AdminAuthService extends BaseAuthService implements IAdminAuthService {
 
-    constructor() {
-        this.adminRepository = new AdminRepository()
+    constructor(
+        @inject(TYPES.AdminRepository) private readonly adminRepository: IAdminRepository
+    ) {
+        super();
     }
-    async login(email: string, password: string, res: Response) {
-        const admin = await this.adminRepository.findByEmail(email)
-        if (!admin || admin.password !== password) {
-            throw new Error('Invalid username or password')
+
+    async login(email: string, password: string) {
+        try {
+            const admin = await this.adminRepository.findByEmail(email)
+            if (!admin) throw new ServiceError('Admin Not Found', 'email')
+            if (admin.password !== password) throw new ServiceError('Invalid Password', 'password')
+            const payload = {
+                userId: new Types.ObjectId(admin._id.toString()),
+                role: admin.role || 'admin'
+            }
+            return this.generateTokens(payload)
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Login Failed', 'email')
         }
-        const payload = { userId: admin._id, role: admin.role }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
-
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        });
-        return { accessToken }
     }
-
     async refreshToken(token: string) {
-        const payload = await verifyRefreshToken(token)
-        if (!payload?.userId || !payload?.role) {
-            throw new Error('Invalid token payload')
+        try {
+            return await super.refreshToken(token);
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Token refresh failed', 'token');
         }
-        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken }
     }
-
 }

@@ -57,3 +57,5 @@ coverage/
 *.tmp
 
 desktop.ini
+
+*.vscode

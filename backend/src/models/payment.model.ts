@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, ObjectId } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 export enum PaymentStatus {
     PENDING = "pending",
@@ -8,13 +8,13 @@ export enum PaymentStatus {
 }
 
 export interface IPaymentInput {
-    inspection: ObjectId;
-    user: ObjectId;
+    inspection: Types.ObjectId;
+    user: Types.ObjectId;
     amount: number;
     currency: string;
     stripePaymentIntentId: string;
     status: PaymentStatus;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 export interface IPaymentDocument extends IPaymentInput, Document { }

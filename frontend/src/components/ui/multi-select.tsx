@@ -188,8 +188,7 @@ MultiSelect.displayName = 'MultiSelect';
 
 type MultiSelectTriggerElement = React.ElementRef<typeof Primitive.div>;
 
-interface MultiSelectTriggerProps
-    extends ComponentPropsWithoutRef<typeof Primitive.div> { }
+type MultiSelectTriggerProps = ComponentPropsWithoutRef<typeof Primitive.div>
 
 const PreventClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -203,6 +202,7 @@ const MultiSelectTrigger = React.forwardRef<
     const { disabled } = useMultiSelect();
 
     return (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <PopoverPrimitive.Trigger ref={forwardedRef as any} asChild>
             <div
                 aria-disabled={disabled}
@@ -353,8 +353,7 @@ const MultiSelectList = React.forwardRef<
 
 MultiSelectList.displayName = 'MultiSelectList';
 
-interface MultiSelectContentProps
-    extends ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> { }
+type MultiSelectContentProps = ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 
 const MultiSelectContent = React.forwardRef<
     React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -395,6 +394,7 @@ const MultiSelectContent = React.forwardRef<
                         '--radix-select-trigger-width': 'var(--radix-popper-anchor-width)',
                         '--radix-select-trigger-height':
                             'var(--radix-popper-anchor-height)',
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } as any
                 }
                 {...props}

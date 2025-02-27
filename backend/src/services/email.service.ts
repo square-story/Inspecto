@@ -1,8 +1,11 @@
 // services/email.service.ts
+import { injectable } from 'inversify';
+import { IEmailService } from '../core/interfaces/services/email.service.interface';
 import { sendEmail } from '../utils/email';
 
-export class EmailService {
-    static async sendApprovalEmail(inspectorEmail: string, firstName: string) {
+@injectable()
+export class EmailService implements IEmailService {
+    async sendApprovalEmail(inspectorEmail: string, firstName: string) {
         const subject = 'Your Inspector Account Has Been Approved';
         const text = `
 Dear ${firstName},
@@ -29,7 +32,7 @@ The Inspecto Team
         }
     }
 
-    static async sendDenialEmail(inspectorEmail: string, firstName: string, reason: string) {
+    async sendDenialEmail(inspectorEmail: string, firstName: string, reason: string) {
         const subject = 'Update Regarding Your Inspector Account Application';
         const text = `
 Dear ${firstName},

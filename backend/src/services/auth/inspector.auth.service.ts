@@ -1,157 +1,173 @@
-import { Response } from "express";
-import { InspectorRepository } from "../../repositories/inspector.repository";
 import bcrypt from "bcrypt";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/token.utils";
+import { generateAccessToken, verifyRefreshToken } from "../../utils/token.utils";
 import { generateOtp } from "../../utils/otp";
-import redisClient from "../../config/redis";
+import redisClient from "../../config/redis.config";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from 'crypto'
 import { InspectorStatus } from "../../models/inspector.model";
+import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { BaseAuthService } from "../../core/abstracts/base.auth.service";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../di/types";
+import { Types } from "mongoose";
+import { IInspectorRepository } from "../../core/interfaces/repositories/inspector.repository.interface";
+import { ServiceError } from '../../core/errors/service.error';
 
-export class InspectorAuthService {
-    private inspectorRepository: InspectorRepository;
+@injectable()
+export class InspectorAuthService extends BaseAuthService implements IInspectorAuthService {
 
-    constructor() {
-        this.inspectorRepository = new InspectorRepository()
+    constructor(
+        @inject(TYPES.InspectorRepository) private readonly inspectorRepository: IInspectorRepository
+    ) {
+        super();
     }
 
-    async loginOfInspector(email: string, password: string, res: Response) {
+    async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
         try {
-            const inspector = await this.inspectorRepository.findInspectorByEmail(email);
+            const inspector = await this.inspectorRepository.findOne({ email });
             if (!inspector) {
-                res.status(400).json({ field: 'email', message: 'Inspector not found' });
-                return
+                throw new ServiceError('Inspector not found', 'email');
             }
-
             if (!inspector.password) {
-                res.status(400).json({ field: 'password', message: 'Inspector needs to set a password' });
-                return
+                throw new ServiceError('Password is required', 'Password');
             }
-
             const isPasswordValid = await bcrypt.compare(password, inspector.password);
             if (!isPasswordValid) {
-                res.status(400).json({ field: 'password', message: 'Password is incorrect' });
-                return
+                throw new ServiceError('Password is incorrect', 'password');
             }
-
             if (inspector.status === InspectorStatus.BLOCKED) {
-                res.status(400).json({ field: 'email', message: 'This account is blocked' });
-                return
+                throw new ServiceError('Account is Blocked', 'email');
+            }
+            const payload = { userId: inspector.id, role: inspector.role };
+            return this.generateTokens(payload);
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('login failed', 'email');
+        }
+    }
+    async refreshToken(token: string): Promise<{ accessToken: string, status?: boolean, blockReason?: string }> {
+        try {
+            const payload = await verifyRefreshToken(token);
+            if (!payload?.userId || !payload?.role) {
+                throw new ServiceError('Invalid token payload', 'token');
+            }
+            const inspector = await this.inspectorRepository.findById(new Types.ObjectId(payload.userId.toString()));
+
+            if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
+                return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
+            }
+            const newAccessToken = generateAccessToken({ userId: payload.userId, role: payload.role });
+            return { accessToken: newAccessToken, status: true, blockReason: "" };
+        } catch (error) {
+            if (error instanceof ServiceError) throw error
+            throw new ServiceError('Refresh Failed', 'refresh')
+        }
+    }
+
+    async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
+        try {
+            const existing = await this.inspectorRepository.findOne({ email })
+            if (existing) {
+                throw new ServiceError('User Already Exising', 'email')
+            }
+            const hashPassword = await bcrypt.hash(password, 10)
+            const otp = generateOtp()
+            const redisKey = `inspector:register:${email}`;
+            await redisClient.set(redisKey, JSON.stringify({ email, hashPassword, firstName, lastName, otp, phone }), { EX: appConfig.otpExp });
+            await sendEmail(email, 'Your Inspecto OTP', `Your OTP is ${otp}`);
+            return { message: 'OTP send successfully' }
+        } catch (error) {
+            if (error instanceof ServiceError) throw error
+            throw new ServiceError('Registration failed due to an unexpected error. Please try again later.')
+        }
+    }
+
+
+    async verifyOTP(email: string, otp: string) {
+        try {
+            const redisKey = `inspector:register:${email}`;
+            const userData = await redisClient.get(redisKey)
+            if (!userData) {
+                throw new ServiceError("OTP expired or invalid");
+            }
+            const parsedData = JSON.parse(userData)
+            if (parsedData.otp !== otp) {
+                throw new ServiceError('Invalid OTP');
+            }
+            const newInspector = await this.inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
+            await redisClient.del(redisKey)
+            const payload = { userId: newInspector.id, role: newInspector.role }
+            const { accessToken, refreshToken } = this.generateTokens(payload)
+            return { message: "Inspector registered successfully", accessToken, refreshToken }
+        } catch (error) {
+            if (error instanceof ServiceError) throw error
+            throw new ServiceError('Unable to Sent OTP at this moment. Please try again later.')
+        }
+    }
+
+    async resendOTP(email: string) {
+        try {
+            const redisKey = `inspector:register:${email}`
+            const userData = await redisClient.get(redisKey)
+
+            if (!userData) {
+                throw new ServiceError("Cannot resend OTP. Registration session Expired.");
             }
 
-            const payload = {
-                userId: inspector.id,
-                role: inspector.role,
-            };
-            const accessToken = generateAccessToken(payload);
-            const refreshToken = generateRefreshToken(payload);
+            const parsedData = JSON.parse(userData)
 
-            res.cookie('refreshToken', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
-            });
+            const newOTP = generateOtp()
+            parsedData.otp = newOTP
+            await redisClient.set(redisKey, JSON.stringify(parsedData), { EX: appConfig.otpExp })
 
-            return {
-                accessToken,
-                role: 'inspector',
-                status: true
-            };
+            await sendEmail(email, "Your Inspecto OTP(resent)", `Your new OTP is ${newOTP}`)
+            return { message: 'OTP resent successfully' }
         } catch (error) {
-            console.error('Error in loginOfInspector:', error);
-            res.status(500).json({ message: 'Internal server error' });
-            return;
+            if (error instanceof ServiceError) throw error
+            throw new ServiceError('Unable to resend OTP at this moment. Please try again later.')
         }
     }
-    async refreshToken(token: string) {
-        const payload = verifyRefreshToken(token)
-        if (!payload?.userId || !payload?.role) {
-            throw new Error('Invalid token payload')
-        }
-        const inspector = await this.inspectorRepository.findInspectorById(payload.userId.toString());
 
-        if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
-            return { status: false, blockReason: "This Inspector Account is Blocked" }
-        }
-        const newAccessToken = await generateAccessToken({ userId: payload.userId, role: payload.role })
-        return { accessToken: newAccessToken, status: true, blockReason: '' }
-    }
-    async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
-        const existing = await this.inspectorRepository.findInspectorByEmail(email)
-        if (existing) {
-            throw new Error('User Already Exising')
-        }
-        const hashPassword = await bcrypt.hash(password, 10)
-        const otp = await generateOtp()
-        const redisKey = `inspector:register:${email}`;
-        await redisClient.set(redisKey, JSON.stringify({ email, hashPassword, firstName, lastName, otp, phone }), { EX: appConfig.otpExp });
-        await sendEmail(email, 'Your Inspecto OTP', `Your OTP is ${otp}`);
-        return { message: 'OTP send successfully' }
-    }
-    async verifyOTP(email: string, otp: string, res: Response) {
-        const redisKey = `inspector:register:${email}`;
-        const userData = await redisClient.get(redisKey)
-        if (!userData) {
-            throw new Error("OTP expired or invalid");
-        }
-        const parsedData = JSON.parse(userData)
-        if (parsedData.otp !== otp) {
-            throw new Error('Invalid OTP');
-        }
-        const newInspector = await this.inspectorRepository.createInspector({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
-        await redisClient.del(redisKey)
-        const payload = { userId: newInspector.id, role: newInspector.role }
-        const accessToken = generateAccessToken(payload)
-        const refreshToken = generateRefreshToken(payload)
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        })
-        return { message: "Inspector registered successfully", user: newInspector, accessToken }
-    }
-    async resendOTP(email: string) {
-        const redisKey = `inspector:register:${email}`
-        const userData = await redisClient.get(redisKey)
 
-        if (!userData) {
-            throw new Error("Cannot resend OTP. Registration session Expired.");
-        }
-
-        const parsedData = JSON.parse(userData)
-
-        const newOTP = generateOtp()
-        parsedData.otp = newOTP
-        await redisClient.set(redisKey, JSON.stringify(parsedData), { EX: appConfig.otpExp })
-
-        await sendEmail(email, "Your Inspecto OTP(resent)", `Your new OTP is ${newOTP}`)
-        return { message: 'OTP resent successfully' }
-    }
     async forgetPassword(email: string, role: string) {
-        const user = await this.inspectorRepository.findInspectorByEmail(email)
-        if (!user) {
-            throw new Error('User not found')
-        }
-        const { hashedToken, resetToken } = this.generateToken()
+        try {
+            const user = await this.inspectorRepository.findOne({ email })
+            if (!user) {
+                throw new ServiceError('User not found', 'email')
+            }
+            const { hashedToken, resetToken } = this.generateToken()
 
-        const redisKey = `resetToken:${email}`
-        await redisClient.set(redisKey, hashedToken, { EX: 3600 }) //1 hour
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}&role=${role}`;
-        await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
-        return { message: 'Reset link sent successfully' }
-    }
-    async resetPassword(token: string, email: string, password: string) {
-        const isValid = await this.validateToken(email, token);
-        if (!isValid) {
-            throw new Error('Invalid or expired token');
+            const redisKey = `resetToken:${email}`
+            await redisClient.set(redisKey, hashedToken, { EX: 3600 }) //1 hour
+            const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}&role=${role}`;
+            await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
+            return { message: 'Reset link sent successfully' }
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Failed to send reset link. Please try again later.', 'email');
         }
-        const hashPassword = await bcrypt.hash(password, 10)
-        await this.inspectorRepository.updateInspectorPassword(email, password = hashPassword)
-        const redisKey = `resetToken:${email}`
-        await redisClient.del(redisKey)
-        return { message: 'Password reset successful' }
     }
+
+
+    async resetPassword(token: string, email: string, password: string) {
+        try {
+            const isValid = await this.validateToken(email, token);
+            if (!isValid) {
+                throw new ServiceError('Invalid or expired token');
+            }
+            const hashPassword = await bcrypt.hash(password, 10)
+            await this.inspectorRepository.updateInspectorPassword(email, password = hashPassword)
+            const redisKey = `resetToken:${email}`
+            await redisClient.del(redisKey)
+            return { message: 'Password reset successful' }
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Failed to Reset Password. Please Try again later')
+        }
+    }
+
+
     private generateToken() {
         const resetToken = crypto.randomUUID();
         const hashedToken = crypto

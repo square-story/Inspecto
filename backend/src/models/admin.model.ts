@@ -1,4 +1,11 @@
-import { model, Schema } from "mongoose";
+import mongoose, { Document, ObjectId, Schema } from "mongoose";
+
+export interface IAdmin extends Document {
+    _id: ObjectId;
+    email: string;
+    password: string;
+    role?: string;
+}
 
 const AdminSchema = new Schema({
     email: { type: String, required: true, unique: true },
@@ -6,4 +13,5 @@ const AdminSchema = new Schema({
     role: { type: String, default: 'admin' }
 })
 
-export const AdminModal = model('Admin', AdminSchema)
+
+export const Admin = mongoose.model<IAdmin>('Admin', AdminSchema)

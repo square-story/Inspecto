@@ -1,15 +1,24 @@
 import { Request, Response } from "express";
-import { IInspectionDocument, IInspectionInput } from "../models/inspection.model";
-import inspectionService from "../services/inspection.service";
+import { IInspectionInput } from "../models/inspection.model";
 import { ObjectId } from "mongoose";
+import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 
-export default class InspectionController {
-    public async createInspection(req: Request, res: Response): Promise<Response> {
+@injectable()
+export class InspectionController implements IInspectionController {
+    constructor(
+        @inject(TYPES.InspectionService) private inspectionService: IInspectionService
+    ) { }
+
+    createInspection = async (req: Request, res: Response): Promise<void> => {
         try {
             const user = req.user?.userId
             if (!user) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "User not found.",
                 });
@@ -19,133 +28,168 @@ export default class InspectionController {
             inspectionData.user = user as unknown as ObjectId
             inspectionData.inspector = inspectorId as unknown as ObjectId
             inspectionData.vehicle = vehicleId as unknown as ObjectId
-            const inspection = await inspectionService.createInspection(inspectionData);
-            return res.status(201).json({
+            const inspection = await this.inspectionService.createInspection(inspectionData);
+            res.status(201).json({
                 success: true,
                 data: inspection,
                 message: "Inspection booking saved successfully.",
             });
-        } catch (error: any) {
-            console.error("Error creating inspection:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
-
-    public async updateInspection(req: Request, res: Response): Promise<Response> {
+    updateInspection = async (req: Request, res: Response): Promise<void> => {
         try {
             const id = req.user?.userId;
 
             if (!id) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "User not found.",
                 });
             }
 
             const updateData: Partial<IInspectionInput> = req.body;
-            const updatedInspection = await inspectionService.updateInspection(id, updateData);
+            const updatedInspection = await this.inspectionService.updateInspection(id as string, updateData);
             if (!updatedInspection) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "Inspection not found.",
                 });
             }
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 inspection: updatedInspection,
                 message: "Inspection updated successfully.",
             });
-        } catch (error: any) {
-            console.error("Error updating inspection:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
-
-    public async getInspectionById(req: Request, res: Response): Promise<Response> {
+    getInspectionById = async (req: Request, res: Response): Promise<void> => {
         try {
             const { inspectionId } = req.params
 
             if (!inspectionId) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "inspections not found.",
                 });
             }
-            const inspection = await inspectionService.getInspectionById(inspectionId);
+            const inspection = await this.inspectionService.getInspectionById(inspectionId);
             if (!inspection) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "Inspection not found.",
                 });
             }
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 inspection,
             });
-        } catch (error: any) {
-            console.error("Error retrieving inspection:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    public async getAvailableSlots(req: Request, res: Response): Promise<Response> {
+
+    getAvailableSlots = async (req: Request, res: Response): Promise<void> => {
         try {
             const { inspectorId, date } = req.params;
-            const slots = await inspectionService.getAvailableSlots(inspectorId, new Date(date));
-            return res.status(200).json({
+            const slots = await this.inspectionService.getAvailableSlots(inspectorId, new Date(date));
+            res.status(200).json({
                 success: true,
                 slots,
             });
-        } catch (error: any) {
-            console.error("Error retrieving slots:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    public async findInspections(req: Request, res: Response): Promise<Response> {
+
+    findInspections = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId
             const role = req.user?.role
             if (!userId || !role) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "User not found.",
                 });
             }
             let inspections;
             if (role == 'user') {
-                inspections = await inspectionService.findInspections(userId);
+                inspections = await this.inspectionService.findInspections(userId as string);
             } else {
-                inspections = await inspectionService.findInspectionsByInspector(userId)
+                inspections = await this.inspectionService.findInspectionsByInspector(userId as string)
             }
             if (!inspections) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
                     message: "Inspection not found.",
                 });
             }
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 inspections,
             });
-        } catch (error: any) {
-            console.error("Error retrieving inspections Details:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 }

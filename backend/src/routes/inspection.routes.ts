@@ -1,35 +1,28 @@
-import { NextFunction, Request, Response, Router } from "express";
-import InspectionController from "../controllers/inspection.controller";
-import { authenticateToken } from "../middlewares/auth.middleware";
+import { Router } from "express";
 import { authorizeRole } from "../middlewares/role.middleware";
+import { container } from "../di/container";
+import { TYPES } from "../di/types";
+import { AuthMiddleware } from "../middlewares/auth.middleware";
+import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 
 const router = Router();
-const inspectionController = new InspectionController();
+
+const inspectionController = container.get<IInspectionController>(TYPES.InspectionController)
+const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware)
+const authenticateToken = authMiddleware.authenticateToken
 
 
 //get all inspections
-router.get('/', authenticateToken, authorizeRole('user', 'inspector'), (req: Request, res: Response, next: NextFunction) => {
-    inspectionController.findInspections(req, res).catch(next)
-})
+router.get('/', authenticateToken, authorizeRole('user', 'inspector'), inspectionController.findInspections)
 
 //get single inspections
-router.get('/:inspectionId', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
-    inspectionController.getInspectionById(req, res).catch(next)
-})
+router.get('/:inspectionId', authenticateToken, authorizeRole('user'), inspectionController.getInspectionById)
 
-router.post("/book", authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
-    inspectionController
-        .createInspection(req, res)
-        .catch(next);
-});
+router.post("/book", authenticateToken, authorizeRole('user'), inspectionController.createInspection);
 
-router.put('/update', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
-    inspectionController.updateInspection(req, res).catch(next)
-})
+router.put('/update', authenticateToken, authorizeRole('user'), inspectionController.updateInspection)
 
-router.get('/available-slots/:inspectorId/:date', authenticateToken, authorizeRole('user'), (req: Request, res: Response, next: NextFunction) => {
-    inspectionController.getAvailableSlots(req, res).catch(next)
-});
+router.get('/available-slots/:inspectorId/:date', authenticateToken, authorizeRole('user'), inspectionController.getAvailableSlots);
 
 
 
