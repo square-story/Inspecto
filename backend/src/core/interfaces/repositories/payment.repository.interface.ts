@@ -8,4 +8,5 @@ export interface IPaymentRepository extends BaseRepository<IPaymentDocument> {
     findUserPayments(userId: string): Promise<IPaymentDocument[]>;
     updatePayment(paymentIntentId: string, data: Partial<IPaymentInput>): Promise<IPaymentDocument | null>;
     getInspectionStats(inspectorId: string): Promise<IInspectionStatesFromPaymentDB>;
+    findPendingByInspection(inspectionId: string): Promise<IPaymentDocument[]>;
 }

@@ -15,7 +15,7 @@ export class PaymentController implements IPaymentController {
 
     createPaymentIntent = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { inspectionId, amount } = req.body;
+            const { inspectionId, amount, isRetry, paymentIntentId } = req.body;
             const userId = req.user?.userId;
 
             if (!userId) {
@@ -23,13 +23,10 @@ export class PaymentController implements IPaymentController {
                     success: false,
                     message: 'User not authenticated'
                 });
+                return;
             }
 
-            const paymentIntent = await this.paymentService.createPaymentIntent(
-                inspectionId,
-                userId as string,
-                amount
-            );
+            const paymentIntent = await this.paymentService.createPaymentIntent(inspectionId, userId as string, amount, isRetry, paymentIntentId);
 
             res.status(200).json({
                 success: true,
@@ -123,8 +120,9 @@ export class PaymentController implements IPaymentController {
                     success: false,
                     message: 'User not authenticated'
                 });
+                return;
             }
-            const response = await this.paymentService.find({ user: userId })
+            const response = await this.paymentService.findPayments(userId)
 
             if (!response) {
                 res.status(404).json({
@@ -135,7 +133,7 @@ export class PaymentController implements IPaymentController {
 
             res.status(200).json({
                 success: true,
-                message: "Payment getted successfully",
+                message: "Payment List generated successfully",
                 payments: response
             })
         } catch (error) {

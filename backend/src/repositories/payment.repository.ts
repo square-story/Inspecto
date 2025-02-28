@@ -21,7 +21,7 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
     async findUserPayments(userId: string): Promise<IPaymentDocument[]> {
         return await this.model.find({
             user: userId
-        }).populate('inspection').sort({ createdAt: -1 });
+        }).populate('inspection').populate('user').sort({ createdAt: -1 });
     }
     async findStalePayments(status: PaymentStatus, beforeDate: Date): Promise<IPaymentDocument[]> {
         return await this.find({
@@ -100,5 +100,11 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
             thisMonthEarnings,
             totalEarnings
         }
+    }
+    async findPendingByInspection(inspectionId: string): Promise<IPaymentDocument[]> {
+        return this.model.find({
+            inspection: inspectionId,
+            status: PaymentStatus.PENDING
+        }).exec();
     }
 }

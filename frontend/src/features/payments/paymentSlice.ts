@@ -27,7 +27,7 @@ const paymentSlice = createSlice({
             })
             .addCase(fetchPayments.fulfilled, (state, action) => {
                 state.loading = false
-                state.data = action.payload
+                state.data = (action.payload as unknown as IPayments[]) || []
                 state.error = null
             })
             .addCase(fetchPayments.rejected, (state, action) => {

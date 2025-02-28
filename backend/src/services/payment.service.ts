@@ -27,31 +27,78 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         super(paymentRepository)
     }
 
-    async createPaymentIntent(inspectionId: string, userId: string, amount: number): Promise<Stripe.PaymentIntent> {
-        try {
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: amount * 100,
-                currency: 'inr',
-                metadata: {
-                    inspectionId,
-                    userId
+    async createPaymentIntent(inspectionId: string, userId: string, amount: number, isRetry = false, paymentIntentId?: string): Promise<Stripe.PaymentIntent> {
+        // Check for existing pending payments for this inspection
+        const existingPayments = await this.paymentRepository.findPendingByInspection(inspectionId);
+
+        console.log('the existing payment is founded!:', existingPayments)
+
+        let reusableIntent: Stripe.PaymentIntent | null = null;
+
+        // Check each existing payment for reusable intents
+        for (const payment of existingPayments) {
+            try {
+                const intent = await stripe.paymentIntents.retrieve(payment.stripePaymentIntentId);
+
+                if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(intent.status)) {
+                    reusableIntent = intent;
+                    break;
+                } else {
+                    // Cancel non-reusable intents
+                    await stripe.paymentIntents.cancel(payment.stripePaymentIntentId);
+                    await this.paymentRepository.updatePayment(
+                        payment.stripePaymentIntentId,
+                        { status: PaymentStatus.FAILED }
+                    );
                 }
-            });
-
-            await this.paymentRepository.create({
-                inspection: new Types.ObjectId(inspectionId),
-                user: new Types.ObjectId(userId),
-                amount: amount,
-                currency: 'inr',
-                stripePaymentIntentId: paymentIntent.id,
-                status: PaymentStatus.PENDING
-            });
-
-            return paymentIntent;
-        } catch (error) {
-            console.error('Error creating payment intent:', error);
-            throw error;
+            } catch (error) {
+                console.error(`Error processing payment ${payment.stripePaymentIntentId}:`, error);
+                await this.paymentRepository.updatePayment(
+                    payment.stripePaymentIntentId,
+                    { status: PaymentStatus.FAILED }
+                );
+            }
         }
+
+        // Return reusable intent if found
+        if (reusableIntent) {
+            return reusableIntent;
+        }
+
+        // Handle retry logic
+        if (isRetry && paymentIntentId) {
+            try {
+                const existingIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+                if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(existingIntent.status)) {
+                    return existingIntent;
+                } else {
+                    throw new Error('Payment intent is not in a retryable state');
+                }
+            } catch (error) {
+                console.error(`Error retrieving payment intent ${paymentIntentId}:`, error);
+                throw new Error('Failed to retrieve payment intent for retry');
+            }
+        }
+
+        // Create new payment intent
+        const newPaymentIntent = await stripe.paymentIntents.create({
+            amount: amount * 100,
+            currency: 'inr',
+            metadata: { inspectionId, userId },
+            payment_method_types: ['card']
+        });
+
+        // Create new payment record
+        await this.paymentRepository.create({
+            inspection: new Types.ObjectId(inspectionId),
+            user: new Types.ObjectId(userId),
+            amount,
+            currency: 'inr',
+            stripePaymentIntentId: newPaymentIntent.id,
+            status: PaymentStatus.PENDING
+        });
+
+        return newPaymentIntent;
     }
 
     async handleWebhookEvent(event: Stripe.Event): Promise<void> {
