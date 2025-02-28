@@ -37,6 +37,8 @@ import LoadingSpinner from "@/components/LoadingSpinner"
 import InvoiceGenerator from "./components/invoice-generator"
 import { IPayments } from "@/features/payments/types"
 import StripePaymentWrapper from "@/components/StripePaymentWrapper"
+import { toast } from "sonner"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const ITEMS_PER_PAGE = 5
 
@@ -71,7 +73,7 @@ const PaymentTimer = ({ createdAt, onExpired }: { createdAt: string; onExpired: 
 
     useEffect(() => {
         const paymentTime = new Date(createdAt).getTime()
-        const expiryTime = paymentTime + 15 * 60 * 1000 // 15 minutes in milliseconds
+        const expiryTime = paymentTime + 10 * 60 * 1000 // 10 minutes in milliseconds
 
         const calculateTimeLeft = () => {
             const now = new Date().getTime()
@@ -90,7 +92,7 @@ const PaymentTimer = ({ createdAt, onExpired }: { createdAt: string; onExpired: 
             setTimeLeft(minutes * 60 + seconds)
 
             // Calculate progress percentage
-            const totalTime = 15 * 60 // 15 minutes in seconds
+            const totalTime = 10 * 60 // 10 minutes in seconds
             const elapsedTime = totalTime - (minutes * 60 + seconds)
             const progressPercentage = 100 - (elapsedTime / totalTime) * 100
             setProgress(progressPercentage)
@@ -206,18 +208,19 @@ export default function PaymentHistory() {
         setRetryPayment(payment)
     }
 
-    const handleRetrySuccess = (paymentIntentId: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleRetrySuccess = async (_payment: PaymentResponse) => {
         // Update the payment status in your state or refetch payments
-        console.log(`Payment retry successful for ${paymentIntentId}`);
+        toast.success(`Payment retry successful`);
         setRetryPayment(null);
         // You might want to refetch the payments here
-        dispatch(fetchPayments());
+        await dispatch(fetchPayments());
     }
 
-    const handleRetryError = (error: Error) => {
-        console.error("Payment retry failed:", error);
+    const handleRetryError = async (error: Error) => {
+        toast.error(`Payment retry failed: ${error.message}`);
         setRetryPayment(null);
-        // You might want to show an error message to the user here
+        await dispatch(fetchPayments());
     }
 
     const getTimeSlotLabel = (slotNumber: number) => {
@@ -686,14 +689,16 @@ export default function PaymentHistory() {
                                 Please complete your payment to confirm your inspection appointment.
                             </DialogDescription>
                         </DialogHeader>
-                        <StripePaymentWrapper
-                            amount={retryPayment.amount}
-                            inspectionId={retryPayment.inspection._id}
-                            onPaymentSuccess={handleRetrySuccess}
-                            onPaymentError={handleRetryError}
-                            isRetry={true}
-                            paymentIntentId={retryPayment.stripePaymentIntentId}
-                        />
+                        <ScrollArea className="h-full max-h-[calc(90vh-8rem)] px-5 scroll-smooth">
+                            <StripePaymentWrapper
+                                amount={retryPayment.amount}
+                                inspectionId={retryPayment.inspection._id}
+                                onPaymentSuccess={handleRetrySuccess}
+                                onPaymentError={handleRetryError}
+                                isRetry={true}
+                                paymentIntentId={retryPayment.stripePaymentIntentId}
+                            />
+                        </ScrollArea>
                     </DialogContent>
                 </Dialog>
             )}
