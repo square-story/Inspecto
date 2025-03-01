@@ -1,10 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Search, Edit, Trash, Plus, Eye } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { PreviewDocument } from "./PreviewDocument";
+import { HandleDocumentOperation } from "./HandleDocumentOperation";
+import { useConfirm } from "@omit/react-confirm-dialog";
 
 interface Document {
     id: string;
@@ -17,6 +20,8 @@ interface DocumentListProps {
 }
 
 export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
+
+    const confirm = useConfirm()
     // Convert string array (image URLs) to Document objects
     const initialDocs = initialDocuments.map((imageUrl, index) => ({
         id: `doc-${index}`,
@@ -26,63 +31,44 @@ export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
 
     const [documents, setDocuments] = useState<Document[]>(initialDocs);
     const [searchQuery, setSearchQuery] = useState('');
-    const [editingDocument, setEditingDocument] = useState<Document | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [newDocumentName, setNewDocumentName] = useState('');
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [newImageUrl, setNewImageUrl] = useState('');
 
     // Filter documents based on search query (on name if available)
     const filteredDocuments = documents.filter(doc =>
         (doc.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
     );
 
-    const handleEditDocument = (document: Document) => {
-        setEditingDocument(document);
-        setNewDocumentName(document.name || '');
-        setNewImageUrl(document.imageUrl);
+    const handleDeleteDocument = async (documentId: string) => {
+        const response = await confirm({
+            title: 'Delete Item',
+            description: 'Are you sure? This action cannot be undone.',
+            icon: <Trash className="size-4 text-destructive" />,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            cancelButton: {
+                size: 'default',
+                variant: 'outline'
+            },
+            confirmButton: {
+                className: 'bg-red-500 hover:bg-red-600 text-white'
+            },
+            alertDialogTitle: {
+                className: 'flex items-center gap-2'
+            }
+        })
+        if (response) setDocuments(docs => docs.filter(doc => doc.id !== documentId));
+    };
+
+
+    const handleEditDocument = () => {
         setIsEditDialogOpen(true);
     };
 
-    const handleSaveEdit = () => {
-        if (editingDocument) {
-            setDocuments(docs =>
-                docs.map(doc =>
-                    doc.id === editingDocument.id
-                        ? {
-                            ...doc,
-                            name: newDocumentName.trim() ? newDocumentName : doc.name,
-                            imageUrl: newImageUrl.trim() ? newImageUrl : doc.imageUrl
-                        }
-                        : doc
-                )
-            );
-            setIsEditDialogOpen(false);
-            setEditingDocument(null);
-            setNewDocumentName('');
-            setNewImageUrl('');
-        }
-    };
 
-    const handleDeleteDocument = (documentId: string) => {
-        setDocuments(docs => docs.filter(doc => doc.id !== documentId));
-    };
 
-    const handleAddDocument = () => {
-        if (newImageUrl.trim()) {
-            const newDoc: Document = {
-                id: `doc-${Date.now()}`,
-                imageUrl: newImageUrl,
-                name: newDocumentName.trim() ? newDocumentName : `Document ${documents.length + 1}`
-            };
-            setDocuments([...documents, newDoc]);
-            setIsAddDialogOpen(false);
-            setNewDocumentName('');
-            setNewImageUrl('');
-        }
-    };
 
     const handlePreviewDocument = (document: Document) => {
         setPreviewDocument(document);
@@ -96,8 +82,6 @@ export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
                 <Button
                     size="sm"
                     onClick={() => {
-                        setNewDocumentName('');
-                        setNewImageUrl('');
                         setIsAddDialogOpen(true);
                     }}
                 >
@@ -151,7 +135,7 @@ export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => handleEditDocument(doc)}
+                                                    onClick={() => handleEditDocument()}
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -178,124 +162,15 @@ export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
 
 
             {/* Edit Document Dialog */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Edit Document</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4 space-y-4">
-                        <div>
-                            <label className="text-sm font-medium mb-1 block">Document Name</label>
-                            <Input
-                                value={newDocumentName}
-                                onChange={(e) => setNewDocumentName(e.target.value)}
-                                placeholder="Document name"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium mb-1 block">Image URL</label>
-                            <Input
-                                value={newImageUrl}
-                                onChange={(e) => setNewImageUrl(e.target.value)}
-                                placeholder="Image URL"
-                            />
-                        </div>
-                        {newImageUrl && (
-                            <div className="h-40 w-full bg-gray-100 rounded overflow-hidden">
-                                <img
-                                    src={newImageUrl}
-                                    alt="Preview"
-                                    className="h-full w-full object-cover"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.src = "/api/placeholder/200/150";
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveEdit}>
-                            Save Changes
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <HandleDocumentOperation isDialogOpen={isEditDialogOpen} setIsDialogOpen={setIsEditDialogOpen} SubmitButtonTitle="Update" isEdit={true} title="Edit Document" />
 
             {/* Add Document Dialog */}
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Add New Document</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4 space-y-4">
-                        <div>
-                            <label className="text-sm font-medium mb-1 block">Document Name (Optional)</label>
-                            <Input
-                                value={newDocumentName}
-                                onChange={(e) => setNewDocumentName(e.target.value)}
-                                placeholder="Document name"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium mb-1 block">Image URL</label>
-                            <Input
-                                value={newImageUrl}
-                                onChange={(e) => setNewImageUrl(e.target.value)}
-                                placeholder="Image URL"
-                                required
-                            />
-                        </div>
-                        {newImageUrl && (
-                            <div className="h-40 w-full bg-gray-100 rounded overflow-hidden">
-                                <img
-                                    src={newImageUrl}
-                                    alt="Preview"
-                                    className="h-full w-full object-cover"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.src = "/api/placeholder/200/150";
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleAddDocument} disabled={!newImageUrl.trim()}>
-                            Add Document
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <HandleDocumentOperation isDialogOpen={isAddDialogOpen} setIsDialogOpen={setIsAddDialogOpen} />
 
             {/* Document Preview Dialog */}
-            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                <DialogContent className="sm:max-w-3xl">
-                    <DialogHeader>
-                        <DialogTitle>{previewDocument?.name || "Document Preview"}</DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-2 relative">
-
-
-                        <ScrollArea className="h-full max-h-[calc(90vh-8rem)] px-5 scroll-smooth"><img
-                            src={previewDocument?.imageUrl || "/api/placeholder/800/600"}
-                            alt={previewDocument?.name || "Document Preview"}
-                            className="max-w-full h-auto"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = "/api/placeholder/800/600";
-                            }}
-                        />
-                        </ScrollArea>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            {previewDocument && (
+                <PreviewDocument isPreviewOpen={isPreviewOpen} setIsPreviewOpen={setIsPreviewOpen} previewDocument={previewDocument} />
+            )}
         </Card>
     );
 };
