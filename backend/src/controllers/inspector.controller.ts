@@ -231,10 +231,10 @@ export class InspectorController implements IInspectorController {
                     success: false,
                     message: "No valid data provided for update."
                 });
-                return
+                return;
             }
 
-            const inspector = this.inspectorService.completeInspectorProfile(userId, data)
+            const inspector = await this.inspectorService.update(new Types.ObjectId(userId), data)
             if (!inspector) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
