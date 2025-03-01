@@ -105,8 +105,8 @@ export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
                     Add Document
                 </Button>
             </CardHeader>
-            <CardContent>
-                <div className="flex w-full items-center space-x-2 mb-4">
+            <CardContent className="p-0">
+                <div className="flex w-full items-center space-x-2 p-4 pb-0">
                     <div className="relative flex-1">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -118,61 +118,64 @@ export const DocumentList = ({ initialDocuments }: DocumentListProps) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredDocuments.length > 0 ? (
-                        filteredDocuments.map((doc) => (
-                            <div
-                                key={doc.id}
-                                className="flex flex-col bg-muted/50 rounded-md overflow-hidden"
-                            >
-                                <div className="relative h-40 w-full bg-gray-100">
-                                    <img
-                                        src={doc.imageUrl || "/api/placeholder/200/150"}
-                                        alt={doc.name || "Document"}
-                                        className="h-full w-full object-cover"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.src = "/api/placeholder/200/150";
-                                        }}
-                                    />
-                                </div>
-                                <div className="p-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-medium truncate">{doc.name || "Unnamed Document"}</span>
-                                        <div className="flex space-x-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handlePreviewDocument(doc)}
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleEditDocument(doc)}
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleDeleteDocument(doc.id)}
-                                            >
-                                                <Trash className="h-4 w-4" />
-                                            </Button>
+                <ScrollArea className="h-[calc(90vh-10rem)] py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+                        {filteredDocuments.length > 0 ? (
+                            filteredDocuments.map((doc) => (
+                                <div
+                                    key={doc.id}
+                                    className="flex flex-col bg-muted/50 rounded-md overflow-hidden"
+                                >
+                                    <div className="relative h-40 w-full bg-gray-100">
+                                        <img
+                                            src={doc.imageUrl || "/api/placeholder/200/150"}
+                                            alt={doc.name || "Document"}
+                                            className="h-full w-full object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.src = "/api/placeholder/200/150";
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="p-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-medium truncate">{doc.name || "Unnamed Document"}</span>
+                                            <div className="flex space-x-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handlePreviewDocument(doc)}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEditDocument(doc)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteDocument(doc.id)}
+                                                >
+                                                    <Trash className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-6 text-muted-foreground">
+                                {searchQuery ? "No documents found" : "No documents yet"}
                             </div>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center py-6 text-muted-foreground">
-                            {searchQuery ? "No documents found" : "No documents yet"}
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </ScrollArea>
             </CardContent>
+
 
             {/* Edit Document Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
