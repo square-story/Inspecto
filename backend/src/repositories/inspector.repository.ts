@@ -12,8 +12,7 @@ export class InspectorRepository extends BaseRepository<IInspector> implements I
     }
     async createInspector(inspectorData: Partial<IInspector>): Promise<IInspector> {
         try {
-            const inspector = new this.model(inspectorData);
-            return await inspector.save();
+            return await this.create(inspectorData);
         } catch (error) {
             console.error('Error in createInspector:', error);
             throw error;
@@ -22,8 +21,13 @@ export class InspectorRepository extends BaseRepository<IInspector> implements I
     async findInspectorById(id: string, session: ClientSession): Promise<IInspector | null> {
         return await this.model.findById(id).session(session)
     }
-    updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
-        return this.model.findByIdAndUpdate(userId, updates, { new: true });
+    async updateInspector(userId: string, updates: Partial<IInspector>): Promise<IInspector | null> {
+        try {
+            return await this.update(new mongoose.Types.ObjectId(userId), updates);
+        } catch (error) {
+            console.error('Error in updateInspector:', error);
+            throw error;
+        }
     }
     deleteInspector(userId: string): Promise<IInspector | null> {
         return this.model.findByIdAndDelete(userId);
@@ -54,7 +58,6 @@ export class InspectorRepository extends BaseRepository<IInspector> implements I
                     }
                 }
             }).exec();
-            console.log('something:', response)
             return response;
         } catch (error) {
             console.error('Error in getNearbyInspectors:', error);

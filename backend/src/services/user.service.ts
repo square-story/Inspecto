@@ -7,6 +7,7 @@ import { IUserService } from "../core/interfaces/services/user.service.interface
 import { TYPES } from "../di/types";
 import { Types } from "mongoose";
 import { IUserRepository } from "../core/interfaces/repositories/user.repository.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 
 @injectable()
@@ -15,22 +16,27 @@ export class UserService extends BaseService<IUsers> implements IUserService {
         super(userRepository);
     }
     async toggleStatus(userId: string) {
-        const user = await this.userRepository.findById(new Types.ObjectId(userId));
-        if (!user) {
-            throw new Error('User not found');
+        try {
+            const user = await this.userRepository.findById(new Types.ObjectId(userId));
+            if (!user) {
+                throw new ServiceError('User not found');
+            }
+    
+            const updateData = {
+                status: !user.status
+            }
+            const updatedUser = await this.userRepository.update(
+                new Types.ObjectId(userId),
+                updateData
+            );
+            if (!updatedUser) {
+                throw new ServiceError('Failed to update user status');
+            }
+            return updatedUser;
+        } catch (error) {
+            console.error('Error in toggleStatus:', error);
+            throw error;
         }
-
-        const updateData = {
-            status: !user.status
-        }
-        const updatedUser = await this.userRepository.update(
-            new Types.ObjectId(userId),
-            updateData
-        );
-        if (!updatedUser) {
-            throw new Error('Failed to update user status');
-        }
-        return updatedUser;
     }
     async changePassword(currentPassword: string, newPassword: string, userId: string): Promise<ChangePasswordResponse> {
         try {

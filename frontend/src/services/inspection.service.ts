@@ -16,8 +16,8 @@ export const InspectionService = {
             const response = await axiosInstance.get('/inspections/get-stats');
             return response.data.response;
         } catch (error) {
-            console.log('something wrong:', error);
-            return undefined;
+            console.error('Error fetching inspection stats:', error);
+            throw new Error('Failed to load inspection statistics. Please try again later.');
         }
     }
 }

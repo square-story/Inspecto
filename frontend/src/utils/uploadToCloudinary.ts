@@ -18,7 +18,11 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
 
         return response.data.public_id;  // ✅ Store only the public_id
     } catch (error) {
-        console.error("Error uploading to Cloudinary:", error);
-        throw new Error("Failed to upload image");
+        console.error("Cloudinary Upload Failure:", {
+            file: file.name,
+            size: file.size,
+            error
+        });
+        throw new Error(`File upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };
