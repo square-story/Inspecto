@@ -10,6 +10,7 @@ import { TYPES } from "../di/types";
 import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -42,7 +43,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             await this.paymentRepository.updatePayment(paymentIntentId, { status: PaymentStatus.FAILED });
         } catch (error) {
             console.error(`Error canceling payment intent ${paymentIntentId}:`, error);
-            throw new Error('Failed to cancel payment intent');
+            throw new ServiceError('Failed to cancel payment intent');
         }
     }
 
@@ -75,6 +76,12 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         if (isRetry && paymentIntentId) {
             try {
                 const existingIntent = await this.retrievePaymentIntent(paymentIntentId);
+                if (existingIntent.status === 'succeeded') {
+                    const existingPayment = await this.paymentRepository.getPaymentByIntentId(paymentIntentId);
+                    if (existingPayment?.status === PaymentStatus.SUCCEEDED) {
+                        return existingIntent;
+                    }
+                }
                 if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(existingIntent.status)) {
                     return existingIntent;
                 } else {

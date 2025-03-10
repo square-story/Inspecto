@@ -208,17 +208,15 @@ export default function PaymentHistory() {
         setRetryPayment(payment)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleRetrySuccess = async (_payment: PaymentResponse) => {
-        // Update the payment status in your state or refetch payments
+
+    const handleRetrySuccess = async () => {
         toast.success(`Payment retry successful`);
         setRetryPayment(null);
-        // You might want to refetch the payments here
         await dispatch(fetchPayments());
     }
 
-    const handleRetryError = async (error: Error) => {
-        toast.error(`Payment retry failed: ${error.message}`);
+    const handleRetryError = async (message: string) => {
+        toast.error(`Payment retry failed: ${message}`);
         setRetryPayment(null);
         await dispatch(fetchPayments());
     }

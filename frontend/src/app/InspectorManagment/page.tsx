@@ -68,7 +68,6 @@ export default function DemoPage() {
 
         if (!result) {
             toast.info('Denial cancelled');
-            // Reopen drawer after cancellation
             setIsDrawerOpen(true);
         }
     };
