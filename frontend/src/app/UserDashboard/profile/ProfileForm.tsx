@@ -35,7 +35,7 @@ const profileFormSchema = z.object({
         .max(30, { message: 'Last name must not be longer than 30 characters.' }),
     email: z.string().email({ message: 'Please enter a valid email.' }),
     address: z.string().optional(),
-    profile_image: z.string().url().optional(),
+    profile_image: z.string().optional(),
 })
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>

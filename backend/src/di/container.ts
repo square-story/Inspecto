@@ -74,6 +74,7 @@ import { PaymentStatusChecker } from "../utils/checkPaymentStatus";
 
 import { IAdminAuthService, IInspectorAuthService, IUserAuthService } from "../core/interfaces/services/auth.service.interface";
 import { IAdminAuthController, IInspectorAuthController, IUserAuthController } from "../core/interfaces/controllers/auth.controller.interface";
+import { CloudinaryController } from "../controllers/cloudinary.controller";
 
 
 
@@ -126,5 +127,8 @@ container.bind<IAdminAuthController>(TYPES.AdminAuthController).to(AdminAuthCont
 //Bind Middleware
 container.bind<AuthMiddleware>(TYPES.AuthMiddleware).to(AuthMiddleware);
 container.bind<PaymentStatusChecker>(TYPES.PaymentStatusChecker).to(PaymentStatusChecker);
+
+//cloudinary
+container.bind<CloudinaryController>(TYPES.CloudinaryController).to(CloudinaryController)
 
 export { container };

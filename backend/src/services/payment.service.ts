@@ -49,7 +49,6 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
 
     async createPaymentIntent(inspectionId: string, userId: string, amount: number, isRetry = false, paymentIntentId?: string): Promise<Stripe.PaymentIntent> {
         const existingPayments = await this.paymentRepository.findPendingByInspection(inspectionId);
-        console.log('Existing payments found:', existingPayments);
 
         let reusableIntent: Stripe.PaymentIntent | null = null;
 

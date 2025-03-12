@@ -44,5 +44,8 @@ export const TYPES = {
 
     //middleware
     AuthMiddleware: Symbol.for('AuthMiddleware'),
-    PaymentStatusChecker: Symbol.for('PaymentStatusChecker')
+    PaymentStatusChecker: Symbol.for('PaymentStatusChecker'),
+
+    //cloudinary
+    CloudinaryController: Symbol.for('CloudinaryController')
 };

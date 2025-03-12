@@ -33,8 +33,8 @@ const profileFormSchema = z.object({
     phone: z
         .string()
         .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-    signature: z.string().url().optional(),
-    profile_image: z.string().url().optional()
+    signature: z.string().optional(),
+    profile_image: z.string().optional()
 })
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -84,7 +84,7 @@ export default function InspectorProfileForm() {
     };
 
     const handleSignature = (url: string | null) => {
-        form.setValue("signature", url || inspector?.signature)
+        form.setValue("signature", url || inspector?.signature);
     }
 
     if (loading) return (<LoadingSpinner />)

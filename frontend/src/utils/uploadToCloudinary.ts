@@ -16,7 +16,7 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
             throw new Error("No public ID received from Cloudinary");
         }
 
-        return response.data.public_id;  // ✅ Store only the public_id
+        return response.data.public_id;  // Return only the public_id
     } catch (error) {
         console.error("Cloudinary Upload Failure:", {
             file: file.name,
