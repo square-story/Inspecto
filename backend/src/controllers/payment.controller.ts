@@ -10,7 +10,7 @@ import { IPaymentService } from "../core/interfaces/services/payment.service.int
 @injectable()
 export class PaymentController implements IPaymentController {
     constructor(
-        @inject(TYPES.PaymentService) private paymentService: IPaymentService
+        @inject(TYPES.PaymentService) private _paymentService: IPaymentService
     ) { }
 
     createPaymentIntent = async (req: Request, res: Response): Promise<void> => {
@@ -26,7 +26,7 @@ export class PaymentController implements IPaymentController {
                 return;
             }
 
-            const paymentIntent = await this.paymentService.createPaymentIntent(inspectionId, userId as string, amount, isRetry, paymentIntentId);
+            const paymentIntent = await this._paymentService.createPaymentIntent(inspectionId, userId as string, amount, isRetry, paymentIntentId);
 
             res.status(200).json({
                 success: true,
@@ -62,7 +62,7 @@ export class PaymentController implements IPaymentController {
                 appConfig.stripWebhook
             );
 
-            await this.paymentService.handleWebhookEvent(event);
+            await this._paymentService.handleWebhookEvent(event);
 
             res.status(200).json({ received: true });
         } catch (error) {
@@ -85,7 +85,7 @@ export class PaymentController implements IPaymentController {
         try {
             const { paymentIntentId } = req.params;
 
-            const payment = await this.paymentService.verifyPayment(paymentIntentId);
+            const payment = await this._paymentService.verifyPayment(paymentIntentId);
             if (!payment) {
                 res.status(404).json({
                     success: false,
@@ -122,7 +122,7 @@ export class PaymentController implements IPaymentController {
                 });
                 return;
             }
-            const response = await this.paymentService.findPayments(userId)
+            const response = await this._paymentService.findPayments(userId)
 
             if (!response) {
                 res.status(404).json({

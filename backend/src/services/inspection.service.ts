@@ -15,16 +15,16 @@ import { IPaymentRepository } from "../core/interfaces/repositories/payment.repo
 @injectable()
 export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
     constructor(
-        @inject(TYPES.InspectionRepository) private inspectionRepository: IInspectionRepository,
-        @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
-        @inject(TYPES.PaymentRepository) private paymentRepository: IPaymentRepository,
+        @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
+        @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
+        @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
     ) {
-        super(inspectionRepository);
+        super(_inspectionRepository);
     }
     async getStatsAboutInspector(inspectorId: string): Promise<IInspectionStats> {
         try {
-            const { completedInspections, pendingInspections, totalInspections } = await this.inspectionRepository.getInspectionStats(inspectorId);
-            const { thisMonthEarnings, totalEarnings } = await this.paymentRepository.getInspectionStats(inspectorId)
+            const { completedInspections, pendingInspections, totalInspections } = await this._inspectionRepository.getInspectionStats(inspectorId);
+            const { thisMonthEarnings, totalEarnings } = await this._paymentRepository.getInspectionStats(inspectorId)
 
             const completionRate = totalInspections > 0
                 ? (completedInspections / totalInspections) * 100
@@ -49,7 +49,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async getUserInspections(userId: string): Promise<IInspectionDocument[]> {
         try {
-            return await this.inspectionRepository.find({ user: userId });
+            return await this._inspectionRepository.find({ user: userId });
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting user inspections: ${error.message}`);
@@ -60,7 +60,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async getInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
         try {
-            return await this.inspectionRepository.find({ inspector: inspectorId });
+            return await this._inspectionRepository.find({ inspector: inspectorId });
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting inspector inspections: ${error.message}`);
@@ -71,7 +71,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async updateInspection(id: string, updateData: Partial<IInspectionInput>): Promise<IInspectionDocument | null> {
         try {
-            return await this.inspectionRepository.update(new Types.ObjectId(id), updateData);
+            return await this._inspectionRepository.update(new Types.ObjectId(id), updateData);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error updating inspection: ${error.message}`);
@@ -82,7 +82,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async getInspectionById(id: string): Promise<IInspectionDocument | null> {
         try {
-            return await this.inspectionRepository.findById(new Types.ObjectId(id));
+            return await this._inspectionRepository.findById(new Types.ObjectId(id));
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting inspection by ID: ${error.message}`);
@@ -93,7 +93,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async findInspections(userId: string): Promise<IInspectionDocument[]> {
         try {
-            return await this.inspectionRepository.findUserInspections(userId);
+            return await this._inspectionRepository.findUserInspections(userId);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error finding inspections: ${error.message}`);
@@ -104,7 +104,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async findInspectionsByInspector(inspectorId: string): Promise<IInspectionDocument[]> {
         try {
-            return await this.inspectionRepository.findInspectorInspections(inspectorId);
+            return await this._inspectionRepository.findInspectorInspections(inspectorId);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error finding inspections by inspector: ${error.message}`);
@@ -115,7 +115,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async checkSlotAvaliability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean> {
         try {
-            return await this.inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber, session);
+            return await this._inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber, session);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error checking slot availability: ${error.message}`);
@@ -126,12 +126,12 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async getAvailableSlots(inspectorId: string, date: Date): Promise<number[]> {
         try {
-            const inspector = await this.inspectorRepository.findById(new Types.ObjectId(inspectorId));
+            const inspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!inspector) throw new ServiceError('Inspector not found');
             const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' }) as keyof WeeklyAvailability;
             const dayAvailability = inspector.availableSlots[dayOfWeek];
             if (!dayAvailability.enabled) throw new ServiceError('Inspector is not available on this day');
-            return await this.inspectionRepository.getAvailableSlots(inspectorId, date, dayAvailability);
+            return await this._inspectionRepository.getAvailableSlots(inspectorId, date, dayAvailability);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting available slots: ${error.message}`);
@@ -148,7 +148,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 throw new ServiceError('Missing required booking data');
             }
 
-            const existingBooking = await this.inspectionRepository.existingInspection({
+            const existingBooking = await this._inspectionRepository.existingInspection({
                 date: data.date,
                 inspector: data.inspector.toString(),
                 slotNumber: data.slotNumber,
@@ -175,7 +175,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 throw new ServiceError('User is required for booking');
             }
 
-            const inspector = await this.inspectorRepository.findInspectorById(data.inspector!.toString(), session);
+            const inspector = await this._inspectorRepository.findInspectorById(data.inspector!.toString(), session);
 
             if (!inspector) {
                 throw new ServiceError('Inspector not found');
@@ -191,7 +191,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
             let booking;
             if (existingBooking) {
-                booking = await this.inspectionRepository.updateInspection(
+                booking = await this._inspectionRepository.updateInspection(
                     existingBooking.id,
                     {
                         ...data,
@@ -203,7 +203,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 );
             } else {
                 // Create new booking if no existing one found
-                booking = await this.inspectionRepository.createInspection({
+                booking = await this._inspectionRepository.createInspection({
                     ...data,
                     bookingReference,
                     version: 0,
@@ -212,7 +212,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 }, session);
             }
 
-            await this.inspectorRepository.bookingHandler(
+            await this._inspectorRepository.bookingHandler(
                 data.inspector.toString(),
                 data.user.toString(),
                 data.date,
@@ -239,11 +239,11 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const inspection = await this.inspectionRepository.findById(new Types.ObjectId(inspectionId));
+            const inspection = await this._inspectionRepository.findById(new Types.ObjectId(inspectionId));
             if (!inspection) {
                 throw new ServiceError('Inspection not found');
             }
-            await this.inspectorRepository.unbookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
+            await this._inspectorRepository.unbookingHandler(inspection.inspector.toString(), inspection.user.toString(), inspection.date);
             await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();

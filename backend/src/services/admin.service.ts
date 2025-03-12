@@ -13,11 +13,11 @@ import { IAdminRepository } from "../core/interfaces/repositories/admin.reposito
 @injectable()
 export class AdminService extends BaseService<IAdmin> implements IAdminService {
     constructor(
-        @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-        @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
-        @inject(TYPES.AdminRepository) private adminRepository: IAdminRepository
+        @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+        @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
+        @inject(TYPES.AdminRepository) private _adminRepository: IAdminRepository
     ) {
-        super(adminRepository);
+        super(_adminRepository);
     }
 
     async findByEmail(email: string): Promise<IAdmin | null> {
@@ -33,7 +33,7 @@ export class AdminService extends BaseService<IAdmin> implements IAdminService {
 
     async getAllInspectors(): Promise<IInspector[]> {
         try {
-            return await this.inspectorRepository.findAll();
+            return await this._inspectorRepository.findAll();
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting all inspectors: ${error.message}`);
@@ -44,7 +44,7 @@ export class AdminService extends BaseService<IAdmin> implements IAdminService {
 
     async getAllUsers(): Promise<IUsers[]> {
         try {
-            return await this.userRepository.getAllUsers();
+            return await this._userRepository.getAllUsers();
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting all users: ${error.message}`);

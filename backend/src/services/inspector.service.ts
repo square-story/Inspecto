@@ -16,16 +16,16 @@ export type ChangePasswordResponse = {
 @injectable()
 export class InspectorService extends BaseService<IInspector> implements IInspectorService {
     constructor(
-        @inject(TYPES.InspectorRepository) private inspectorRepository: IInspectorRepository,
-        @inject(TYPES.EmailService) private emailService: IEmailService,
+        @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
+        @inject(TYPES.EmailService) private _emailService: IEmailService,
     ) {
-        super(inspectorRepository);
+        super(_inspectorRepository);
     }
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
         const response = await this.repository.findByIdAndUpdate(new Types.ObjectId(userId), data)
         if (response) {
-            return await this.inspectorRepository.updateInspectorProfileCompletion(userId)
+            return await this._inspectorRepository.updateInspectorProfileCompletion(userId)
         }
     }
 
@@ -40,7 +40,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
             const updatedInspector = await this.repository.findByIdAndUpdate(new Types.ObjectId(inspectorId), updates)
             if (updatedInspector) {
                 // Send approval email
-                await this.emailService.sendApprovalEmail(
+                await this._emailService.sendApprovalEmail(
                     updatedInspector.email,
                     updatedInspector.firstName
                 );
@@ -62,11 +62,11 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                 deniedAt: new Date(),
                 denialReason: reason
             };
-            const updatedInspector = await this.inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
+            const updatedInspector = await this._inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
 
             if (updatedInspector) {
                 // Send denial email
-                await this.emailService.sendDenialEmail(
+                await this._emailService.sendDenialEmail(
                     updatedInspector.email,
                     updatedInspector.firstName,
                     reason
@@ -83,14 +83,14 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
 
     async BlockHandler(inspectorId: string) {
         try {
-            const currentInspector = await this.inspectorRepository.findById(new Types.ObjectId(inspectorId));
+            const currentInspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!currentInspector) {
                 throw new Error('Inspector not found');
             }
             const updates = {
                 status: currentInspector.status === InspectorStatus.BLOCKED ? InspectorStatus.APPROVED : InspectorStatus.BLOCKED,
             };
-            await this.inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
+            await this._inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
             // if (updatedInspector) {
             //     if (updates.status === InspectorStatus.BLOCKED) {
             //         await EmailService.sendBlockNotification(updatedInspector.email, updatedInspector.firstName);
@@ -108,7 +108,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
 
     async changePassword(currentPassword: string, newPassword: string, inspectorId: string): Promise<ChangePasswordResponse> {
         try {
-            const isValid = await this.inspectorRepository.findById(new Types.ObjectId(inspectorId))
+            const isValid = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId))
             if (!isValid) {
                 return {
                     status: false,
@@ -125,7 +125,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                 };
             }
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            const response = await this.inspectorRepository.update(new Types.ObjectId(inspectorId), {
+            const response = await this._inspectorRepository.update(new Types.ObjectId(inspectorId), {
                 password: hashedNewPassword,
             });
 
@@ -146,13 +146,13 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
         }
     }
     async getNearbyInspectors(latitude: string, longitude: string) {
-        return await this.inspectorRepository.getNearbyInspectors(latitude, longitude)
+        return await this._inspectorRepository.getNearbyInspectors(latitude, longitude)
     }
 
     async bookingHandler(inspectorId: string, userId: string, date: Date) {
-        return await this.inspectorRepository.bookingHandler(inspectorId, userId, date,)
+        return await this._inspectorRepository.bookingHandler(inspectorId, userId, date,)
     }
     async unBookingHandler(inspectorId: string, userId: string, date: Date) {
-        return await this.inspectorRepository.unbookingHandler(inspectorId, userId, date)
+        return await this._inspectorRepository.unbookingHandler(inspectorId, userId, date)
     }
 }

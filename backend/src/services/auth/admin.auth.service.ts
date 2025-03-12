@@ -10,14 +10,14 @@ import { ServiceError } from "../../core/errors/service.error";
 export class AdminAuthService extends BaseAuthService implements IAdminAuthService {
 
     constructor(
-        @inject(TYPES.AdminRepository) private readonly adminRepository: IAdminRepository
+        @inject(TYPES.AdminRepository) private readonly _adminRepository: IAdminRepository
     ) {
         super();
     }
 
     async login(email: string, password: string) {
         try {
-            const admin = await this.adminRepository.findByEmail(email)
+            const admin = await this._adminRepository.findByEmail(email)
             if (!admin) throw new ServiceError('Admin Not Found', 'email')
             if (admin.password !== password) throw new ServiceError('Invalid Password', 'password')
             const payload = {

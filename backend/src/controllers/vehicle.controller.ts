@@ -15,7 +15,7 @@ interface MongoErrorWithCode extends Error {
 @injectable()
 export class VehicleController implements IVehicleController {
     constructor(
-        @inject(TYPES.VehicleService) private vehicleService: IVehicleService
+        @inject(TYPES.VehicleService) private _vehicleService: IVehicleService
     ) { }
 
     private handleError(res: Response, error: unknown): void {
@@ -79,7 +79,7 @@ export class VehicleController implements IVehicleController {
             // Attach user ID to vehicle data
             vehicleData.user = userId as unknown as ObjectId;
 
-            const vehicle = await this.vehicleService.create(vehicleData);
+            const vehicle = await this._vehicleService.create(vehicleData);
             res.status(201).json(vehicle);
         } catch (error) {
             this.handleError(res, error);
@@ -106,7 +106,7 @@ export class VehicleController implements IVehicleController {
                 return;
             }
 
-            const vehicle = await this.vehicleService.findById(new Types.ObjectId(vehicleId));
+            const vehicle = await this._vehicleService.findById(new Types.ObjectId(vehicleId));
             if (!vehicle) {
                 res.status(404).json({
                     message: "Vehicle not found"
@@ -131,7 +131,7 @@ export class VehicleController implements IVehicleController {
                 return;
             }
 
-            const vehicles = await this.vehicleService.find({ user: userId });
+            const vehicles = await this._vehicleService.find({ user: userId });
             if (!vehicles || vehicles.length === 0) {
                 res.status(404).json({
                     message: "No vehicles found for this user"
@@ -173,7 +173,7 @@ export class VehicleController implements IVehicleController {
                 return;
             }
 
-            const updatedVehicle = await this.vehicleService.update(new Types.ObjectId(vehicleId), updateData);
+            const updatedVehicle = await this._vehicleService.update(new Types.ObjectId(vehicleId), updateData);
             res.json(updatedVehicle);
         } catch (error) {
             this.handleError(res, error);
@@ -200,7 +200,7 @@ export class VehicleController implements IVehicleController {
                 return;
             }
 
-            await this.vehicleService.delete(new Types.ObjectId(vehicleId));
+            await this._vehicleService.delete(new Types.ObjectId(vehicleId));
             res.status(204).send();
         } catch (error) {
             this.handleError(res, error);

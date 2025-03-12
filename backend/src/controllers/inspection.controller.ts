@@ -11,7 +11,7 @@ import { ServiceError } from "../core/errors/service.error";
 @injectable()
 export class InspectionController implements IInspectionController {
     constructor(
-        @inject(TYPES.InspectionService) private inspectionService: IInspectionService
+        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService
     ) { }
 
     createInspection = async (req: Request, res: Response): Promise<void> => {
@@ -28,7 +28,7 @@ export class InspectionController implements IInspectionController {
             inspectionData.user = user as unknown as ObjectId
             inspectionData.inspector = inspectorId as unknown as ObjectId
             inspectionData.vehicle = vehicleId as unknown as ObjectId
-            const inspection = await this.inspectionService.createInspection(inspectionData);
+            const inspection = await this._inspectionService.createInspection(inspectionData);
             res.status(201).json({
                 success: true,
                 data: inspection,
@@ -62,7 +62,7 @@ export class InspectionController implements IInspectionController {
             }
 
             const updateData: Partial<IInspectionInput> = req.body;
-            const updatedInspection = await this.inspectionService.updateInspection(id as string, updateData);
+            const updatedInspection = await this._inspectionService.updateInspection(id as string, updateData);
             if (!updatedInspection) {
                 res.status(404).json({
                     success: false,
@@ -100,7 +100,7 @@ export class InspectionController implements IInspectionController {
                     message: "inspections not found.",
                 });
             }
-            const inspection = await this.inspectionService.getInspectionById(inspectionId);
+            const inspection = await this._inspectionService.getInspectionById(inspectionId);
             if (!inspection) {
                 res.status(404).json({
                     success: false,
@@ -130,7 +130,7 @@ export class InspectionController implements IInspectionController {
     getAvailableSlots = async (req: Request, res: Response): Promise<void> => {
         try {
             const { inspectorId, date } = req.params;
-            const slots = await this.inspectionService.getAvailableSlots(inspectorId, new Date(date));
+            const slots = await this._inspectionService.getAvailableSlots(inspectorId, new Date(date));
             res.status(200).json({
                 success: true,
                 slots,
@@ -163,9 +163,9 @@ export class InspectionController implements IInspectionController {
             }
             let inspections;
             if (role == 'user') {
-                inspections = await this.inspectionService.findInspections(userId as string);
+                inspections = await this._inspectionService.findInspections(userId as string);
             } else {
-                inspections = await this.inspectionService.findInspectionsByInspector(userId as string)
+                inspections = await this._inspectionService.findInspectionsByInspector(userId as string)
             }
             if (!inspections) {
                 res.status(404).json({
@@ -205,7 +205,7 @@ export class InspectionController implements IInspectionController {
                 });
                 return;
             }
-            const response = await this.inspectionService.getStatsAboutInspector(inspectorId);
+            const response = await this._inspectionService.getStatsAboutInspector(inspectorId);
             res.status(200).json({
                 success: true,
                 response,

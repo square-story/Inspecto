@@ -18,14 +18,14 @@ import { ServiceError } from '../../core/errors/service.error';
 export class InspectorAuthService extends BaseAuthService implements IInspectorAuthService {
 
     constructor(
-        @inject(TYPES.InspectorRepository) private readonly inspectorRepository: IInspectorRepository
+        @inject(TYPES.InspectorRepository) private readonly _inspectorRepository: IInspectorRepository
     ) {
         super();
     }
 
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
         try {
-            const inspector = await this.inspectorRepository.findOne({ email });
+            const inspector = await this._inspectorRepository.findOne({ email });
             if (!inspector) {
                 throw new ServiceError('Inspector not found', 'email');
             }
@@ -52,7 +52,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             if (!payload?.userId || !payload?.role) {
                 throw new ServiceError('Invalid token payload', 'token');
             }
-            const inspector = await this.inspectorRepository.findById(new Types.ObjectId(payload.userId.toString()));
+            const inspector = await this._inspectorRepository.findById(new Types.ObjectId(payload.userId.toString()));
 
             if (!inspector || inspector.status === InspectorStatus.BLOCKED) {
                 return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
@@ -67,7 +67,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
 
     async registerInspector(email: string, password: string, firstName: string, lastName: string, phone: string) {
         try {
-            const existing = await this.inspectorRepository.findOne({ email })
+            const existing = await this._inspectorRepository.findOne({ email })
             if (existing) {
                 throw new ServiceError('User Already Exising', 'email')
             }
@@ -95,7 +95,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             if (parsedData.otp !== otp) {
                 throw new ServiceError('Invalid OTP');
             }
-            const newInspector = await this.inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
+            const newInspector = await this._inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
             await redisClient.del(redisKey)
             const payload = { userId: newInspector.id, role: newInspector.role }
             const { accessToken, refreshToken } = this.generateTokens(payload)
@@ -132,7 +132,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
 
     async forgetPassword(email: string, role: string) {
         try {
-            const user = await this.inspectorRepository.findOne({ email })
+            const user = await this._inspectorRepository.findOne({ email })
             if (!user) {
                 throw new ServiceError('User not found', 'email')
             }
@@ -157,7 +157,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
                 throw new ServiceError('Invalid or expired token');
             }
             const hashPassword = await bcrypt.hash(password, 10)
-            await this.inspectorRepository.updateInspectorPassword(email, password = hashPassword)
+            await this._inspectorRepository.updateInspectorPassword(email, password = hashPassword)
             const redisKey = `resetToken:${email}`
             await redisClient.del(redisKey)
             return { message: 'Password reset successful' }

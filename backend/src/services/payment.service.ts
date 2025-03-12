@@ -21,11 +21,11 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
     private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
 
     constructor(
-        @inject(TYPES.PaymentRepository) private paymentRepository: IPaymentRepository,
-        @inject(TYPES.InspectionRepository) private inspectionRepository: IInspectionRepository,
-        @inject(TYPES.InspectionService) private inspectionService: IInspectionService,
+        @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
+        @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
+        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
     ) {
-        super(paymentRepository);
+        super(_paymentRepository);
     }
 
     private async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
@@ -40,7 +40,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
     private async cancelPaymentIntent(paymentIntentId: string): Promise<void> {
         try {
             await stripe.paymentIntents.cancel(paymentIntentId);
-            await this.paymentRepository.updatePayment(paymentIntentId, { status: PaymentStatus.FAILED });
+            await this._paymentRepository.updatePayment(paymentIntentId, { status: PaymentStatus.FAILED });
         } catch (error) {
             console.error(`Error canceling payment intent ${paymentIntentId}:`, error);
             throw new ServiceError('Failed to cancel payment intent');
@@ -48,7 +48,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
     }
 
     async createPaymentIntent(inspectionId: string, userId: string, amount: number, isRetry = false, paymentIntentId?: string): Promise<Stripe.PaymentIntent> {
-        const existingPayments = await this.paymentRepository.findPendingByInspection(inspectionId);
+        const existingPayments = await this._paymentRepository.findPendingByInspection(inspectionId);
 
         let reusableIntent: Stripe.PaymentIntent | null = null;
 
@@ -64,7 +64,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 }
             } catch (error) {
                 console.error(`Error processing payment ${payment.stripePaymentIntentId}:`, error);
-                await this.paymentRepository.updatePayment(payment.stripePaymentIntentId, { status: PaymentStatus.FAILED });
+                await this._paymentRepository.updatePayment(payment.stripePaymentIntentId, { status: PaymentStatus.FAILED });
             }
         }
 
@@ -76,7 +76,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             try {
                 const existingIntent = await this.retrievePaymentIntent(paymentIntentId);
                 if (existingIntent.status === 'succeeded') {
-                    const existingPayment = await this.paymentRepository.getPaymentByIntentId(paymentIntentId);
+                    const existingPayment = await this._paymentRepository.getPaymentByIntentId(paymentIntentId);
                     if (existingPayment?.status === PaymentStatus.SUCCEEDED) {
                         return existingIntent;
                     }
@@ -99,7 +99,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             payment_method_types: ['card']
         });
 
-        await this.paymentRepository.create({
+        await this._paymentRepository.create({
             inspection: new Types.ObjectId(inspectionId),
             user: new Types.ObjectId(userId),
             amount,
@@ -120,26 +120,26 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             switch (event.type) {
                 case "payment_intent.succeeded": {
                     const paymentIntent = event.data.object as Stripe.PaymentIntent;
-                    payment = await this.paymentRepository.updatePayment(paymentIntent.id, { status: PaymentStatus.SUCCEEDED });
+                    payment = await this._paymentRepository.updatePayment(paymentIntent.id, { status: PaymentStatus.SUCCEEDED });
 
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
 
-                    await this.inspectionRepository.update(payment.inspection, { status: InspectionStatus.CONFIRMED });
+                    await this._inspectionRepository.update(payment.inspection, { status: InspectionStatus.CONFIRMED });
                     break;
                 }
 
                 case "payment_intent.payment_failed": {
                     const failedPayment = event.data.object as Stripe.PaymentIntent;
-                    payment = await this.paymentRepository.updatePayment(failedPayment.id, { status: PaymentStatus.FAILED });
+                    payment = await this._paymentRepository.updatePayment(failedPayment.id, { status: PaymentStatus.FAILED });
 
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
 
-                    await this.inspectionRepository.update(payment.inspection, { status: InspectionStatus.CANCELLED });
-                    await this.inspectionService.cancelInspection(payment.inspection.toString());
+                    await this._inspectionRepository.update(payment.inspection, { status: InspectionStatus.CANCELLED });
+                    await this._inspectionService.cancelInspection(payment.inspection.toString());
                     break;
                 }
             }
@@ -156,7 +156,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
 
     async verifyPayment(paymentIntentId: string) {
         try {
-            return await this.paymentRepository.getPaymentByIntentId(paymentIntentId);
+            return await this._paymentRepository.getPaymentByIntentId(paymentIntentId);
         } catch (error) {
             console.error('Error verifying payment:', error);
             throw error;
@@ -165,7 +165,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
 
     async findPayments(userId: string) {
         try {
-            return await this.paymentRepository.findUserPayments(userId);
+            return await this._paymentRepository.findUserPayments(userId);
         } catch (error) {
             console.error('Error getting payments data:', error);
             throw error;
@@ -178,7 +178,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
 
         try {
             const staleDate = new Date(Date.now() - this.PENDING_TIMEOUT_MS);
-            const stalePayments = await this.paymentRepository.findStalePayments(PaymentStatus.PENDING, staleDate);
+            const stalePayments = await this._paymentRepository.findStalePayments(PaymentStatus.PENDING, staleDate);
 
             for (const payment of stalePayments) {
                 try {
@@ -188,9 +188,9 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                         await this.cancelPaymentIntent(payment.stripePaymentIntentId);
                     }
 
-                    await this.paymentRepository.updatePayment(payment.stripePaymentIntentId, { status: PaymentStatus.FAILED });
-                    await this.inspectionRepository.update(payment.inspection, { status: InspectionStatus.CANCELLED });
-                    await this.inspectionService.cancelInspection(payment.inspection.toString());
+                    await this._paymentRepository.updatePayment(payment.stripePaymentIntentId, { status: PaymentStatus.FAILED });
+                    await this._inspectionRepository.update(payment.inspection, { status: InspectionStatus.CANCELLED });
+                    await this._inspectionService.cancelInspection(payment.inspection.toString());
                 } catch (error) {
                     console.error(`Error handling stale payment ${payment.stripePaymentIntentId}:`, error);
                     continue;

@@ -9,13 +9,13 @@ import { ServiceError } from '../../core/errors/service.error';
 @injectable()
 export class AdminAuthController implements IAdminAuthController {
     constructor(
-        @inject(TYPES.AdminAuthService) private adminAuthService: IAdminAuthService
+        @inject(TYPES.AdminAuthService) private _adminAuthService: IAdminAuthService
     ) { }
 
     login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body;
-            const { accessToken, refreshToken } = await this.adminAuthService.login(email, password);
+            const { accessToken, refreshToken } = await this._adminAuthService.login(email, password);
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
@@ -47,7 +47,7 @@ export class AdminAuthController implements IAdminAuthController {
                 res.status(401).json({ message: 'Refresh token missing' });
                 return;
             }
-            const { accessToken } = await this.adminAuthService.refreshToken(refreshToken);
+            const { accessToken } = await this._adminAuthService.refreshToken(refreshToken);
             res.status(200).json({ accessToken, status: true });
         } catch (error) {
             if (error instanceof ServiceError) {

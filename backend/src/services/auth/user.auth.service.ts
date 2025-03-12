@@ -17,13 +17,13 @@ import { IUsers } from "../../models/user.model";
 export class UserAuthService extends BaseAuthService implements IUserAuthService {
 
     constructor(
-        @inject(TYPES.UserRepository) private userRepository: IUserRepository
+        @inject(TYPES.UserRepository) private _userRepository: IUserRepository
     ) {
         super();
     }
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string; }> {
         try {
-            const user = await this.userRepository.findUserByEmail(email);
+            const user = await this._userRepository.findUserByEmail(email);
             if (!user) {
                 throw new ServiceError('User not found', 'email');
             }
@@ -51,7 +51,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
             if (!payload?.userId || !payload?.role) {
                 throw new ServiceError('Invalid token payload', 'token')
             }
-            const user = await this.userRepository.findById(payload.userId)
+            const user = await this._userRepository.findById(payload.userId)
             if (!user || !user.status) {
                 return { accessToken: '', status: false, blockReason: "This User Account is Blocked" }
             }
@@ -64,7 +64,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
     }
 
     async registerUser(email: string, password: string, firstName: string, lastName: string): Promise<{ message: string }> {
-        const existingUser = await this.userRepository.findUserByEmail(email)
+        const existingUser = await this._userRepository.findUserByEmail(email)
 
         if (existingUser) {
             throw new ServiceError('user already Exist');
@@ -90,7 +90,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
             throw new ServiceError('Invalid OTP');
         }
 
-        const newUser = await this.userRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
+        const newUser = await this._userRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
         await redisClient.del(redisKey)
         const payload = { userId: newUser.id, role: newUser.role }
         const { accessToken, refreshToken } = this.generateTokens(payload)
@@ -119,10 +119,10 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
             if (!email || !name) {
                 throw new ServiceError("Google account lacks required information");
             }
-            const user = await this.userRepository.findUserByEmail(email);
+            const user = await this._userRepository.findUserByEmail(email);
 
             if (!user) {
-                await this.userRepository.create({
+                await this._userRepository.create({
                     email,
                     firstName: name,
                     lastName: familyName,
@@ -142,7 +142,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         }
     }
     async forgetPassword(email: string, role: string) {
-        const user = await this.userRepository.findUserByEmail(email)
+        const user = await this._userRepository.findUserByEmail(email)
         if (!user) {
             throw new ServiceError('User not found')
         }
@@ -160,7 +160,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
             throw new ServiceError('Invalid or expired token');
         }
         const hashPassword = await bcrypt.hash(password, 10)
-        await this.userRepository.updateUserPassword(email, password = hashPassword)
+        await this._userRepository.updateUserPassword(email, password = hashPassword)
         const redisKey = `resetToken:${email}`
         await redisClient.del(redisKey)
         return { message: 'Password reset successful' }

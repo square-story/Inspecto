@@ -12,20 +12,20 @@ import { ServiceError } from "../core/errors/service.error";
 
 @injectable()
 export class UserService extends BaseService<IUsers> implements IUserService {
-    constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {
-        super(userRepository);
+    constructor(@inject(TYPES.UserRepository) private _userRepository: IUserRepository) {
+        super(_userRepository);
     }
     async toggleStatus(userId: string) {
         try {
-            const user = await this.userRepository.findById(new Types.ObjectId(userId));
+            const user = await this._userRepository.findById(new Types.ObjectId(userId));
             if (!user) {
                 throw new ServiceError('User not found');
             }
-    
+
             const updateData = {
                 status: !user.status
             }
-            const updatedUser = await this.userRepository.update(
+            const updatedUser = await this._userRepository.update(
                 new Types.ObjectId(userId),
                 updateData
             );
@@ -40,7 +40,7 @@ export class UserService extends BaseService<IUsers> implements IUserService {
     }
     async changePassword(currentPassword: string, newPassword: string, userId: string): Promise<ChangePasswordResponse> {
         try {
-            const isValid = await this.userRepository.findById(new Types.ObjectId(userId))
+            const isValid = await this._userRepository.findById(new Types.ObjectId(userId))
             if (!isValid) {
                 return {
                     status: false,
@@ -56,7 +56,7 @@ export class UserService extends BaseService<IUsers> implements IUserService {
             }
 
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            const response = await this.userRepository.update(new Types.ObjectId(userId), {
+            const response = await this._userRepository.update(new Types.ObjectId(userId), {
                 password: hashedNewPassword,
             });
             if (response) {

@@ -12,7 +12,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 export class UserAuthController implements IUserAuthController {
 
     constructor(
-        @inject(TYPES.UserAuthService) private readonly userAuthService: IUserAuthService
+        @inject(TYPES.UserAuthService) private readonly _userAuthService: IUserAuthService
     ) { }
 
 
@@ -20,7 +20,7 @@ export class UserAuthController implements IUserAuthController {
     login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body;
-            const { accessToken, refreshToken } = await this.userAuthService.login(email, password);
+            const { accessToken, refreshToken } = await this._userAuthService.login(email, password);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -51,7 +51,7 @@ export class UserAuthController implements IUserAuthController {
                 res.status(401).json({ message: 'Refresh token missing' });
                 return;
             }
-            const accessToken = await this.userAuthService.refreshToken(refreshToken);
+            const accessToken = await this._userAuthService.refreshToken(refreshToken);
             res.status(200).json(accessToken);
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -72,7 +72,7 @@ export class UserAuthController implements IUserAuthController {
     forgetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, role } = req.body;
-            const response = await this.userAuthService.forgetPassword(email, role)
+            const response = await this._userAuthService.forgetPassword(email, role)
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -95,7 +95,7 @@ export class UserAuthController implements IUserAuthController {
     register = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password, firstName, lastName } = req.body
-            const response = await this.userAuthService.registerUser(email, password, firstName, lastName)
+            const response = await this._userAuthService.registerUser(email, password, firstName, lastName)
             res.status(200).json({
                 response
             })
@@ -118,7 +118,7 @@ export class UserAuthController implements IUserAuthController {
     verifyOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, otp } = req.body
-            const { accessToken, message, refreshToken } = await this.userAuthService.verifyOTP(email, otp)
+            const { accessToken, message, refreshToken } = await this._userAuthService.verifyOTP(email, otp)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -146,7 +146,7 @@ export class UserAuthController implements IUserAuthController {
     resendOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email } = req.body;
-            const result = await this.userAuthService.resendOTP(email);
+            const result = await this._userAuthService.resendOTP(email);
             res.status(200).json(result);
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -167,7 +167,7 @@ export class UserAuthController implements IUserAuthController {
     resetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { token, email, password } = req.body
-            const response = await this.userAuthService.resetPassword(token, email, password)
+            const response = await this._userAuthService.resetPassword(token, email, password)
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -209,7 +209,7 @@ export class UserAuthController implements IUserAuthController {
                 res.status(400).json({ message: 'Missing required Google account information' });
                 return;
             }
-            const { refreshToken, accessToken, user } = await this.userAuthService.googleLoginOrRegister(email, name, picture, family_name);
+            const { refreshToken, accessToken, user } = await this._userAuthService.googleLoginOrRegister(email, name, picture, family_name);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',

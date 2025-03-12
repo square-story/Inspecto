@@ -9,7 +9,7 @@ import { IInspectorService } from "../core/interfaces/services/inspector.service
 @injectable()
 export class InspectorController implements IInspectorController {
     constructor(
-        @inject(TYPES.InspectorService) private inspectorService: IInspectorService
+        @inject(TYPES.InspectorService) private _inspectorService: IInspectorService
     ) { }
 
     getInspectorDetails = async (req: Request, res: Response): Promise<void> => {
@@ -19,7 +19,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: "User ID is missing from the token" });
                 return;
             }
-            const response = await this.inspectorService.findById(new Types.ObjectId(userId))
+            const response = await this._inspectorService.findById(new Types.ObjectId(userId))
             if (!response) {
                 res.status(404).json({ message: "Inspector not found" });
                 return;
@@ -66,7 +66,7 @@ export class InspectorController implements IInspectorController {
             };
 
             const updatedData = { ...restData, location }; // Merge with other form data
-            const response = await this.inspectorService.completeInspectorProfile(userId, updatedData)
+            const response = await this._inspectorService.completeInspectorProfile(userId, updatedData)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -100,7 +100,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const isExist = await this.inspectorService.findById(new Types.ObjectId(inspectorId))
+            const isExist = await this._inspectorService.findById(new Types.ObjectId(inspectorId))
             if (!isExist) {
                 res.status(404).json("Inspector not found in the database")
                 return
@@ -109,7 +109,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: "Inspector is already approved" });
                 return;
             }
-            const response = await this.inspectorService.approveInspector(inspectorId)
+            const response = await this._inspectorService.approveInspector(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -148,14 +148,14 @@ export class InspectorController implements IInspectorController {
                 return
             }
 
-            const inspector = await this.inspectorService.findById(new Types.ObjectId(inspectorId))
+            const inspector = await this._inspectorService.findById(new Types.ObjectId(inspectorId))
 
             if (!inspector) {
                 res.status(404).json({ message: "Inspector not found in the database" });
                 return
             }
 
-            const updatedInspector = await this.inspectorService.denyInspector(inspectorId, reason);
+            const updatedInspector = await this._inspectorService.denyInspector(inspectorId, reason);
 
             if (!updatedInspector) {
                 res.status(400).json({ message: 'Failed to deny profile' });
@@ -190,7 +190,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const response = await this.inspectorService.BlockHandler(inspectorId)
+            const response = await this._inspectorService.BlockHandler(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: `Profile ${response} successfully`,
@@ -234,7 +234,7 @@ export class InspectorController implements IInspectorController {
                 return;
             }
 
-            const inspector = await this.inspectorService.update(new Types.ObjectId(userId), data)
+            const inspector = await this._inspectorService.update(new Types.ObjectId(userId), data)
             if (!inspector) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
@@ -282,7 +282,7 @@ export class InspectorController implements IInspectorController {
                 })
                 return;
             }
-            const response = await this.inspectorService.changePassword(currentPassword, newPassword, inspectorId)
+            const response = await this._inspectorService.changePassword(currentPassword, newPassword, inspectorId)
             if (response.status) {
                 res.status(200).json({
                     success: true,
@@ -317,7 +317,7 @@ export class InspectorController implements IInspectorController {
                 res.status(400).json({ message: "Latitude and Longitude are required" });
                 return
             }
-            const inspectors = await this.inspectorService.getNearbyInspectors(latitude as string, longitude as string);
+            const inspectors = await this._inspectorService.getNearbyInspectors(latitude as string, longitude as string);
             res.status(200).json(inspectors);
             return;
         } catch (error) {

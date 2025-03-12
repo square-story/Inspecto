@@ -8,9 +8,9 @@ import { IVehicleRepository } from "../core/interfaces/repositories/vehicle.repo
 @injectable()
 export class VehicleService extends BaseService<IVehicleDocument> implements IVehicleService {
     constructor(
-        @inject(TYPES.VehicleRepository) private vehicleRepository: IVehicleRepository
+        @inject(TYPES.VehicleRepository) private _vehicleRepository: IVehicleRepository
     ) {
-        super(vehicleRepository)
+        super(_vehicleRepository)
     }
 }
 

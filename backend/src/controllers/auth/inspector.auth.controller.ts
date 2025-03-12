@@ -9,13 +9,13 @@ import { ServiceError } from "../../core/errors/service.error";
 @injectable()
 export class InspectorAuthController implements IInspectorAuthController {
     constructor(
-        @inject(TYPES.InspectorAuthService) private readonly inspectorAuthService: IInspectorAuthService
+        @inject(TYPES.InspectorAuthService) private readonly _inspectorAuthService: IInspectorAuthService
     ) { }
 
     login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body
-            const { accessToken, refreshToken } = await this.inspectorAuthService.login(email, password)
+            const { accessToken, refreshToken } = await this._inspectorAuthService.login(email, password)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -45,7 +45,7 @@ export class InspectorAuthController implements IInspectorAuthController {
                 res.status(401).json({ message: 'Refresh token missing' })
                 return
             }
-            const response = await this.inspectorAuthService.refreshToken(refreshToken)
+            const response = await this._inspectorAuthService.refreshToken(refreshToken)
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -67,7 +67,7 @@ export class InspectorAuthController implements IInspectorAuthController {
     forgetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, role = 'inspector' } = req.body
-            const response = await this.inspectorAuthService.forgetPassword(email, role)
+            const response = await this._inspectorAuthService.forgetPassword(email, role)
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -88,7 +88,7 @@ export class InspectorAuthController implements IInspectorAuthController {
     register = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password, firstName, lastName, phone } = req.body
-            const response = await this.inspectorAuthService.registerInspector(email, password, firstName, lastName, phone)
+            const response = await this._inspectorAuthService.registerInspector(email, password, firstName, lastName, phone)
             res.status(200).json({
                 response
             })
@@ -112,7 +112,7 @@ export class InspectorAuthController implements IInspectorAuthController {
     verifyOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, otp } = req.body
-            const { accessToken, refreshToken, message } = await this.inspectorAuthService.verifyOTP(email, otp)
+            const { accessToken, refreshToken, message } = await this._inspectorAuthService.verifyOTP(email, otp)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -140,7 +140,7 @@ export class InspectorAuthController implements IInspectorAuthController {
     resendOTP = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email } = req.body
-            const response = await this.inspectorAuthService.resendOTP(email)
+            const response = await this._inspectorAuthService.resendOTP(email)
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -161,7 +161,7 @@ export class InspectorAuthController implements IInspectorAuthController {
     resetPassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const { token, email, password } = req.body
-            const response = await this.inspectorAuthService.resetPassword(token, email, password)
+            const response = await this._inspectorAuthService.resetPassword(token, email, password)
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {

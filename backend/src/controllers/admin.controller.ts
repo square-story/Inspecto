@@ -9,12 +9,12 @@ import { ServiceError } from "../core/errors/service.error";
 export class AdminController implements IAdminController {
 
     constructor(
-        @inject(TYPES.AdminService) private adminService: IAdminService
+        @inject(TYPES.AdminService) private _adminService: IAdminService
     ) { }
 
     getAllInspectors = async (req: Request, res: Response): Promise<void> => {
         try {
-            const response = await this.adminService.getAllInspectors()
+            const response = await this._adminService.getAllInspectors()
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -34,7 +34,7 @@ export class AdminController implements IAdminController {
 
     getAllUsers = async (req: Request, res: Response): Promise<void> => {
         try {
-            const response = await this.adminService.getAllUsers()
+            const response = await this._adminService.getAllUsers()
             res.status(200).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {

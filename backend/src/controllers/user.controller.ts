@@ -8,7 +8,7 @@ import { IUserService } from "../core/interfaces/services/user.service.interface
 @injectable()
 export class UserController implements IUserController {
     constructor(
-        @inject(TYPES.UserService) private userService: IUserService
+        @inject(TYPES.UserService) private _userService: IUserService
     ) { }
 
     getUserDetails = async (req: Request, res: Response): Promise<void> => {
@@ -21,7 +21,7 @@ export class UserController implements IUserController {
             }
 
             // Fetch user details from the database
-            const user = await this.userService.findById(new Types.ObjectId(userId));
+            const user = await this._userService.findById(new Types.ObjectId(userId));
             if (!user) {
                 res.status(404).json({ message: "User not found" });
                 return;
@@ -54,7 +54,7 @@ export class UserController implements IUserController {
                 return
             }
 
-            const user = await this.userService.update(new Types.ObjectId(userId), data);
+            const user = await this._userService.update(new Types.ObjectId(userId), data);
             if (!user) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
@@ -88,7 +88,7 @@ export class UserController implements IUserController {
                 });
                 return;
             }
-            const response = await this.userService.toggleStatus(userId)
+            const response = await this._userService.toggleStatus(userId)
 
             res.status(200).json({
                 success: true,
@@ -126,7 +126,7 @@ export class UserController implements IUserController {
                 })
                 return;
             }
-            const response = await this.userService.changePassword(currentPassword, newPassword, userId)
+            const response = await this._userService.changePassword(currentPassword, newPassword, userId)
             if (response.status) {
                 res.status(200).json({
                     success: true,
