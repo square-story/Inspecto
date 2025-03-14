@@ -1,4 +1,4 @@
-import { InspectorState } from "../inspector/inspectorSlice";
+import { IInspector } from "@/types/inspector";
 import { UserState } from "../user/userSlice";
 import { Vehicle } from "../vehicle/vehicleSlice";
 
@@ -31,7 +31,7 @@ export interface Inspection {
     notes?: string;
     version: number;
     vehicle: Vehicle;
-    inspector: InspectorState;
+    inspector: IInspector;
     bookingReference: string;
     user: UserState;
 }

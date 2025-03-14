@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { columns, IUsers } from "./columns";
 import { AdminService } from "@/services/admin.service";
@@ -54,7 +52,9 @@ export default function UserManagmentTable() {
                 const response = await AdminService.updateUserStatus(userId);
                 if (response.data?.success) {
                     toast.success(response.data?.message);
-                    await featchData();
+                    setData(prev => prev.map(user =>
+                        user._id === userId ? { ...user, status: !currentStatus } : user
+                    ));
                 } else {
                     toast.error(response.data?.message || "Failed to update user status");
                 }

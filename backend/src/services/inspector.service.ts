@@ -1,33 +1,33 @@
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
-import { InspectorRepository } from "../repositories/inspector.repository";
-import { EmailService } from "./email.service";
 import bcrypt from 'bcrypt';
+import { inject, injectable } from "inversify";
+import { BaseService } from "../core/abstracts/base.service";
+import { TYPES } from "../di/types";
+import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
+import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
+import { IEmailService } from "../core/interfaces/services/email.service.interface";
 
 export type ChangePasswordResponse = {
     status: boolean;
     message: string;
 };
 
-export class InspectorService {
-    private inspectorRepository: InspectorRepository;
-    constructor() {
-        this.inspectorRepository = new InspectorRepository()
+@injectable()
+export class InspectorService extends BaseService<IInspector> implements IInspectorService {
+    constructor(
+        @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
+        @inject(TYPES.EmailService) private _emailService: IEmailService,
+    ) {
+        super(_inspectorRepository);
     }
-
-
-    async getInspectorDetails(inspectorId: string) {
-        return await this.inspectorRepository.findInspectorById(inspectorId)
-    }
-
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
-        const response = await this.inspectorRepository.updateInspector(userId, data)
+        const response = await this.repository.findByIdAndUpdate(new Types.ObjectId(userId), data)
         if (response) {
-            return await this.inspectorRepository.updateInspectorProfileCompletion(userId)
+            return await this._inspectorRepository.updateInspectorProfileCompletion(userId)
         }
     }
-
 
     async approveInspector(inspectorId: string) {
         try {
@@ -37,10 +37,10 @@ export class InspectorService {
                 denialReason: '',
                 approvedAt: new Date(),
             };
-            const updatedInspector = await this.inspectorRepository.updateInspector(inspectorId, updates)
+            const updatedInspector = await this.repository.findByIdAndUpdate(new Types.ObjectId(inspectorId), updates)
             if (updatedInspector) {
                 // Send approval email
-                await EmailService.sendApprovalEmail(
+                await this._emailService.sendApprovalEmail(
                     updatedInspector.email,
                     updatedInspector.firstName
                 );
@@ -62,11 +62,11 @@ export class InspectorService {
                 deniedAt: new Date(),
                 denialReason: reason
             };
-            const updatedInspector = await this.inspectorRepository.updateInspector(inspectorId, updates);
+            const updatedInspector = await this._inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
 
             if (updatedInspector) {
                 // Send denial email
-                await EmailService.sendDenialEmail(
+                await this._emailService.sendDenialEmail(
                     updatedInspector.email,
                     updatedInspector.firstName,
                     reason
@@ -83,14 +83,14 @@ export class InspectorService {
 
     async BlockHandler(inspectorId: string) {
         try {
-            const currentInspector = await this.inspectorRepository.findInspectorById(inspectorId);
+            const currentInspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!currentInspector) {
                 throw new Error('Inspector not found');
             }
             const updates = {
                 status: currentInspector.status === InspectorStatus.BLOCKED ? InspectorStatus.APPROVED : InspectorStatus.BLOCKED,
             };
-            await this.inspectorRepository.updateInspector(inspectorId, updates);
+            await this._inspectorRepository.update(new Types.ObjectId(inspectorId), updates);
             // if (updatedInspector) {
             //     if (updates.status === InspectorStatus.BLOCKED) {
             //         await EmailService.sendBlockNotification(updatedInspector.email, updatedInspector.firstName);
@@ -106,14 +106,9 @@ export class InspectorService {
     }
 
 
-    async updateDetails(userId: string, data: Partial<IInspector>) {
-        return await this.inspectorRepository.updateInspector(userId, data)
-    }
-
-
     async changePassword(currentPassword: string, newPassword: string, inspectorId: string): Promise<ChangePasswordResponse> {
         try {
-            const isValid = await this.inspectorRepository.findInspectorById(inspectorId)
+            const isValid = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId))
             if (!isValid) {
                 return {
                     status: false,
@@ -130,7 +125,7 @@ export class InspectorService {
                 };
             }
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            const response = await this.inspectorRepository.updateInspector(inspectorId, {
+            const response = await this._inspectorRepository.update(new Types.ObjectId(inspectorId), {
                 password: hashedNewPassword,
             });
 
@@ -151,13 +146,13 @@ export class InspectorService {
         }
     }
     async getNearbyInspectors(latitude: string, longitude: string) {
-        return await this.inspectorRepository.getNearbyInspectors(latitude, longitude)
+        return await this._inspectorRepository.getNearbyInspectors(latitude, longitude)
     }
 
-    async bookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
-        return await this.inspectorRepository.bookingHandler(inspectorId, userId, date,)
+    async bookingHandler(inspectorId: string, userId: string, date: Date) {
+        return await this._inspectorRepository.bookingHandler(inspectorId, userId, date,)
     }
-    async unBookingHandler(inspectorId: string, userId: string, date: Date, session?: mongoose.mongo.ClientSession) {
-        return await this.inspectorRepository.unbookingHandler(inspectorId, userId, date)
+    async unBookingHandler(inspectorId: string, userId: string, date: Date) {
+        return await this._inspectorRepository.unbookingHandler(inspectorId, userId, date)
     }
 }

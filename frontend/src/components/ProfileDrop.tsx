@@ -1,11 +1,11 @@
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ImageIcon, XCircleIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary"; // Update path as needed
 import { toast } from "sonner";
-import { getTransformedImageUrl } from "@/utils/cloudinary";
+import { getSecureImageUrl } from "@/utils/cloudinary";
 
 const ImagePreview = ({
     url,
@@ -42,15 +42,37 @@ export default function ProfileDrop({
 }) {
     const [profilePicture, setProfilePicture] = useState<string | null>(defaultImage);
     const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const loadSignedImage = async () => {
+            if (defaultImage) {
+                try {
+                    const signedUrl = await getSecureImageUrl(defaultImage, 'none');
+                    setProfilePicture(signedUrl);
+                } catch (error) {
+                    console.error('Failed to load signed image:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setIsLoading(false);
+            }
+        };
+
+        loadSignedImage();
+    }, [defaultImage]);
 
     const handleDrop = async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
         if (file) {
             try {
                 setIsUploading(true);
-                const imageUrl = getTransformedImageUrl(await uploadToCloudinary(file), 'none');
-                setProfilePicture(imageUrl);
-                onImageUpload(imageUrl); // Pass URL to parent
+                const publicId = await uploadToCloudinary(file);
+                // Get signed URL for the uploaded image
+                const signedUrl = await getSecureImageUrl(publicId, 'none');
+                setProfilePicture(signedUrl);
+                onImageUpload(publicId)
                 toast.success("Image uploaded successfully!");
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (error) {
@@ -65,12 +87,17 @@ export default function ProfileDrop({
         <div className="w-full max-w-40">
             <Label htmlFor="profile">{headerTitle}</Label>
             <div className="mt-1 w-full">
-                {profilePicture ? (
+
+                {isLoading ? (
+                    <div className="flex items-center justify-center aspect-square border border-dashed rounded-md">
+                        <p>Loading...</p>
+                    </div>
+                ) : profilePicture ? (
                     <ImagePreview
                         url={profilePicture}
                         onRemove={() => {
                             setProfilePicture(null);
-                            onImageUpload(null); // Clear URL in parent
+                            onImageUpload(null);
                         }}
                     />
                 ) : (

@@ -1,17 +1,26 @@
+import "reflect-metadata";
 import express, { Request, Response } from "express";
 import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
-import cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser';
 import adminRoutes from "./routes/admin.routes";
-import userRoutes from './routes/user.routes'
+import userRoutes from './routes/user.routes';
 import inspectorRoutes from "./routes/inspector.routes";
-import vehiclesRoutes from "./routes/vehicles.routes"
-import inspectionRoutes from "./routes/inspection.routes"
-import paymentsRoutes from './routes/payment.routes'
+import vehiclesRoutes from "./routes/vehicles.routes";
+import inspectionRoutes from "./routes/inspection.routes";
+import paymentsRoutes from './routes/payment.routes';
+import cloudinaryRoutes from './routes/cloudinary.routes';
 import cors from "cors";
-import './utils/checkPaymentStatus';
+import jwt from "jsonwebtoken";
+import { errorHandler } from './middlewares/error.middleware';
+import morgan from 'morgan';
+import { blacklistToken } from "./utils/token.utils";
+import { container } from './di/container';
+import { TYPES } from './di/types';
+import { PaymentStatusChecker } from './utils/checkPaymentStatus';
+import { IPaymentService } from './core/interfaces/services/payment.service.interface';
 
-const app = express()
+const app = express();
 
 // Regular routes should use JSON parsing
 app.use((req, res, next) => {
@@ -30,42 +39,80 @@ app.use((req, res, next) => {
     }
 });
 
+app.use(morgan('dev'));
 app.use(cookieParser());
 
 // Connect Database
 connectToDatabase();
 
 app.use(cors({
-    origin: appConfig.frontEndUrl,
-    credentials: true
+    origin: ["http://localhost:5173", "http://frontend:5173"],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('server is up and running')
-})
+    res.send('server is up and running');
+});
 
-app.post('/logout', (req: Request, res: Response) => {
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-    });
-    res.status(200).json({ message: 'Logged out successfully' });
-})
+app.post('/logout', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const accessToken = req.headers.authorization?.split(' ')[1];
+        const refreshToken = req.cookies.refreshToken;
+
+        if (accessToken) {
+            const decoded = jwt.decode(accessToken) as jwt.JwtPayload;
+            if (decoded.exp) {
+                const expirationTime = decoded.exp - Math.floor(Date.now() / 1000);
+                await blacklistToken(accessToken, expirationTime);
+            }
+        }
+
+        if (refreshToken) {
+            const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
+            if (decoded.exp) {
+                const expirationTime = decoded.exp - Math.floor(Date.now() / 1000);
+                await blacklistToken(refreshToken, expirationTime);
+            }
+        }
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to logout', error: (error as Error).message });
+    }
+});
 
 // Routes
-app.use('/admin', adminRoutes)
-app.use('/inspector', inspectorRoutes)
-app.use('/user', userRoutes)
-app.use('/vehicles', vehiclesRoutes)
-app.use('/inspections', inspectionRoutes)
-app.use('/payments', paymentsRoutes)
-
+app.use('/admin', adminRoutes);
+app.use('/inspector', inspectorRoutes);
+app.use('/user', userRoutes);
+app.use('/vehicles', vehiclesRoutes);
+app.use('/inspections', inspectionRoutes);
+app.use('/payments', paymentsRoutes);
+app.use('/cloudinary', cloudinaryRoutes)
 
 app.use((req: Request, res: Response) => {
-    res.status(404).send('route not found')
-})
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
+});
+
+app.use((err: Error, req: Request, res: Response) => {
+    errorHandler(err, req, res);
+});
+
+// Initialize PaymentStatusChecker
+const paymentService = container.get<IPaymentService>(TYPES.PaymentService);
+new PaymentStatusChecker(paymentService);
 
 app.listen(appConfig.port, () => {
-    console.log(`server is running on port ${appConfig.port}`)
-})
+    console.log(`server is running on port ${appConfig.port}`);
+});
+

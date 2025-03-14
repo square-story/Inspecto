@@ -1,4 +1,5 @@
 import { Inspection } from "../inspection/types";
+import { UserState } from "../user/userSlice";
 
 
 export enum PaymentStatus {
@@ -11,6 +12,7 @@ export enum PaymentStatus {
 export interface IPayments {
     _id: string;
     inspection: Inspection;
+    user: UserState
     amount: number;
     currency: string;
     stripePaymentIntentId: string;

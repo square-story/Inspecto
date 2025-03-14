@@ -19,7 +19,6 @@ import { X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { inspectorService } from "@/services/inspector.service";
-import { getTransformedImageUrl } from "@/utils/cloudinary";
 import { SpecializationSelect } from "@/components/fancy-multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
@@ -162,13 +161,17 @@ export default function InspectorForm() {
             const signature = form.getValues('signature');
             const certificates = form.getValues('certificates');
 
-            const profileUrl = profile ? getTransformedImageUrl(await uploadToCloudinary(profile.file), 'face') : '';
-            const signatureUrl = signature ? getTransformedImageUrl(await uploadToCloudinary(signature.file), 'signature') : '';
-            const certificateUrls = await Promise.all(
-                certificates.map(async cert => getTransformedImageUrl(await uploadToCloudinary(cert.file), 'certificate'))
+            const profilePublicId = profile ? await uploadToCloudinary(profile.file) : '';
+            const signaturePublicId = signature ? await uploadToCloudinary(signature.file) : '';
+            const certificatePublicIds = await Promise.all(
+                certificates.map(async cert => await uploadToCloudinary(cert.file))
             );
 
-            return { profileUrl, signatureUrl, certificateUrls };
+            return {
+                profileUrl: profilePublicId,
+                signatureUrl: signaturePublicId,
+                certificateUrls: certificatePublicIds
+            };
         } catch (error) {
             console.error('Error uploading files:', error);
             throw new Error('Failed to upload files');

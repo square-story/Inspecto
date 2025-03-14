@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, ObjectId } from 'mongoose'
+import mongoose, { Schema, Document, ObjectId, Types } from 'mongoose'
 
 export enum InspectorStatus {
     PENDING = 'PENDING',
@@ -37,9 +37,8 @@ export interface IInspectorInput {
     signature: string;
     specialization: [string];
     availableSlots: WeeklyAvailability;
-    // to track dates and remaining slots
     bookedSlots: {
-        _id: any;
+        _id: Types.ObjectId;
         date: Date,
         slotsBooked: number,
         bookedBy: ObjectId[]

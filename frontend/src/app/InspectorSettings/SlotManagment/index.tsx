@@ -1,5 +1,5 @@
-import Comingsoon from "@/components/Comingsoon"
 import ContentSection from "@/components/content-section"
+import InspectorSlotForm from "./component/InspectorSlotForm"
 
 const SlotManagment = () => {
     return (
@@ -7,7 +7,7 @@ const SlotManagment = () => {
             title='Slot Managment'
             desc='Your Slot Details Section'
         >
-            <Comingsoon />
+            <InspectorSlotForm />
         </ContentSection>
     )
 }

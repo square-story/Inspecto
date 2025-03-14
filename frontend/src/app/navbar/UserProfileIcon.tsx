@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { logoutUser } from "@/features/auth/authAPI"
 import { AppDispatch, } from "@/store"
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { useDispatch, } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useUserDetails } from "@/hooks/useUserDetails"
+import { SignedAvatar } from "@/components/SignedAvatar"
 
 export function UserProfileIcon() {
     const { user } = useUserDetails();
@@ -53,15 +53,12 @@ export function UserProfileIcon() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="p-0 h-10 w-10 rounded-full flex items-center justify-center border-0">
-                    <Avatar className="h-full w-full">
-                        {user.profile_image ? <AvatarImage
-                            src={user.profile_image}
-                            alt="User"
-                            className="object-cover rounded-full"
-                        />
-                            : <AvatarFallback className="text-sm">{user?.firstName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>}
-                    </Avatar>
+                <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
+                    <SignedAvatar
+                        publicId={user?.profile_image}
+                        fallback={`${user?.firstName || ''} ${user?.lastName || ''}`}
+                        className="h-8 w-8"
+                    />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">

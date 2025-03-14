@@ -57,3 +57,23 @@ coverage/
 *.tmp
 
 desktop.ini
+
+*.vscode
+
+# Docker related
+docker-compose.override.yml
+.docker/
+docker/data/
+*.env.docker
+
+# Docker volumes data
+redis_data/
+data/
+
+# Docker logs
+docker-compose.log
+
+# Docker build context
+.dockerignore
+frontend/.env.development
+frontend/.env.production

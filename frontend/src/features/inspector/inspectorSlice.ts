@@ -1,43 +1,43 @@
+import { IInspector, InspectorStatus, WeeklyAvailability } from '@/types/inspector';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export interface InspectorState {
-    firstName: string;
-    lastName: string;
-    email: string;
-    address: string;
-    profile_image: string;
-    status: string;
-    role: string;
-    certificates: [string];
-    yearOfExp: number;
-    phone: string;
-    signature: string;
-    specialization: [string],
-    start_time: string;
-    end_time: string;
-    avaliable_days: number;
-    isListed: boolean;
-    isCompleted: boolean;
-}
-
-const initialState: InspectorState = {
+const initialState: IInspector = {
+    _id: '',
     firstName: '',
     lastName: '',
     email: '',
+    password: null,
     address: '',
     profile_image: '',
-    status: '',
+    status: InspectorStatus.PENDING,
     role: '',
     certificates: [''],
     yearOfExp: 0,
     phone: '',
     signature: '',
     specialization: [''],
-    start_time: '',
-    end_time: '',
-    avaliable_days: 0,
+    availableSlots: {
+        Monday: { enabled: false, slots: 0 },
+        Tuesday: { enabled: false, slots: 0 },
+        Wednesday: { enabled: false, slots: 0 },
+        Thursday: { enabled: false, slots: 0 },
+        Friday: { enabled: false, slots: 0 },
+        Saturday: { enabled: false, slots: 0 },
+    },
+    bookedSlots: [],
     isListed: false,
     isCompleted: false,
+    approvedAt: undefined,
+    deniedAt: undefined,
+    denialReason: undefined,
+    coverageRadius: 0,
+    serviceAreas: [''],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    location: {
+        type: 'Point',
+        coordinates: [0, 0],
+    },
 };
 
 const inspectorSlice = createSlice({
@@ -59,13 +59,13 @@ const inspectorSlice = createSlice({
         setProfileImage(state, action: PayloadAction<string>) {
             state.profile_image = action.payload;
         },
-        setStatus(state, action: PayloadAction<string>) {
+        setStatus(state, action: PayloadAction<InspectorStatus>) {
             state.status = action.payload;
         },
         setRole(state, action: PayloadAction<string>) {
             state.role = action.payload;
         },
-        setCertificates(state, action: PayloadAction<[string]>) {
+        setCertificates(state, action: PayloadAction<string[]>) {
             state.certificates = action.payload;
         },
         setYearOfExp(state, action: PayloadAction<number>) {
@@ -77,17 +77,14 @@ const inspectorSlice = createSlice({
         setSignature(state, action: PayloadAction<string>) {
             state.signature = action.payload;
         },
-        setSpecialization(state, action: PayloadAction<[string]>) {
+        setSpecialization(state, action: PayloadAction<string[]>) {
             state.specialization = action.payload;
         },
-        setStartTime(state, action: PayloadAction<string>) {
-            state.start_time = action.payload;
+        setAvailableSlots(state, action: PayloadAction<WeeklyAvailability>) {
+            state.availableSlots = action.payload;
         },
-        setEndTime(state, action: PayloadAction<string>) {
-            state.end_time = action.payload;
-        },
-        setAvaliableDays(state, action: PayloadAction<number>) {
-            state.avaliable_days = action.payload;
+        setBookedSlots(state, action: PayloadAction<IInspector['bookedSlots']>) {
+            state.bookedSlots = action.payload;
         },
         setIsListed(state, action: PayloadAction<boolean>) {
             state.isListed = action.payload;
@@ -95,7 +92,25 @@ const inspectorSlice = createSlice({
         setIsCompleted(state, action: PayloadAction<boolean>) {
             state.isCompleted = action.payload;
         },
-        setInspector(state, action: PayloadAction<InspectorState>) {
+        setApprovedAt(state, action: PayloadAction<Date | undefined>) {
+            state.approvedAt = action.payload;
+        },
+        setDeniedAt(state, action: PayloadAction<Date | undefined>) {
+            state.deniedAt = action.payload;
+        },
+        setDenialReason(state, action: PayloadAction<string | undefined>) {
+            state.denialReason = action.payload;
+        },
+        setCoverageRadius(state, action: PayloadAction<number>) {
+            state.coverageRadius = action.payload;
+        },
+        setServiceAreas(state, action: PayloadAction<string[]>) {
+            state.serviceAreas = action.payload;
+        },
+        setLocation(state, action: PayloadAction<IInspector['location']>) {
+            state.location = action.payload;
+        },
+        setInspector(state, action: PayloadAction<IInspector>) {
             return { ...state, ...action.payload };
         }
     },
@@ -114,11 +129,16 @@ export const {
     setPhone,
     setSignature,
     setSpecialization,
-    setStartTime,
-    setEndTime,
-    setAvaliableDays,
+    setAvailableSlots,
+    setBookedSlots,
     setIsListed,
     setIsCompleted,
+    setApprovedAt,
+    setDeniedAt,
+    setDenialReason,
+    setCoverageRadius,
+    setServiceAreas,
+    setLocation,
     setInspector
 } = inspectorSlice.actions;
 

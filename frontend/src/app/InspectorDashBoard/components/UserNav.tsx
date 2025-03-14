@@ -1,8 +1,4 @@
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar"
+import { SignedAvatar } from "@/components/SignedAvatar"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -61,15 +57,12 @@ export function UserNav() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage
-                            src={inspector.profile_image}
-                            alt={`${inspector.firstName} ${inspector.lastName}`}
-                            className="object-cover"
-                        />
-                        <AvatarFallback>{inspector.firstName[0]}{inspector.lastName[0]}</AvatarFallback>
-                    </Avatar>
+                <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
+                    <SignedAvatar
+                        publicId={inspector?.profile_image}
+                        fallback={`${inspector?.firstName || ''} ${inspector?.lastName || ''}`}
+                        className="h-8 w-8"
+                    />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>

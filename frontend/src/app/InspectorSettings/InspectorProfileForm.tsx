@@ -16,6 +16,7 @@ import { Form } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import SvgText from '@/components/SvgText'
+import { useEffect } from 'react'
 
 const profileFormSchema = z.object({
     firstName: z
@@ -32,10 +33,9 @@ const profileFormSchema = z.object({
     phone: z
         .string()
         .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-    signature: z.string().url().optional(),
-    profile_image: z.string().url().optional()
+    signature: z.string().optional(),
+    profile_image: z.string().optional()
 })
-
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
@@ -45,38 +45,51 @@ export default function InspectorProfileForm() {
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
-            firstName: inspector.firstName || '',
-            lastName: inspector.lastName || '',
-            email: inspector.email || '',
-            phone: inspector.phone || "",
-            profile_image: inspector.profile_image,
-            signature: inspector.signature || ""
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            profile_image: '',
+            signature: ''
         },
         mode: 'onChange'
     })
 
+    useEffect(() => {
+        if (inspector) {
+            form.reset({
+                firstName: inspector.firstName || '',
+                lastName: inspector.lastName || '',
+                email: inspector.email || '',
+                phone: inspector.phone || '',
+                profile_image: inspector.profile_image || '',
+                signature: inspector.signature || ''
+            })
+        }
+    }, [inspector, form])
+
     async function onSubmit(data: ProfileFormValues) {
         try {
             const updatedInspector = await inspectorService.updateInspector(data);
-            dispatch(setInspector(updatedInspector.data))
+            dispatch(setInspector(updatedInspector.data.inspector))
             toast.success('Profile updated successfully!');
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             toast.error("Failed to update profile")
         }
     }
+
     const handleImageUpload = (url: string | null) => {
         form.setValue("profile_image", url || inspector?.profile_image);
     };
 
     const handleSignature = (url: string | null) => {
-        form.setValue("signature", url || inspector?.signature)
+        form.setValue("signature", url || inspector?.signature);
     }
 
     if (loading) return (<LoadingSpinner />)
 
     return (
-
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                 <div className='relative'>
@@ -101,7 +114,6 @@ export default function InspectorProfileForm() {
                         </FormItem>
                     )}
                 />
-
                 <FormField
                     control={form.control}
                     name='lastName'
@@ -109,7 +121,7 @@ export default function InspectorProfileForm() {
                         <FormItem>
                             <FormLabel>Last Name</FormLabel>
                             <FormControl>
-                                <Input placeholder='Enter Your lastName' {...field} defaultValue={inspector.email} />
+                                <Input placeholder='Enter Your lastName' {...field} />
                             </FormControl>
                             <FormDescription>
                                 something
@@ -125,10 +137,10 @@ export default function InspectorProfileForm() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input placeholder='Ener Your Updated Email Address' {...field} defaultValue={inspector.email} />
+                                <Input placeholder='Enter Your Updated Email Address' {...field} />
                             </FormControl>
                             <FormDescription>
-                                Email Want to verifiy
+                                Email Want to verify
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -141,7 +153,7 @@ export default function InspectorProfileForm() {
                         <FormItem className='grid gap-2'>
                             <FormLabel htmlFor='phone'>Phone Number</FormLabel>
                             <FormControl>
-                                <PhoneInput {...field} defaultCountry='IN' defaultValue={inspector.phone} />
+                                <PhoneInput {...field} defaultCountry='IN' />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

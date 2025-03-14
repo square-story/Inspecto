@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
-import VehicleService from "../services/vehicle.service";
 import { IVehicleDocument } from "../models/vehicle.model";
-import { ObjectId } from "mongoose";
-
+import { ObjectId, Types } from "mongoose";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
+import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 
 interface MongoErrorWithCode extends Error {
     code?: number;
@@ -10,12 +12,11 @@ interface MongoErrorWithCode extends Error {
     keyValue?: Record<string, string>;
 }
 
-export default class VehicleController {
-    private vehicleService: VehicleService;
-
-    constructor(vehicleService: VehicleService) {
-        this.vehicleService = vehicleService;
-    }
+@injectable()
+export class VehicleController implements IVehicleController {
+    constructor(
+        @inject(TYPES.VehicleService) private _vehicleService: IVehicleService
+    ) { }
 
     private handleError(res: Response, error: unknown): void {
         // Type guard to check if error is a MongoDB duplicate key error
@@ -61,7 +62,7 @@ export default class VehicleController {
         }
     }
 
-    async createVehicle(req: Request, res: Response): Promise<void> {
+    createVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleData: IVehicleDocument = req.body;
             const userId = req.user?.userId;
@@ -78,18 +79,14 @@ export default class VehicleController {
             // Attach user ID to vehicle data
             vehicleData.user = userId as unknown as ObjectId;
 
-            try {
-                const vehicle = await this.vehicleService.createVehicle(vehicleData);
-                res.status(201).json(vehicle);
-            } catch (error) {
-                this.handleError(res, error);
-            }
+            const vehicle = await this._vehicleService.create(vehicleData);
+            res.status(201).json(vehicle);
         } catch (error) {
             this.handleError(res, error);
         }
     }
 
-    async getVehicleById(req: Request, res: Response): Promise<void> {
+    getVehicleById = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
             const userId = req.user?.userId;
@@ -109,47 +106,21 @@ export default class VehicleController {
                 return;
             }
 
-            try {
-                const vehicle = await this.vehicleService.getVehicleById(vehicleId);
-
-                // Additional authorization check
-                if (vehicle && vehicle.user.toString() !== userId) {
-                    res.status(403).json({
-                        message: "Forbidden: You do not have access to this vehicle"
-                    });
-                    return;
-                }
-
-                if (!vehicle) {
-                    res.status(404).json({
-                        message: "Vehicle not found"
-                    });
-                    return;
-                }
-
-                res.json(vehicle);
-            } catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({
-                        message: "Error retrieving vehicle",
-                        error: error.message
-                    });
-                } else {
-                    res.status(500).json({
-                        message: "Unexpected error retrieving vehicle",
-                        error: String(error)
-                    });
-                }
+            const vehicle = await this._vehicleService.findById(new Types.ObjectId(vehicleId));
+            if (!vehicle) {
+                res.status(404).json({
+                    message: "Vehicle not found"
+                });
+                return;
             }
+
+            res.json(vehicle);
         } catch (error) {
-            res.status(500).json({
-                message: "Unexpected server error",
-                error: String(error)
-            });
+            this.handleError(res, error);
         }
     }
 
-    async getVehiclesByUser(req: Request, res: Response): Promise<void> {
+    getVehiclesByUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
 
@@ -160,39 +131,21 @@ export default class VehicleController {
                 return;
             }
 
-            try {
-                const vehicles = await this.vehicleService.getVehiclesByUser(userId);
-
-                if (vehicles.length === 0) {
-                    res.status(404).json({
-                        message: "No vehicles found for this user"
-                    });
-                    return;
-                }
-
-                res.json(vehicles);
-            } catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({
-                        message: "Error retrieving user's vehicles",
-                        error: error.message
-                    });
-                } else {
-                    res.status(500).json({
-                        message: "Unexpected error retrieving vehicles",
-                        error: String(error)
-                    });
-                }
+            const vehicles = await this._vehicleService.find({ user: userId });
+            if (!vehicles || vehicles.length === 0) {
+                res.status(404).json({
+                    message: "No vehicles found for this user"
+                });
+                return;
             }
+
+            res.json(vehicles);
         } catch (error) {
-            res.status(500).json({
-                message: "Unexpected server error",
-                error: String(error)
-            });
+            this.handleError(res, error);
         }
     }
 
-    async updateVehicle(req: Request, res: Response): Promise<void> {
+    updateVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
             const updateData = req.body;
@@ -220,37 +173,14 @@ export default class VehicleController {
                 return;
             }
 
-            try {
-                // First, verify vehicle ownership
-                const existingVehicle = await this.vehicleService.getVehicleById(vehicleId);
-
-                if (!existingVehicle) {
-                    res.status(404).json({
-                        message: "Vehicle not found"
-                    });
-                    return;
-                }
-
-                if (existingVehicle.user.toString() !== userId) {
-                    res.status(403).json({
-                        message: "Forbidden: You do not have permission to update this vehicle"
-                    });
-                    return;
-                }
-
-                // Proceed with update
-                const updatedVehicle = await this.vehicleService.updateVehicle(vehicleId, updateData);
-
-                res.json(updatedVehicle);
-            } catch (error) {
-                this.handleError(res, error);
-            }
+            const updatedVehicle = await this._vehicleService.update(new Types.ObjectId(vehicleId), updateData);
+            res.json(updatedVehicle);
         } catch (error) {
             this.handleError(res, error);
         }
     }
 
-    async deleteVehicle(req: Request, res: Response): Promise<void> {
+    deleteVehicle = async (req: Request, res: Response): Promise<void> => {
         try {
             const vehicleId = req.params.vehicleId;
             const userId = req.user?.userId;
@@ -270,53 +200,10 @@ export default class VehicleController {
                 return;
             }
 
-            try {
-                // First, verify vehicle ownership
-                const existingVehicle = await this.vehicleService.getVehicleById(vehicleId);
-
-                if (!existingVehicle) {
-                    res.status(404).json({
-                        message: "Vehicle not found"
-                    });
-                    return;
-                }
-
-                if (existingVehicle.user.toString() !== userId) {
-                    res.status(403).json({
-                        message: "Forbidden: You do not have permission to delete this vehicle"
-                    });
-                    return;
-                }
-
-                // Proceed with deletion
-                const deleted = await this.vehicleService.deleteVehicle(vehicleId);
-
-                if (!deleted) {
-                    res.status(500).json({
-                        message: "Failed to delete vehicle"
-                    });
-                    return;
-                }
-
-                res.status(204).send();
-            } catch (error) {
-                if (error instanceof Error) {
-                    res.status(400).json({
-                        message: "Error deleting vehicle",
-                        error: error.message
-                    });
-                } else {
-                    res.status(500).json({
-                        message: "Unexpected error deleting vehicle",
-                        error: String(error)
-                    });
-                }
-            }
+            await this._vehicleService.delete(new Types.ObjectId(vehicleId));
+            res.status(204).send();
         } catch (error) {
-            res.status(500).json({
-                message: "Unexpected server error",
-                error: String(error)
-            });
+            this.handleError(res, error);
         }
     }
 }

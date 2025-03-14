@@ -13,6 +13,7 @@ interface CheckoutFormProps {
     clientSecret: string;
     onSuccess: (paymentIntent: PaymentIntent) => void;
     onError: (message: string) => void;
+
 }
 
 interface StripePaymentWrapperProps {
@@ -20,6 +21,8 @@ interface StripePaymentWrapperProps {
     inspectionId: string;
     onPaymentSuccess: (payment: PaymentResponse) => void;
     onPaymentError: (message: string) => void;
+    isRetry?: boolean;
+    paymentIntentId?: string;
 }
 
 interface PaymentResponse {
@@ -49,7 +52,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess, onError }) => {
             });
 
             if (error) {
-                onError(error.message);
+                onError(error.message || 'An unknown error occurred');
             } else if (paymentIntent?.status === 'succeeded') {
                 onSuccess(paymentIntent);
             }
@@ -78,7 +81,9 @@ const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = ({
     amount,
     inspectionId,
     onPaymentSuccess,
-    onPaymentError
+    onPaymentError,
+    isRetry = false,
+    paymentIntentId
 }) => {
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -89,7 +94,9 @@ const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = ({
             try {
                 const response = await axiosInstance.post<{ clientSecret: string }>('/payments/create-payment-intent', {
                     amount,
-                    inspectionId
+                    inspectionId,
+                    isRetry,
+                    paymentIntentId
                 });
                 setClientSecret(response.data.clientSecret);
             } catch (err) {
@@ -100,7 +107,7 @@ const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = ({
         };
 
         initializePayment();
-    }, [amount, inspectionId, onPaymentError]);
+    }, [amount, inspectionId, onPaymentError, isRetry, paymentIntentId]);
 
     const handlePaymentSuccess = async (paymentIntent: PaymentIntent) => {
         try {

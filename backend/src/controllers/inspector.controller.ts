@@ -1,27 +1,49 @@
-import { Request, RequestHandler, Response } from "express";
-import { InspectorService } from "../services/inspector.service";
+import { Request, Response } from "express";
+import { inject, injectable } from "inversify";
+import { IInspectorController } from "../core/interfaces/controllers/inspector.controller.interface";
+import { TYPES } from "../di/types";
+import { ServiceError } from "../core/errors/service.error";
+import { Types } from "mongoose";
+import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 
-const inspectorService = new InspectorService()
+@injectable()
+export class InspectorController implements IInspectorController {
+    constructor(
+        @inject(TYPES.InspectorService) private _inspectorService: IInspectorService
+    ) { }
 
-export class InspectorController {
-    static getInspectorDetails: RequestHandler = async (req: Request, res: Response) => {
+    getInspectorDetails = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
             if (!userId) {
                 res.status(400).json({ message: "User ID is missing from the token" });
                 return;
             }
-            const response = await inspectorService.getInspectorDetails(userId)
+            const response = await this._inspectorService.findById(new Types.ObjectId(userId))
             if (!response) {
                 res.status(404).json({ message: "Inspector not found" });
                 return;
             }
             res.status(200).json(response);
         } catch (error) {
-            console.error(error)
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    static completeProfile: RequestHandler = async (req: Request, res: Response) => {
+
+
+
+    completeProfile = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId
             const { longitude, latitude, ...restData } = req.body; // Extract location data separately
@@ -44,7 +66,7 @@ export class InspectorController {
             };
 
             const updatedData = { ...restData, location }; // Merge with other form data
-            const response = await inspectorService.completeInspectorProfile(userId, updatedData)
+            const response = await this._inspectorService.completeInspectorProfile(userId, updatedData)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -54,23 +76,31 @@ export class InspectorController {
             }
             res.status(400).json({ message: 'Failed to update profile' });
             return;
-        } catch (error: any) {
-            console.error('Profile completion error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    static approvalProfile: RequestHandler = async (req: Request, res: Response) => {
+
+
+    approvalProfile = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const isExist = await inspectorService.getInspectorDetails(inspectorId)
+            const isExist = await this._inspectorService.findById(new Types.ObjectId(inspectorId))
             if (!isExist) {
                 res.status(404).json("Inspector not found in the database")
                 return
@@ -79,7 +109,7 @@ export class InspectorController {
                 res.status(400).json({ message: "Inspector is already approved" });
                 return;
             }
-            const response = await inspectorService.approveInspector(inspectorId)
+            const response = await this._inspectorService.approveInspector(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: 'Profile updated successfully',
@@ -88,16 +118,22 @@ export class InspectorController {
             }
             res.status(400).json({ message: 'Failed to update profile' });
             return;
-        } catch (error: any) {
-            console.error('Profile completion error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    static denyProfile: RequestHandler = async (req: Request, res: Response) => {
+    denyProfile = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.params.inspectorId;
             const { reason } = req.body;
@@ -112,14 +148,14 @@ export class InspectorController {
                 return
             }
 
-            const inspector = await inspectorService.getInspectorDetails(inspectorId);
+            const inspector = await this._inspectorService.findById(new Types.ObjectId(inspectorId))
 
             if (!inspector) {
                 res.status(404).json({ message: "Inspector not found in the database" });
                 return
             }
 
-            const updatedInspector = await inspectorService.denyInspector(inspectorId, reason);
+            const updatedInspector = await this._inspectorService.denyInspector(inspectorId, reason);
 
             if (!updatedInspector) {
                 res.status(400).json({ message: 'Failed to deny profile' });
@@ -132,23 +168,29 @@ export class InspectorController {
             });
             return
 
-        } catch (error: any) {
-            console.error('Profile denial error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    static handleBlock: RequestHandler = async (req: Request, res: Response) => {
+    handleBlock = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
                 res.status(400).json({ message: 'Inspector ID is missing in the params' });
                 return;
             }
-            const response = await inspectorService.BlockHandler(inspectorId)
+            const response = await this._inspectorService.BlockHandler(inspectorId)
             if (response) {
                 res.status(200).json({
                     message: `Profile ${response} successfully`,
@@ -156,16 +198,22 @@ export class InspectorController {
                 return;
             }
             res.status(400).json({ message: 'Failed to update profile' });
-        } catch (error: any) {
-            console.error('Profile denial error:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: error.message
-            });
-            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    static updateInspector: RequestHandler = async (req: Request, res: Response) => {
+    updateInspector = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = req.user?.userId;
             if (!userId) {
@@ -183,10 +231,10 @@ export class InspectorController {
                     success: false,
                     message: "No valid data provided for update."
                 });
-                return
+                return;
             }
 
-            const inspector = inspectorService.completeInspectorProfile(userId, data)
+            const inspector = await this._inspectorService.update(new Types.ObjectId(userId), data)
             if (!inspector) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
@@ -201,15 +249,21 @@ export class InspectorController {
                 inspector
             });
         } catch (error) {
-            console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
-                success: false,
-                message: "Internal server error. Please try again later."
-            });
-            return
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-    static changePassword: RequestHandler = async (req: Request, res: Response) => {
+    changePassword = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectorId = req.user?.userId
             if (!inspectorId) {
@@ -228,7 +282,7 @@ export class InspectorController {
                 })
                 return;
             }
-            const response = await inspectorService.changePassword(currentPassword, newPassword, inspectorId)
+            const response = await this._inspectorService.changePassword(currentPassword, newPassword, inspectorId)
             if (response.status) {
                 res.status(200).json({
                     success: true,
@@ -241,33 +295,44 @@ export class InspectorController {
                 })
             }
         } catch (error) {
-            console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
-                success: false,
-                message: "Internal server error. Please try again later."
-            });
-            return
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
 
-    static getNearbyInspectors: RequestHandler = async (req: Request, res: Response) => {
+    getNearbyInspectors = async (req: Request, res: Response): Promise<void> => {
         try {
             const { latitude, longitude } = req.query;
             if (!latitude || !longitude) {
                 res.status(400).json({ message: "Latitude and Longitude are required" });
                 return
             }
-            const inspectors = await inspectorService.getNearbyInspectors(latitude as string, longitude as string);
+            const inspectors = await this._inspectorService.getNearbyInspectors(latitude as string, longitude as string);
             res.status(200).json(inspectors);
             return;
-        } catch (error: any) {
-            console.error("Error in getNearbyInspectors:", error);
-            res.status(500).json({
-                success: false,
-                message: error.message || "Internal Server Error. Please try again later."
-            });
-            return
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
         }
     }
-
 }

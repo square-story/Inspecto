@@ -1,26 +1,53 @@
-import { Request, RequestHandler, Response } from "express";
-import { AdminService } from "../services/admin.service";
+import { Request, Response } from "express";
+import { inject, injectable } from "inversify";
+import { IAdminController } from "../core/interfaces/controllers/admin.controller.interface";
+import { TYPES } from "../di/types";
+import { IAdminService } from "../core/interfaces/services/admin.service.interface";
+import { ServiceError } from "../core/errors/service.error";
 
-const adminService = new AdminService()
+@injectable()
+export class AdminController implements IAdminController {
 
-export class AdminController {
-    static getAllInspectors: RequestHandler = async (req: Request, res: Response) => {
+    constructor(
+        @inject(TYPES.AdminService) private _adminService: IAdminService
+    ) { }
+
+    getAllInspectors = async (req: Request, res: Response): Promise<void> => {
         try {
-            const response = await adminService.getAllInspectors()
+            const response = await this._adminService.getAllInspectors()
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json("Internal server Error")
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }
-    static getAllUsers: RequestHandler = async (req: Request, res: Response) => {
+
+    getAllUsers = async (req: Request, res: Response): Promise<void> => {
         try {
-            const response = await adminService.getAllUsers()
+            const response = await this._adminService.getAllUsers()
             res.status(200).json(response)
         } catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json("intenal server error")
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
             }
         }
     }

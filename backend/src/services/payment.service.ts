@@ -1,47 +1,114 @@
 import Stripe from "stripe";
 import appConfig from "../config/app.config";
-import PaymentRepository from "../repositories/payment.repository";
-import { PaymentStatus } from "../models/payment.model";
-import mongoose from "mongoose";
-import inspectionService from "./inspection.service";
+import { IPaymentDocument, PaymentStatus } from "../models/payment.model";
+import mongoose, { Types } from "mongoose";
 import { InspectionStatus } from "../models/inspection.model";
+import { BaseService } from "../core/abstracts/base.service";
+import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../di/types";
+import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
+import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
+import { ServiceError } from "../core/errors/service.error";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
 });
 
-class PaymentService {
-    private paymentRepository: PaymentRepository;
+@injectable()
+export class PaymentService extends BaseService<IPaymentDocument> implements IPaymentService {
     private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
-    constructor() {
-        this.paymentRepository = new PaymentRepository();
+
+    constructor(
+        @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
+        @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
+        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
+    ) {
+        super(_paymentRepository);
     }
 
-    async createPaymentIntent(inspectionId: string, userId: string, amount: number): Promise<Stripe.PaymentIntent> {
+    private async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
         try {
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: amount * 100,
-                currency: 'inr',
-                metadata: {
-                    inspectionId,
-                    userId
-                }
-            });
-
-            await this.paymentRepository.createPayment({
-                inspection: inspectionId as any,
-                user: userId as any,
-                amount: amount,
-                currency: 'inr',
-                stripePaymentIntentId: paymentIntent.id,
-                status: PaymentStatus.PENDING
-            });
-
-            return paymentIntent;
+            return await stripe.paymentIntents.retrieve(paymentIntentId);
         } catch (error) {
-            console.error('Error creating payment intent:', error);
-            throw error;
+            console.error(`Error retrieving payment intent ${paymentIntentId}:`, error);
+            throw new Error('Failed to retrieve payment intent');
         }
+    }
+
+    private async cancelPaymentIntent(paymentIntentId: string): Promise<void> {
+        try {
+            await stripe.paymentIntents.cancel(paymentIntentId);
+            await this._paymentRepository.updatePayment(paymentIntentId, { status: PaymentStatus.FAILED });
+        } catch (error) {
+            console.error(`Error canceling payment intent ${paymentIntentId}:`, error);
+            throw new ServiceError('Failed to cancel payment intent');
+        }
+    }
+
+    async createPaymentIntent(inspectionId: string, userId: string, amount: number, isRetry = false, paymentIntentId?: string): Promise<Stripe.PaymentIntent> {
+        const existingPayments = await this._paymentRepository.findPendingByInspection(inspectionId);
+
+        let reusableIntent: Stripe.PaymentIntent | null = null;
+
+        for (const payment of existingPayments) {
+            try {
+                const intent = await this.retrievePaymentIntent(payment.stripePaymentIntentId);
+
+                if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(intent.status)) {
+                    reusableIntent = intent;
+                    break;
+                } else {
+                    await this.cancelPaymentIntent(payment.stripePaymentIntentId);
+                }
+            } catch (error) {
+                console.error(`Error processing payment ${payment.stripePaymentIntentId}:`, error);
+                await this._paymentRepository.updatePayment(payment.stripePaymentIntentId, { status: PaymentStatus.FAILED });
+            }
+        }
+
+        if (reusableIntent) {
+            return reusableIntent;
+        }
+
+        if (isRetry && paymentIntentId) {
+            try {
+                const existingIntent = await this.retrievePaymentIntent(paymentIntentId);
+                if (existingIntent.status === 'succeeded') {
+                    const existingPayment = await this._paymentRepository.getPaymentByIntentId(paymentIntentId);
+                    if (existingPayment?.status === PaymentStatus.SUCCEEDED) {
+                        return existingIntent;
+                    }
+                }
+                if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(existingIntent.status)) {
+                    return existingIntent;
+                } else {
+                    throw new Error('Payment intent is not in a returnable state');
+                }
+            } catch (error) {
+                console.error(`Error retrieving payment intent ${paymentIntentId}:`, error);
+                throw new Error('Failed to retrieve payment intent for retry');
+            }
+        }
+
+        const newPaymentIntent = await stripe.paymentIntents.create({
+            amount: amount * 100,
+            currency: 'inr',
+            metadata: { inspectionId, userId },
+            payment_method_types: ['card']
+        });
+
+        await this._paymentRepository.create({
+            inspection: new Types.ObjectId(inspectionId),
+            user: new Types.ObjectId(userId),
+            amount,
+            currency: 'inr',
+            stripePaymentIntentId: newPaymentIntent.id,
+            status: PaymentStatus.PENDING
+        });
+
+        return newPaymentIntent;
     }
 
     async handleWebhookEvent(event: Stripe.Event): Promise<void> {
@@ -53,41 +120,26 @@ class PaymentService {
             switch (event.type) {
                 case "payment_intent.succeeded": {
                     const paymentIntent = event.data.object as Stripe.PaymentIntent;
-                    payment = await this.paymentRepository.updatePayment(
-                        paymentIntent.id,
-                        { status: PaymentStatus.SUCCEEDED }
-                    );
+                    payment = await this._paymentRepository.updatePayment(paymentIntent.id, { status: PaymentStatus.SUCCEEDED });
 
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
 
-                    await inspectionService.updateInspection(
-                        payment.inspection.toString(),
-                        { status: InspectionStatus.CONFIRMED }
-                    );
+                    await this._inspectionRepository.update(payment.inspection, { status: InspectionStatus.CONFIRMED });
                     break;
                 }
 
                 case "payment_intent.payment_failed": {
                     const failedPayment = event.data.object as Stripe.PaymentIntent;
-                    payment = await this.paymentRepository.updatePayment(
-                        failedPayment.id,
-                        { status: PaymentStatus.FAILED }
-                    );
-
-
+                    payment = await this._paymentRepository.updatePayment(failedPayment.id, { status: PaymentStatus.FAILED });
 
                     if (!payment) {
                         throw new Error('Payment not found');
                     }
 
-                    await inspectionService.updateInspection(
-                        payment.inspection.toString(),
-                        { status: InspectionStatus.CANCELLED }
-                    );
-
-                    await inspectionService.cancelInspection(payment.inspection.toString())
+                    await this._inspectionRepository.update(payment.inspection, { status: InspectionStatus.CANCELLED });
+                    await this._inspectionService.cancelInspection(payment.inspection.toString());
                     break;
                 }
             }
@@ -104,15 +156,16 @@ class PaymentService {
 
     async verifyPayment(paymentIntentId: string) {
         try {
-            return await this.paymentRepository.getPaymentByIntentId(paymentIntentId);
+            return await this._paymentRepository.getPaymentByIntentId(paymentIntentId);
         } catch (error) {
             console.error('Error verifying payment:', error);
             throw error;
         }
     }
+
     async findPayments(userId: string) {
         try {
-            return await this.paymentRepository.findUserPayments(userId)
+            return await this._paymentRepository.findUserPayments(userId);
         } catch (error) {
             console.error('Error getting payments data:', error);
             throw error;
@@ -124,47 +177,22 @@ class PaymentService {
         session.startTransaction();
 
         try {
-
-            // Find payments that are pending for more than 1 hour
             const staleDate = new Date(Date.now() - this.PENDING_TIMEOUT_MS);
-            const stalePayments = await this.paymentRepository.findStalePayments(
-                PaymentStatus.PENDING,
-                staleDate
-            );
+            const stalePayments = await this._paymentRepository.findStalePayments(PaymentStatus.PENDING, staleDate);
 
             for (const payment of stalePayments) {
                 try {
-                    // Retrieve the payment intent from Stripe
-                    const paymentIntent = await stripe.paymentIntents.retrieve(
-                        payment.stripePaymentIntentId
-                    );
+                    const paymentIntent = await this.retrievePaymentIntent(payment.stripePaymentIntentId);
 
-                    // If the payment is still pending in Stripe, cancel it
-                    if (paymentIntent.status === 'requires_payment_method' ||
-                        paymentIntent.status === 'requires_confirmation' ||
-                        paymentIntent.status === 'requires_action') {
-
-                        await stripe.paymentIntents.cancel(payment.stripePaymentIntentId);
+                    if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(paymentIntent.status)) {
+                        await this.cancelPaymentIntent(payment.stripePaymentIntentId);
                     }
 
-                    // Update local payment status
-                    await this.paymentRepository.updatePayment(
-                        payment.stripePaymentIntentId,
-                        { status: PaymentStatus.FAILED }
-                    );
-
-                    // Update inspection status
-                    await inspectionService.updateInspection(
-                        payment.inspection.toString(),
-                        { status: InspectionStatus.CANCELLED }
-                    );
-
-                    // Cancel the inspection
-                    await inspectionService.cancelInspection(payment.inspection.toString());
-
+                    await this._paymentRepository.updatePayment(payment.stripePaymentIntentId, { status: PaymentStatus.FAILED });
+                    await this._inspectionRepository.update(payment.inspection, { status: InspectionStatus.CANCELLED });
+                    await this._inspectionService.cancelInspection(payment.inspection.toString());
                 } catch (error) {
                     console.error(`Error handling stale payment ${payment.stripePaymentIntentId}:`, error);
-                    // Continue with other payments even if one fails
                     continue;
                 }
             }
@@ -179,5 +207,3 @@ class PaymentService {
         }
     }
 }
-
-export default new PaymentService();

@@ -7,7 +7,9 @@ export function authorizeRole(...roles: string[]): RequestHandler {
             return
         }
 
-        if (!roles.includes(req.user.role)) {
+        console.log('roles is:', ...roles, 'and role in the reqest body:', req.user.role)
+
+        if (!roles.includes(req.user?.role)) {
             res.status(403).json({ message: "Access denied" });
             return
         }

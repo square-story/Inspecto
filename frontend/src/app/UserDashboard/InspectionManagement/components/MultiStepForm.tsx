@@ -63,7 +63,7 @@ const MultiStepForm = () => {
         setShowPayment(false);
     };
 
-    const handlePaymentError = (message) => {
+    const handlePaymentError = (message: string) => {
         toast.error(message);
     };
     const values = methods.getValues()

@@ -1,16 +1,19 @@
-import Comingsoon from "@/components/Comingsoon"
 import ContentSection from "@/components/content-section"
+import { useInspectorDetails } from "@/hooks/useInspectorDetails"
+import { DocumentList } from "./components/DocumentList"
+import LoadingSpinner from "@/components/LoadingSpinner"
 
 const DocumentManagment = () => {
+    const { inspector, loading } = useInspectorDetails()
     return (<>
 
         <ContentSection
-            title='Document Managment'
-            desc='Your Profile Details Section'
+            title='Your Documents'
+            desc='Manage your documents - upload, view, edit, and download files.'
+            scrollAreaClassName=""
         >
 
-            <Comingsoon />
-
+            {loading ? <LoadingSpinner /> : <DocumentList initialDocuments={inspector.certificates} />}
 
         </ContentSection>
 
