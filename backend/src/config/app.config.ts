@@ -25,7 +25,7 @@ interface AppConfig {
 }
 
 const appConfig: AppConfig = {
-    port: parseInt(process.env.PORT || '3000', 10),
+    port: parseInt(process.env.PORT || '5000', 10),
     databaseUrl: process.env.DATABASE_URL as string,
     accessToken: process.env.ACCESS_TOKEN_SECRET as string,
     refreshToken: process.env.REFRESH_TOKEN_SECRET as string,

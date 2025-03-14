@@ -84,7 +84,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(existingIntent.status)) {
                     return existingIntent;
                 } else {
-                    throw new Error('Payment intent is not in a retryable state');
+                    throw new Error('Payment intent is not in a returnable state');
                 }
             } catch (error) {
                 console.error(`Error retrieving payment intent ${paymentIntentId}:`, error);
