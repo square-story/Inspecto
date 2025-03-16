@@ -46,8 +46,8 @@ const editVehicleSchema = z.object({
         z.date(),
         z.string().transform((val) => val ? new Date(val) : undefined)
     ]).optional(),
-    frontViewImage: z.string().url().optional(),
-    rearViewImage: z.string().url().optional(),
+    frontViewImage: z.string().optional(),
+    rearViewImage: z.string().optional(),
     color: z.string().optional(),
 });
 

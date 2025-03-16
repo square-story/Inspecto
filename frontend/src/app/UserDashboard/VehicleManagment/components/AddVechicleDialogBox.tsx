@@ -41,8 +41,8 @@ const addVehicleSchema = z.object({
     transmission: z.nativeEnum(Transmission),
     insuranceExpiry: z.date().optional(),
     lastInspectionDate: z.date().optional(),
-    frontViewImage: z.string().url().optional(),
-    rearViewImage: z.string().url().optional(),
+    frontViewImage: z.string().optional(),
+    rearViewImage: z.string().optional(),
     color: z.string().optional(),
 });
 
