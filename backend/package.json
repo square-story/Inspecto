@@ -15,11 +15,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/pdfkit": "^0.13.9",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "google-auth-library": "^9.15.0",
@@ -29,6 +31,7 @@
     "mongoose": "^8.9.3",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "pdfkit": "^0.16.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "stripe": "^17.6.0"

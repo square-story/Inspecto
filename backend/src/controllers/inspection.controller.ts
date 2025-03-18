@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
-import { IInspectionInput } from "../models/inspection.model";
+import { IInspectionDocument, IInspectionInput, InspectionStatus } from "../models/inspection.model";
 import { ObjectId } from "mongoose";
 import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { ServiceError } from "../core/errors/service.error";
+import { generateInspectionPDF } from "../utils/pdf.utils";
+import { uploadToCloudinary } from "../utils/cloudinary.utils";
 
 
 @injectable()
@@ -211,6 +213,63 @@ export class InspectionController implements IInspectionController {
                 response,
             });
 
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
+        }
+    }
+
+    submitInspectionReport = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { reportData, id, isDraft } = req.body;
+            if (!id) {
+                res.status(400).json({ message: 'Inspection ID is required' });
+                return;
+            }
+            const report = await this._inspectionService.getInspectionById(id)
+            if (!report) {
+                res.status(404).json({ message: 'Inspection not found' });
+                return;
+            }
+            if (report.report?.status == 'completed') {
+                res.status(400).json({ message: 'Report already submitted' });
+                return;
+            }
+            const updatedReport = await this._inspectionService.updateInspection(id, {
+                report: {
+                    ...reportData,
+                    status: isDraft ? 'draft' : 'completed'
+                }
+            });
+            let pdfUrl = ''
+            if (!isDraft) {
+                const pdfBuffer = await generateInspectionPDF(updatedReport as IInspectionDocument);
+                const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
+                pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
+                console.log('hello')
+                await this._inspectionService.updateInspection(id, {
+                    status:InspectionStatus.COMPLETED,
+                    report: {
+                        ...reportData,
+                        status: 'completed',
+                        reportPdfUrl: pdfUrl
+                    }
+                })
+            }
+            res.status(200).json({
+                message: isDraft ? 'Report saved as draft' : 'Report submitted successfully',
+                pdfUrl
+            });
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(400).json({

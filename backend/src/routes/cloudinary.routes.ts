@@ -10,5 +10,6 @@ const authenticateToken = authMiddleware.authenticateToken
 const cloudinaryController = container.get<CloudinaryController>(TYPES.CloudinaryController)
 
 router.get('/signed-url', authenticateToken, cloudinaryController.getSignedUrl)
+router.get('/signed-pdf-url', authenticateToken, cloudinaryController.getSignedPdfUrl)
 
 export default router;

@@ -26,6 +26,8 @@ import { useDropzone } from "react-dropzone"
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary"
 import { useSignedImage } from "@/hooks/useSignedImage"
 import { Skeleton } from "@/components/ui/skeleton"
+import { InspectionService } from "@/services/inspection.service"
+import { getSignedPdfUrl } from "@/utils/cloudinary"
 
 
 const inspectionFormSchema = z.object({
@@ -47,7 +49,7 @@ const inspectionFormSchema = z.object({
   photos: z.array(z.string()).optional(),
 })
 
-type InspectionFormValues = z.infer<typeof inspectionFormSchema>
+export type InspectionFormValues = z.infer<typeof inspectionFormSchema>
 
 export default function InspectionReportPage() {
   const { id } = useParams<{ id: string }>()
@@ -137,18 +139,30 @@ export default function InspectionReportPage() {
     setSubmitting(true)
 
     try {
-      // In a real app, you would submit the form data to your API
-      console.log("Form values:", values)
-
-      // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const { pdfUrl } = await InspectionService.submitInspectionReport(values, id as string, isDraft);
 
       toast.success(isDraft
         ? "Your inspection report draft has been saved."
-        : "Your inspection report has been submitted successfully.")
+        : "Your inspection report has been submitted successfully.",
+        {action:!isDraft && pdfUrl ? {
+          label: 'View Report',
+          onClick: async () => {
+            try {
+              console.log('Getting signed URL for PDF:', pdfUrl);
+              const signedUrl = await getSignedPdfUrl(pdfUrl);
+              console.log('Opening signed PDF URL:', signedUrl);
+            window.open(signedUrl, "_blank");
+            } catch (error) {
+              console.error('Error opening PDF:', error);
+            toast.error('Unable to open PDF. Please try again later.');
+            }
+          }
+        }: undefined,
+      }
+      )
 
       if (!isDraft) {
-        navigate("/inspections")
+        navigate("/inspector/dashboard/inspection")
       }
     } catch (error) {
       console.error("Error submitting form:", error)
