@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IInspectionDocument, IInspectionInput, InspectionStatus } from "../models/inspection.model";
+import {  IInspectionInput, InspectionStatus } from "../models/inspection.model";
 import { ObjectId } from "mongoose";
 import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 import { inject, injectable } from "inversify";
@@ -245,7 +245,7 @@ export class InspectionController implements IInspectionController {
                 res.status(400).json({ message: 'Report already submitted' });
                 return;
             }
-            const updatedReport = await this._inspectionService.updateInspection(id, {
+            await this._inspectionService.updateInspection(id, {
                 report: {
                     ...reportData,
                     status: isDraft ? 'draft' : 'completed'
@@ -253,10 +253,16 @@ export class InspectionController implements IInspectionController {
             });
             let pdfUrl = ''
             if (!isDraft) {
-                const pdfBuffer = await generateInspectionPDF(updatedReport as IInspectionDocument);
+                const populatedInspection = await this._inspectionService.getInspectionById(
+                    id,
+                );
+                if (!populatedInspection) {
+                    res.status(404).json({ message: 'Populated inspection data not found' });
+                    return;
+                }
+                const pdfBuffer = await generateInspectionPDF(populatedInspection);
                 const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
-                console.log('hello')
                 await this._inspectionService.updateInspection(id, {
                     status:InspectionStatus.COMPLETED,
                     report: {

@@ -82,7 +82,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async getInspectionById(id: string): Promise<IInspectionDocument | null> {
         try {
-            return await this._inspectionRepository.findById(new Types.ObjectId(id));
+            return await this._inspectionRepository.findById(new Types.ObjectId(id),['vehicle', 'user', 'inspector']);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting inspection by ID: ${error.message}`);

@@ -4,8 +4,17 @@ import { IBaseRepository } from "../interfaces/repositories/base/base.repository
 export abstract class BaseRepository<T extends Document> implements IBaseRepository<T> {
     constructor(protected model: Model<T>) { }
 
-    async findById(id: Types.ObjectId): Promise<T | null> {
-        return this.model.findById(id);
+    async findById(id: Types.ObjectId,populate?:string[]): Promise<T | null> {
+        let query = this.model.findById(id);
+        
+        // Apply population if specified
+        if (populate && populate.length > 0) {
+            populate.forEach(field => {
+                query = query.populate(field);
+            });
+        }
+        
+        return await query.exec();
     }
 
     async findByIdAndUpdate(id: Types.ObjectId, update: UpdateQuery<T>): Promise<T | null> {
