@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
@@ -39,6 +40,8 @@ import { IPayments } from "@/features/payments/types"
 import StripePaymentWrapper from "@/components/StripePaymentWrapper"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { getSignedPdfUrl } from "@/utils/cloudinary";
+import { saveAs } from 'file-saver';
 
 const ITEMS_PER_PAGE = 5
 
@@ -194,9 +197,30 @@ export default function PaymentHistory() {
         setInvoicePayment(payment)
     }
 
-    const handleDownloadReport = (inspectionId: string) => {
-        console.log(`Downloading report for inspection: ${inspectionId}`)
-        // Implement actual report download functionality here
+    const handleDownloadReport = async (inspectionId: string) => {
+        try {
+            const inspection = inspections?.find(i => i._id === inspectionId);
+            if (!inspection?.report?.reportPdfUrl) {
+                toast.error('Report PDF not available');
+                return;
+            }
+
+            // Get signed URL from backend
+            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl);
+            
+            // Fetch the PDF blob
+            const response = await fetch(signedUrl);
+            const pdfBlob = await response.blob();
+            
+            // Download with proper filename
+            const filename = `Inspection-Report-${inspection.bookingReference}.pdf`;
+            saveAs(pdfBlob, filename);
+            
+            toast.success('Report download started');
+        } catch (error) {
+            console.error('Error downloading report:', error);
+            toast.error('Failed to download report. Please try again.');
+        }
     }
 
     const handlePaymentExpired = (paymentId: string) => {

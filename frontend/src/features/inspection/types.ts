@@ -16,6 +16,30 @@ export enum InspectionStatus {
     PAYMENT_COMPLETED = "payment_completed"
 }
 
+export enum ReportStatus {
+    DRAFT = "draft",
+    COMPLETED = "completed"
+}
+
+export interface IInspectionReport {
+    mileage: string;
+    exteriorCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    interiorCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    engineCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    tiresCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    lightsCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    brakesCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    suspensionCondition: 'excellent' | 'good' | 'fair' | 'poor';
+    fuelLevel: 'empty' | 'quarter' | 'half' | 'threequarters' | 'full';
+    additionalNotes?: string;
+    recommendations?: string;
+    passedInspection: boolean;
+    photos?: string[];
+    status: ReportStatus;
+    submittedAt: Date;
+    reportPdfUrl?: string;
+    version: number; 
+}
 
 export interface Inspection {
     _id: string,
@@ -34,5 +58,6 @@ export interface Inspection {
     inspector: IInspector;
     bookingReference: string;
     user: UserState;
+    report?:IInspectionReport;
 }
 
