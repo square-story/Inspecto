@@ -53,6 +53,9 @@ import { IVehicleController } from "../core/interfaces/controllers/vehicle.contr
 import { VehicleController } from "../controllers/vehicle.controller";
 
 
+//Wallet
+import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
+import { WalletRepository } from "../repositories/wallet.repository";
 
 //Email
 import { IEmailService } from "../core/interfaces/services/email.service.interface";
@@ -110,6 +113,9 @@ container.bind<IPaymentController>(TYPES.PaymentController).to(PaymentController
 container.bind<IVehicleRepository>(TYPES.VehicleRepository).to(VehicleRepository);
 container.bind<IVehicleService>(TYPES.VehicleService).to(VehicleService);
 container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController);
+
+//Wallet
+container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
 
 //Email
 container.bind<IEmailService>(TYPES.EmailService).to(EmailService);

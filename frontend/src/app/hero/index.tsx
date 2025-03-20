@@ -9,7 +9,7 @@ const Hero01 = () => {
         <div className="min-h-screen flex items-center justify-center">
             <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12 ">
                 <div>
-                    <Badge className="animate-bounce bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
+                    <Badge className="cursor-default animate-bounce bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
                         Just released v1.0.0
                     </Badge>
                     <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tighter">
@@ -19,13 +19,13 @@ const Hero01 = () => {
                         Register your vehicle, book inspections with verified professionals, and access centralized reports – all in one place
                     </p>
                     <div className="mt-12 flex items-center gap-4">
-                        <Button size="lg" className="rounded-full text-base">
+                        <Button size="lg" className="rounded-full text-base bg-holo-gradient px-6 py-3 shadow-lg border border-white/40 text-gray-900 font-semibold transition duration-200 hover:scale-105">
                             Register Now <ArrowUpRight className="!h-5 !w-5" />
                         </Button>
                         <Button
                             variant="outline"
                             size="lg"
-                            className="rounded-full text-base shadow-none"
+                            className="rounded-full text-base transition duration-200 hover:scale-105 shadow-lg border border-white/40"
 
                         >
                             <Link

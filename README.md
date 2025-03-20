@@ -48,7 +48,6 @@
 ---
 
 ## 📅 Future Improvements  
-✅ Real-time messaging  
 ✅ GPS-based inspector tracking  
 ✅ Enhanced analytics in the admin dashboard  
 
@@ -56,10 +55,8 @@
 
 ## Screenshots
 
-![Landing Page Dark](https://i.imgur.com/8CBrtag.png)
-![Landing Page Light](https://i.imgur.com/Gff0lUp.png)
-![Inspector Page](https://i.imgur.com/als9Y36.png)
-![Account Settings](https://i.imgur.com/4rpKHok.png)
+![Landing Page Dark](https://i.imgur.com/7kPZGTS.png)
+![Landing Page Light](https://i.imgur.com/ixp9Rx9.png)
 
 
 

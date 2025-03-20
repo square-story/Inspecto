@@ -281,8 +281,8 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                 <!-- Header with Logo and Report Info -->
                 <div class="header">
                     <div class="logo-area">
-                        <div class="logo-title">Vehicle Inspection</div>
-                        <div class="logo-subtitle">Official Inspection Report</div>
+                        <div class="logo-title">Inspecto</div>
+                        <div class="logo-subtitle">Official Vehicle Inspection Report</div>
                     </div>
                     <div class="report-info">
                         <div class="report-id">Ref: ${inspection.bookingReference}</div>
@@ -506,13 +506,13 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
 
 function formatCondition(condition?: string): string {
     if (!condition) return 'Not Assessed';
-    
+
     return condition.charAt(0).toUpperCase() + condition.slice(1);
 }
 
 function formatFuelLevel(level?: string): string {
     if (!level) return 'Not Assessed';
-    
+
     const fuelLevels: Record<string, string> = {
         empty: 'Empty',
         quarter: '1/4',
@@ -520,6 +520,6 @@ function formatFuelLevel(level?: string): string {
         threequarters: '3/4',
         full: 'Full'
     };
-    
+
     return fuelLevels[level] || level;
 }

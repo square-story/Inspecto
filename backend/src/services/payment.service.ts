@@ -11,6 +11,8 @@ import { IPaymentRepository } from "../core/interfaces/repositories/payment.repo
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { ServiceError } from "../core/errors/service.error";
+import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
+import { IInspector } from "../models/inspector.model";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -23,6 +25,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
     constructor(
         @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
+        @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
         @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
     ) {
         super(_paymentRepository);
@@ -205,5 +208,61 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         } finally {
             session.endSession();
         }
+    }
+    async processInspectionPayment(inspectionId: string, amount: number) {
+        const inspection = await this._inspectionRepository.findById(
+            new Types.ObjectId(inspectionId), 
+            ['inspector']
+        );
+        
+        if (!inspection) throw new ServiceError('Inspection not found');
+        if (inspection.status !== InspectionStatus.CONFIRMED) {
+            throw new ServiceError('Inspection is not confirmed');
+        }
+    
+        const inspector = inspection.inspector as unknown as IInspector;
+        let wallet = await this._walletRepository.findOne({ inspector: inspector._id });
+    
+        if (!wallet) {
+            wallet = await this._walletRepository.create({
+                inspector: inspector._id,
+                balance: 0,
+                pendingBalance: 0,
+                transactions: [],
+            });
+        }
+    
+        const FIXED_PLATFORM_FEE = 50;
+        const inspectorEarnings = amount - FIXED_PLATFORM_FEE;
+    
+        // Atomic update
+        await this._walletRepository.findOneAndUpdate(
+            { _id: wallet._id },
+            {
+                $inc: { balance: inspectorEarnings - FIXED_PLATFORM_FEE },
+                $push: {
+                    transactions: {
+                        $each: [
+                            {
+                                amount: inspectorEarnings,
+                                date: new Date(),
+                                type: 'EARNED',
+                                status: 'COMPLETED',
+                                reference: inspectionId
+                            },
+                            {
+                                amount: -FIXED_PLATFORM_FEE,
+                                date: new Date(),
+                                type: 'FEE',
+                                status: 'COMPLETED',
+                                reference: inspectionId
+                            }
+                        ]
+                    }
+                }
+            }
+        );
+    
+        return { platformFee:FIXED_PLATFORM_FEE, inspectorEarnings };
     }
 }

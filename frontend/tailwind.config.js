@@ -82,7 +82,10 @@ export default {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
     			sm: 'calc(var(--radius) - 4px)'
-    		}
+    		},
+			backgroundImage: {
+				'holo-gradient': 'linear-gradient(135deg, hsl(350, 100%, 85%), hsl(0, 100%, 90%), hsl(300, 100%, 90%), hsl(260, 40%, 70%), hsl(0, 100%, 90%))',
+			  },
     	}
     },
 	plugins: [require("tailwindcss-animate")],

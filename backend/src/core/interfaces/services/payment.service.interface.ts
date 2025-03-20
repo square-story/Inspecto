@@ -8,4 +8,8 @@ export interface IPaymentService extends IBaseService<IPaymentDocument> {
     verifyPayment(paymentIntentId: string): Promise<IPaymentDocument | null>;
     handleStaleTransactions(): Promise<void>;
     findPayments(userId: string): Promise<IPaymentDocument[]>;
+    processInspectionPayment(inspectionId: string, amount: number): Promise<{
+        platformFee: number;
+        inspectorEarnings: number;
+    }>;
 }

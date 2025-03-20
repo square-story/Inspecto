@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  IInspectionInput, InspectionStatus } from "../models/inspection.model";
+import { IInspectionInput, InspectionStatus } from "../models/inspection.model";
 import { ObjectId } from "mongoose";
 import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 import { inject, injectable } from "inversify";
@@ -8,12 +8,14 @@ import { IInspectionService } from "../core/interfaces/services/inspection.servi
 import { ServiceError } from "../core/errors/service.error";
 import { generateInspectionPDF } from "../utils/pdf.utils";
 import { uploadToCloudinary } from "../utils/cloudinary.utils";
+import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 
 
 @injectable()
 export class InspectionController implements IInspectionController {
     constructor(
-        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService
+        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
+        @inject(TYPES.PaymentService) private _paymentService: IPaymentService
     ) { }
 
     createInspection = async (req: Request, res: Response): Promise<void> => {
@@ -263,8 +265,11 @@ export class InspectionController implements IInspectionController {
                 const pdfBuffer = await generateInspectionPDF(populatedInspection);
                 const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
+
+                await this._paymentService.processInspectionPayment(id, populatedInspection.inspectionType == 'full' ? 300 : 250)
+
                 await this._inspectionService.updateInspection(id, {
-                    status:InspectionStatus.COMPLETED,
+                    status: InspectionStatus.COMPLETED,
                     report: {
                         ...reportData,
                         status: 'completed',

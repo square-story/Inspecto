@@ -32,6 +32,9 @@ export const TYPES = {
     //Email
     EmailService: Symbol.for('EmailService'),
 
+    //Wallet
+    WalletRepository: Symbol.for('WalletRepository'),
+
     //Auth Services
     AdminAuthService: Symbol.for('AdminAuthService'),
     InspectorAuthService: Symbol.for('InspectorAuthService'),
