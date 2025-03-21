@@ -3,8 +3,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import TransactionHistory from "@/components/inspector/transaction-history"
 import UpcomingEarnings from "@/components/inspector/upcoming-earnings"
 import PaymentStats from "@/components/inspector/payment-stats"
+import { useEffect, useState } from "react"
+import { IWalletStats } from "@/types/inspector.wallet.stats"
+import { useLoadingState } from "@/hooks/useLoadingState"
+import { PaymentService } from "@/services/payment.service"
+import LoadingSpinner from "@/components/LoadingSpinner"
 
 export default function PaymentsPage() {
+    const [stats, setStats] = useState<IWalletStats>({
+        totalEarnings: 0,
+        totalTransactions: 0,
+        totalPlatformFee: 0
+    })
+
+    //for loading state
+    const { loading, withLoading } = useLoadingState();
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            await withLoading(async () => {
+                try {
+                    const response = await PaymentService.getStats();
+                    if (response) {
+                        setStats(response);
+                    } else {
+                        console.error("Received undefined stats");
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch stats", error);
+                }
+            })
+        }
+        fetchStats()
+    }, [withLoading])
+
     return (
         <div className="container mx-auto px-4 py-6 space-y-6">
             <div className="flex flex-col gap-4">
@@ -12,15 +44,15 @@ export default function PaymentsPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card className="p-4">
                         <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
-                        <p className="text-2xl font-bold">₹45,231.89</p>
+                        <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
                     </Card>
                     <Card className="p-4">
                         <h3 className="font-medium text-sm text-muted-foreground">Platform Fees</h3>
-                        <p className="text-2xl font-bold">₹4,523.19</p>
+                        <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalPlatformFee}`}</p>
                     </Card>
                     <Card className="p-4">
-                        <h3 className="font-medium text-sm text-muted-foreground">Pending Payments</h3>
-                        <p className="text-2xl font-bold">₹12,450.00</p>
+                        <h3 className="font-medium text-sm text-muted-foreground">Total Transactions</h3>
+                        <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalTransactions}</p>
                     </Card>
                 </div>
             </div>

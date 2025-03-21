@@ -14,11 +14,14 @@ const authenticateToken = authMiddleware.authenticateToken
 //for get all payments
 router.get('/', authenticateToken, authorizeRole('user'), paymentController.findPayments)
 
+router.get('/get-stats', authenticateToken, authorizeRole('inspector'), paymentController.getWalletStates)
+
 router.post(
     '/create-payment-intent',
     authenticateToken,
     paymentController.createPaymentIntent
 );
+
 
 router.post(
     '/webhook',

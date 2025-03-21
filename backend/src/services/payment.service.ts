@@ -13,6 +13,7 @@ import { IInspectionService } from "../core/interfaces/services/inspection.servi
 import { ServiceError } from "../core/errors/service.error";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
 import { IInspector } from "../models/inspector.model";
+import { IWalletStats } from "../core/types/wallet.stats.type";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -211,18 +212,18 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
     }
     async processInspectionPayment(inspectionId: string, amount: number) {
         const inspection = await this._inspectionRepository.findById(
-            new Types.ObjectId(inspectionId), 
+            new Types.ObjectId(inspectionId),
             ['inspector']
         );
-        
+
         if (!inspection) throw new ServiceError('Inspection not found');
         if (inspection.status !== InspectionStatus.CONFIRMED) {
             throw new ServiceError('Inspection is not confirmed');
         }
-    
+
         const inspector = inspection.inspector as unknown as IInspector;
         let wallet = await this._walletRepository.findOne({ inspector: inspector._id });
-    
+
         if (!wallet) {
             wallet = await this._walletRepository.create({
                 inspector: inspector._id,
@@ -231,10 +232,10 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 transactions: [],
             });
         }
-    
+
         const FIXED_PLATFORM_FEE = 50;
         const inspectorEarnings = amount - FIXED_PLATFORM_FEE;
-    
+
         // Atomic update
         await this._walletRepository.findOneAndUpdate(
             { _id: wallet._id },
@@ -262,7 +263,15 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 }
             }
         );
-    
-        return { platformFee:FIXED_PLATFORM_FEE, inspectorEarnings };
+
+        return { platformFee: FIXED_PLATFORM_FEE, inspectorEarnings };
+    }
+    async getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats> {
+        try {
+            return await this._walletRepository.WalletStatsInspector(inspectorId)
+        } catch (error) {
+            console.error(`Error get Stats About Wallet Transaction ${inspectorId}:`, error);
+            throw new ServiceError('Error get Stats About Wallet');
+        }
     }
 }

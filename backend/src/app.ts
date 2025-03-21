@@ -1,7 +1,5 @@
 import "reflect-metadata";
 import express, { Request, Response } from "express";
-import appConfig from "./config/app.config";
-import { connectToDatabase } from "./config/db.config";
 import cookieParser from 'cookie-parser';
 import adminRoutes from "./routes/admin.routes";
 import userRoutes from './routes/user.routes';
@@ -13,12 +11,12 @@ import cloudinaryRoutes from './routes/cloudinary.routes';
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import { errorHandler } from './middlewares/error.middleware';
-import morgan from 'morgan';
 import { blacklistToken } from "./utils/token.utils";
 import { container } from './di/container';
 import { TYPES } from './di/types';
 import { PaymentStatusChecker } from './utils/checkPaymentStatus';
 import { IPaymentService } from './core/interfaces/services/payment.service.interface';
+import { developmentLogger, errorLogger } from "./config/logger.config";
 
 const app = express();
 
@@ -39,11 +37,9 @@ app.use((req, res, next) => {
     }
 });
 
-app.use(morgan('dev'));
+app.use(developmentLogger);  // Log successful requests
+app.use(errorLogger);
 app.use(cookieParser());
-
-// Connect Database
-connectToDatabase();
 
 app.use(cors({
     origin: ["http://localhost:5173", "http://frontend:5173"],
@@ -112,7 +108,5 @@ app.use((err: Error, req: Request, res: Response) => {
 const paymentService = container.get<IPaymentService>(TYPES.PaymentService);
 new PaymentStatusChecker(paymentService);
 
-app.listen(appConfig.port, () => {
-    console.log(`server is running on port ${appConfig.port}`);
-});
+export default app
 
