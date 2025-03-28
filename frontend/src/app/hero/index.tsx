@@ -1,9 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RootState } from "@/store";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const Hero01 = () => {
+    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     return (
 
         <div className="min-h-screen flex items-center justify-center">
@@ -19,9 +22,17 @@ const Hero01 = () => {
                         Register your vehicle, book inspections with verified professionals, and access centralized reports – all in one place
                     </p>
                     <div className="mt-12 flex items-center gap-4">
-                        <Button size="lg" className="rounded-full text-base bg-holo-gradient px-6 py-3 shadow-lg border border-white/40 text-gray-900 font-semibold transition duration-200 hover:scale-105">
-                            Register Now <ArrowUpRight className="!h-5 !w-5" />
-                        </Button>
+                        {isAuthenticated ? <Button size="lg" className="rounded-full text-base bg-holo-gradient px-6 py-3 shadow-lg border border-white/40 text-gray-900 font-semibold transition duration-200 hover:scale-105">
+                            <Link
+                                key={'/user/dashboard/inspection'}
+                                to={'/user/dashboard/inspection'} className="flex flex-row">Book An Inspection Now<ArrowUpRight className="!h-5 !w-5" />
+                            </Link>
+                        </Button> : <Button size="lg" className="rounded-full text-base bg-holo-gradient px-6 py-3 shadow-lg border border-white/40 text-gray-900 font-semibold transition duration-200 hover:scale-105">
+                            <Link
+                                key={'/user/login'}
+                                to={'/user/login'} className="flex flex-row">Get Started<ArrowUpRight className="!h-5 !w-5" />
+                            </Link>
+                        </Button>}
                         <Button
                             variant="outline"
                             size="lg"
