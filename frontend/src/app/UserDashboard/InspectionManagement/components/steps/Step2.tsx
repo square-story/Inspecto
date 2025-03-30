@@ -1,15 +1,30 @@
 "use client"
 
-import { FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form"
-import { useFormContext } from "react-hook-form"
-import { useEffect, useState } from "react"
-import { inspectorService } from "@/services/inspector.service"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type React from "react"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Clock, } from "lucide-react"
-import { Inspectors } from "@/app/InspectorManagment/columns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { inspectorService } from "@/services/inspector.service"
+import type { IInspector } from "@/types/inspector"
+import {
+    type ColumnDef,
+    type ColumnFiltersState,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    type SortingState,
+    useReactTable,
+} from "@tanstack/react-table"
+import { Search, SortAsc, SortDesc, Star } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useFormContext } from "react-hook-form"
 import { SignedAvatar } from "@/components/SignedAvatar"
 
 const Step2 = () => {
@@ -17,19 +32,190 @@ const Step2 = () => {
     const latitude = watch("latitude")
     const longitude = watch("longitude")
 
-    const [inspectors, setInspectors] = useState<Inspectors[]>([])
+    const [inspectors, setInspectors] = useState<IInspector[]>([])
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [searchQuery, setSearchQuery] = useState("")
+    const [specializationFilter, setSpecializationFilter] = useState<string>("all")
+    const [isLoading, setIsLoading] = useState(false)
 
+    // Fetch inspectors only when coordinates change
     useEffect(() => {
         async function fetchInspectors() {
             if (latitude && longitude) {
-                const response = await inspectorService.getInspectorsBasedOnLocation(latitude, longitude)
-                setInspectors(response.data)
+                setIsLoading(true)
+                try {
+                    const response = await inspectorService.getInspectorsBasedOnLocation(latitude, longitude)
+                    setInspectors(response.data)
+                } catch (error) {
+                    console.error("Failed to fetch inspectors:", error)
+                } finally {
+                    setIsLoading(false)
+                }
             }
         }
         fetchInspectors()
     }, [latitude, longitude])
 
-    const availableInspectors = inspectors.filter((inspector) => inspector.status === "APPROVED")
+    // Memoize available inspectors to prevent recalculation on every render
+    const availableInspectors = useMemo(() => {
+        return inspectors.filter((inspector) => inspector.status === "APPROVED")
+    }, [inspectors])
+
+    // Memoize specializations to prevent recalculation on every render
+    const allSpecializations = useMemo(() => {
+        return Array.from(new Set(availableInspectors.flatMap((inspector) => inspector.specialization || [])))
+    }, [availableInspectors])
+
+    // Memoize columns definition to prevent recreation on every render
+    const columns = useMemo<ColumnDef<IInspector>[]>(
+        () => [
+            {
+                id: "select",
+                cell: ({ row }) => <RadioGroupItem value={row.original._id} id={row.original._id} className="mt-1" />,
+            },
+            {
+                accessorKey: "inspector",
+                header: "Inspector",
+                cell: ({ row }) => {
+                    const inspector = row.original
+                    return (
+                        <div className="flex items-center gap-3">
+                            <SignedAvatar
+                                publicId={inspector.profile_image}
+                                fallback={`${inspector.firstName} ${inspector.lastName}`}
+                            />
+                            <div>
+                                <div className="font-medium">
+                                    {inspector.firstName} {inspector.lastName}
+                                </div>
+                                <div className="text-sm text-muted-foreground">{inspector.email}</div>
+                                <div className="flex items-center mt-1">
+                                    <Star className="h-4 w-4 text-yellow-500 mr-1" fill="currentColor" />
+                                    <span className="text-sm font-medium">5</span>
+                                    <span className="text-xs text-muted-foreground ml-1">({58} reviews)</span>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+            },
+            {
+                accessorKey: "specialization",
+                header: ({ column }) => {
+                    return (
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="p-0 hover:bg-transparent"
+                        >
+                            Specialization
+                            {column.getIsSorted() === "asc" ? (
+                                <SortAsc className="ml-2 h-4 w-4" />
+                            ) : column.getIsSorted() === "desc" ? (
+                                <SortDesc className="ml-2 h-4 w-4" />
+                            ) : null}
+                        </Button>
+                    )
+                },
+                cell: ({ row }) => {
+                    const specializations = row.original.specialization || []
+                    return (
+                        <div className="flex flex-wrap gap-1">
+                            {specializations.map((spec) => (
+                                <Badge key={spec} variant="secondary">
+                                    {spec}
+                                </Badge>
+                            ))}
+                        </div>
+                    )
+                },
+                sortingFn: (rowA, rowB) => {
+                    const specA = rowA.original.specialization?.join(", ") || ""
+                    const specB = rowB.original.specialization?.join(", ") || ""
+                    return specA.localeCompare(specB)
+                },
+            },
+            {
+                accessorKey: "yearOfExp",
+                header: ({ column }) => {
+                    return (
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="p-0 hover:bg-transparent"
+                        >
+                            Experience
+                            {column.getIsSorted() === "asc" ? (
+                                <SortAsc className="ml-2 h-4 w-4" />
+                            ) : column.getIsSorted() === "desc" ? (
+                                <SortDesc className="ml-2 h-4 w-4" />
+                            ) : null}
+                        </Button>
+                    )
+                },
+                cell: ({ row }) => `${row.original.yearOfExp} years`,
+            },
+            {
+                id: "actions",
+                cell: ({ row }) => (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                            e.stopPropagation() // Prevent row selection when clicking the button
+                            window.open(`/inspector-profile/${row.original._id}`, "_blank")
+                        }}
+                    >
+                        View Profile
+                    </Button>
+                ),
+            },
+        ],
+        [],
+    )
+
+    // Memoize filtered inspectors to prevent recalculation on every render
+    const filteredInspectors = useMemo(() => {
+        return availableInspectors.filter((inspector) => {
+            const matchesSearch =
+                searchQuery === "" ||
+                `${inspector.firstName} ${inspector.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                inspector.specialization?.some((spec) => spec.toLowerCase().includes(searchQuery.toLowerCase()))
+
+            const matchesSpecialization =
+                specializationFilter === "all" || inspector.specialization?.includes(specializationFilter)
+
+            return matchesSearch && matchesSpecialization
+        })
+    }, [availableInspectors, searchQuery, specializationFilter])
+
+    // Memoize event handlers to prevent recreation on every render
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value)
+    }, [])
+
+    const handleSpecializationChange = useCallback((value: string) => {
+        setSpecializationFilter(value)
+    }, [])
+
+    // Create and memoize the table instance
+    const table = useReactTable({
+        data: filteredInspectors,
+        columns,
+        state: {
+            sorting,
+            columnFilters,
+        },
+        enableSorting: true,
+        manualFiltering: true, // We're handling filtering manually
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    })
 
     return (
         <Card className="w-full">
@@ -42,62 +228,114 @@ const Step2 = () => {
                     name="inspectorId"
                     render={({ field }) => (
                         <FormItem>
-                            {availableInspectors.length > 0 ? (
-                                <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-4">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[50px]"></TableHead>
-                                                <TableHead>Inspector</TableHead>
-                                                <TableHead>Specialization</TableHead>
-                                                <TableHead>Experience</TableHead>
-                                                <TableHead>Availability</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {availableInspectors.map((inspector) => (
-                                                <TableRow key={inspector._id} className="cursor-pointer hover:bg-muted/50">
-                                                    <TableCell>
-                                                        <RadioGroupItem value={inspector._id} id={inspector._id} className="mt-1" />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-3">
-                                                            <SignedAvatar
-                                                                publicId={inspector.profile_image}
-                                                                fallback={`${inspector?.firstName || ''} ${inspector?.lastName || ''}`}
-                                                                className="h-8 w-8"
-                                                            />
-                                                            <div>
-                                                                <div className="font-medium">
-                                                                    {inspector.firstName} {inspector.lastName}
-                                                                </div>
-                                                                <div className="text-sm text-muted-foreground">{inspector.email}</div>
-                                                            </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className="flex flex-wrap gap-1">
-                                                            {inspector.specialization?.map((spec) => (
-                                                                <Badge key={spec} variant="secondary">
-                                                                    {spec}
-                                                                </Badge>
+                            {isLoading ? (
+                                <div className="flex justify-center items-center py-12">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                </div>
+                            ) : availableInspectors.length > 0 ? (
+                                <>
+                                    <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Search inspectors..."
+                                                value={searchQuery}
+                                                onChange={handleSearchChange}
+                                                className="pl-8"
+                                            />
+                                        </div>
+                                        <div className="w-full sm:w-64">
+                                            <Select value={specializationFilter} onValueChange={handleSpecializationChange}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Filter by specialization" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Specializations</SelectItem>
+                                                    {allSpecializations.map((spec) => (
+                                                        <SelectItem key={spec} value={spec}>
+                                                            {spec}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        className="space-y-4"
+                                        key={`inspector-radio-group-${filteredInspectors.length}`}
+                                    >
+                                        <div className="rounded-md border">
+                                            <table className="w-full">
+                                                <thead>
+                                                    {table.getHeaderGroups().map((headerGroup) => (
+                                                        <tr key={headerGroup.id} className="border-b">
+                                                            {headerGroup.headers.map((header) => (
+                                                                <th
+                                                                    key={header.id}
+                                                                    className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                                                                >
+                                                                    {header.isPlaceholder
+                                                                        ? null
+                                                                        : flexRender(header.column.columnDef.header, header.getContext())}
+                                                                </th>
                                                             ))}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>{inspector.yearOfExp} years</TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-2">
-                                                            <Clock className="h-4 w-4 text-muted-foreground" />
-                                                            <span>
-                                                                {inspector.start_time} - {inspector.end_time}
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </RadioGroup>
+                                                        </tr>
+                                                    ))}
+                                                </thead>
+                                                <tbody>
+                                                    {table.getRowModel().rows.length > 0 ? (
+                                                        table.getRowModel().rows.map((row) => (
+                                                            <tr
+                                                                key={row.id}
+                                                                className="border-b cursor-pointer hover:bg-muted/50"
+                                                                onClick={() => field.onChange(row.original._id)}
+                                                            >
+                                                                {row.getVisibleCells().map((cell) => (
+                                                                    <td key={cell.id} className="p-4 align-middle">
+                                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan={columns.length} className="h-24 text-center">
+                                                                No inspectors found matching your criteria.
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </RadioGroup>
+
+                                    {table.getPageCount() > 1 && (
+                                        <div className="flex items-center justify-end space-x-2 py-4">
+                                            <div className="text-sm text-muted-foreground">
+                                                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => table.previousPage()}
+                                                disabled={!table.getCanPreviousPage()}
+                                            >
+                                                Previous
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => table.nextPage()}
+                                                disabled={!table.getCanNextPage()}
+                                            >
+                                                Next
+                                            </Button>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <FormDescription className="text-center py-8 text-muted-foreground">
                                     No inspectors are available at this moment. Please try again later.

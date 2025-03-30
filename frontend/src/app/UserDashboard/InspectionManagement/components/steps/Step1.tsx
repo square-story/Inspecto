@@ -1,5 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useFormContext } from "react-hook-form";
+import { INSPECTION_TYPE, InspectionTypeCard } from '@/components/InspectionTypeCard';
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
     Select,
     SelectContent,
@@ -7,30 +23,14 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import {
-    FormField,
-    FormItem,
-    FormLabel,
-    FormControl,
-    FormMessage,
-} from "@/components/ui/form";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogDescription
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Info } from "lucide-react";
-import AddressAutocomplete from "../AddressAutocomplete";
-import { PhoneInput } from "@/components/ui/phone-input";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store";
-import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
-import { INSPECTION_TYPE, InspectionTypeCard } from '@/components/InspectionTypeCard';
 import { VehicleDetails } from '@/components/VehicleDetailsCard';
+import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
+import { AppDispatch, RootState } from "@/store";
+import { Info } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useFormContext } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import AddressAutocomplete from "../AddressAutocomplete";
 
 
 

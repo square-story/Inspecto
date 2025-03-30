@@ -1,22 +1,22 @@
-import { useFormContext } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
+    FormControl,
     FormField,
     FormItem,
     FormLabel,
-    FormControl,
     FormMessage,
 } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+import { InspectionService } from '@/services/inspection.service';
 import { format } from "date-fns";
 import { CalendarIcon, Clock, Loader2 } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InspectionService } from '@/services/inspection.service';
+import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const TimeSlotMap: Record<number, string> = {
