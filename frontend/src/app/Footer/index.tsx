@@ -60,7 +60,7 @@ const Footer05Page = () => {
                         <span className="text-muted-foreground">
                             &copy; {new Date().getFullYear()}{" "}
                             <a href="/" target="_blank">
-                                Shadcn UI Blocks
+                                Inspecto
                             </a>
                             . All rights reserved.
                         </span>

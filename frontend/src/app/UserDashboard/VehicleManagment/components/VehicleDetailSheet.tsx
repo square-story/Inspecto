@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
+import { useSignedImage } from "@/hooks/useSignedImage";
 import { Barcode, Calendar, Car, ClipboardCheck, Edit, Fuel, Palette, ShieldCheck, Trash2, Wrench } from "lucide-react";
 
 
@@ -37,6 +38,12 @@ export const VehicleDetailSheet = ({
     const formatDate = (date: Date) =>
         new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
+    const { imageUrl: frontImageUrl, isLoading: isFrontLoading, error: frontError } =
+        useSignedImage(isOpen ? vehicle.frontViewImage : null);
+
+    const { imageUrl: rearImageUrl, isLoading: isRearLoading, error: rearError } =
+        useSignedImage(isOpen ? vehicle.rearViewImage : null);
+
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
             <SheetContent>
@@ -60,18 +67,42 @@ export const VehicleDetailSheet = ({
                         {(vehicle.frontViewImage || vehicle.rearViewImage) && (
                             <div className="grid grid-cols-2 gap-4">
                                 {vehicle.frontViewImage && (
-                                    <img
-                                        src={vehicle.frontViewImage}
-                                        alt="Front view"
-                                        className="w-full h-40 object-cover rounded-lg"
-                                    />
+                                    <div className="relative w-full h-40">
+                                        {isFrontLoading ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-muted-foreground">Loading...</span>
+                                            </div>
+                                        ) : frontError ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-red-500">Failed to load image</span>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={frontImageUrl}
+                                                alt="Front view"
+                                                className="w-full h-40 object-cover rounded-lg"
+                                            />
+                                        )}
+                                    </div>
                                 )}
                                 {vehicle.rearViewImage && (
-                                    <img
-                                        src={vehicle.rearViewImage}
-                                        alt="Rear view"
-                                        className="w-full h-40 object-cover rounded-lg"
-                                    />
+                                    <div className="relative w-full h-40">
+                                        {isRearLoading ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-muted-foreground">Loading...</span>
+                                            </div>
+                                        ) : rearError ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-red-500">Failed to load image</span>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={rearImageUrl}
+                                                alt="Rear view"
+                                                className="w-full h-40 object-cover rounded-lg"
+                                            />
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}

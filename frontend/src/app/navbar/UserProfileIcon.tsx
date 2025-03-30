@@ -62,7 +62,7 @@ export function UserProfileIcon() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem onClick={() => handleNavigation('/user/dashboard')}>
-                        Profile
+                        Dashboard
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleNavigation('/user/dashboard/vehicles')}>
@@ -80,7 +80,7 @@ export function UserProfileIcon() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Notifications</DropdownMenuItem>
-                <DropdownMenuItem disabled>Support</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigation('/user/dashboard/settings')}>Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                     Log out

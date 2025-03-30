@@ -7,10 +7,10 @@ import { inspectorService } from "@/services/inspector.service"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Clock, User } from "lucide-react"
+import { Clock, } from "lucide-react"
 import { Inspectors } from "@/app/InspectorManagment/columns";
+import { SignedAvatar } from "@/components/SignedAvatar"
 
 const Step2 = () => {
     const { control, watch } = useFormContext()
@@ -62,12 +62,11 @@ const Step2 = () => {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-3">
-                                                            <Avatar>
-                                                                <AvatarImage src={inspector.profile_image} />
-                                                                <AvatarFallback>
-                                                                    <User className="h-4 w-4" />
-                                                                </AvatarFallback>
-                                                            </Avatar>
+                                                            <SignedAvatar
+                                                                publicId={inspector.profile_image}
+                                                                fallback={`${inspector?.firstName || ''} ${inspector?.lastName || ''}`}
+                                                                className="h-8 w-8"
+                                                            />
                                                             <div>
                                                                 <div className="font-medium">
                                                                     {inspector.firstName} {inspector.lastName}
