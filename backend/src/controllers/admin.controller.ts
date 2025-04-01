@@ -8,47 +8,47 @@ import { ServiceError } from "../core/errors/service.error";
 @injectable()
 export class AdminController implements IAdminController {
 
-    constructor(
-        @inject(TYPES.AdminService) private _adminService: IAdminService
-    ) { }
+  constructor(
+    @inject(TYPES.AdminService) private _adminService: IAdminService
+  ) { }
 
-    getAllInspectors = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const response = await this._adminService.getAllInspectors()
-            res.status(200).json(response)
-        } catch (error) {
-            if (error instanceof ServiceError) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message,
-                    field: error.field
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Internal server error',
-                });
-            }
-        }
+  getAllInspectors = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this._adminService.getAllInspectors()
+      res.status(200).json(response)
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        res.status(400).json({
+          success: false,
+          message: error.message,
+          field: error.field
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Internal server error',
+        });
+      }
     }
+  }
 
-    getAllUsers = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const response = await this._adminService.getAllUsers()
-            res.status(200).json(response)
-        } catch (error) {
-            if (error instanceof ServiceError) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message,
-                    field: error.field
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Internal server error',
-                });
-            }
-        }
+  getAllUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this._adminService.getAllUsers()
+      res.status(200).json(response)
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        res.status(400).json({
+          success: false,
+          message: error.message,
+          field: error.field
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Internal server error',
+        });
+      }
     }
+  }
 }
