@@ -42,6 +42,7 @@ import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getSignedPdfUrl } from "@/utils/cloudinary";
 import { saveAs } from 'file-saver';
+import { ReviewDialog } from "@/components/ReviewComponent"
 
 const ITEMS_PER_PAGE = 5
 
@@ -128,10 +129,12 @@ export default function PaymentHistory() {
     const [appointmentPage, setAppointmentPage] = useState(1)
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
+    const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
     const [retryPayment, setRetryPayment] = useState<any>(null)
     const dispatch = useDispatch<AppDispatch>()
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
+
 
 
     useEffect(() => {
@@ -207,15 +210,15 @@ export default function PaymentHistory() {
 
             // Get signed URL from backend
             const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl);
-            
+
             // Fetch the PDF blob
             const response = await fetch(signedUrl);
             const pdfBlob = await response.blob();
-            
+
             // Download with proper filename
             const filename = `Inspection-Report-${inspection.bookingReference}.pdf`;
             saveAs(pdfBlob, filename);
-            
+
             toast.success('Report download started');
         } catch (error) {
             console.error('Error downloading report:', error);
@@ -570,6 +573,9 @@ export default function PaymentHistory() {
                                                                 <p className="text-muted-foreground">Reference:</p>
                                                                 <p className="font-medium">{inspection.bookingReference}</p>
 
+                                                                <p className="text-muted-foreground">Inspector Name</p>
+                                                                <p className="capitalize">{inspection.inspector.firstName}</p>
+
                                                                 <p className="text-muted-foreground">Type:</p>
                                                                 <p className="capitalize">{inspection.inspectionType}</p>
 
@@ -578,6 +584,7 @@ export default function PaymentHistory() {
 
                                                                 <p className="text-muted-foreground">Time Slot:</p>
                                                                 <p>{getTimeSlotLabel(inspection.slotNumber)}</p>
+
 
                                                                 <p className="text-muted-foreground">Status:</p>
                                                                 <p>
@@ -592,15 +599,31 @@ export default function PaymentHistory() {
                                                         </div>
                                                         <DialogFooter className="flex justify-between items-center mt-4">
                                                             {inspection.status === InspectionStatus.COMPLETED && (
-                                                                <Button
-                                                                    onClick={() => handleDownloadReport(inspection._id)}
-                                                                    className="w-full sm:w-auto"
-                                                                >
-                                                                    <Download className="h-4 w-4 mr-2" />
-                                                                    Download Inspection Report
-                                                                </Button>
+                                                                <>
+
+                                                                    <Button
+                                                                        onClick={() => handleDownloadReport(inspection._id)}
+                                                                        className="w-full sm:w-auto"
+                                                                    >
+                                                                        <Download className="h-4 w-4 mr-2" />
+                                                                        Download Inspection Report
+                                                                    </Button>
+                                                                    <Button
+                                                                        onClick={() => setReviewDialogOpen(true)}
+                                                                        className="w-full"
+                                                                    >
+                                                                        Leave a Review
+                                                                    </Button>
+                                                                </>
+
                                                             )}
                                                         </DialogFooter>
+                                                        <ReviewDialog
+                                                            open={reviewDialogOpen}
+                                                            onOpenChange={setReviewDialogOpen}
+                                                            inspectionId={inspection._id}
+                                                            inspectorId={inspection.inspector._id}
+                                                        />
                                                     </DialogContent>
                                                 </Dialog>
                                             </div>

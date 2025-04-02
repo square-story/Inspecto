@@ -61,6 +61,7 @@ import { WalletRepository } from "../repositories/wallet.repository";
 import { IEmailService } from "../core/interfaces/services/email.service.interface";
 import { EmailService } from "../services/email.service";
 
+//Review
 
 import { InspectorAuthService } from "../services/auth/inspector.auth.service";
 import { UserAuthService } from "../services/auth/user.auth.service";
@@ -74,10 +75,15 @@ import { AuthMiddleware } from "../middlewares/auth.middleware";
 import { PaymentStatusChecker } from "../utils/checkPaymentStatus";
 
 
-
 import { IAdminAuthService, IInspectorAuthService, IUserAuthService } from "../core/interfaces/services/auth.service.interface";
 import { IAdminAuthController, IInspectorAuthController, IUserAuthController } from "../core/interfaces/controllers/auth.controller.interface";
 import { CloudinaryController } from "../controllers/cloudinary.controller";
+import { IReviewRepository } from "../core/interfaces/repositories/review.repository.interface";
+import { ReviewRepository } from "../repositories/review.repository";
+import { IReviewService } from "../core/interfaces/services/review.service.interface";
+import { ReviewService } from "../services/review.service";
+import { IReviewController } from "../core/interfaces/controllers/review.controller.interface";
+import { ReviewController } from "../controllers/review.controller";
 
 
 
@@ -116,6 +122,11 @@ container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController
 
 //Wallet
 container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
+
+//Review
+container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);
+container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);
+container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
 
 //Email
 container.bind<IEmailService>(TYPES.EmailService).to(EmailService);

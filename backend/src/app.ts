@@ -8,6 +8,7 @@ import vehiclesRoutes from "./routes/vehicles.routes";
 import inspectionRoutes from "./routes/inspection.routes";
 import paymentsRoutes from './routes/payment.routes';
 import cloudinaryRoutes from './routes/cloudinary.routes';
+import reviewRouter from "./routes/review.routes";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import { errorHandler } from './middlewares/error.middleware';
@@ -91,7 +92,8 @@ app.use('/user', userRoutes);
 app.use('/vehicles', vehiclesRoutes);
 app.use('/inspections', inspectionRoutes);
 app.use('/payments', paymentsRoutes);
-app.use('/cloudinary', cloudinaryRoutes)
+app.use('/cloudinary', cloudinaryRoutes);
+app.use('/reviews', reviewRouter)
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({

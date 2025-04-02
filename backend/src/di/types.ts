@@ -35,6 +35,11 @@ export const TYPES = {
     //Wallet
     WalletRepository: Symbol.for('WalletRepository'),
 
+    //Review
+    ReviewRepository: Symbol.for('ReviewRepository'),
+    ReviewService: Symbol.for('ReviewService'),
+    ReviewController: Symbol.for('ReviewController'),
+
     //Auth Services
     AdminAuthService: Symbol.for('AdminAuthService'),
     InspectorAuthService: Symbol.for('InspectorAuthService'),
