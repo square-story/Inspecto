@@ -30,8 +30,8 @@ import { z } from "zod";
 
 const formSchema = z.object({
   location: z.string().min(3, "Address Must Be atleast 3 Characters"),
-  longitude: z.string().optional().nullable(),
-  latitude: z.string().optional().nullable(),
+  longitude: z.string().min(1, "Longitude is required"),
+  latitude: z.string().min(1, "Latitude is required"),
 });
 
 const AddressManagment = () => {
@@ -42,20 +42,31 @@ const AddressManagment = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      location: inspector.address || '',
-      longitude:'',
-      latitude:'',
+      location: inspector?.address || '',
+      longitude: inspector?.location?.coordinates?.[0]?.toString() || '',
+      latitude: inspector?.location?.coordinates?.[1]?.toString() || '',
     },
   });
   const locationValue = form.watch("location");
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const data = {
+        address: values.location,
+        location: {
+          type: "Point",
+          coordinates: [
+            parseFloat(values.longitude as string),
+            parseFloat(values.latitude as string)
+          ]
+        }
+      }
       const updatedInspector = await inspectorService.updateInspector(data);
       dispatch(setInspector(updatedInspector.data.inspector));
       toast.success('Location updated successfully!');
     } catch (error) {
-      toast.error("Failed to update profile")
+      toast.error("Failed to update profile");
+      console.error(error);
     }
   };
   if (loading) return (<LoadingSpinner />)
