@@ -24,12 +24,11 @@ export type ReviewFormValues = z.infer<typeof reviewSchema>
 interface ReviewDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onReviewSubmitted: () => void;
     inspectionId: string;
     inspectorId: string;
 }
 
-export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId, onReviewSubmitted }: ReviewDialogProps) {
+export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: ReviewDialogProps) {
     const [hoveredRating, setHoveredRating] = useState(0);
     const user = useSelector((state: RootState) => state.user)
 
@@ -48,9 +47,6 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId, on
             toast.success("Review submitted successfully!");
             onOpenChange(false);
             form.reset();
-            if (onReviewSubmitted) {
-                onReviewSubmitted();
-            }
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(`Failed to submit review: ${error.response?.data?.message || error.message}`);
