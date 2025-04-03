@@ -40,10 +40,12 @@ export class ReviewController implements IReviewController {
             const { inspectionId } = req.params
             if (!inspectionId) {
                 res.status(400).json({ success: false, message: 'Inspection Id Required' })
+                return;
             }
             const response = await this._reviewService.findOne({ inspection: inspectionId })
             if (!response) {
                 res.status(400).json({ success: true, message: 'Didn\'t get Inspection Review' })
+                return;
             }
             res.status(200).json(response)
         } catch (error) {
@@ -64,9 +66,10 @@ export class ReviewController implements IReviewController {
 
     getInspectorReviews = async (req: Request, res: Response) => {
         try {
-            const inspectorId = req.user?.userId
+            const { inspectorId } = req.params
             if (!inspectorId) {
                 res.status(400).json({ message: 'Inspector Id Needed', success: false })
+                return
             }
             const response = await this._reviewService.find({ inspector: inspectorId })
             res.status(200).json({ data: response, message: "Inspector Review Featched Successfully", success: true })
@@ -88,10 +91,11 @@ export class ReviewController implements IReviewController {
 
     getInspectorRating = async (req: Request, res: Response) => {
         try {
-            const { inspectorId } = req.body
+            const { inspectorId } = req.params
 
             if (!inspectorId) {
                 res.status(400).json({ message: 'inspectorId not Found', success: false })
+                return
             }
 
             const response = await this._reviewService.getInspectorRating(inspectorId)

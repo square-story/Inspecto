@@ -13,6 +13,7 @@ const reviewRouter = Router()
 reviewRouter.post('/', authMiddleware.authenticateToken, authorizeRole('user'), reviewController.createReview)
 reviewRouter.get('/inspector/:inspectorId', reviewController.getInspectorReviews);
 reviewRouter.get('/inspector/:inspectorId/rating', reviewController.getInspectorRating);
+reviewRouter.get('/inspection/:inspectionId', authMiddleware.authenticateToken, reviewController.getInspectionReview)
 
 
 export default reviewRouter

@@ -130,6 +130,7 @@ export default function PaymentHistory() {
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
     const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
+    const [reviewSubmit, setReviewSubmit] = useState<boolean>(false)
     const [retryPayment, setRetryPayment] = useState<any>(null)
     const dispatch = useDispatch<AppDispatch>()
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
@@ -618,12 +619,19 @@ export default function PaymentHistory() {
 
                                                             )}
                                                         </DialogFooter>
-                                                        <ReviewDialog
-                                                            open={reviewDialogOpen}
-                                                            onOpenChange={setReviewDialogOpen}
-                                                            inspectionId={inspection._id}
-                                                            inspectorId={inspection.inspector._id}
-                                                        />
+                                                        {reviewSubmit ? (
+                                                            <p className="text-sm text-muted-foreground">
+                                                                Review already submitted
+                                                            </p>
+                                                        ) : (
+                                                            <ReviewDialog
+                                                                open={reviewDialogOpen}
+                                                                onOpenChange={setReviewDialogOpen}
+                                                                inspectionId={inspection._id}
+                                                                inspectorId={inspection.inspector._id}
+                                                                onReviewSubmitted={() => setReviewSubmit(true)}
+                                                            />
+                                                        )}
                                                     </DialogContent>
                                                 </Dialog>
                                             </div>

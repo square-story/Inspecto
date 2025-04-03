@@ -27,6 +27,11 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { SignedAvatar } from "@/components/SignedAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { InspectorRating } from "@/components/InspectorRating"
+import { ReviewList } from "@/components/ReviewListComponent"
+import { ReviewService } from "@/services/review.service"
+import { IReview } from "@/types/review"
+import { toast } from "sonner"
 
 const Step2 = () => {
     const { control, watch } = useFormContext()
@@ -41,6 +46,7 @@ const Step2 = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [selectedInspector, setSelectedInspector] = useState<IInspector | null>(null)
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+    const [reviews, setReviews] = useState<IReview[]>([]);
 
     // Fetch inspectors only when coordinates change
     useEffect(() => {
@@ -75,6 +81,31 @@ const Step2 = () => {
         setSelectedInspector(inspector)
         setIsProfileModalOpen(true)
     }
+
+    useEffect(() => {
+        let mounted = true;
+        const fetchReviews = async () => {
+            if (!selectedInspector?._id) return;
+
+            try {
+                const data = await ReviewService.getInspectorReviews(selectedInspector._id);
+                if (mounted) {
+                    setReviews(data);
+                }
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+                if (mounted) {
+                    setReviews([]);
+                    toast.error("Failed to load reviews");
+                }
+            }
+        };
+
+        fetchReviews();
+        return () => {
+            mounted = false;
+        };
+    }, [selectedInspector?._id]);
 
     // Memoize columns definition to prevent recreation on every render
     const columns = useMemo<ColumnDef<IInspector>[]>(
@@ -367,7 +398,7 @@ const Step2 = () => {
                             <span>Inspector Profile</span>
                         </DialogTitle>
                     </DialogHeader>
-                    
+
                     {selectedInspector && (
                         <div className="space-y-6">
                             <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
@@ -383,11 +414,7 @@ const Step2 = () => {
                                         {selectedInspector.firstName} {selectedInspector.lastName}
                                     </h3>
                                     <p className="text-muted-foreground">{selectedInspector.email}</p>
-                                    <div className="flex items-center justify-center sm:justify-start mt-2">
-                                        <Star className="h-5 w-5 text-yellow-500 mr-1" fill="currentColor" />
-                                        <span className="text-sm font-medium">5</span>
-                                        <span className="text-xs text-muted-foreground ml-1">({58} reviews)</span>
-                                    </div>
+                                    <InspectorRating inspectorId={selectedInspector._id} />
                                     <div className="mt-2">
                                         <Badge variant="outline" className="mr-1">
                                             {selectedInspector.yearOfExp} years experience
@@ -423,19 +450,12 @@ const Step2 = () => {
                                 <p>{selectedInspector.coverageRadius || "Not specified"} km</p>
                             </div>
 
-                            <div>
-                                <h4 className="text-sm font-medium mb-2">Certifications</h4>
-                                {selectedInspector.certificates?.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        {selectedInspector.certificates.map((cert, index) => (
-                                            <Badge key={index} variant="outline" className="p-2">
-                                                Certificate {index + 1}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-muted-foreground">No certificates uploaded</p>
-                                )}
+                            <div className="mt-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-2xl font-semibold">Reviews</h2>
+                                    <InspectorRating inspectorId={selectedInspector._id} />
+                                </div>
+                                <ReviewList reviews={reviews} />
                             </div>
                         </div>
                     )}

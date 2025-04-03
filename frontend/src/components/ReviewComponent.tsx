@@ -1,4 +1,3 @@
-import axiosInstance from "@/api/axios";
 import { RootState } from "@/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
@@ -12,23 +11,25 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Star } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { ReviewService } from "@/services/review.service";
 
 const reviewSchema = z.object({
     rating: z.number().min(1).max(5),
     comment: z.string().min(10, 'comment must be at least 10 characters'),
 });
 
-type ReviewFormValues = z.infer<typeof reviewSchema>
+export type ReviewFormValues = z.infer<typeof reviewSchema>
 
 
 interface ReviewDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onReviewSubmitted: () => void;
     inspectionId: string;
     inspectorId: string;
 }
 
-export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: ReviewDialogProps) {
+export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId, onReviewSubmitted }: ReviewDialogProps) {
     const [hoveredRating, setHoveredRating] = useState(0);
     const user = useSelector((state: RootState) => state.user)
 
@@ -40,20 +41,19 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: 
         }
     })
 
+    // Update the onSubmit function
     const onSubmit = async (values: ReviewFormValues) => {
         try {
-            await axiosInstance.post('/reviews', {
-                inspection: inspectionId,
-                inspector: inspectorId,
-                user: user._id,
-                ...values
-            })
-            toast.success("Review Submitted Successfully");
-            onOpenChange(false)
+            await ReviewService.createReview(values, user._id, inspectorId, inspectionId);
+            toast.success("Review submitted successfully!");
+            onOpenChange(false);
             form.reset();
+            if (onReviewSubmitted) {
+                onReviewSubmitted();
+            }
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(`Failed to submit review: ${error.message}`);
+                toast.error(`Failed to submit review: ${error.response?.data?.message || error.message}`);
             }
         }
     };
@@ -80,8 +80,8 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: 
                                             <Star
                                                 key={rating}
                                                 className={`h-6 w-6 cursor-pointer ${rating <= (hoveredRating || field.value)
-                                                        ? "fill-yellow-400 text-yellow-400"
-                                                        : "text-gray-300"
+                                                    ? "fill-yellow-400 text-yellow-400"
+                                                    : "text-gray-300"
                                                     }`}
                                                 onMouseEnter={() => setHoveredRating(rating)}
                                                 onMouseLeave={() => setHoveredRating(0)}
