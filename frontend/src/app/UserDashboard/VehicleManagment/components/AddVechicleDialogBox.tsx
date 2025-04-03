@@ -70,6 +70,7 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
             rearViewImage: "",
             color: "",
         },
+        mode:'onSubmit'
     });
 
     const handleFront = (url: string | null) => {

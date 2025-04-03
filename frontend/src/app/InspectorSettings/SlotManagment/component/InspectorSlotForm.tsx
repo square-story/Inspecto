@@ -65,7 +65,7 @@ export default function InspectorSlotForm() {
 
     async function onSubmit(data: SlotFormValues) {
         try {
-            const updatedInspector = await inspectorService.updateInspector(data);
+          const updatedInspector = await inspectorService.updateInspector(data);
             dispatch(setInspector(updatedInspector.data.inspector))
             toast.success('Profile updated successfully!');
             // eslint-disable-next-line @typescript-eslint/no-unused-vars

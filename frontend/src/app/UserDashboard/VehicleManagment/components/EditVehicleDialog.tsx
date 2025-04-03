@@ -84,6 +84,7 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
             rearViewImage: vehicle.rearViewImage || "",
             color: vehicle.color || "",
         },
+        mode:'onSubmit'
     });
 
     const handleFront = (url: string | null) => {
