@@ -47,7 +47,6 @@ import { saveAs } from "file-saver"
 import { ReviewDialog } from "@/components/ReviewComponent"
 import { PaymentService } from "@/services/payment.service"
 import { useConfirm } from "@omit/react-confirm-dialog"
-import { AxiosError } from "axios"
 
 const ITEMS_PER_PAGE = 5
 
@@ -68,10 +67,11 @@ enum InspectionStatus {
 
 // Function to format currency in Indian Rupees
 const formatIndianRupees = (amount: number) => {
+    const maximumFractionDigits = 0
     return new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits,
     }).format(amount)
 }
 
@@ -181,6 +181,8 @@ const CancellationTimer = ({ createdAt }: { createdAt: string }) => {
 export default function PaymentHistory() {
     const [paymentFilter, setPaymentFilter] = useState("all")
     const [appointmentFilter, setAppointmentFilter] = useState("all")
+    const [paymentDateFilter, setPaymentDateFilter] = useState("all")
+    const [appointmentDateFilter, setAppointmentDateFilter] = useState("all")
     const [paymentPage, setPaymentPage] = useState(1)
     const [appointmentPage, setAppointmentPage] = useState(1)
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
@@ -192,76 +194,111 @@ export default function PaymentHistory() {
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
 
-    const handleCancelSuccessfulPayment = async (payment: IPayments) => {
-        try {
-            const paymentTime = new Date(payment.createdAt).getTime()
-            const currentTime = new Date().getTime()
-            const timeDiff = currentTime - paymentTime
-            const timeWindow = 10 * 60 * 1000
-
-            if (timeDiff > timeWindow) {
-                toast.error("Cancellation window has expired")
-                return
-            }
-
-            const result = await confirm({
-                title: `Cancel Inspection`,
-                icon: <AlertTriangle className="size-4 text-yellow-500" />,
-                description: `Are you sure you want to Cancel this Inspection?`,
-                confirmButton: {
-                    className: "bg-red-500 hover:bg-red-600",
-                },
-                cancelButton: {
-                    className: "bg-gray-200 hover:bg-gray-300",
-                },
-                alertDialogTitle: {
-                    className: "flex items-center gap-5",
-                },
-            })
-
-            if (result) {
-                await PaymentService.cancelSuccessfulPayment(payment.stripePaymentIntentId)
-                toast.success("Payment cancelled and refunded successfully")
-                await dispatch(fetchPayments())
-                await dispatch(fetchAppointments())
-            }
-        } catch (error) {
-            console.error("Error cancelling payment:", error)
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data?.message || "Failed to cancel payment")
-            } else {
-                toast.error("Failed to cancel payment")
-            }
-        }
-    }
-
-    const showCancelButton = (payment: IPayments) => {
-        if (payment.status !== PaymentStatus.SUCCEEDED) return false
-
-        const paymentTime = new Date(payment.createdAt).getTime()
-        const currentTime = new Date().getTime()
-        const timeDiff = currentTime - paymentTime
-        const timeWindow = 10 * 60 * 1000
-
-        return timeDiff <= timeWindow
-    }
-
     useEffect(() => {
         dispatch(fetchAppointments())
         dispatch(fetchPayments())
     }, [dispatch])
 
+    // Reset pagination when filters change
+    useEffect(() => {
+        setPaymentPage(1)
+    }, [paymentFilter, paymentDateFilter])
+
+    useEffect(() => {
+        setAppointmentPage(1)
+    }, [appointmentFilter, appointmentDateFilter])
+
+    // Add this function to filter by date
+    const filterByDate = (dateString: string, filterType: string) => {
+        if (!dateString) return false
+
+        try {
+            const itemDate = new Date(dateString)
+            // Check if date is valid
+            if (isNaN(itemDate.getTime())) return false
+
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+
+            const yesterday = new Date(today)
+            yesterday.setDate(yesterday.getDate() - 1)
+
+            const tomorrow = new Date(today)
+            tomorrow.setDate(tomorrow.getDate() + 1)
+
+            const thisWeekStart = new Date(today)
+            thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay())
+
+            const thisWeekEnd = new Date(thisWeekStart)
+            thisWeekEnd.setDate(thisWeekEnd.getDate() + 6)
+
+            const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+            const thisMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+            const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0)
+
+            itemDate.setHours(0, 0, 0, 0)
+
+            switch (filterType) {
+                case "today":
+                    return itemDate.getTime() === today.getTime()
+                case "yesterday":
+                    return itemDate.getTime() === yesterday.getTime()
+                case "tomorrow":
+                    return itemDate.getTime() === tomorrow.getTime()
+                case "this-week":
+                    return itemDate >= thisWeekStart && itemDate <= thisWeekEnd
+                case "this-month":
+                    return itemDate >= thisMonthStart && itemDate <= thisMonthEnd
+                case "last-month":
+                    return itemDate >= lastMonthStart && itemDate <= lastMonthEnd
+                default:
+                    return true
+            }
+        } catch (error) {
+            console.error("Error filtering by date:", error)
+            return false
+        }
+    }
+
+    // Update the filteredPayments useMemo to include date filtering
     const filteredPayments = useMemo(() => {
         if (!payments) return []
-        if (paymentFilter === "all") return payments
-        return payments.filter((payment) => payment.status === paymentFilter)
-    }, [payments, paymentFilter])
 
+        // First filter by status
+        let filtered = payments
+        if (paymentFilter !== "all") {
+            filtered = filtered.filter((payment) => payment.status === paymentFilter)
+        }
+
+        // Then filter by date
+        if (paymentDateFilter !== "all") {
+            filtered = filtered.filter((payment) => filterByDate(payment.createdAt, paymentDateFilter))
+        }
+
+        return filtered
+    }, [payments, paymentFilter, paymentDateFilter])
+
+    // Update the filteredInspections useMemo to include date filtering
     const filteredInspections = useMemo(() => {
         if (!inspections) return []
-        if (appointmentFilter === "all") return inspections
-        return inspections.filter((inspection) => inspection.status === appointmentFilter)
-    }, [inspections, appointmentFilter])
+
+        // First filter by status
+        let filtered = inspections
+        if (appointmentFilter !== "all") {
+            filtered = filtered.filter((inspection) => inspection.status === appointmentFilter)
+        }
+
+        // Then filter by date
+        if (appointmentDateFilter !== "all") {
+            filtered = filtered.filter((inspection) =>
+                filterByDate(inspection.date as unknown as string, appointmentDateFilter),
+            )
+        }
+
+        return filtered
+    }, [inspections, appointmentFilter, appointmentDateFilter])
 
     const paginatedPayments = useMemo(() => {
         const startIndex = (paymentPage - 1) * ITEMS_PER_PAGE
@@ -392,6 +429,43 @@ export default function PaymentHistory() {
         return "Evening (5 PM - 8 PM)"
     }
 
+    const showCancelButton = (payment: IPayments): boolean => {
+        const createdAtTime = new Date(payment.createdAt).getTime()
+        const now = Date.now()
+        const diffInMinutes = (now - createdAtTime) / (1000 * 60)
+        return payment.status === PaymentStatus.SUCCEEDED && diffInMinutes <= 10
+    }
+
+    const handleCancelSuccessfulPayment = async (payment: IPayments) => {
+        try {
+            const result = await confirm({
+                title: `Cancel Inspection`,
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: `Are you sure you want to Cancel this Inspection?`,
+                confirmButton: {
+                    className: "bg-red-500 hover:bg-red-600",
+                },
+                cancelButton: {
+                    className: "bg-gray-200 hover:bg-gray-300",
+                },
+                alertDialogTitle: {
+                    className: "flex items-center gap-5",
+                },
+            })
+            if (result) {
+                await PaymentService.cancelSuccessfulPayment(payment.stripePaymentIntentId)
+                toast.success("Payment cancelled successfully")
+                // Refresh payments list
+                await dispatch(fetchPayments())
+                // Refresh inspections list
+                await dispatch(fetchAppointments())
+            }
+        } catch (error) {
+            console.error("Error cancelling payment:", error)
+            toast.error("Failed to cancel payment. Please try again.")
+        }
+    }
+
     return (
         <ContentSection
             title="Transaction History"
@@ -411,17 +485,33 @@ export default function PaymentHistory() {
                                     <CardTitle>Payment Transactions</CardTitle>
                                     <CardDescription>View and manage all your payment transactions</CardDescription>
                                 </div>
-                                <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                                    <SelectTrigger className="w-full sm:w-[180px]">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Payments</SelectItem>
-                                        <SelectItem value="succeeded">Succeeded</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="failed">Failed</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <Select value={paymentDateFilter} onValueChange={setPaymentDateFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by date" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Dates</SelectItem>
+                                            <SelectItem value="today">Today</SelectItem>
+                                            <SelectItem value="yesterday">Yesterday</SelectItem>
+                                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                                            <SelectItem value="this-week">This Week</SelectItem>
+                                            <SelectItem value="this-month">This Month</SelectItem>
+                                            <SelectItem value="last-month">Last Month</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Payments</SelectItem>
+                                            <SelectItem value="succeeded">Succeeded</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="failed">Failed</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -663,18 +753,34 @@ export default function PaymentHistory() {
                                     <CardTitle>Inspection Appointments</CardTitle>
                                     <CardDescription>Your scheduled vehicle inspections</CardDescription>
                                 </div>
-                                <Select value={appointmentFilter} onValueChange={setAppointmentFilter}>
-                                    <SelectTrigger className="w-full sm:w-[180px]">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Inspections</SelectItem>
-                                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="completed">Completed</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <Select value={appointmentDateFilter} onValueChange={setAppointmentDateFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by date" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Dates</SelectItem>
+                                            <SelectItem value="today">Today</SelectItem>
+                                            <SelectItem value="yesterday">Yesterday</SelectItem>
+                                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                                            <SelectItem value="this-week">This Week</SelectItem>
+                                            <SelectItem value="this-month">This Month</SelectItem>
+                                            <SelectItem value="last-month">Last Month</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select value={appointmentFilter} onValueChange={setAppointmentFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Inspections</SelectItem>
+                                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
+                                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
