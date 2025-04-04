@@ -22,7 +22,7 @@ export const stripe = new Stripe(appConfig.stripSecret, {
 @injectable()
 export class PaymentService extends BaseService<IPaymentDocument> implements IPaymentService {
     private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
-
+    private readonly CANCEL_WINDOW_MS = 10 * 60 * 1000;
     constructor(
         @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
@@ -272,6 +272,89 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         } catch (error) {
             console.error(`Error get Stats About Wallet Transaction ${inspectorId}:`, error);
             throw new ServiceError('Error get Stats About Wallet');
+        }
+    }
+
+    async cancelPayment(paymentIntentId: string, userId: string): Promise<void> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            //get payment and verify ownerShip
+            const payment = await this._paymentRepository.findOne({
+                stripePaymentIntentId: paymentIntentId,
+                user: new Types.ObjectId(userId)
+            })
+            if (!payment) {
+                throw new ServiceError('Payment not found or unauthorized');
+            }
+
+            // Cancel the payment intent in Stripe
+            await stripe.paymentIntents.cancel(paymentIntentId);
+
+            await this._paymentRepository.updatePayment(paymentIntentId, {
+                status: PaymentStatus.CANCELLED
+            });
+
+            await this._inspectionRepository.update(
+                payment.inspection,
+                { status: InspectionStatus.CANCELLED }
+            );
+
+            //Unbook the inspection by the inspector profile
+            await this._inspectionService.cancelInspection(payment.inspection.toString());
+            await session.commitTransaction();
+
+        } catch (error) {
+            await session.abortTransaction();
+            console.error('Error cancelling payment:', error);
+            throw error;
+        } finally {
+            session.endSession();
+        }
+    }
+
+    async cancelSuccessfulPayment(paymentIntentId: string, userId: string): Promise<void> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const payment = await this._paymentRepository.findOne({
+                stripePaymentIntentId: paymentIntentId,
+                user: new Types.ObjectId(userId),
+                status: PaymentStatus.SUCCEEDED
+            })
+
+            if (!payment) {
+                throw new ServiceError('Payment not found or unauthorized');
+            }
+
+            const paymentTime = new Date(payment.createdAt).getTime();
+            const currentTime = new Date().getTime();
+
+            if (currentTime - paymentTime > this.CANCEL_WINDOW_MS) {
+                throw new ServiceError('Cancellation window has Expired')
+            }
+            // Create refund in Stripe
+            await stripe.refunds.create({
+                payment_intent: paymentIntentId
+            })
+            // Update payment status
+            await this._paymentRepository.updatePayment(paymentIntentId, {
+                status: PaymentStatus.REFUNDED
+            })
+            //Cancel Inspection
+            await this._inspectionRepository.update(
+                payment.inspection,
+                { status: InspectionStatus.CANCELLED }
+            )
+
+            await this._inspectionService.cancelInspection(payment.inspection.toString())
+            await session.commitTransaction();
+        } catch (error) {
+            await session.commitTransaction();
+            console.error('Error cancelling successful payment:', error)
+            throw error;
+        } finally {
+            session.endSession();
         }
     }
 }

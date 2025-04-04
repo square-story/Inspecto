@@ -15,5 +15,11 @@ export const PaymentService = {
             console.error('Error fetching inspection stats:', error);
             throw new Error('Failed to load inspection statistics. Please try again later.');
         }
+    },
+    cancelPayment: async (paymentIntentId: string): Promise<void> => {
+        await axiosInstance.post(`/payments/cancel/${paymentIntentId}`);
+    },
+    cancelSuccessfulPayment: async (paymentIntentId: string): Promise<void> => {
+        await axiosInstance.post(`/payments/cancel-successful/${paymentIntentId}`)
     }
 }

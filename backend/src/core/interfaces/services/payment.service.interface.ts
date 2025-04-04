@@ -14,4 +14,6 @@ export interface IPaymentService extends IBaseService<IPaymentDocument> {
         inspectorEarnings: number;
     }>;
     getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats>;
+    cancelPayment(paymentIntentId: string, userId: string): Promise<void>;
+    cancelSuccessfulPayment(paymentIntentId: string, userId: string): Promise<void>
 }

@@ -2,6 +2,7 @@
 "use client"
 
 import {
+    AlertTriangle,
     CalendarClock,
     ChevronLeft,
     ChevronRight,
@@ -44,6 +45,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { getSignedPdfUrl } from "@/utils/cloudinary";
 import { saveAs } from 'file-saver';
 import { ReviewDialog } from "@/components/ReviewComponent"
+import { PaymentService } from "@/services/payment.service"
+import { useConfirm } from "@omit/react-confirm-dialog"
+import { AxiosError } from "axios"
 
 const ITEMS_PER_PAGE = 5
 
@@ -132,10 +136,67 @@ export default function PaymentHistory() {
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
     const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
     const [retryPayment, setRetryPayment] = useState<any>(null)
+    const confirm = useConfirm();
     const dispatch = useDispatch<AppDispatch>()
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
 
+
+
+    const handleCancelSuccessfulPayment = async (payment: IPayments) => {
+        try {
+            const paymentTime = new Date(payment.createdAt).getTime();
+            const currentTime = new Date().getTime();
+            const timeDiff = currentTime - paymentTime;
+            const timeWindow = 10 * 60 * 1000;
+
+            if (timeDiff > timeWindow) {
+                toast.error('Cancellation window has expired');
+                return;
+            }
+
+            const result = await confirm({
+                title: `Cancel Inspection`,
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: `Are you sure you want to Cancel this Inspection?`,
+                confirmButton: {
+                    className: 'bg-red-500 hover:bg-red-600'
+                },
+                cancelButton: {
+                    className: 'bg-gray-200 hover:bg-gray-300'
+                },
+                alertDialogTitle: {
+                    className: 'flex items-center gap-5'
+                },
+            });
+
+            if (result) {
+                await PaymentService.cancelSuccessfulPayment(payment.stripePaymentIntentId)
+                toast.success('Payment cancelled and refunded successfully');
+                await dispatch(fetchPayments());
+                await dispatch(fetchAppointments());
+            }
+        } catch (error) {
+            console.error('Error cancelling payment:', error);
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data?.message || 'Failed to cancel payment');
+            } else {
+                toast.error('Failed to cancel payment');
+            }
+        }
+    }
+
+    const showCancelButton = (payment: IPayments) => {
+
+        if (payment.status !== PaymentStatus.SUCCEEDED) return false;
+
+        const paymentTime = new Date(payment.createdAt).getTime();
+        const currentTime = new Date().getTime();
+        const timeDiff = currentTime - paymentTime;
+        const timeWindow = 10 * 60 * 1000;
+
+        return timeDiff <= timeWindow;
+    }
 
 
     useEffect(() => {
@@ -226,6 +287,37 @@ export default function PaymentHistory() {
             toast.error('Failed to download report. Please try again.');
         }
     }
+
+    const handleCancelPayment = async (payment: IPayments) => {
+        try {
+
+            const result = await confirm({
+                title: `Cancel Inspection`,
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: `Are you sure you want to Cancel this Inspection?`,
+                confirmButton: {
+                    className: 'bg-red-500 hover:bg-red-600'
+                },
+                cancelButton: {
+                    className: 'bg-gray-200 hover:bg-gray-300'
+                },
+                alertDialogTitle: {
+                    className: 'flex items-center gap-5'
+                },
+            });
+            if (result) {
+                await PaymentService.cancelPayment(payment.stripePaymentIntentId);
+                toast.success('Payment cancelled successfully');
+                // Refresh payments list
+                await dispatch(fetchPayments());
+                // Refresh inspections list
+                await dispatch(fetchAppointments());
+            }
+        } catch (error) {
+            console.error('Error cancelling payment:', error);
+            toast.error('Failed to cancel payment. Please try again.');
+        }
+    };
 
     const handlePaymentExpired = (paymentId: string) => {
         console.log(`Payment window expired for: ${paymentId}`)
@@ -350,6 +442,46 @@ export default function PaymentHistory() {
                                                             </TooltipTrigger>
                                                             <TooltipContent>
                                                                 <p>View and download invoice</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                )}
+
+                                                {showCancelButton(payment) && (
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleCancelSuccessfulPayment(payment)}
+                                                                    className="text-red-600 hover:text-red-700"
+                                                                >
+                                                                    Cancel & Refund
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Cancel booking and request refund</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                )}
+
+                                                {payment.status === PaymentStatus.PENDING && (
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleCancelPayment(payment)}
+                                                                    className="text-red-600 hover:text-red-700"
+                                                                >
+                                                                    Cancel Payment
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Cancel this pending payment</p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>

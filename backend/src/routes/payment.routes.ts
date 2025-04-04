@@ -22,6 +22,9 @@ router.post(
     paymentController.createPaymentIntent
 );
 
+router.post('/cancel/:paymentIntentId', authenticateToken, paymentController.cancelPayment)
+
+router.post('/cancel-successful/:paymentIntentId', authenticateToken, paymentController.cancelSuccessfulPayment)
 
 router.post(
     '/webhook',
