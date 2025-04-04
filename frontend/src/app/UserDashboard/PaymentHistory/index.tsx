@@ -38,12 +38,12 @@ import { fetchAppointments } from "@/features/inspection/inspectionSlice"
 import { fetchPayments } from "@/features/payments/paymentSlice"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import InvoiceGenerator from "./components/invoice-generator"
-import { IPayments } from "@/features/payments/types"
+import type { IPayments } from "@/features/payments/types"
 import StripePaymentWrapper from "@/components/StripePaymentWrapper"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getSignedPdfUrl } from "@/utils/cloudinary";
-import { saveAs } from 'file-saver';
+import { getSignedPdfUrl } from "@/utils/cloudinary"
+import { saveAs } from "file-saver"
 import { ReviewDialog } from "@/components/ReviewComponent"
 import { PaymentService } from "@/services/payment.service"
 import { useConfirm } from "@omit/react-confirm-dialog"
@@ -127,6 +127,57 @@ const PaymentTimer = ({ createdAt, onExpired }: { createdAt: string; onExpired: 
     )
 }
 
+// Timer component for cancellation window
+const CancellationTimer = ({ createdAt }: { createdAt: string }) => {
+    const [timeLeft, setTimeLeft] = useState<number>(0)
+    const [progress, setProgress] = useState<number>(100)
+
+    useEffect(() => {
+        const paymentTime = new Date(createdAt).getTime()
+        const expiryTime = paymentTime + 10 * 60 * 1000 // 10 minutes in milliseconds
+
+        const calculateTimeLeft = () => {
+            const now = new Date().getTime()
+            const difference = expiryTime - now
+
+            if (difference <= 0) {
+                setTimeLeft(0)
+                setProgress(0)
+                clearInterval(timer)
+                return
+            }
+
+            const minutes = Math.floor((difference / 1000 / 60) % 60)
+            const seconds = Math.floor((difference / 1000) % 60)
+            setTimeLeft(minutes * 60 + seconds)
+
+            // Calculate progress percentage
+            const totalTime = 10 * 60 // 10 minutes in seconds
+            const elapsedTime = totalTime - (minutes * 60 + seconds)
+            const progressPercentage = 100 - (elapsedTime / totalTime) * 100
+            setProgress(progressPercentage)
+        }
+
+        calculateTimeLeft()
+        const timer = setInterval(calculateTimeLeft, 1000)
+
+        return () => clearInterval(timer)
+    }, [createdAt])
+
+    const minutes = Math.floor(timeLeft / 60)
+    const seconds = timeLeft % 60
+
+    return (
+        <div className="text-xs text-muted-foreground mt-1">
+            <div className="flex justify-between items-center">
+                <span>Refund window:</span>
+                <span className="font-medium">{`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`}</span>
+            </div>
+            <Progress value={progress} className="h-1 mt-1" />
+        </div>
+    )
+}
+
 export default function PaymentHistory() {
     const [paymentFilter, setPaymentFilter] = useState("all")
     const [appointmentFilter, setAppointmentFilter] = useState("all")
@@ -136,23 +187,21 @@ export default function PaymentHistory() {
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
     const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
     const [retryPayment, setRetryPayment] = useState<any>(null)
-    const confirm = useConfirm();
+    const confirm = useConfirm()
     const dispatch = useDispatch<AppDispatch>()
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
 
-
-
     const handleCancelSuccessfulPayment = async (payment: IPayments) => {
         try {
-            const paymentTime = new Date(payment.createdAt).getTime();
-            const currentTime = new Date().getTime();
-            const timeDiff = currentTime - paymentTime;
-            const timeWindow = 10 * 60 * 1000;
+            const paymentTime = new Date(payment.createdAt).getTime()
+            const currentTime = new Date().getTime()
+            const timeDiff = currentTime - paymentTime
+            const timeWindow = 10 * 60 * 1000
 
             if (timeDiff > timeWindow) {
-                toast.error('Cancellation window has expired');
-                return;
+                toast.error("Cancellation window has expired")
+                return
             }
 
             const result = await confirm({
@@ -160,44 +209,42 @@ export default function PaymentHistory() {
                 icon: <AlertTriangle className="size-4 text-yellow-500" />,
                 description: `Are you sure you want to Cancel this Inspection?`,
                 confirmButton: {
-                    className: 'bg-red-500 hover:bg-red-600'
+                    className: "bg-red-500 hover:bg-red-600",
                 },
                 cancelButton: {
-                    className: 'bg-gray-200 hover:bg-gray-300'
+                    className: "bg-gray-200 hover:bg-gray-300",
                 },
                 alertDialogTitle: {
-                    className: 'flex items-center gap-5'
+                    className: "flex items-center gap-5",
                 },
-            });
+            })
 
             if (result) {
                 await PaymentService.cancelSuccessfulPayment(payment.stripePaymentIntentId)
-                toast.success('Payment cancelled and refunded successfully');
-                await dispatch(fetchPayments());
-                await dispatch(fetchAppointments());
+                toast.success("Payment cancelled and refunded successfully")
+                await dispatch(fetchPayments())
+                await dispatch(fetchAppointments())
             }
         } catch (error) {
-            console.error('Error cancelling payment:', error);
+            console.error("Error cancelling payment:", error)
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data?.message || 'Failed to cancel payment');
+                toast.error(error.response?.data?.message || "Failed to cancel payment")
             } else {
-                toast.error('Failed to cancel payment');
+                toast.error("Failed to cancel payment")
             }
         }
     }
 
     const showCancelButton = (payment: IPayments) => {
+        if (payment.status !== PaymentStatus.SUCCEEDED) return false
 
-        if (payment.status !== PaymentStatus.SUCCEEDED) return false;
+        const paymentTime = new Date(payment.createdAt).getTime()
+        const currentTime = new Date().getTime()
+        const timeDiff = currentTime - paymentTime
+        const timeWindow = 10 * 60 * 1000
 
-        const paymentTime = new Date(payment.createdAt).getTime();
-        const currentTime = new Date().getTime();
-        const timeDiff = currentTime - paymentTime;
-        const timeWindow = 10 * 60 * 1000;
-
-        return timeDiff <= timeWindow;
+        return timeDiff <= timeWindow
     }
-
 
     useEffect(() => {
         dispatch(fetchAppointments())
@@ -264,60 +311,59 @@ export default function PaymentHistory() {
 
     const handleDownloadReport = async (inspectionId: string) => {
         try {
-            const inspection = inspections?.find(i => i._id === inspectionId);
+            const inspection = inspections?.find((i) => i._id === inspectionId)
             if (!inspection?.report?.reportPdfUrl) {
-                toast.error('Report PDF not available');
-                return;
+                toast.error("Report PDF not available")
+                return
             }
 
             // Get signed URL from backend
-            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl);
+            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl)
 
             // Fetch the PDF blob
-            const response = await fetch(signedUrl);
-            const pdfBlob = await response.blob();
+            const response = await fetch(signedUrl)
+            const pdfBlob = await response.blob()
 
             // Download with proper filename
-            const filename = `Inspection-Report-${inspection.bookingReference}.pdf`;
-            saveAs(pdfBlob, filename);
+            const filename = `Inspection-Report-${inspection.bookingReference}.pdf`
+            saveAs(pdfBlob, filename)
 
-            toast.success('Report download started');
+            toast.success("Report download started")
         } catch (error) {
-            console.error('Error downloading report:', error);
-            toast.error('Failed to download report. Please try again.');
+            console.error("Error downloading report:", error)
+            toast.error("Failed to download report. Please try again.")
         }
     }
 
     const handleCancelPayment = async (payment: IPayments) => {
         try {
-
             const result = await confirm({
                 title: `Cancel Inspection`,
                 icon: <AlertTriangle className="size-4 text-yellow-500" />,
                 description: `Are you sure you want to Cancel this Inspection?`,
                 confirmButton: {
-                    className: 'bg-red-500 hover:bg-red-600'
+                    className: "bg-red-500 hover:bg-red-600",
                 },
                 cancelButton: {
-                    className: 'bg-gray-200 hover:bg-gray-300'
+                    className: "bg-gray-200 hover:bg-gray-300",
                 },
                 alertDialogTitle: {
-                    className: 'flex items-center gap-5'
+                    className: "flex items-center gap-5",
                 },
-            });
+            })
             if (result) {
-                await PaymentService.cancelPayment(payment.stripePaymentIntentId);
-                toast.success('Payment cancelled successfully');
+                await PaymentService.cancelPayment(payment.stripePaymentIntentId)
+                toast.success("Payment cancelled successfully")
                 // Refresh payments list
-                await dispatch(fetchPayments());
+                await dispatch(fetchPayments())
                 // Refresh inspections list
-                await dispatch(fetchAppointments());
+                await dispatch(fetchAppointments())
             }
         } catch (error) {
-            console.error('Error cancelling payment:', error);
-            toast.error('Failed to cancel payment. Please try again.');
+            console.error("Error cancelling payment:", error)
+            toast.error("Failed to cancel payment. Please try again.")
         }
-    };
+    }
 
     const handlePaymentExpired = (paymentId: string) => {
         console.log(`Payment window expired for: ${paymentId}`)
@@ -328,17 +374,16 @@ export default function PaymentHistory() {
         setRetryPayment(payment)
     }
 
-
     const handleRetrySuccess = async () => {
-        toast.success(`Payment retry successful`);
-        setRetryPayment(null);
-        await dispatch(fetchPayments());
+        toast.success(`Payment retry successful`)
+        setRetryPayment(null)
+        await dispatch(fetchPayments())
     }
 
     const handleRetryError = async (message: string) => {
-        toast.error(`Payment retry failed: ${message}`);
-        setRetryPayment(null);
-        await dispatch(fetchPayments());
+        toast.error(`Payment retry failed: ${message}`)
+        setRetryPayment(null)
+        await dispatch(fetchPayments())
     }
 
     const getTimeSlotLabel = (slotNumber: number) => {
@@ -451,14 +496,17 @@ export default function PaymentHistory() {
                                                     <TooltipProvider>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    onClick={() => handleCancelSuccessfulPayment(payment)}
-                                                                    className="text-red-600 hover:text-red-700"
-                                                                >
-                                                                    Cancel & Refund
-                                                                </Button>
+                                                                <div className="flex flex-col">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleCancelSuccessfulPayment(payment)}
+                                                                        className="text-red-600 hover:text-red-700"
+                                                                    >
+                                                                        Cancel & Refund
+                                                                    </Button>
+                                                                    <CancellationTimer createdAt={payment.createdAt} />
+                                                                </div>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
                                                                 <p>Cancel booking and request refund</p>
@@ -718,7 +766,6 @@ export default function PaymentHistory() {
                                                                 <p className="text-muted-foreground">Time Slot:</p>
                                                                 <p>{getTimeSlotLabel(inspection.slotNumber)}</p>
 
-
                                                                 <p className="text-muted-foreground">Status:</p>
                                                                 <p>
                                                                     <Badge className={getStatusBadgeColor(inspection.status)}>
@@ -733,7 +780,6 @@ export default function PaymentHistory() {
                                                         <DialogFooter className="flex justify-between items-center mt-4">
                                                             {inspection.status === InspectionStatus.COMPLETED && (
                                                                 <>
-
                                                                     <Button
                                                                         onClick={() => handleDownloadReport(inspection._id)}
                                                                         className="w-full sm:w-auto"
@@ -741,14 +787,11 @@ export default function PaymentHistory() {
                                                                         <Download className="h-4 w-4 mr-2" />
                                                                         Download Inspection Report
                                                                     </Button>
-                                                                    <Button
-                                                                        onClick={() => setReviewDialogOpen(true)}
-                                                                        className="w-full"
-                                                                    >
-                                                                        Give Review<Star className="fill-white h-4 w-4 mr-2" />
+                                                                    <Button onClick={() => setReviewDialogOpen(true)} className="w-full">
+                                                                        Give Review
+                                                                        <Star className="fill-white h-4 w-4 mr-2" />
                                                                     </Button>
                                                                 </>
-
                                                             )}
                                                         </DialogFooter>
                                                         <ReviewDialog
@@ -846,9 +889,7 @@ export default function PaymentHistory() {
                             <Button variant="outline" onClick={() => setActivePaymentId(null)} className="w-full sm:w-auto">
                                 Cancel
                             </Button>
-                            <Button className="w-full sm:w-auto">
-                                Proceed to Payment
-                            </Button>
+                            <Button className="w-full sm:w-auto">Proceed to Payment</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
