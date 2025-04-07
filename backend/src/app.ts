@@ -18,6 +18,7 @@ import { TYPES } from './di/types';
 import { PaymentStatusChecker } from './utils/checkPaymentStatus';
 import { IPaymentService } from './core/interfaces/services/payment.service.interface';
 import { developmentLogger, errorLogger } from "./config/logger.config";
+import withdrawalRoutes from "./routes/withdrawal.routes";
 
 const app = express();
 
@@ -93,7 +94,8 @@ app.use('/vehicles', vehiclesRoutes);
 app.use('/inspections', inspectionRoutes);
 app.use('/payments', paymentsRoutes);
 app.use('/cloudinary', cloudinaryRoutes);
-app.use('/reviews', reviewRouter)
+app.use('/reviews', reviewRouter);
+app.use('/withdrawals', withdrawalRoutes);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({

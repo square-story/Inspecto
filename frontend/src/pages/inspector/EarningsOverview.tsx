@@ -8,39 +8,49 @@ import { IWalletStats } from "@/types/inspector.wallet.stats"
 import { useLoadingState } from "@/hooks/useLoadingState"
 import { PaymentService } from "@/services/payment.service"
 import LoadingSpinner from "@/components/LoadingSpinner"
+import { WithdrawalDialog } from "@/components/WithdrawalDialog"
 
 export default function PaymentsPage() {
     const [stats, setStats] = useState<IWalletStats>({
         totalEarnings: 0,
         totalTransactions: 0,
-        totalPlatformFee: 0
-    })
+        totalPlatformFee: 0,
+        pendingBalance: 0,
+        availableBalance: 0,
+        monthlyStats: [],
+        recentTransactions: []
+    });
 
     //for loading state
     const { loading, withLoading } = useLoadingState();
 
-    useEffect(() => {
-        const fetchStats = async () => {
-            await withLoading(async () => {
-                try {
-                    const response = await PaymentService.getStats();
-                    if (response) {
-                        setStats(response);
-                    } else {
-                        console.error("Received undefined stats");
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch stats", error);
+    const fetchStats = async () => {
+        await withLoading(async () => {
+            try {
+                const response = await PaymentService.getStats();
+                if (response) {
+                    setStats(response);
+                } else {
+                    console.error("Received undefined stats");
                 }
-            })
-        }
-        fetchStats()
-    }, [withLoading])
+            } catch (error) {
+                console.error("Failed to fetch stats", error);
+            }
+        });
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, [withLoading]);
 
     return (
         <div className="container mx-auto px-4 py-6 space-y-6">
             <div className="flex flex-col gap-4">
                 <h1 className="text-2xl font-bold tracking-tight">Payment Management</h1>
+                <WithdrawalDialog
+                    availableBalance={stats.availableBalance}
+                    onSuccess={() => fetchStats()}
+                />
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card className="p-4">
                         <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>

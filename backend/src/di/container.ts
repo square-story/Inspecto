@@ -84,6 +84,12 @@ import { IReviewService } from "../core/interfaces/services/review.service.inter
 import { ReviewService } from "../services/review.service";
 import { IReviewController } from "../core/interfaces/controllers/review.controller.interface";
 import { ReviewController } from "../controllers/review.controller";
+import { IWithdrawalRepository } from "../core/interfaces/repositories/withdrawal.repository.interface";
+import { WithdrawalRepository } from "../repositories/withdrawal.repository";
+import { IWithDrawalService } from "../core/interfaces/services/withdrawal.service.interface";
+import { WithdrawalService } from "../services/withdrawal.service";
+import { IWithDrawalController } from "../core/interfaces/controllers/withdrawal.controller.interface";
+import { WithdrawalController } from "../controllers/withdrawar.controller";
 
 
 
@@ -122,6 +128,11 @@ container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController
 
 //Wallet
 container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
+
+//WithDrawal
+container.bind<IWithdrawalRepository>(TYPES.WithdrawalRepository).to(WithdrawalRepository);
+container.bind<IWithDrawalService>(TYPES.WithdrawalService).to(WithdrawalService);
+container.bind<IWithDrawalController>(TYPES.WithdrawalContoller).to(WithdrawalController);
 
 //Review
 container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);

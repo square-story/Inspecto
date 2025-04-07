@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import appConfig from "../config/app.config";
 import { IPaymentDocument, PaymentStatus } from "../models/payment.model";
-import mongoose, { Types } from "mongoose";
+import mongoose, { ObjectId, Types } from "mongoose";
 import { InspectionStatus } from "../models/inspection.model";
 import { BaseService } from "../core/abstracts/base.service";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
@@ -12,8 +12,8 @@ import { IInspectionRepository } from "../core/interfaces/repositories/inspectio
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { ServiceError } from "../core/errors/service.error";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
-import { IInspector } from "../models/inspector.model";
 import { IWalletStats } from "../core/types/wallet.stats.type";
+import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/wallet.model";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -210,61 +210,104 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             session.endSession();
         }
     }
-    async processInspectionPayment(inspectionId: string, amount: number) {
-        const inspection = await this._inspectionRepository.findById(
-            new Types.ObjectId(inspectionId),
-            ['inspector']
-        );
+    async processInspectionPayment(inspectionId: string) {
+        try {
+            const inspection = await this._inspectionRepository.findById(
+                new Types.ObjectId(inspectionId),
+                ['inspector']
+            );
 
-        if (!inspection) throw new ServiceError('Inspection not found');
-        if (inspection.status !== InspectionStatus.CONFIRMED) {
-            throw new ServiceError('Inspection is not confirmed');
-        }
-
-        const inspector = inspection.inspector as unknown as IInspector;
-        let wallet = await this._walletRepository.findOne({ inspector: inspector._id });
-
-        if (!wallet) {
-            wallet = await this._walletRepository.create({
-                inspector: inspector._id,
-                balance: 0,
-                pendingBalance: 0,
-                transactions: [],
-            });
-        }
-
-        const FIXED_PLATFORM_FEE = 50;
-        const inspectorEarnings = amount - FIXED_PLATFORM_FEE;
-
-        // Atomic update
-        await this._walletRepository.findOneAndUpdate(
-            { _id: wallet._id },
-            {
-                $inc: { balance: inspectorEarnings - FIXED_PLATFORM_FEE },
-                $push: {
-                    transactions: {
-                        $each: [
-                            {
-                                amount: inspectorEarnings,
-                                date: new Date(),
-                                type: 'EARNED',
-                                status: 'COMPLETED',
-                                reference: inspectionId
-                            },
-                            {
-                                amount: -FIXED_PLATFORM_FEE,
-                                date: new Date(),
-                                type: 'FEE',
-                                status: 'COMPLETED',
-                                reference: inspectionId
-                            }
-                        ]
-                    }
-                }
+            if (!inspection) throw new ServiceError('Inspection not found');
+            if (inspection.status !== InspectionStatus.CONFIRMED) {
+                throw new ServiceError('Inspection is not confirmed');
             }
-        );
 
-        return { platformFee: FIXED_PLATFORM_FEE, inspectorEarnings };
+            const payment = await this._paymentRepository.findOne({
+                inspection: inspectionId,
+                status: PaymentStatus.SUCCEEDED
+            })
+
+            if (!payment) {
+                throw new ServiceError('payment Not Found')
+            }
+
+            const platformFee = 50;
+            const inspectorAmount = payment.amount - platformFee
+
+            let inspectorWallet = await this._walletRepository.findOne({
+                owner: inspection.inspector,
+                ownerType: WalletOwnerType.INSPECTOR
+            })
+
+            if (!inspectorWallet) {
+                inspectorWallet = await this._walletRepository.create({
+                    owner: inspection.inspector,
+                    ownerType: WalletOwnerType.INSPECTOR,
+                    balance: 0,
+                    pendingBalance: 0,
+                    transactions: []
+                });
+            }
+
+            let adminWallet = await this._walletRepository.findOne({
+                ownerType: WalletOwnerType.ADMIN
+            })
+
+            if (!adminWallet) {
+                adminWallet = await this._walletRepository.create({
+                    owner: new mongoose.Types.ObjectId() as unknown as ObjectId,
+                    ownerType: WalletOwnerType.ADMIN,
+                    balance: 0,
+                    pendingBalance: 0,
+                    transactions: []
+                })
+            }
+
+
+            await this._walletRepository.findOneAndUpdate(
+                { _id: inspectorWallet._id },
+                {
+                    $inc: {
+                        balance: inspectorAmount,
+                        totalEarned: inspectorAmount
+                    },
+                    $push: {
+                        transactions: {
+                            amount: inspectorAmount,
+                            type: TransactionType.EARNED,
+                            status: TransactionStatus.COMPLETED,
+                            reference: inspectionId,
+                            description: `Earnings from inspection #${inspection.bookingReference}`
+                        }
+                    }
+                },
+            );
+
+            await this._walletRepository.findOneAndUpdate(
+                { _id: adminWallet._id },
+                {
+                    $inc: {
+                        balance: platformFee,
+                        totalEarned: platformFee
+                    },
+                    $push: {
+                        transactions: {
+                            amount: platformFee,
+                            type: TransactionType.PLATFORM_FEE,
+                            status: TransactionStatus.COMPLETED,
+                            reference: inspectionId,
+                            description: `Platform fee from inspection #${inspection.bookingReference}`
+                        }
+                    }
+                },
+            );
+
+            return { platformFee, inspectorEarnings: inspectorAmount }
+        } catch (error) {
+            console.error(`Error in process earning fund`, error);
+            throw new ServiceError('Error in process earning fund');
+        }
+
     }
     async getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats> {
         try {

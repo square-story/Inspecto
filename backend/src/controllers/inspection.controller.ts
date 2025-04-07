@@ -266,7 +266,7 @@ export class InspectionController implements IInspectionController {
                 const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
 
-                await this._paymentService.processInspectionPayment(id, populatedInspection.inspectionType == 'full' ? 300 : 250)
+                await this._paymentService.processInspectionPayment(id)
 
                 await this._inspectionService.updateInspection(id, {
                     status: InspectionStatus.COMPLETED,

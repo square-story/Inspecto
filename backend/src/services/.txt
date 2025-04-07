@@ -1,0 +1,44 @@
+const inspector = inspection.inspector as unknown as IInspector;
+        let wallet = await this._walletRepository.findOne({ inspector: inspector._id });
+
+        if (!wallet) {
+            wallet = await this._walletRepository.create({
+                inspector: inspector._id,
+                balance: 0,
+                pendingBalance: 0,
+                transactions: [],
+            });
+        }
+
+        const payment = await this._paymentRepository.findOne({
+            inspection: inspectionId,
+            status: PaymentStatus.SUCCEEDED
+        });
+
+        if (!payment) {
+            throw new ServiceError('Payment not found');
+        }
+
+        const platformFee = 50; // or calculate based on percentage
+        const inspectorAmount = payment.amount - platformFee;
+
+        // Credit inspector's wallet
+        await this._walletRepository.findOneAndUpdate(
+            { inspector: inspection.inspector },
+            {
+                $inc: {
+                    balance: inspectorAmount,
+                    totalEarned: inspectorAmount
+                },
+                $push: {
+                    transactions: {
+                        amount: inspectorAmount,
+                        type: TransactionType.EARNED,
+                        status: TransactionStatus.COMPLETED,
+                        reference: inspectionId
+                    }
+                }
+            },
+        );
+
+        return { platformFee, inspectorEarnings: inspectorAmount };
