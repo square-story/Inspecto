@@ -1,6 +1,6 @@
 import { NavUser } from "@/app/InspectorDashBoard/layout/nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { CalendarRange, Home, Settings, Users } from "lucide-react";
+import { CalendarRange, Home, Users, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const items = [
@@ -20,10 +20,10 @@ const items = [
         icon: CalendarRange,
     },
     {
-        title: "Settings",
-        route: "/admin/dashboard/settings",
-        icon: Settings,
-    },
+        title: "Wallet",
+        route: "/admin/dashboard/wallet",
+        icon: Wallet,
+    }
 ];
 
 const AdminSidebar = () => {
