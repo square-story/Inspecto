@@ -92,7 +92,7 @@ export default function PaymentsPage() {
                     <UpcomingEarnings />
                 </TabsContent> */}
                 <TabsContent value="stats" className="space-y-4">
-                    <PaymentStats />
+                    <PaymentStats monthlyData={stats.monthlyStats} />
                 </TabsContent>
             </Tabs>
         </div>

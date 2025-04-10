@@ -3,6 +3,7 @@ import { BaseRepository } from "../core/abstracts/base.repository";
 import { IWallet, IWalletTransaction, Wallet, WalletOwnerType } from "../models/wallet.model";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
 import { IWalletStats } from "../core/types/wallet.stats.type";
+import { format, parseISO } from 'date-fns'
 
 @injectable()
 export class WalletRepository extends BaseRepository<IWallet> implements IWalletRepository {
@@ -29,7 +30,26 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
         const totalTransactions = wallet.transactions.length;
         const totalPlatformFee = totalTransactions * 50;
         const recentTransactions = wallet.transactions.slice(-5)
+        const monthlyStatsMap: Record<string, { earnings: number; platformFee: number; transactionCount: number }> = {};
 
+        wallet.transactions.forEach((transaction) => {
+            const month = format(parseISO(transaction.date.toISOString()), "yyyy-MM") //format date as YYYY-MM
+            if (!monthlyStatsMap[month]) {
+                monthlyStatsMap[month] = { earnings: 0, platformFee: 0, transactionCount: 0 };
+            }
+
+            if (transaction.type === "EARNED") {
+                monthlyStatsMap[month].earnings += transaction.amount;
+            }
+
+            monthlyStatsMap[month].platformFee += 50;
+            monthlyStatsMap[month].transactionCount += 1;
+        })
+
+        const monthlyStats = Object.entries(monthlyStatsMap).map(([month, stats]) => ({
+            month,
+            ...stats
+        }))
 
         return {
             totalEarnings: wallet.totalEarned,
@@ -37,7 +57,8 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
             totalTransactions,
             recentTransactions,
             pendingBalance: wallet.pendingBalance,
-            availableBalance: wallet.balance
+            availableBalance: wallet.balance,
+            monthlyStats
         };
     }
 }

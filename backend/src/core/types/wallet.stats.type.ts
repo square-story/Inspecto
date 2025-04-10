@@ -7,4 +7,13 @@ export interface IWalletStats {
     recentTransactions: IWalletTransaction[];
     pendingBalance: number;
     availableBalance: number;
+    monthlyStats: MonthlyStats[];
+}
+
+
+export interface MonthlyStats {
+    month: string;
+    earnings: number;
+    platformFee: number;
+    transactionCount: number;
 }
