@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import TransactionHistory from "@/components/inspector/transaction-history"
 // import UpcomingEarnings from "@/components/inspector/upcoming-earnings"
 import PaymentStats from "@/components/inspector/payment-stats"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { IWalletStats } from "@/types/inspector.wallet.stats"
 import { useLoadingState } from "@/hooks/useLoadingState"
 import LoadingSpinner from "@/components/LoadingSpinner"
@@ -24,7 +24,7 @@ export default function PaymentsPage() {
     //for loading state
     const { loading, withLoading } = useLoadingState();
 
-    const fetchStats = async () => {
+    const fetchStats = useCallback(async () => {
         await withLoading(async () => {
             try {
                 const response = await WalletService.getInspctorWalletStats();
@@ -37,11 +37,11 @@ export default function PaymentsPage() {
                 console.error("Failed to fetch stats", error);
             }
         });
-    };
+    }, [withLoading]);
 
     useEffect(() => {
         fetchStats();
-    }, [withLoading]);
+    }, [fetchStats]);
 
     return (
         <div className="container mx-auto px-4 py-6 space-y-6">
