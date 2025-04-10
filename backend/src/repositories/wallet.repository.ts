@@ -28,11 +28,16 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
 
         const totalTransactions = wallet.transactions.length;
         const totalPlatformFee = totalTransactions * 50;
+        const recentTransactions = wallet.transactions.slice(-5)
+
 
         return {
             totalEarnings: wallet.totalEarned,
             totalPlatformFee,
             totalTransactions,
+            recentTransactions,
+            pendingBalance: wallet.pendingBalance,
+            availableBalance: wallet.balance
         };
     }
 }

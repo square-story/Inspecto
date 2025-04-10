@@ -17,7 +17,7 @@ export interface MonthlyStats {
 }
 
 export interface TransactionStats {
-    id: string;
+    _id: string;
     amount: number;
     date: Date;
     type: string;

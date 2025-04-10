@@ -6,9 +6,9 @@ import PaymentStats from "@/components/inspector/payment-stats"
 import { useEffect, useState } from "react"
 import { IWalletStats } from "@/types/inspector.wallet.stats"
 import { useLoadingState } from "@/hooks/useLoadingState"
-import { PaymentService } from "@/services/payment.service"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import { WithdrawalDialog } from "@/components/WithdrawalDialog"
+import { WalletService } from "@/services/wallet.service"
 
 export default function PaymentsPage() {
     const [stats, setStats] = useState<IWalletStats>({
@@ -27,7 +27,7 @@ export default function PaymentsPage() {
     const fetchStats = async () => {
         await withLoading(async () => {
             try {
-                const response = await PaymentService.getStats();
+                const response = await WalletService.getInspctorWalletStats();
                 if (response) {
                     setStats(response);
                 } else {
@@ -64,6 +64,14 @@ export default function PaymentsPage() {
                         <h3 className="font-medium text-sm text-muted-foreground">Total Transactions</h3>
                         <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalTransactions}</p>
                     </Card>
+                    <Card className="p-4">
+                        <h3 className="font-medium text-sm text-muted-foreground">Total Transactions</h3>
+                        <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.availableBalance}`}</p>
+                    </Card>
+                    <Card className="p-4">
+                        <h3 className="font-medium text-sm text-muted-foreground">Total Transactions</h3>
+                        <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.pendingBalance}`}</p>
+                    </Card>
                 </div>
             </div>
 
@@ -74,7 +82,7 @@ export default function PaymentsPage() {
                     <TabsTrigger value="stats">Payment Stats</TabsTrigger>
                 </TabsList>
                 <TabsContent value="transactions" className="space-y-4">
-                    <TransactionHistory />
+                    <TransactionHistory recentTransactions={stats.recentTransactions} />
                 </TabsContent>
                 <TabsContent value="upcoming" className="space-y-4">
                     <UpcomingEarnings />

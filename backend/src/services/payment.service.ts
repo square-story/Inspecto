@@ -12,7 +12,6 @@ import { IInspectionRepository } from "../core/interfaces/repositories/inspectio
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { ServiceError } from "../core/errors/service.error";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
-import { IWalletStats } from "../core/types/wallet.stats.type";
 import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/wallet.model";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
@@ -308,14 +307,6 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             throw new ServiceError('Error in process earning fund');
         }
 
-    }
-    async getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats> {
-        try {
-            return await this._walletRepository.WalletStatsInspector(inspectorId)
-        } catch (error) {
-            console.error(`Error get Stats About Wallet Transaction ${inspectorId}:`, error);
-            throw new ServiceError('Error get Stats About Wallet');
-        }
     }
 
     async cancelPayment(paymentIntentId: string, userId: string): Promise<void> {

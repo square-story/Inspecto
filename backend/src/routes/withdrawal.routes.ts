@@ -11,7 +11,8 @@ const authenticateToken = authMiddleware.authenticateToken
 
 const withdrawalRoutes = Router();
 
-withdrawalRoutes.post('/request', authenticateToken, authorizeRole('inspector'), withdrawalController.requestWithdrawal)
-withdrawalRoutes.get('/history', authenticateToken, authorizeRole('inspector'), withdrawalController.getInspectorWithdrawals)
+withdrawalRoutes.post('/inspector/request', authenticateToken, authorizeRole('inspector'), withdrawalController.requestWithdrawal)
+withdrawalRoutes.get('/inspector/history', authenticateToken, authorizeRole('inspector'), withdrawalController.getInspectorWithdrawals)
+
 
 export default withdrawalRoutes;

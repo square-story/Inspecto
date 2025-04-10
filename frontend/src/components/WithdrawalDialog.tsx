@@ -62,7 +62,7 @@ export function WithdrawalDialog({ availableBalance, onSuccess }: WithdrawalDial
                 }
                 : { upiId: data.upiId || "" }
 
-            await WithdrawalService.requestWithdrawal(
+            await WithdrawalService.requestInspctorWithdrawal(
                 data.amount,
                 data.method as "BANK_TRANSFER" | "UPI",
                 paymentDetails

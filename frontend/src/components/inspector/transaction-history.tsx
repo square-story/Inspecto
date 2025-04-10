@@ -5,28 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TransactionStats } from "@/types/inspector.wallet.stats"
 
-const transactions = [
-    {
-        id: "1",
-        date: "2024-02-19",
-        inspectionId: "INS-001",
-        amount: 1500,
-        platformFee: 150,
-        status: "succeeded",
-        customer: "John Doe",
-    },
-    {
-        id: "2",
-        date: "2024-02-18",
-        inspectionId: "INS-002",
-        amount: 2000,
-        platformFee: 200,
-        status: "pending",
-        customer: "Jane Smith",
-    },
-    // Add more mock data as needed
-]
+
 
 const statusColors = {
     pending: "bg-yellow-500/10 text-yellow-500",
@@ -35,8 +16,14 @@ const statusColors = {
     refunded: "bg-blue-500/10 text-blue-500",
 }
 
-export default function TransactionHistory() {
+export interface TransactionHistoryProps {
+    recentTransactions: TransactionStats[]
+}
+
+export default function TransactionHistory({ recentTransactions }: TransactionHistoryProps) {
     const [timeframe, setTimeframe] = useState("all")
+
+
 
     return (
         <Card>
@@ -58,8 +45,6 @@ export default function TransactionHistory() {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Date</TableHead>
-                        <TableHead>Inspection ID</TableHead>
-                        <TableHead>Customer</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Platform Fee</TableHead>
                         <TableHead>Net Amount</TableHead>
@@ -67,17 +52,15 @@ export default function TransactionHistory() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {transactions.map((transaction) => (
-                        <TableRow key={transaction.id}>
-                            <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
-                            <TableCell>{transaction.inspectionId}</TableCell>
-                            <TableCell>{transaction.customer}</TableCell>
-                            <TableCell>₹{transaction.amount.toFixed(2)}</TableCell>
-                            <TableCell>₹{transaction.platformFee.toFixed(2)}</TableCell>
-                            <TableCell>₹{(transaction.amount - transaction.platformFee).toFixed(2)}</TableCell>
+                    {recentTransactions.map((recentTransactions) => (
+                        <TableRow key={recentTransactions._id}>
+                            <TableCell>{new Date(recentTransactions.date).toLocaleDateString()}</TableCell>
+                            <TableCell>₹{(recentTransactions.amount + 50).toFixed(2)}</TableCell>
+                            <TableCell>₹{50}</TableCell>
+                            <TableCell>₹{(recentTransactions.amount).toFixed(2)}</TableCell>
                             <TableCell>
-                                <Badge className={statusColors[transaction.status as keyof typeof statusColors]}>
-                                    {transaction.status}
+                                <Badge className={statusColors[recentTransactions.status as keyof typeof statusColors]}>
+                                    {recentTransactions.status}
                                 </Badge>
                             </TableCell>
                         </TableRow>

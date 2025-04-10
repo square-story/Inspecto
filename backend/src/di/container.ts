@@ -90,6 +90,10 @@ import { IWithDrawalService } from "../core/interfaces/services/withdrawal.servi
 import { WithdrawalService } from "../services/withdrawal.service";
 import { IWithDrawalController } from "../core/interfaces/controllers/withdrawal.controller.interface";
 import { WithdrawalController } from "../controllers/withdrawar.controller";
+import { IWalletService } from "../core/interfaces/services/wallet.service.interface";
+import { WalletService } from "../services/wallet.service";
+import { IWalletController } from "../core/interfaces/controllers/wallet.controller.interface";
+import { WalletController } from "../controllers/wallet.controller";
 
 
 
@@ -128,6 +132,9 @@ container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController
 
 //Wallet
 container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
+container.bind<IWalletService>(TYPES.WalletService).to(WalletService);
+container.bind<IWalletController>(TYPES.WalletController).to(WalletController);
+
 
 //WithDrawal
 container.bind<IWithdrawalRepository>(TYPES.WithdrawalRepository).to(WithdrawalRepository);

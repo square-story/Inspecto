@@ -3,12 +3,12 @@ import axiosInstance from "@/api/axios";
 
 
 export const WithdrawalService = {
-    async requestWithdrawal(
+    async requestInspctorWithdrawal(
         amount: number,
         method: "BANK_TRANSFER" | "UPI",
         paymentDetails: { accountNumber: string; ifscCode?: string; accountHolderName: string; bankName: string; } | { upiId: string }
     ) {
-        const response = await axiosInstance.post("/withdrawals/request", {
+        const response = await axiosInstance.post("/withdrawals/inspector/request", {
             amount,
             method,
             paymentDetails
@@ -16,8 +16,12 @@ export const WithdrawalService = {
         return response.data
     },
 
-    async getWithdrawalHistory() {
-        const response = await axiosInstance.get("/withdrawals/history")
+    async getInspctorWithdrawalHistory() {
+        const response = await axiosInstance.get("/withdrawals/inspector/history")
         return response.data
-    }
+    },
+    async getAllWithdrawalHistory() {
+        const response = await axiosInstance.get("/withdrawals/admin/history")
+        return response.data
+    },
 }
