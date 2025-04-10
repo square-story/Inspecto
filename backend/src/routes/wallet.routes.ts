@@ -11,8 +11,11 @@ const walletController = container.get<IWalletController>(TYPES.WalletController
 const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware)
 const authenticateToken = authMiddleware.authenticateToken
 
-// Get wallet stats
+// Get Inspector wallet stats
 walletRoutes.get('/inspector/stats', authenticateToken, walletController.getWalletStatsAboutInspector);
+
+// Get Admin Wallet Stats
+walletRoutes.get('/admin/stats', authenticateToken, walletController.getWalletStatsAboutAdmin)
 
 
 // // Get wallet balance

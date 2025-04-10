@@ -1,46 +1,20 @@
 import { withdrawalColumns } from "@/app/AdminWalletManagement/column";
 import { DataTable } from "@/app/AdminWalletManagement/data-table";
 import { earningsColumns } from "@/app/AdminWalletManagement/earnings-columns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip } from "@/components/ui/tooltip";
-import { ArrowDownUp, ArrowUpDown, Clock, CreditCard, DollarSign, Download, Filter, Wallet } from "lucide-react";
-import { useState } from "react";
+import { useLoadingState } from "@/hooks/useLoadingState";
+import { WalletService } from "@/services/wallet.service";
+import { IAdminWalletStats } from "@/types/wallet.stats";
+import { Clock, Download, Filter } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 
-const statsData = [
-    {
-        title: "Total Earnings",
-        value: "$24,560.00",
-        change: "+12.5%",
-        icon: DollarSign,
-        positive: true,
-    },
-    {
-        title: "Platform Fees",
-        value: "$15,245.75",
-        change: "+8.2%",
-        icon: CreditCard,
-        positive: true,
-    },
-    {
-        title: "Inspector Earnings",
-        value: "$9,314.25",
-        change: "+18.3%",
-        icon: Wallet,
-        positive: true,
-    },
-    {
-        title: "Pending Withdrawals",
-        value: "$1,845.50",
-        change: "-3.1%",
-        icon: Clock,
-        positive: false,
-    },
-]
 
 const earningData = [
     { name: "Jan", platformFee: 4000, inspectorFee: 2400, total: 6400 },
@@ -214,9 +188,32 @@ const earningsHistory = [
 ]
 
 export default function WalletManagement() {
+    const [stats, setStats] = useState<IAdminWalletStats>({
+        totalEarnings: 0
+    })
+    const { loading, withLoading } = useLoadingState();
     const [activeTab, setActiveTab] = useState("overview")
 
-    console.log(activeTab)
+    const fetchStats = useCallback(async () => {
+        await withLoading(async () => {
+            try {
+                const response = await WalletService.getAdminWalletStats();
+                if (response) {
+                    setStats(response);
+                } else {
+                    console.error("Received undefined stats");
+                }
+            } catch (error) {
+                console.error("Failed to fetch stats", error);
+            }
+        })
+    }, [withLoading])
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats])
+
+
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -241,25 +238,20 @@ export default function WalletManagement() {
                     </TabsList>
                     <TabsContent value="overview" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                            {statsData.map((stat, index) => (
-                                <Card key={index}>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                                        <stat.icon className="h-4 w-4 text-muted-foreground" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">{stat.value}</div>
-                                        <p className={`text-xs ${stat.positive ? "text-green-500" : "text-red-500"} flex items-center`}>
-                                            {stat.positive ? (
-                                                <ArrowUpDown className="mr-1 h-3 w-3" />
-                                            ) : (
-                                                <ArrowDownUp className="mr-1 h-3 w-3" />
-                                            )}
-                                            {stat.change} from last month
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                            <Card className="p-4">
+                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
+                            </Card>
+                            <Card className="p-4">
+                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
+                            </Card><Card className="p-4">
+                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
+                            </Card><Card className="p-4">
+                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
+                            </Card>
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                             <Card className="col-span-1">

@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { MonthlyStats } from "@/types/inspector.wallet.stats";
+import { MonthlyStats } from "@/types/wallet.stats";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 
 

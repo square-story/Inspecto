@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { BaseRepository } from "../core/abstracts/base.repository";
 import { IWallet, IWalletTransaction, Wallet, WalletOwnerType } from "../models/wallet.model";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
-import { IWalletStats } from "../core/types/wallet.stats.type";
+import { IAdminWalletStats, IWalletStats } from "../core/types/wallet.stats.type";
 import { format, parseISO } from 'date-fns'
 
 @injectable()
@@ -60,5 +60,19 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
             availableBalance: wallet.balance,
             monthlyStats
         };
+    }
+
+    async WalletStatsAdmin(): Promise<IAdminWalletStats> {
+        const wallet = await this.model.findOne({
+            ownerType: WalletOwnerType.ADMIN
+        })
+
+        if (!wallet) {
+            throw new Error("Wallet not found");
+        }
+
+        return {
+            totalEarnings: wallet.balance
+        }
     }
 }

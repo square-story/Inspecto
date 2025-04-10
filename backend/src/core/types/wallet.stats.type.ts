@@ -17,3 +17,8 @@ export interface MonthlyStats {
     platformFee: number;
     transactionCount: number;
 }
+
+
+export interface IAdminWalletStats {
+    totalEarnings: number;
+}

@@ -25,3 +25,7 @@ export interface TransactionStats {
     reference: string;
     description: string;
 }
+
+export interface IAdminWalletStats {
+    totalEarnings: number
+}
