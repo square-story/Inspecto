@@ -1,9 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Activity, AlertCircle, ArrowRight, Calendar, DollarSign, FileCheck, User, Users } from "lucide-react"
+import { Activity, AlertCircle, ArrowRight, Calendar, DollarSign, FileCheck, Users } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "@/store"
@@ -14,6 +13,7 @@ import { IInspectionStats } from "@/types/inspector.dashboard.stats"
 import { InspectionService } from "@/services/inspection.service"
 import { useLoadingState } from "@/hooks/useLoadingState";
 import LoadingSpinner from "@/components/LoadingSpinner"
+import { SignedAvatar } from "@/components/SignedAvatar"
 
 export default function Dashboard() {
     const dispatch = useDispatch<AppDispatch>()
@@ -140,16 +140,11 @@ export default function Dashboard() {
                                     <TableCell className="font-medium">{inspection.bookingReference}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage
-                                                    src={inspection.user.profile_image}
-                                                    alt={`${inspection.user.firstName} ${inspection.user.lastName}`}
-                                                    className="object-cover"
-                                                />
-                                                <AvatarFallback>
-                                                    <User className="h-4 w-4" />
-                                                </AvatarFallback>
-                                            </Avatar>
+                                            <SignedAvatar
+                                                publicId={inspection.user?.profile_image}
+                                                fallback={`${inspection.user?.firstName || ''} ${inspection.user?.lastName || ''}`}
+                                                className="h-8 w-8"
+                                            />
                                             {inspection.user.firstName}{" "}{inspection.user.lastName}
                                         </div>
                                     </TableCell>
