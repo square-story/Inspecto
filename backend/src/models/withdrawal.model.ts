@@ -48,7 +48,7 @@ const WithdrawalSchema = new Schema<IWithdrawal>({
     amount: {
         type: Number,
         required: true,
-        min: 1000 // Minimum withdrawal amount
+        min: 1000
     },
     status: {
         type: String,

@@ -13,6 +13,7 @@ const withdrawalRoutes = Router();
 
 withdrawalRoutes.post('/inspector/request', authenticateToken, authorizeRole('inspector'), withdrawalController.requestWithdrawal)
 withdrawalRoutes.get('/inspector/history', authenticateToken, authorizeRole('inspector'), withdrawalController.getInspectorWithdrawals)
+withdrawalRoutes.post('/admin/:withdrawalId/process', authenticateToken, authorizeRole('admin'), withdrawalController.processWithdrawal)
 
 
 export default withdrawalRoutes;

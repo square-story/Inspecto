@@ -15,6 +15,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { WithdrawalStats } from "@/types/wallet.stats"
+import { useConfirm } from "@omit/react-confirm-dialog"
+import { toast } from "sonner"
+import { WithdrawalService } from "@/services/withdrawal.service"
+import { DeleteConfirmContent } from "../InspectorManagment/components/DenyReason"
 
 // Define the type for our data
 export type WithdrawalRequest = {
@@ -102,7 +106,96 @@ export const withdrawalColumns: ColumnDef<WithdrawalStats, unknown>[] = [
     {
         id: "actions",
         cell: ({ row }) => {
-            const withdrawal = row.original
+            const withdrawal = row.original;
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const confirm = useConfirm();
+
+            const handleApprove = async () => {
+                let successReason = "";
+                const result = await confirm({
+                    title: "Approve Withdrawal",
+                    description: "Are you sure you want to approve this withdrawal request?",
+                    icon: <Check className="size-4 text-green-600" />,
+                    confirmButton: {
+                        className: "bg-green-500 hover:bg-green-600 text-white",
+                        onClick: async () => {
+                            if (!successReason.trim()) {
+                                toast.error("Please provide a denial reason");
+                                return false;
+                            }
+
+                            try {
+                                await WithdrawalService.processWithdrawal(withdrawal.id, 'approve', successReason)
+                                return true
+                            } catch (error) {
+                                console.error("Denial error:", error);
+                                return false;
+                            }
+                        }
+                    },
+                    alertDialogTitle: {
+                        className: 'flex items-center gap-5'
+                    },
+                    contentSlot: <DeleteConfirmContent
+                        onValueChange={(value) => {
+                            successReason = value;
+                        }}
+                    />
+                });
+
+                if (result) {
+                    try {
+                        toast.success("Withdrawal approved successfully!");
+                    } catch (error) {
+                        console.error("Approval error:", error);
+                        toast.error("Failed to approve withdrawal.");
+                    }
+                }
+            };
+
+            const handleReject = async () => {
+
+                let rejectReason = "";
+                const result = await confirm({
+                    title: "Reject Withdrawal",
+                    description: "Are you sure you want to reject this withdrawal request?",
+                    icon: <X className="size-4 text-red-600" />,
+                    confirmButton: {
+                        className: "bg-red-500 hover:bg-red-600 text-white",
+                        onClick: async () => {
+                            if (!rejectReason.trim()) {
+                                toast.error("Please provide a denial reason");
+                                return false;
+                            }
+
+                            try {
+                                await WithdrawalService.processWithdrawal(withdrawal.id, 'reject', rejectReason)
+                                return true
+                            } catch (error) {
+                                console.error("Denial error:", error);
+                                return false;
+                            }
+                        }
+                    },
+                    alertDialogTitle: {
+                        className: 'flex items-center gap-5'
+                    },
+                    contentSlot: <DeleteConfirmContent
+                        onValueChange={(value) => {
+                            rejectReason = value;
+                        }}
+                    />
+                });
+
+                if (result) {
+                    try {
+                        toast.success("Withdrawal rejected successfully!");
+                    } catch (error) {
+                        console.error("Rejection error:", error);
+                        toast.error("Failed to reject withdrawal.");
+                    }
+                }
+            };
 
             return (
                 <DropdownMenu>
@@ -119,17 +212,17 @@ export const withdrawalColumns: ColumnDef<WithdrawalStats, unknown>[] = [
                         <DropdownMenuItem>View Details</DropdownMenuItem>
                         {withdrawal.status === "pending".toUpperCase() && (
                             <>
-                                <DropdownMenuItem className="text-green-600">
+                                <DropdownMenuItem className="text-green-600" onClick={handleApprove}>
                                     <Check className="mr-2 h-4 w-4" /> Approve
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600">
+                                <DropdownMenuItem className="text-red-600" onClick={handleReject}>
                                     <X className="mr-2 h-4 w-4" /> Reject
                                 </DropdownMenuItem>
                             </>
                         )}
                     </DropdownMenuContent>
                 </DropdownMenu>
-            )
+            );
         },
     },
 ]

@@ -24,4 +24,7 @@ export const WithdrawalService = {
         const response = await axiosInstance.get("/withdrawals/admin/history")
         return response.data
     },
+    async processWithdrawal(id: string, action: "approve" | "reject", remarks: string) {
+        return await axiosInstance.post(`/withdrawals/admin/${id}/process`, { action, remarks });
+    }
 }

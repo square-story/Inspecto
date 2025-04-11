@@ -99,7 +99,10 @@ export class WithdrawalService extends BaseService<IWithdrawal> implements IWith
                     remarks
                 })
 
-                await this._walletRepository.findOneAndUpdate({ inspector: withdrawal.inspector }, {
+                await this._walletRepository.findOneAndUpdate({
+                    owner: withdrawal.inspector,
+                    ownerType: WalletOwnerType.INSPECTOR
+                }, {
                     $inc: {
                         pendingBalance: -withdrawal.amount,
                         totalWithdrawn: withdrawal.amount
@@ -113,7 +116,10 @@ export class WithdrawalService extends BaseService<IWithdrawal> implements IWith
                 })
 
                 await this._walletRepository.findOneAndUpdate(
-                    { inspector: withdrawal.inspector },
+                    {
+                        owner: withdrawal.inspector,
+                        ownerType: WalletOwnerType.INSPECTOR
+                    },
                     {
                         $inc: {
                             balance: withdrawal.amount,

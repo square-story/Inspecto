@@ -12,7 +12,7 @@ import { useLoadingState } from "@/hooks/useLoadingState";
 import { WalletService } from "@/services/wallet.service";
 import { IAdminWalletStats } from "@/types/wallet.stats";
 import { format } from "date-fns";
-import { Clock, Download, Filter } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
@@ -97,7 +97,7 @@ export default function WalletManagement() {
             <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-3xl font-bold tracking-tight">Wallet Management</h2>
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm">
                             <Download className="mr-2 h-4 w-4" />
                             Export
@@ -106,7 +106,7 @@ export default function WalletManagement() {
                             <Filter className="mr-2 h-4 w-4" />
                             Filter
                         </Button>
-                    </div>
+                    </div> */}
                 </div>
                 <Tabs value={activeTab} className="space-y-4" onValueChange={setActiveTab}>
                     <TabsList>
