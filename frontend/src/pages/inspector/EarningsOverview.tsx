@@ -63,11 +63,11 @@ export default function PaymentsPage() {
                         <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalTransactions}</p>
                     </Card>
                     <Card className="p-4">
-                        <h3 className="font-medium text-sm text-muted-foreground">Total Transactions</h3>
+                        <h3 className="font-medium text-sm text-muted-foreground">Total Balance</h3>
                         <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.availableBalance}`}</p>
                     </Card>
                     <Card className="p-4">
-                        <h3 className="font-medium text-sm text-muted-foreground">Total Transactions</h3>
+                        <h3 className="font-medium text-sm text-muted-foreground">Total Pending Balance</h3>
                         <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.pendingBalance}`}</p>
                     </Card>
                     <Card className="p-4 flex justify-start items-start">
