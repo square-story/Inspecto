@@ -20,5 +20,32 @@ export interface MonthlyStats {
 
 
 export interface IAdminWalletStats {
-    totalEarnings: number;
+    totalPlatformEarnings: number;
+    totalProfit: number;
+    totalTransactions: number;
+    recentTransactions: IWalletTransaction[];
+    totalWithdrawals: number;
+    totalWithdrawalAmount: number;
+    pendingWithdrawalAmount: number;
+    withdrawalStats: WithdrawalStats[];
+    earningsStats: IAdminEarningsStats[];
+}
+
+export interface WithdrawalStats {
+    id: string;
+    user: string;
+    amount: number;
+    requestDate: string;
+    status: string;
+    method: string;
+    accountDetails: string;
+}
+
+export interface IAdminEarningsStats {
+    id: string;
+    date: string;
+    amount: number;
+    type: string;
+    source: string;
+    description: string;
 }

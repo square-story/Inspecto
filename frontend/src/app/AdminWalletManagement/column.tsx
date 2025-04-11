@@ -14,6 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { WithdrawalStats } from "@/types/wallet.stats"
 
 // Define the type for our data
 export type WithdrawalRequest = {
@@ -22,11 +23,11 @@ export type WithdrawalRequest = {
     amount: number
     requestDate: string
     status: "pending" | "approved" | "rejected"
-    method: string
+    method: 'UPI' | 'BANK_TRANSFER'
     accountDetails: string
 }
 
-export const withdrawalColumns: ColumnDef<WithdrawalRequest>[] = [
+export const withdrawalColumns: ColumnDef<WithdrawalStats, unknown>[] = [
     {
         accessorKey: "id",
         header: "Request ID",
@@ -57,7 +58,7 @@ export const withdrawalColumns: ColumnDef<WithdrawalRequest>[] = [
             const amount = Number.parseFloat(row.getValue("amount"))
             const formatted = new Intl.NumberFormat("en-US", {
                 style: "currency",
-                currency: "USD",
+                currency: "INR",
             }).format(amount)
             return <div className="font-medium">{formatted}</div>
         },
@@ -88,9 +89,9 @@ export const withdrawalColumns: ColumnDef<WithdrawalRequest>[] = [
 
             return (
                 <Badge
-                    variant={status === "approved" ? "default" : status === "rejected" ? "destructive" : "outline"}
+                    variant={status === "approved".toUpperCase() ? "default" : status === "rejected".toUpperCase() ? "destructive" : "outline"}
                     className={
-                        status === "approved" ? "bg-green-500" : status === "rejected" ? "bg-red-500" : "bg-yellow-500 text-black"
+                        status === "approved".toUpperCase() ? "bg-green-500" : status === "rejected".toUpperCase() ? "bg-red-500" : "bg-yellow-500 text-black"
                     }
                 >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -116,7 +117,7 @@ export const withdrawalColumns: ColumnDef<WithdrawalRequest>[] = [
                         <DropdownMenuItem onClick={() => navigator.clipboard.writeText(withdrawal.id)}>Copy ID</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>View Details</DropdownMenuItem>
-                        {withdrawal.status === "pending" && (
+                        {withdrawal.status === "pending".toUpperCase() && (
                             <>
                                 <DropdownMenuItem className="text-green-600">
                                     <Check className="mr-2 h-4 w-4" /> Approve

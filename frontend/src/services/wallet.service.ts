@@ -1,9 +1,10 @@
 import axiosInstance from "@/api/axios";
-import { IWalletStats, MonthlyStats, TransactionStats } from "@/types/wallet.stats";
+import { IAdminWalletStats, IWalletStats, MonthlyStats, TransactionStats } from "@/types/wallet.stats";
 
 export const WalletService = {
-    getAdminWalletStats: async (): Promise<IWalletStats> => {
+    getAdminWalletStats: async (): Promise<IAdminWalletStats> => {
         const response = await axiosInstance.get('/wallet/admin/stats');
+        console.log(response.data.response)
         return response.data.response;
     },
     getAdminEarningsHistory: async (): Promise<TransactionStats> => {

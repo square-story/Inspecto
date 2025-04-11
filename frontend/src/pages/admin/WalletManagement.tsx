@@ -1,3 +1,4 @@
+
 import { withdrawalColumns } from "@/app/AdminWalletManagement/column";
 import { DataTable } from "@/app/AdminWalletManagement/data-table";
 import { earningsColumns } from "@/app/AdminWalletManagement/earnings-columns";
@@ -10,12 +11,14 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { WalletService } from "@/services/wallet.service";
 import { IAdminWalletStats } from "@/types/wallet.stats";
+import { format } from "date-fns";
 import { Clock, Download, Filter } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const earningData = [
     { name: "Jan", platformFee: 4000, inspectorFee: 2400, total: 6400 },
     { name: "Feb", platformFee: 3000, inspectorFee: 1398, total: 4398 },
@@ -26,170 +29,19 @@ const earningData = [
     { name: "Jul", platformFee: 3490, inspectorFee: 4300, total: 7790 },
 ]
 
-const withdrawalRequests = [
-    {
-        id: "WD001",
-        user: "John Doe",
-        amount: 250.0,
-        requestDate: "2023-04-15T10:30:00",
-        status: "pending",
-        method: "Bank Transfer",
-        accountDetails: "XXXX-XXXX-1234",
-    },
-    {
-        id: "WD002",
-        user: "Jane Smith",
-        amount: 175.5,
-        requestDate: "2023-04-14T14:45:00",
-        status: "approved",
-        method: "PayPal",
-        accountDetails: "jane.smith@example.com",
-    },
-    {
-        id: "WD003",
-        user: "Robert Johnson",
-        amount: 500.0,
-        requestDate: "2023-04-13T09:15:00",
-        status: "pending",
-        method: "Bank Transfer",
-        accountDetails: "XXXX-XXXX-5678",
-    },
-    {
-        id: "WD004",
-        user: "Emily Davis",
-        amount: 320.75,
-        requestDate: "2023-04-12T16:20:00",
-        status: "rejected",
-        method: "Venmo",
-        accountDetails: "@emily-davis",
-    },
-    {
-        id: "WD005",
-        user: "Michael Wilson",
-        amount: 150.0,
-        requestDate: "2023-04-11T11:00:00",
-        status: "pending",
-        method: "PayPal",
-        accountDetails: "michael.wilson@example.com",
-    },
-    {
-        id: "WD006",
-        user: "Sarah Brown",
-        amount: 425.25,
-        requestDate: "2023-04-10T13:30:00",
-        status: "approved",
-        method: "Bank Transfer",
-        accountDetails: "XXXX-XXXX-9012",
-    },
-    {
-        id: "WD007",
-        user: "David Miller",
-        amount: 275.5,
-        requestDate: "2023-04-09T15:45:00",
-        status: "pending",
-        method: "Venmo",
-        accountDetails: "@david-miller",
-    },
-    {
-        id: "WD0032",
-        user: "David Miller",
-        amount: 275.5,
-        requestDate: "2023-04-09T15:45:00",
-        status: "pending",
-        method: "Venmo",
-        accountDetails: "@david-miller",
-    },
-    {
-        id: "WD00332",
-        user: "David Miller",
-        amount: 275.5,
-        requestDate: "2023-04-09T15:45:00",
-        status: "pending",
-        method: "Venmo",
-        accountDetails: "@david-miller",
-    },
-    {
-        id: "WD00326",
-        user: "David Miller",
-        amount: 275.5,
-        requestDate: "2023-04-09T15:45:00",
-        status: "pending",
-        method: "Venmo",
-        accountDetails: "@david-miller",
-    },
-    {
-        id: "WD003262",
-        user: "David Miller",
-        amount: 275.5,
-        requestDate: "2023-04-09T15:45:00",
-        status: "pending",
-        method: "Venmo",
-        accountDetails: "@david-miller",
-    },
-]
 
-const earningsHistory = [
-    {
-        id: "TR001",
-        date: "2023-04-15T10:30:00",
-        amount: 1250.0,
-        type: "Platform Fee",
-        source: "User Subscriptions",
-        description: "Monthly subscription fees",
-    },
-    {
-        id: "TR002",
-        date: "2023-04-14T14:45:00",
-        amount: 375.5,
-        type: "Inspector Fee",
-        source: "Inspection Services",
-        description: "Property inspection fees",
-    },
-    {
-        id: "TR003",
-        date: "2023-04-13T09:15:00",
-        amount: 500.0,
-        type: "Platform Fee",
-        source: "Premium Listings",
-        description: "Featured property listings",
-    },
-    {
-        id: "TR004",
-        date: "2023-04-12T16:20:00",
-        amount: 820.75,
-        type: "Inspector Fee",
-        source: "Inspection Services",
-        description: "Commercial property inspections",
-    },
-    {
-        id: "TR005",
-        date: "2023-04-11T11:00:00",
-        amount: 150.0,
-        type: "Platform Fee",
-        source: "User Subscriptions",
-        description: "Annual plan upgrades",
-    },
-    {
-        id: "TR006",
-        date: "2023-04-10T13:30:00",
-        amount: 425.25,
-        type: "Inspector Fee",
-        source: "Inspection Services",
-        description: "Residential property inspections",
-    },
-    {
-        id: "TR007",
-        date: "2023-04-09T15:45:00",
-        amount: 275.5,
-        type: "Platform Fee",
-        source: "Premium Listings",
-        description: "Urgent listing fees",
-    },
-]
 
 export default function WalletManagement() {
     const [stats, setStats] = useState<IAdminWalletStats>({
-        totalEarnings: 0
+        totalPlatformEarnings: 0,
+        totalProfit: 0,
+        totalTransactions: 0,
+        recentTransactions: [],
+        totalWithdrawals: 0,
+        totalWithdrawalAmount: 0,
+        pendingWithdrawalAmount: 0,
+        withdrawalStats: [],
+        earningsStats: []
     })
     const { loading, withLoading } = useLoadingState();
     const [activeTab, setActiveTab] = useState("overview")
@@ -212,6 +64,32 @@ export default function WalletManagement() {
     useEffect(() => {
         fetchStats();
     }, [fetchStats])
+
+
+    const monthlyEarnings = useMemo(() => {
+        return stats.earningsStats.reduce((acc, transaction) => {
+            const month = format(new Date(transaction.date), 'MMM');
+            const existing = acc.find(item => item.name === month);
+            const amount = transaction.amount;
+
+            if (existing) {
+                existing.total += amount;
+                if (transaction.type === "PLATFORM_FEE") {
+                    existing.platformFee += amount;
+                } else {
+                    existing.inspectorFee += amount;
+                }
+            } else {
+                acc.push({
+                    name: month,
+                    platformFee: transaction.type === "PLATFORM_FEE" ? amount : 0,
+                    inspectorFee: transaction.type !== "PLATFORM_FEE" ? amount : 0,
+                    total: amount
+                });
+            }
+            return acc;
+        }, [] as typeof earningData);
+    }, [stats.earningsStats]);
 
 
     return (
@@ -239,18 +117,20 @@ export default function WalletManagement() {
                     <TabsContent value="overview" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                             <Card className="p-4">
-                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
-                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
+                                <h3 className="font-medium text-sm text-muted-foreground">Platform Earnings</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalPlatformEarnings}`}</p>
                             </Card>
                             <Card className="p-4">
-                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
-                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
-                            </Card><Card className="p-4">
-                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
-                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
-                            </Card><Card className="p-4">
-                                <h3 className="font-medium text-sm text-muted-foreground">Total Earnings</h3>
-                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalEarnings}`}</p>
+                                <h3 className="font-medium text-sm text-muted-foreground">Net Profit</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalProfit}`}</p>
+                            </Card>
+                            <Card className="p-4">
+                                <h3 className="font-medium text-sm text-muted-foreground">Pending Withdrawals</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.pendingWithdrawalAmount}`}</p>
+                            </Card>
+                            <Card className="p-4">
+                                <h3 className="font-medium text-sm text-muted-foreground">Total Withdrawals</h3>
+                                <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalWithdrawalAmount}`}</p>
                             </Card>
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
@@ -261,7 +141,7 @@ export default function WalletManagement() {
                                 </CardHeader>
                                 <CardContent className="pl-2">
                                     <ResponsiveContainer width="100%" height={350}>
-                                        <BarChart data={earningData}>
+                                        <BarChart data={monthlyEarnings}>
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="name" />
                                             <YAxis />
@@ -280,13 +160,13 @@ export default function WalletManagement() {
                                 </CardHeader>
                                 <CardContent className="pl-2">
                                     <ResponsiveContainer width="100%" height={350}>
-                                        <LineChart data={earningData}>
+                                        <LineChart data={monthlyEarnings}>
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="name" />
                                             <YAxis />
                                             <Tooltip />
                                             <Legend />
-                                            <Line type="monotone" dataKey="total" stroke="#ff7300" name="Total Revenue" strokeWidth={2} />
+                                            <Line type="monotone" dataKey="total" stroke="#ff7300" />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 </CardContent>
@@ -298,7 +178,7 @@ export default function WalletManagement() {
                                 <CardDescription>Showing the 5 most recent withdrawal requests</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <DataTable columns={withdrawalColumns} data={withdrawalRequests.slice(0, 5)} searchKey="user" />
+                                <DataTable columns={withdrawalColumns} data={stats.withdrawalStats} searchKey="user" />
                             </CardContent>
                             <CardFooter>
                                 <Button variant="outline" className="w-full" onClick={() => setActiveTab('withdrawals')}>
@@ -318,12 +198,12 @@ export default function WalletManagement() {
                                     <Clock className="mr-2 h-4 w-4" />
                                     Pending Requests
                                     <Badge variant="secondary" className="ml-2">
-                                        {withdrawalRequests.filter((req) => req.status === "pending").length}
+                                        {stats.withdrawalStats.filter((req) => req.status === "pending".toUpperCase()).length}
                                     </Badge>
                                 </Button>
                             </CardHeader>
                             <CardContent>
-                                <DataTable columns={withdrawalColumns} data={withdrawalRequests} searchKey="user" />
+                                <DataTable columns={withdrawalColumns} data={stats.withdrawalStats} searchKey="user" />
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -334,7 +214,7 @@ export default function WalletManagement() {
                                 <CardDescription>Complete history of platform earnings</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <DataTable columns={earningsColumns} data={earningsHistory} searchKey="type" />
+                                <DataTable columns={earningsColumns} data={stats.earningsStats} searchKey="type" />
                             </CardContent>
                         </Card>
                     </TabsContent>

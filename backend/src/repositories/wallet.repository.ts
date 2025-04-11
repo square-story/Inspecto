@@ -1,13 +1,18 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { BaseRepository } from "../core/abstracts/base.repository";
 import { IWallet, IWalletTransaction, Wallet, WalletOwnerType } from "../models/wallet.model";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
 import { IAdminWalletStats, IWalletStats } from "../core/types/wallet.stats.type";
 import { format, parseISO } from 'date-fns'
+import { TYPES } from "../di/types";
+import { IWithdrawalRepository } from "../core/interfaces/repositories/withdrawal.repository.interface";
+import { IWithdrawal, WithdrawalStatus } from "../models/withdrawal.model";
 
 @injectable()
 export class WalletRepository extends BaseRepository<IWallet> implements IWalletRepository {
-    constructor() {
+    constructor(
+        @inject(TYPES.WithdrawalRepository) private _withdrawalRepository: IWithdrawalRepository
+    ) {
         super(Wallet);
     }
     async updateWalletBalance(inspectorId: string, amount: number): Promise<IWallet | null> {
@@ -63,16 +68,46 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
     }
 
     async WalletStatsAdmin(): Promise<IAdminWalletStats> {
-        const wallet = await this.model.findOne({
-            ownerType: WalletOwnerType.ADMIN
-        })
+        const [wallet, allWithdrawals] = await Promise.all([
+            this.model.findOne({ ownerType: WalletOwnerType.ADMIN }),
+            this._withdrawalRepository.find({})
+        ]);
 
-        if (!wallet) {
-            throw new Error("Wallet not found");
-        }
+        const pendingWithdrawals: IWithdrawal[] = await this._withdrawalRepository.getPendingWithdrawals();
 
+        const earningsStats = wallet?.transactions?.map(t => ({
+            id: t._id?.toString() as unknown as string || '',
+            date: t.date.toISOString(),
+            amount: t.amount,
+            type: t.type,
+            source: 'Platform Earnings',
+            description: t.description || `Transaction for ${t.date.toISOString()}`
+        })) || [];
+
+        const withdrawalStats = allWithdrawals.map(w => ({
+            id: w._id?.toString() as unknown as string || '',
+            user: w.inspector.toString(),
+            amount: w.amount,
+            requestDate: w.requestDate.toISOString(),
+            status: w.status,
+            method: w.withdrawalMethod,
+            accountDetails: w.bankDetails ?
+                `${w.bankDetails.accountNumber}` :
+                w.upiId || 'N/A'
+        }));
         return {
-            totalEarnings: wallet.balance
+            totalPlatformEarnings: (wallet?.balance ?? 0),
+            totalProfit: wallet?.balance || 0,
+            totalTransactions: wallet?.transactions?.length || 0,
+            recentTransactions: wallet?.transactions?.slice(-5) || [],
+            totalWithdrawals: allWithdrawals.length,
+            totalWithdrawalAmount: allWithdrawals
+                .filter(w => w.status === WithdrawalStatus.APPROVED)
+                .reduce((sum, w) => sum + w.amount, 0),
+            pendingWithdrawalAmount: pendingWithdrawals
+                .reduce((sum, w) => sum + w.amount, 0),
+            withdrawalStats,
+            earningsStats
         }
     }
 }

@@ -21,6 +21,7 @@ export enum TransactionStatus {
 }
 
 export interface IWalletTransaction {
+    _id?: ObjectId;
     amount: number;
     date: Date;
     type: TransactionType;
