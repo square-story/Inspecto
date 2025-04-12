@@ -9,6 +9,7 @@ import { useLoadingState } from "@/hooks/useLoadingState"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import { WithdrawalDialog } from "@/components/WithdrawalDialog"
 import { WalletService } from "@/services/wallet.service"
+import WithdrawalStates from "@/components/inspector/upcoming-earnings"
 
 export default function PaymentsPage() {
     const [stats, setStats] = useState<IWalletStats>({
@@ -82,15 +83,15 @@ export default function PaymentsPage() {
             <Tabs defaultValue="transactions" className="space-y-4">
                 <TabsList>
                     <TabsTrigger value="transactions">Transaction History</TabsTrigger>
-                    {/* <TabsTrigger value="upcoming">Upcoming Earnings</TabsTrigger> */}
+                    <TabsTrigger value="withdrawals">Withdrawal Transactions</TabsTrigger>
                     <TabsTrigger value="stats">Payment Stats</TabsTrigger>
                 </TabsList>
                 <TabsContent value="transactions" className="space-y-4">
                     <TransactionHistory recentTransactions={stats.recentTransactions} />
                 </TabsContent>
-                {/* <TabsContent value="upcoming" className="space-y-4">
-                    <UpcomingEarnings />
-                </TabsContent> */}
+                <TabsContent value="withdrawals" className="space-y-4">
+                    <WithdrawalStates />
+                </TabsContent>
                 <TabsContent value="stats" className="space-y-4">
                     <PaymentStats monthlyData={stats.monthlyStats} />
                 </TabsContent>

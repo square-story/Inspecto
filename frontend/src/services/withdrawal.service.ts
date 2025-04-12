@@ -18,7 +18,7 @@ export const WithdrawalService = {
 
     async getInspctorWithdrawalHistory() {
         const response = await axiosInstance.get("/withdrawals/inspector/history")
-        return response.data
+        return response.data.withdrawal
     },
     async getAllWithdrawalHistory() {
         const response = await axiosInstance.get("/withdrawals/admin/history")

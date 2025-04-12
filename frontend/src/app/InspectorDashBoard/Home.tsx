@@ -74,7 +74,7 @@ export default function Dashboard() {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `$  ${stats.totalEarnings}`}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹  ${stats.totalEarnings}`}</div>
                         <p className="text-xs text-muted-foreground">+8% from last month</p>
                     </CardContent>
                 </Card>
