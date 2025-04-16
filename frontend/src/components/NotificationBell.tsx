@@ -16,7 +16,7 @@ export const NotificationBell: React.FC = () => {
     setOpen(false)
   }
   const handleNotificationClick = async (id: string) => {
-    await markAsRead(id);
+    markAsRead(id)
     setOpen(false);
   };
 
@@ -50,12 +50,12 @@ export const NotificationBell: React.FC = () => {
             <div className="flex flex-col">
               {notifications.map((notification) => (
                 <button
-                  key={notification.id}
+                  key={notification._id}
                   className={cn(
                     "flex flex-col gap-1 p-4 text-left hover:bg-secondary-100 border-b",
                     !notification.isRead && "bg-accent"
                   )}
-                  onClick={() => handleNotificationClick(notification.id)}
+                  onClick={() => handleNotificationClick(notification._id)}
                 >
                   <div className="flex justify-between items-start">
                     <span className="font-medium">{notification.title}</span>

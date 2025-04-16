@@ -36,7 +36,7 @@ export class NotificationService extends BaseService<INotificationDocument> impl
         )
 
         await this._socketService.sendNotificationToUser(recipientId, {
-            id: notification._id?.toString(),
+            _id: notification._id?.toString(),
             type,
             title,
             message,

@@ -4,20 +4,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { toast } from "sonner";
 import axiosInstance from "@/api/axios";
+import { INotification } from "@/types/notification";
 
-interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: Record<string, any>;
-  isRead: boolean;
-  createdAt: string;
-}
+
 
 interface NotificationContextType {
-  notifications: Notification[];
+  notifications: INotification[];
   unreadCount: number;
   markAllAsRead: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
@@ -35,7 +27,7 @@ const NotificationContext = createContext<NotificationContextType>({
 export const useNotification = () => useContext(NotificationContext)
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<INotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { socket } = useSocket();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -61,7 +53,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       fetchUnreadCount();
     };
 
-    const handleNewNotification = (notification: Notification) => {
+    const handleNewNotification = (notification: INotification) => {
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
 
@@ -69,7 +61,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         description: notification.message,
         action: {
           label: 'View',
-          onClick: () => markAsRead(notification.id),
+          onClick: () => markAsRead(notification._id),
         },
       });
     };
@@ -79,7 +71,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       toast.error('Lost connection to notification service');
     };
 
-    const handlePendingNotifications = (pendingNotifications: Notification[]) => {
+    const handlePendingNotifications = (pendingNotifications: INotification[]) => {
       if (pendingNotifications.length > 0) {
         setNotifications((prev) => [...pendingNotifications, ...prev]);
         setUnreadCount((prev) => prev + pendingNotifications.length);
@@ -135,12 +127,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const markAsRead = async (notificationId: string) => {
     try {
+
       const response = await axiosInstance.patch(`/notifications/${notificationId}/read`);
       if (response.data.success) {
         // Update local state
         setNotifications((prev) =>
           prev.map((notification) =>
-            notification.id === notificationId
+            notification._id === notificationId
               ? { ...notification, isRead: true }
               : notification
           )
