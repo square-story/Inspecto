@@ -28,9 +28,6 @@ export class WithdrawalService extends BaseService<IWithdrawal> implements IWith
         const wallet = await this._walletRepository.findOne({ owner: inspectorId, ownerType: WalletOwnerType.INSPECTOR });
 
 
-        console.log(paymentDetails)
-
-
         if (!wallet || wallet.balance < amount) {
             throw new ServiceError('Insufficient balance');
         }

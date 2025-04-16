@@ -62,7 +62,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
 
     const handleNewNotification = (notification: Notification) => {
-      console.log('New notification received:', notification);
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
 
@@ -84,8 +83,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (pendingNotifications.length > 0) {
         setNotifications((prev) => [...pendingNotifications, ...prev]);
         setUnreadCount((prev) => prev + pendingNotifications.length);
-
-        console.log(pendingNotifications, 'somethign tihfsdjkjfdksjakljklfdjskjal')
         // Show toast for the most recent notification
         const mostRecent = pendingNotifications[0];
         toast(`${pendingNotifications.length} new notifications`, {
@@ -104,7 +101,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     socket.on('pending-notifications', handlePendingNotifications);
 
     socket.emit('get-pending-notifications');
-    console.log("Requested pending notifications");
 
 
     return () => {
@@ -129,7 +125,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const fetchUnreadCount = async () => {
     try {
       const response = await axiosInstance.get('/notifications/unread-count');
-      console.log(response.data)
       if (response.data.success) {
         setUnreadCount(response.data.data);
       }
@@ -140,7 +135,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const markAsRead = async (notificationId: string) => {
     try {
-      console.log(notificationId)
       const response = await axiosInstance.patch(`/notifications/${notificationId}/read`);
       if (response.data.success) {
         // Update local state

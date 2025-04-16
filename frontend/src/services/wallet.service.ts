@@ -4,7 +4,6 @@ import { IAdminWalletStats, IWalletStats, MonthlyStats, TransactionStats } from 
 export const WalletService = {
     getAdminWalletStats: async (): Promise<IAdminWalletStats> => {
         const response = await axiosInstance.get('/wallet/admin/stats');
-        console.log(response.data.response)
         return response.data.response;
     },
     getAdminEarningsHistory: async (): Promise<TransactionStats> => {
@@ -18,7 +17,6 @@ export const WalletService = {
     getInspctorWalletStats: async (): Promise<IWalletStats> => {
         try {
             const response = await axiosInstance.get('/wallet/inspector/stats');
-            console.log(response.data.response)
             return response.data.response;
         } catch (error) {
             console.error('Error fetching inspection stats:', error);

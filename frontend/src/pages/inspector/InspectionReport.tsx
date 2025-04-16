@@ -144,21 +144,21 @@ export default function InspectionReportPage() {
       toast.success(isDraft
         ? "Your inspection report draft has been saved."
         : "Your inspection report has been submitted successfully.",
-        {action:!isDraft && pdfUrl ? {
-          label: 'View Report',
-          onClick: async () => {
-            try {
-              console.log('Getting signed URL for PDF:', pdfUrl);
-              const signedUrl = await getSignedPdfUrl(pdfUrl);
-              console.log('Opening signed PDF URL:', signedUrl);
-            window.open(signedUrl, "_blank");
-            } catch (error) {
-              console.error('Error opening PDF:', error);
-            toast.error('Unable to open PDF. Please try again later.');
+        {
+          action: !isDraft && pdfUrl ? {
+            label: 'View Report',
+            onClick: async () => {
+              try {
+                console.log('Getting signed URL for PDF:', pdfUrl);
+                const signedUrl = await getSignedPdfUrl(pdfUrl);
+                window.open(signedUrl, "_blank");
+              } catch (error) {
+                console.error('Error opening PDF:', error);
+                toast.error('Unable to open PDF. Please try again later.');
+              }
             }
-          }
-        }: undefined,
-      }
+          } : undefined,
+        }
       )
 
       if (!isDraft) {
@@ -596,9 +596,9 @@ export default function InspectionReportPage() {
 
 function InspectionPhotoPreview({ publicId }: { publicId: string }) {
   const { imageUrl, isLoading } = useSignedImage(publicId);
-  
+
   if (isLoading) return <Skeleton className="h-24 w-24 rounded-md" />;
-  
+
   return (
     <div className="relative h-24 w-24 rounded-md overflow-hidden border">
       <img

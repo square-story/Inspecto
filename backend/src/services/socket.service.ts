@@ -33,7 +33,6 @@ export class SocketService {
                 // Verify the token and extract userId
                 const decoded = jwt.verify(token, appConfig.accessToken);
 
-                console.log('Decoded token:', decoded);
                 if (!decoded || typeof decoded !== 'object' || !decoded.userId) {
                     return next(new Error('Invalid token'));
                 }

@@ -15,6 +15,7 @@ import { IWalletRepository } from "../core/interfaces/repositories/wallet.reposi
 import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/wallet.model";
 import { INotificationService } from "../core/interfaces/services/notification.service.interface";
 import { NotificationType } from "../models/notification.model";
+import { IInspector } from "../models/inspector.model";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -304,9 +305,11 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 },
             );
 
+            const inspector = inspection.inspector as unknown as IInspector;
+
             // Notify inspector about the earnings
             await this._notificationService.createAndSendNotification(
-                inspection.inspector as unknown as string,
+                String(inspector._id),
                 'Inspector',
                 NotificationType.PAYMENT_RECEIVED,
                 'Payment Received',
