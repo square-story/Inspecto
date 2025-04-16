@@ -16,6 +16,7 @@ import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/w
 import { INotificationService } from "../core/interfaces/services/notification.service.interface";
 import { NotificationType } from "../models/notification.model";
 import { IInspector } from "../models/inspector.model";
+import { IUsers } from "../models/user.model";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -217,7 +218,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         try {
             const inspection = await this._inspectionRepository.findById(
                 new Types.ObjectId(inspectionId),
-                ['inspector']
+                ['inspector', 'user']
             );
 
             if (!inspection) throw new ServiceError('Inspection not found');
@@ -306,6 +307,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             );
 
             const inspector = inspection.inspector as unknown as IInspector;
+            const user = inspection.user as unknown as IUsers;
 
             // Notify inspector about the earnings
             await this._notificationService.createAndSendNotification(
@@ -319,6 +321,18 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                     amount: inspectorAmount
                 }
             );
+
+            await this._notificationService.createAndSendNotification(
+                String(user._id),
+                'User',
+                NotificationType.INSPECTION_COMPLETED,
+                'Payment Successful',
+                `Your Inspection is completed ready to download`,
+                {
+                    inspectionId: inspection._id,
+                    amount: payment.amount
+                }
+            )
 
             return { platformFee, inspectorEarnings: inspectorAmount }
         } catch (error) {
