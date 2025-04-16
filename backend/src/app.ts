@@ -20,6 +20,7 @@ import { IPaymentService } from './core/interfaces/services/payment.service.inte
 import { developmentLogger, errorLogger } from "./config/logger.config";
 import withdrawalRoutes from "./routes/withdrawal.routes";
 import walletRoutes from "./routes/wallet.routes";
+import notificationRouter from "./routes/notification.routes";
 
 const app = express();
 
@@ -98,6 +99,7 @@ app.use('/cloudinary', cloudinaryRoutes);
 app.use('/reviews', reviewRouter);
 app.use('/withdrawals', withdrawalRoutes);
 app.use('/wallet',walletRoutes);
+app.use('/notifications',notificationRouter);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({

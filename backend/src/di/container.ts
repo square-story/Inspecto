@@ -94,6 +94,13 @@ import { IWalletService } from "../core/interfaces/services/wallet.service.inter
 import { WalletService } from "../services/wallet.service";
 import { IWalletController } from "../core/interfaces/controllers/wallet.controller.interface";
 import { WalletController } from "../controllers/wallet.controller";
+import { SocketService } from "../services/socket.service";
+import { NotificationRepository } from "../repositories/notification.repository";
+import { NotificationService } from "../services/notification.service";
+import { NotificationController } from "../controllers/notification.controller";
+import { INotificationController } from "../core/interfaces/controllers/notification.controller.interface";
+import { INotificationService } from "../core/interfaces/services/notification.service.interface";
+import { INotificationRepository } from "../core/interfaces/repositories/notification.repository.interface";
 
 
 
@@ -134,6 +141,15 @@ container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController
 container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
 container.bind<IWalletService>(TYPES.WalletService).to(WalletService);
 container.bind<IWalletController>(TYPES.WalletController).to(WalletController);
+
+//socket
+container.bind<SocketService>(TYPES.SocketService).to(SocketService).inSingletonScope();
+
+//Notification
+container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository).inSingletonScope();
+container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService).inSingletonScope();
+container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
+
 
 
 //WithDrawal

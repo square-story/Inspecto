@@ -7,6 +7,8 @@ import { TYPES } from "../di/types";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 import { IEmailService } from "../core/interfaces/services/email.service.interface";
+import { NotificationService } from "./notification.service";
+import { NotificationType } from "../models/notification.model";
 
 export type ChangePasswordResponse = {
     status: boolean;
@@ -18,6 +20,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
     constructor(
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
         @inject(TYPES.EmailService) private _emailService: IEmailService,
+        @inject(TYPES.NotificationService) private _notificationService: NotificationService,
     ) {
         super(_inspectorRepository);
     }
@@ -44,6 +47,17 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                     updatedInspector.email,
                     updatedInspector.firstName
                 );
+
+                await this._notificationService.createAndSendNotification(
+                    inspectorId,
+                    "Inspector",
+                    NotificationType.INSPECTOR_APPROVED,
+                    "Inspector Approved",
+                    "Your inspector account has been approved.",
+                    {
+                        inspectorId
+                    }
+                )
             }
             return updatedInspector;
         } catch (error) {
@@ -130,9 +144,20 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
             });
 
             if (response) {
+
+                await this._notificationService.createAndSendNotification(
+                    inspectorId,
+                    "Inspector",
+                    NotificationType.SYSTEM,
+                    "Password Changed",
+                    "Your password has been changed successfully.",
+                    {
+                        inspectorId
+                    }
+                )
                 return {
                     status: true,
-                    message: 'The password has been changed successfully.',
+                    message: 'Password updated successfully.',
                 };
             } else {
                 return {

@@ -37,6 +37,15 @@ export const TYPES = {
     WalletService: Symbol.for('WalletService'),
     WalletController: Symbol.for('WalletController'),
 
+
+    //Socket
+    SocketService: Symbol.for('SocketService'),
+
+    //Notification
+    NotificationRepository: Symbol.for('NotificationRepository'),
+    NotificationService: Symbol.for('NotificationService'),
+    NotificationController: Symbol.for('NotificationController'),
+
     //WithDrawal
     WithdrawalService: Symbol.for('WithdrawalService'),
     WithdrawalRepository: Symbol.for('WithdrawalRepository'),

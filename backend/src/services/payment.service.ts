@@ -13,6 +13,8 @@ import { IInspectionService } from "../core/interfaces/services/inspection.servi
 import { ServiceError } from "../core/errors/service.error";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
 import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/wallet.model";
+import { INotificationService } from "../core/interfaces/services/notification.service.interface";
+import { NotificationType } from "../models/notification.model";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -27,6 +29,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
         @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
+        @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     ) {
         super(_paymentRepository);
     }
@@ -299,6 +302,19 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                         }
                     }
                 },
+            );
+
+            // Notify inspector about the earnings
+            await this._notificationService.createAndSendNotification(
+                inspection.inspector as unknown as string,
+                'Inspector',
+                NotificationType.PAYMENT_RECEIVED,
+                'Payment Received',
+                `You have received a payment of ${inspectorAmount} for inspection #${inspection.bookingReference}`,
+                {
+                    inspectionId: inspection._id,
+                    amount: inspectorAmount
+                }
             );
 
             return { platformFee, inspectorEarnings: inspectorAmount }

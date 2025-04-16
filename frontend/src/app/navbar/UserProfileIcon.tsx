@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useUserDetails } from "@/hooks/useUserDetails"
 import { SignedAvatar } from "@/components/SignedAvatar"
+import { NotificationBell } from "@/components/NotificationBell"
 
 export function UserProfileIcon() {
     const { user } = useUserDetails();
@@ -58,7 +59,7 @@ export function UserProfileIcon() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Hey {user.firstName.toUpperCase()}👋</DropdownMenuLabel>
+                <DropdownMenuLabel className="flex justify-between items-center">Hey {user.firstName.toUpperCase()}👋<NotificationBell /></DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem onClick={() => handleNavigation('/user/dashboard')}>

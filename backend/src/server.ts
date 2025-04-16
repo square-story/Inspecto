@@ -2,6 +2,9 @@ import app from "./app";
 import appConfig from "./config/app.config";
 import { connectToDatabase } from "./config/db.config";
 import mongoose from "mongoose";
+import { container } from "./di/container";
+import { SocketService } from "./services/socket.service";
+import { TYPES } from "./di/types";
 
 async function startServer() {
     try {
@@ -12,6 +15,9 @@ async function startServer() {
         const server = app.listen(appConfig.port, () => {
             console.log(`Server is running on port ${appConfig.port}`);
         });
+
+        const socketService = container.get<SocketService>(TYPES.SocketService);
+        socketService.initialize(server)
 
         // Graceful shutdown handlers
         const shutdown = async () => {

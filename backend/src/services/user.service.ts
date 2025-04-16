@@ -8,11 +8,16 @@ import { TYPES } from "../di/types";
 import { Types } from "mongoose";
 import { IUserRepository } from "../core/interfaces/repositories/user.repository.interface";
 import { ServiceError } from "../core/errors/service.error";
+import { INotificationService } from "../core/interfaces/services/notification.service.interface";
+import { NotificationType } from "../models/notification.model";
 
 
 @injectable()
 export class UserService extends BaseService<IUsers> implements IUserService {
-    constructor(@inject(TYPES.UserRepository) private _userRepository: IUserRepository) {
+    constructor(
+        @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+        @inject(TYPES.NotificationService) private _notificationService: INotificationService,
+    ) {
         super(_userRepository);
     }
     async toggleStatus(userId: string) {
@@ -60,6 +65,18 @@ export class UserService extends BaseService<IUsers> implements IUserService {
                 password: hashedNewPassword,
             });
             if (response) {
+
+                await this._notificationService.createAndSendNotification(
+                    userId,
+                    "User",
+                    NotificationType.SYSTEM,
+                    "Password Changed",
+                    "Your password has been changed successfully.",
+                    {
+                        userId
+                    }
+                )
+
                 return {
                     status: true,
                     message: 'The password has been changed successfully.',
