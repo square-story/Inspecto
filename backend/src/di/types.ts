@@ -46,6 +46,11 @@ export const TYPES = {
     NotificationService: Symbol.for('NotificationService'),
     NotificationController: Symbol.for('NotificationController'),
 
+    //Inspection Type
+    InspectionTypeRepository: Symbol.for('InspectionTypeRepository'),
+    InspectionTypeService: Symbol.for('InspectionTypeService'),
+    InspectionTypeController: Symbol.for('InspectionTypeController'),
+
     //WithDrawal
     WithdrawalService: Symbol.for('WithdrawalService'),
     WithdrawalRepository: Symbol.for('WithdrawalRepository'),

@@ -21,6 +21,7 @@ import { developmentLogger, errorLogger } from "./config/logger.config";
 import withdrawalRoutes from "./routes/withdrawal.routes";
 import walletRoutes from "./routes/wallet.routes";
 import notificationRouter from "./routes/notification.routes";
+import inspectionTypeRoutes from "./routes/inspection-type.routes";
 
 const app = express();
 
@@ -100,6 +101,7 @@ app.use('/reviews', reviewRouter);
 app.use('/withdrawals', withdrawalRoutes);
 app.use('/wallet',walletRoutes);
 app.use('/notifications',notificationRouter);
+app.use('/inspection-types',inspectionTypeRoutes)
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({

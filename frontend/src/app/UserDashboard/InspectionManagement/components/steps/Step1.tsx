@@ -1,4 +1,4 @@
-import { INSPECTION_TYPE, InspectionTypeCard } from '@/components/InspectionTypeCard';
+import { InspectionTypeCard } from '@/components/InspectionTypeCard';
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -31,46 +31,7 @@ import { useEffect, useState } from 'react';
 import { useFormContext } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import AddressAutocomplete from "../AddressAutocomplete";
-
-
-
-
-
-
-const INSPECTION_TYPES: INSPECTION_TYPE[] = [
-    {
-        id: 'basic',
-        name: 'Basic Inspection',
-        price: 200,
-        platformFee: 50,
-        duration: '45-60 mins',
-        features: [
-            'External visual inspection',
-            'Basic engine diagnostics',
-            'Tire condition check',
-            'Brake system check'
-        ]
-    },
-    {
-        id: 'full',
-        name: 'Full Inspection',
-        price: 250,
-        platformFee: 50,
-        duration: '90-120 mins',
-        features: [
-            'Complete external & internal inspection',
-            'Advanced computer diagnostics',
-            'Suspension system check',
-            'Electrical systems check',
-            'Test drive evaluation',
-            'Detailed report with photos'
-        ]
-    }
-];
-
-
-
-
+import { featchActiveInspectionTypes } from '@/features/inspectionType/inspectionTypeSlice';
 
 
 
@@ -83,11 +44,14 @@ const Step1 = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const vehicles = useSelector((state: RootState) => state.vehicle.vehicles);
+    const inspectionTypes = useSelector((state: RootState) => state.inspectionType.activeInspectionTypes);
+    const loading = useSelector((state: RootState) => state.inspectionType.loading);
 
     const selectedVehicle = vehicles.find(v => v._id === selectedVehicleId);
 
     useEffect(() => {
         dispatch(fetchVehicles());
+        dispatch(featchActiveInspectionTypes());
     }, [dispatch]);
 
     return (
@@ -192,21 +156,27 @@ const Step1 = () => {
                 )}
             />
 
-            <FormField
+<FormField
                 control={control}
                 name="inspectionType"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Inspection Type</FormLabel>
-                        <div className="grid gap-4 mt-2 ">
-                            {INSPECTION_TYPES.map((type) => (
-                                <InspectionTypeCard
-                                    key={type.id}
-                                    type={type}
-                                    selected={field.value === type.id}
-                                    onSelect={(value) => field.onChange(value)}
-                                />
-                            ))}
+                        <div className="grid gap-4 mt-2">
+                            {loading ? (
+                                <div className="text-center py-4">Loading inspection types...</div>
+                            ) : inspectionTypes.length === 0 ? (
+                                <div className="text-center py-4">No inspection types available</div>
+                            ) : (
+                                inspectionTypes.map((type) => (
+                                    <InspectionTypeCard
+                                        key={type._id}
+                                        type={type}
+                                        selected={field.value === type._id}
+                                        onSelect={(value) => field.onChange(value)}
+                                    />
+                                ))
+                            )}
                         </div>
                     </FormItem>
                 )}

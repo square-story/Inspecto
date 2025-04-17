@@ -101,6 +101,12 @@ import { NotificationController } from "../controllers/notification.controller";
 import { INotificationController } from "../core/interfaces/controllers/notification.controller.interface";
 import { INotificationService } from "../core/interfaces/services/notification.service.interface";
 import { INotificationRepository } from "../core/interfaces/repositories/notification.repository.interface";
+import { IInspectionTypeRepository } from "../core/interfaces/repositories/inspection-type.repository.interface";
+import { InspectionTypeRepository } from "../repositories/inspection-type.repository";
+import { IInspectionTypeService } from "../core/interfaces/services/inspection-type.service.interface";
+import { InspectionTypeService } from "../services/inspection-type.service";
+import { IInspectionTypeController } from "../core/interfaces/controllers/inspection-type.controller.interface";
+import { InspectionTypeController } from "../controllers/inspection-type.controller";
 
 
 
@@ -149,6 +155,12 @@ container.bind<SocketService>(TYPES.SocketService).to(SocketService).inSingleton
 container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository).inSingletonScope();
 container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService).inSingletonScope();
 container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
+
+
+//Inspection-type
+container.bind<IInspectionTypeRepository>(TYPES.InspectionTypeRepository).to(InspectionTypeRepository);
+container.bind<IInspectionTypeService>(TYPES.InspectionTypeService).to(InspectionTypeService);
+container.bind<IInspectionTypeController>(TYPES.InspectionTypeController).to(InspectionTypeController);
 
 
 

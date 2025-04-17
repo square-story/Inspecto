@@ -59,4 +59,13 @@ export abstract class BaseService<T extends Document> implements IBaseService<T>
             throw new ServiceError('Error Deleting documents')
         }
     }
+
+    async findAll(): Promise<T[]> {
+        try {
+            return await this.repository.findAll();
+        } catch (error) {
+            if(error instanceof ServiceError) throw error;
+            throw new ServiceError('Error finding all documents')
+        }
+    }
 }
