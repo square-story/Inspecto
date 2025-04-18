@@ -3,11 +3,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export interface InspectionType {
     _id: string;
-    id: string;
     name: string;
     price: number;
     platformFee: number;
-    duration: number;
+    duration: string;
     features: string[];
     isActive: boolean;
     createdAt: string;
@@ -45,7 +44,7 @@ export const featchActiveInspectionTypes = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get('/inspection-types/active');
-            console.log(response.data.data,'something thisoifdskjkfdsjkadfsjklaj');
+            console.log(response.data.data, 'something thisoifdskjkfdsjkadfsjklaj');
             return response.data.data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch inspection types');
@@ -177,9 +176,9 @@ const inspectionTypeSlice = createSlice({
                 }
             })
 
-            .addCase(deleteInspectionType.fulfilled,(state,action)=>{
-                state.inspectionTypes = state.inspectionTypes.filter(type=>type._id!== action.payload);
-                state.activeInspectionTypes = state.activeInspectionTypes.filter(type=>type._id!== action.payload);
+            .addCase(deleteInspectionType.fulfilled, (state, action) => {
+                state.inspectionTypes = state.inspectionTypes.filter(type => type._id !== action.payload);
+                state.activeInspectionTypes = state.activeInspectionTypes.filter(type => type._id !== action.payload);
             })
     }
 })
