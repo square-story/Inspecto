@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { TagsInput } from "@/components/ui/tags-input"
-import { createInspectionType, deleteInspectionType, featchAllInspectionTypes, InspectionType, toggleInspectionTypeStatus } from "@/features/inspectionType/inspectionTypeSlice"
+import { createInspectionType, deleteInspectionType, featchAllInspectionTypes, InspectionType, toggleInspectionTypeStatus, updateInspectionType } from "@/features/inspectionType/inspectionTypeSlice"
 import { AppDispatch, RootState } from "@/store"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useConfirm } from "@omit/react-confirm-dialog"
@@ -47,7 +47,6 @@ const InspectionTypesManagement = () => {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [formData, setFormData] = useState<InspectionType>(defaultFormData);
-    const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
     const confirm = useConfirm();
 
 
@@ -89,14 +88,52 @@ const InspectionTypesManagement = () => {
     }
 
     const handleEditClick = async (type: InspectionType) => {
-        try {
-            setIsEditDialogOpen(true);
+
+        const response = await confirm({
+            title: 'Edit Item',
+            description: 'Are you sure? This action cannot be undone.',
+            icon: <Edit className="size-4 text-yellow-400" />,
+            confirmText: 'Edit',
+            cancelText: 'Cancel',
+            cancelButton: {
+                size: 'default',
+                variant: 'outline'
+            },
+            confirmButton: {
+                className: 'bg-red-500 hover:bg-red-600 text-white'
+            },
+            alertDialogTitle: {
+                className: 'flex items-center gap-2'
+            }
+        })
+        if (response) {
             setFormData(type);
-            toast.success('Edit modal will open now!')
-        } catch (error: any) {
-            toast.error(error.message || "Failed to Update the Details")
+            form.reset({
+                name: type.name,
+                price: type.price,
+                platformFee: type.platformFee,
+                duration: type.duration,
+                features: type.features,
+                isActive: type.isActive
+            });
+            setIsEditDialogOpen(true);
         }
-    }
+    };
+
+    const handleEditSubmit = async (data: InspectionTypeFormValues) => {
+        try {
+            await dispatch(updateInspectionType({
+                id: formData._id as string,
+                data
+            })).unwrap();
+            toast.success('Inspection type updated successfully!');
+            setIsEditDialogOpen(false);
+            setFormData(defaultFormData);
+            form.reset(defaultFormData);
+        } catch (error: any) {
+            toast.error(error.message || "Failed to update inspection type");
+        }
+    };
 
     const handleDeleteClick = async (type: string) => {
         try {
@@ -275,6 +312,139 @@ const InspectionTypesManagement = () => {
                         </DialogContent>
                     </Dialog>
                 </div>
+
+                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                    <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit Inspection Type</DialogTitle>
+                            <DialogDescription>
+                                Modify the inspection type details and features.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(handleEditSubmit)}>
+                                <ScrollArea className="h-full max-h-[calc(80vh-8rem)] rounded-md px-5">
+                                    <div className="grid gap-4 py-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Inspection Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Inspection Name"
+                                                            {...field}
+                                                            className="w-full"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                    <FormDescription>
+                                                        Please provide a valid inspection type name.
+                                                    </FormDescription>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="price"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Inspection Price</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Inspection Price"
+                                                            {...field}
+                                                            className="w-full"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="platformFee"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Platform Fee</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Platform Fee"
+                                                            {...field}
+                                                            className="w-full"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="duration"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Duration</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="e.g. 45-60 mins"
+                                                            {...field}
+                                                            className="w-full"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                    <FormDescription>
+                                                        Please provide a valid duration.
+                                                    </FormDescription>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="features"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Features</FormLabel>
+                                                    <FormControl>
+                                                        <TagsInput
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                            placeholder="Enter features..."
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                    <FormDescription>
+                                                        Please provide at least one feature.
+                                                    </FormDescription>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="isActive"
+                                        render={({ field }) => (
+                                            <FormItem className="flex items-center space-x-2">
+                                                <FormLabel>Is Active</FormLabel>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </ScrollArea>
+                                <DialogFooter>
+                                    <Button type="submit" disabled={loading}>Update Inspection Type</Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
                 <Card>
                     <CardHeader>
                         <CardTitle>Inspection Types</CardTitle>
