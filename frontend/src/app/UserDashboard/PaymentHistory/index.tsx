@@ -808,8 +808,7 @@ export default function PaymentHistory() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">
-                                                        {inspection.inspectionType.charAt(0).toUpperCase() + inspection.inspectionType.slice(1)}{" "}
-                                                        Inspection
+                                                        {inspection.inspectionType.name}
                                                     </p>
                                                     <p className="text-sm text-muted-foreground">
                                                         {inspection.bookingReference} • {formatDateTime(inspection.date as unknown as string).date}
@@ -864,7 +863,7 @@ export default function PaymentHistory() {
                                                                 <p className="capitalize">{inspection.inspector.firstName}</p>
 
                                                                 <p className="text-muted-foreground">Type:</p>
-                                                                <p className="capitalize">{inspection.inspectionType}</p>
+                                                                <p className="capitalize">{inspection.inspectionType.name}</p>
 
                                                                 <p className="text-muted-foreground">Date:</p>
                                                                 <p>{formatDateTime(inspection.date as unknown as string).date}</p>

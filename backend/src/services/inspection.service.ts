@@ -11,6 +11,7 @@ import { IInspectorRepository } from "../core/interfaces/repositories/inspector.
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 import { IInspectionStats } from "../core/types/inspection.stats.type";
 import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
+import { IInspectionTypeRepository } from "../core/interfaces/repositories/inspection-type.repository.interface";
 
 @injectable()
 export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
@@ -18,6 +19,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
         @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
+        @inject(TYPES.InspectionTypeRepository) private _inspectionTypeRepository: IInspectionTypeRepository
     ) {
         super(_inspectionRepository);
     }
@@ -169,6 +171,15 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             if (!isAvailable) {
                 throw new ServiceError('Slot is no longer available');
             }
+
+            const inspectionType = await this._inspectionTypeRepository.findById(data.inspectionType as unknown as Types.ObjectId);
+        if (!inspectionType) {
+            throw new ServiceError('Inspection type not found');
+        }
+
+        if (!inspectionType.isActive) {
+            throw new ServiceError('Selected inspection type is not currently available');
+        }
 
             const bookingReference = await this.generateBookingReference();
             if (!data.user) {

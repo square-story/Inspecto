@@ -9,6 +9,7 @@ import { ServiceError } from "../core/errors/service.error";
 import { generateInspectionPDF } from "../utils/pdf.utils";
 import { uploadToCloudinary } from "../utils/cloudinary.utils";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
+import mongoose from "mongoose";
 
 
 @injectable()

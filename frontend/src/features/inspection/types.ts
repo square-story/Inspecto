@@ -2,9 +2,14 @@ import { IInspector } from "@/types/inspector";
 import { UserState } from "../user/userSlice";
 import { Vehicle } from "../vehicle/vehicleSlice";
 
-export enum InspectionType {
-    BASIC = "basic",
-    FULL = "full"
+export interface IInspectionType {
+    _id: string;
+    name: string;
+    price: number;
+    platformFee: number;
+    duration: string;
+    features: string[];
+    isActive: boolean;
 }
 
 export enum InspectionStatus {
@@ -47,7 +52,7 @@ export interface Inspection {
     latitude: string;
     longitude: string;
     phone: string;
-    inspectionType: InspectionType;
+    inspectionType: IInspectionType;
     date: Date;
     slotNumber: number;
     confirmAgreement: boolean;

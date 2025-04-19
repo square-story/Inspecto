@@ -56,10 +56,10 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
             .filter(slot => !bookedSlotNumbers.has(slot));
     }
     async findUserInspections(userId: string): Promise<IInspectionDocument[]> {
-        return await this.model.find({ user: userId }).populate('vehicle').populate('inspector').sort({ date: -1 });
+        return await this.model.find({ user: userId }).populate('vehicle').populate('inspector').populate('inspectionType').sort({ date: -1 });
     }
     async findInspectorInspections(inspectorId: string): Promise<IInspectionDocument[]> {
-        return await this.model.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').sort({ date: -1 });
+        return await this.model.find({ inspector: inspectorId, status: InspectionStatus.CONFIRMED }).populate('vehicle').populate('user').populate('inspectionType').sort({ date: -1 });
     }
     async existingInspection(data: { date: Date, inspector: string, slotNumber: number }, session: ClientSession): Promise<IInspectionDocument | null> {
         return await this.model.findOne(data).session(session).exec();

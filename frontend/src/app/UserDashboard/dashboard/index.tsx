@@ -5,8 +5,8 @@ import UserWallet from "@/components/user/user-wallet"
 const UserDashboardView = () => {
     return (
         <ContentSection title='dashboard'
-            desc='This is how others will see you on the dashboard.'>
-            <UserWallet/>
+            desc='This is how others will see you on the dashboard.' scrollAreaClassName="">
+            <UserWallet />
         </ContentSection>
     )
 }

@@ -1,10 +1,5 @@
 import mongoose, { Document, ObjectId, Schema } from "mongoose";
 
-export enum InspectionType {
-    BASIC = "basic",
-    FULL = "full"
-}
-
 export enum InspectionStatus {
     PENDING = "pending",
     CONFIRMED = "confirmed",
@@ -48,7 +43,7 @@ export interface IInspectionInput {
     latitude: string;
     longitude: string;
     phone: string;
-    inspectionType: InspectionType;
+    inspectionType: ObjectId;
     date: Date;
     slotNumber: number;           // Track which slot was booked (1-10)
     bookingReference: string;     // Unique booking reference
@@ -71,9 +66,9 @@ const InspectionSchema: Schema = new Schema<IInspectionDocument>(
         longitude: { type: String, required: true },
         phone: { type: String, required: true },
         inspectionType: {
-            type: String,
-            enum: Object.values(InspectionType),
-            required: true,
+            type: Schema.Types.ObjectId,
+            ref: "InspectionType",
+            required: true
         },
         date: { type: Date, required: true },
         slotNumber: { type: Number, required: true },
