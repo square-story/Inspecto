@@ -4,7 +4,7 @@ import { TYPES } from '../di/types';
 import { inject, injectable } from 'inversify';
 import { IWalletService } from '../core/interfaces/services/wallet.service.interface';
 import { IWallet } from '../models/wallet.model';
-import { IAdminWalletStats, IWalletStats } from '../core/types/wallet.stats.type';
+import { IAdminWalletStats, IUserWalletStats, IWalletStats } from '../core/types/wallet.stats.type';
 import { ServiceError } from '../core/errors/service.error';
 
 @injectable()
@@ -30,6 +30,23 @@ export class WalletService extends BaseService<IWallet> implements IWalletServic
     } catch (error) {
       console.log('Error get Stats About Admin Wallet Transaction', error)
       throw new ServiceError('Error Get Stats about Admin wallet')
+    }
+  }
+  async getWalletStatsAboutUser(userId: string): Promise<IUserWalletStats> {
+    try {
+      return await this._walletRepository.WalletStatsUser(userId)
+    } catch (error) {
+      console.error(`Error getting stats about user wallet transaction ${userId}:`, error);
+      throw new ServiceError('Error getting stats about user wallet');
+    }
+  }
+
+  async processRefundToUserWallet(userId: string, amount: number, reference: string, description: string): Promise<IWallet> {
+    try {
+      return await this._walletRepository.processRefundToUserWallet(userId, amount, reference, description);
+    } catch (error) {
+      console.error(`Error processing refund to user wallet ${userId}:`, error);
+      throw new ServiceError('Error processing refund to user wallet'); // TODO: add custom error message here
     }
   }
 }

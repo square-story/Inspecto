@@ -4,13 +4,15 @@ export enum TransactionType {
     EARNED = 'EARNED',
     WITHDRAWN = 'WITHDRAWN',
     PLATFORM_FEE = 'PLATFORM_FEE',
-    REFUND = 'REFUND'
+    REFUND = 'REFUND',
+    "PAYMENT" = "PAYMENT"
 }
 
 
 export enum WalletOwnerType {
     INSPECTOR = 'INSPECTOR',
-    ADMIN = 'ADMIN'
+    ADMIN = 'ADMIN',
+    USER = 'USER' 
 }
 
 export enum TransactionStatus {

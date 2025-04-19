@@ -408,6 +408,14 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             await this._paymentRepository.updatePayment(paymentIntentId, {
                 status: PaymentStatus.REFUNDED
             })
+
+            await this._walletRepository.processRefundToUserWallet(
+                userId,
+                payment.amount,
+                payment.inspection.toString(),
+                `Refund for inspection #${payment.inspection.toString()}`
+            );
+            
             //Cancel Inspection
             await this._inspectionRepository.update(
                 payment.inspection,

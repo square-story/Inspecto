@@ -95,4 +95,46 @@ export class WalletController implements IWalletController {
             }
         }
     };
+
+    getWalletStatsAboutUser = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const userId = req.user?.userId;
+
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                })
+                return;
+            }
+
+            const response = await this._walletService.getWalletStatsAboutUser(userId)
+
+            if (!response) {
+                res.status(404).json({
+                    success: false,
+                    message: 'Wallet stats not found'
+                });
+                return;
+            }
+
+            res.status(200).json({
+                success: true,
+                response,
+            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
+        }
+    }
 }

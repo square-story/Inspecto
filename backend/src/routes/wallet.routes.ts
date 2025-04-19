@@ -17,6 +17,9 @@ walletRoutes.get('/inspector/stats', authenticateToken, walletController.getWall
 // Get Admin Wallet Stats
 walletRoutes.get('/admin/stats', authenticateToken, walletController.getWalletStatsAboutAdmin)
 
+// Get User Wallet Stats
+walletRoutes.get('/user/stats', authenticateToken, walletController.getWalletStatsAboutUser)
+
 
 // // Get wallet balance
 // router.get('/balance', authenticateToken, walletController.getBalance);

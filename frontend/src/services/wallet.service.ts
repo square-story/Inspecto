@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios";
-import { IAdminWalletStats, IWalletStats, MonthlyStats, TransactionStats } from "@/types/wallet.stats";
+import { IAdminWalletStats, IUserWalletStats, IWalletStats, MonthlyStats, TransactionStats } from "@/types/wallet.stats";
 
 export const WalletService = {
     getAdminWalletStats: async (): Promise<IAdminWalletStats> => {
@@ -30,5 +30,9 @@ export const WalletService = {
     getInspectorMonthlyStats: async (): Promise<MonthlyStats[]> => {
         const response = await axiosInstance.get('/wallet/inspector/monthly-stats');
         return response.data;
+    },
+    getUserWalletStats: async (): Promise<IUserWalletStats> => {
+        const response = await axiosInstance.get('/wallet/user/stats');
+        return response.data.response;
     },
 }

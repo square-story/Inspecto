@@ -49,3 +49,19 @@ export interface IAdminEarningsStats {
     source: string;
     description: string;
 }
+
+export interface IUserWalletStats {
+    totalSpent: number;
+    totalRefunds: number;
+    walletBalance: number;
+    pendingRefunds: number;
+    recentTransactions: IWalletTransaction[];
+    monthlyStats: UserMonthlyStats[];
+}
+
+export interface UserMonthlyStats {
+    month: string;
+    spent: number;
+    refunds: number;
+    transactionCount: number;
+}

@@ -1,11 +1,10 @@
 import { IWallet } from "../../../models/wallet.model";
-import { IAdminWalletStats, IWalletStats } from "../../types/wallet.stats.type";
+import { IAdminWalletStats, IUserWalletStats, IWalletStats } from "../../types/wallet.stats.type";
 import { IBaseService } from "./base/base.service.interface";
 
 export interface IWalletService extends IBaseService<IWallet> {
-    // Stats about the inspactor wallet
     getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats>;
-
-    //Stats about the Admin Wallet
     getWalletStatsAboutAdmin(): Promise<IAdminWalletStats>;
+    getWalletStatsAboutUser(userId: string): Promise<IUserWalletStats>;
+    processRefundToUserWallet(userId: string, amount: number, reference: string, description: string): Promise<IWallet>;
 }
