@@ -12,6 +12,7 @@ import { IInspectionRepository } from "../core/interfaces/repositories/inspectio
 import { IInspectionStats } from "../core/types/inspection.stats.type";
 import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
 import { IInspectionTypeRepository } from "../core/interfaces/repositories/inspection-type.repository.interface";
+import { format } from "date-fns";
 
 @injectable()
 export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
@@ -130,7 +131,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         try {
             const inspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!inspector) throw new ServiceError('Inspector not found');
-            const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' }) as keyof WeeklyAvailability;
+            const dayOfWeek = format(date, 'EEEE') as keyof WeeklyAvailability;
             const dayAvailability = inspector.availableSlots[dayOfWeek];
             if (!dayAvailability.enabled) throw new ServiceError('Inspector is not available on this day');
             return await this._inspectionRepository.getAvailableSlots(inspectorId, date, dayAvailability);
