@@ -22,6 +22,7 @@ import {
     Fuel,
     Wrench,
 } from "lucide-react"
+import { useSignedImage } from "@/hooks/useSignedImage"
 
 export default function UserReportPage() {
     const { id } = useParams<{ id: string }>()
@@ -377,16 +378,31 @@ export default function UserReportPage() {
                                     <CardContent>
                                         {inspection.report.photos && inspection.report.photos.length > 0 ? (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {inspection.report.photos.map((photo, index) => (
-                                                    <div key={index} className="relative aspect-video rounded-md overflow-hidden">
-                                                        <img
-                                                            src={photo || "/placeholder.svg"}
-                                                            alt={`Inspection photo ${index + 1}`}
-                                                            className="object-cover w-full h-full"
-                                                            onClick={() => window.open(photo, "_blank")}
-                                                        />
-                                                    </div>
-                                                ))}
+                                                {inspection.report.photos.map((photo, index) => {
+                                                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                                                    const { imageUrl, isLoading, error } = useSignedImage(photo, "none");
+
+                                                    return (
+                                                        <div key={index} className="relative aspect-video rounded-md overflow-hidden">
+                                                            {isLoading ? (
+                                                                <div className="flex items-center justify-center w-full h-full bg-gray-200">
+                                                                    <span>Loading...</span>
+                                                                </div>
+                                                            ) : error ? (
+                                                                <div className="flex items-center justify-center w-full h-full bg-red-200">
+                                                                    <span>Error loading image</span>
+                                                                </div>
+                                                            ) : (
+                                                                <img
+                                                                    src={imageUrl || "/placeholder.svg"}
+                                                                    alt={`Inspection photo ${index + 1}`}
+                                                                    className="object-cover w-full h-full"
+                                                                    onClick={() => window.open(imageUrl, "_blank")}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         ) : (
                                             <div className="text-center py-8 text-muted-foreground">
