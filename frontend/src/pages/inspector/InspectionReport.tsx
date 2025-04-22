@@ -91,6 +91,7 @@ export default function InspectionReportPage() {
         toast.error("Failed to load inspection details. Please try again.")
       } finally {
         setLoading(false)
+
       }
     }
 
@@ -578,11 +579,19 @@ export default function InspectionReportPage() {
                   }}
                   disabled={submitting}
                 >
-                  <Save className="mr-2 h-4 w-4" />
+                  {submitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
                   Save as Draft
                 </Button>
                 <Button type="submit" disabled={submitting}>
-                  <Send className="mr-2 h-4 w-4" />
+                  {submitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
                   Submit Report
                 </Button>
               </CardFooter>

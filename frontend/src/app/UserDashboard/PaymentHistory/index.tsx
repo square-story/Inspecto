@@ -342,7 +342,6 @@ export default function PaymentHistory() {
     }
 
     const handleDownloadInvoice = (payment: IPayments) => {
-        console.log(`Opening invoice for payment: ${payment._id}`)
         setInvoicePayment(payment)
     }
 
