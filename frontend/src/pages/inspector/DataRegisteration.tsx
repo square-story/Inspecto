@@ -23,6 +23,7 @@ import { SpecializationSelect } from "@/components/fancy-multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
 import AvailabilityPicker, { WeeklyAvailability } from "@/components/AvailabilityPicker"
+import { generateDefaultTimeSlots } from '@/utils/generateDefaultTimeSlots'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -37,13 +38,26 @@ const FileSchema = z.object({
   preview: z.string()
 })
 
+const timeSlotSchema = z.object({
+  startTime: z.string(),
+  endTime: z.string(),
+  isAvailable: z.boolean()
+});
+
+const dayAvailabilitySchema = z.object({
+  enabled: z.boolean(),
+  slots: z.number().min(0).max(10),
+  timeSlots: z.array(timeSlotSchema)
+});
+
 const defaultAvailability: WeeklyAvailability = {
-  Monday: { enabled: true, slots: 5 },
-  Tuesday: { enabled: true, slots: 5 },
-  Wednesday: { enabled: true, slots: 5 },
-  Thursday: { enabled: true, slots: 5 },
-  Friday: { enabled: true, slots: 5 },
-  Saturday: { enabled: false, slots: 0 },
+  Monday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+  Tuesday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+  Wednesday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+  Thursday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+  Friday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+  Saturday: { enabled: false, slots: 0, timeSlots: [] },
+  Sunday: { enabled: false, slots: 0, timeSlots: [] }
 };
 
 // Validation schema
@@ -59,31 +73,22 @@ const formSchema = z.object({
   longitude: z.string().optional().nullable(),
   latitude: z.string().optional().nullable(),
   availableSlots: z.object({
-    Monday: z.object({
-      enabled: z.boolean(),
-      slots: z.number(),
-    }),
-    Tuesday: z.object({
-      enabled: z.boolean(),
-      slots: z.number(),
-    }),
-    Wednesday: z.object({
-      enabled: z.boolean(),
-      slots: z.number(),
-    }),
-    Thursday: z.object({
-      enabled: z.boolean(),
-      slots: z.number(),
-    }),
-    Friday: z.object({
-      enabled: z.boolean(),
-      slots: z.number(),
-    }),
-    Saturday: z.object({
-      enabled: z.boolean(),
-      slots: z.number(),
-    }),
+    Monday: dayAvailabilitySchema,
+    Tuesday: dayAvailabilitySchema,
+    Wednesday: dayAvailabilitySchema,
+    Thursday: dayAvailabilitySchema,
+    Friday: dayAvailabilitySchema,
+    Saturday: dayAvailabilitySchema,
+    Sunday: dayAvailabilitySchema,
   }),
+  unavailabilityPeriods: z.array(
+    z.object({
+      id: z.string(),
+      startDate: z.date(),
+      endDate: z.date(),
+      reason: z.string(),
+    })
+  ),
 });
 
 interface FileWithPreview {
@@ -107,6 +112,7 @@ export default function InspectorForm() {
       profile_image: null,
       signature: null,
       availableSlots: defaultAvailability,
+      unavailabilityPeriods: []
     }
   });
 
@@ -318,7 +324,7 @@ export default function InspectorForm() {
                     <FormLabel>Available Slots</FormLabel>
                     <FormControl>
                       <AvailabilityPicker
-                        value={field.value || defaultAvailability}
+                        value={field.value}
                         onChange={field.onChange}
                       />
                     </FormControl>

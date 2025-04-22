@@ -149,15 +149,15 @@ export default function Dashboard() {
                                         </div>
                                     </TableCell>
                                     <TableCell>{format(inspection.date, "MM/dd/yyyy")}</TableCell>
-                                    <TableCell>{inspection.inspectionType}</TableCell>
+                                    <TableCell>{inspection.inspectionType.name}</TableCell>
                                     <TableCell>
                                         <Badge variant={inspection.status === "completed" ? "default" : "outline"}>
                                             {inspection.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{inspection.inspectionType == "basic" ? "250" : "300"}</TableCell>
+                                    <TableCell>{inspection.inspectionType.price}</TableCell>
                                     <TableCell>
-                                        <Button variant="ghost" size="sm">
+                                        <Button variant="ghost" size="sm" onClick={() => navigate(`/inspector/dashboard/inspection/${inspection.bookingReference}`)}>
                                             <ArrowRight className="h-4 w-4" />
                                         </Button>
                                     </TableCell>

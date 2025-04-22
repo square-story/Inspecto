@@ -92,11 +92,9 @@ export default function Step3() {
                                 <Calendar
                                     mode="single"
                                     selected={field.value}
-                                    onSelect={field.onChange}
+                                    onSelect={(date) => field.onChange(date ? new Date(date) : null)}
                                     disabled={(date) =>
-                                        date <= new Date() ||
-                                        date.getDay() === 0 ||
-                                        date.getDay() === 6
+                                        date <= new Date() || date.getDay() === 0 || date.getDay() === 6 || false
                                     }
                                     initialFocus
                                 />

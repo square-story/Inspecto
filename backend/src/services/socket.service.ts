@@ -24,8 +24,6 @@ export class SocketService {
         this.io.use((socket, next) => {
             try {
                 const token = socket.handshake.auth.token;
-
-                console.log('Socket authentication token:', token);
                 if (!token) {
                     return next(new Error('Authentication token missing'));
                 }
@@ -53,7 +51,6 @@ export class SocketService {
 
             if (userId) {
                 this.userSocketMap.set(userId, socket.id);
-                console.log(`User ${userId} authenticated with socket ${socket.id}`);
 
                 // Join user to their own room for targeted notifications
                 socket.join(`user:${userId}`);

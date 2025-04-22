@@ -1,4 +1,5 @@
 import { IInspector, InspectorStatus, WeeklyAvailability } from '@/types/inspector';
+import { generateDefaultTimeSlots } from '@/utils/generateDefaultTimeSlots';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const initialState: IInspector = {
@@ -17,14 +18,16 @@ const initialState: IInspector = {
     signature: '',
     specialization: [''],
     availableSlots: {
-        Monday: { enabled: false, slots: 0 },
-        Tuesday: { enabled: false, slots: 0 },
-        Wednesday: { enabled: false, slots: 0 },
-        Thursday: { enabled: false, slots: 0 },
-        Friday: { enabled: false, slots: 0 },
-        Saturday: { enabled: false, slots: 0 },
+        Monday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+        Tuesday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+        Wednesday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+        Thursday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+        Friday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
+        Saturday: { enabled: false, slots: 0, timeSlots: [] },
+        Sunday: { enabled: false, slots: 0, timeSlots: [] }
     },
     bookedSlots: [],
+    unavailabilityPeriods: [],
     isListed: false,
     isCompleted: false,
     approvedAt: undefined,

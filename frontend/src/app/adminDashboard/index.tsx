@@ -18,7 +18,7 @@ const earningData = [
 ]
 
 const AdminDashBoardContent = () => {
-    const [loading, setLoading] = useState(false)
+    const [loading] = useState(false)
     const navigate = useNavigate();
     return (
         <div className="flex flex-col gap-6 p-6">

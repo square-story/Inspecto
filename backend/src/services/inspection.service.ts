@@ -85,7 +85,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
     async getInspectionById(id: string): Promise<IInspectionDocument | null> {
         try {
-            return await this._inspectionRepository.findById(new Types.ObjectId(id),['vehicle', 'user', 'inspector']);
+            return await this._inspectionRepository.findById(new Types.ObjectId(id), ['vehicle', 'user', 'inspector']);
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting inspection by ID: ${error.message}`);
@@ -131,6 +131,18 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         try {
             const inspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!inspector) throw new ServiceError('Inspector not found');
+
+            // Check if the date falls within any unavailability periods
+            const isUnavailable = inspector.unavailabilityPeriods?.some(period => {
+                const periodStart = new Date(period.startDate);
+                const periodEnd = new Date(period.endDate);
+                return date >= periodStart && date <= periodEnd;
+            });
+
+            if (isUnavailable) {
+                return []; // No slots available during unavailability periods
+            }
+
             const dayOfWeek = format(date, 'EEEE') as keyof WeeklyAvailability;
             const dayAvailability = inspector.availableSlots[dayOfWeek];
             if (!dayAvailability.enabled) throw new ServiceError('Inspector is not available on this day');
@@ -174,13 +186,13 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             }
 
             const inspectionType = await this._inspectionTypeRepository.findById(data.inspectionType as unknown as Types.ObjectId);
-        if (!inspectionType) {
-            throw new ServiceError('Inspection type not found');
-        }
+            if (!inspectionType) {
+                throw new ServiceError('Inspection type not found');
+            }
 
-        if (!inspectionType.isActive) {
-            throw new ServiceError('Selected inspection type is not currently available');
-        }
+            if (!inspectionType.isActive) {
+                throw new ServiceError('Selected inspection type is not currently available');
+            }
 
             const bookingReference = await this.generateBookingReference();
             if (!data.user) {
@@ -196,9 +208,27 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             const validDate = this.validateDate(data.date);
             const dayOfWeek = validDate.toLocaleDateString('en-US', { weekday: 'long' });
 
+            console.log('Day of the week:', dayOfWeek);
+
+            // Check if the date falls within any unavailability periods
+            const isUnavailable = inspector.unavailabilityPeriods?.some(period => {
+                const periodStart = new Date(period.startDate);
+                const periodEnd = new Date(period.endDate);
+                return validDate >= periodStart && validDate <= periodEnd;
+            });
+
+            if (isUnavailable) {
+                throw new ServiceError('Inspector is unavailable on this date');
+            }
+
             const dayAvailability = inspector.availableSlots[dayOfWeek as keyof WeeklyAvailability];
             if (!dayAvailability.enabled) {
                 throw new ServiceError('Inspector is not available on this day');
+            }
+
+            const timeSlot = dayAvailability.timeSlots[data.slotNumber! - 1];
+            if (!timeSlot || !timeSlot.isAvailable) {
+                throw new ServiceError('The selected time slot is not available');
             }
 
             let booking;

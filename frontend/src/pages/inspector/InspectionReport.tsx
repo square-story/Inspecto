@@ -236,7 +236,7 @@ export default function InspectionReportPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="inspectionType">Inspection Type</Label>
-                        <Input id="inspectionType" value={inspection?.inspectionType || ""} disabled />
+                        <Input id="inspectionType" value={inspection?.inspectionType._id || ""} disabled />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="inspectionDate">Inspection Date</Label>

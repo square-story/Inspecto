@@ -1,3 +1,5 @@
+import { TimeSlot } from "@/components/AvailabilityPicker";
+
 export enum InspectorStatus {
     PENDING = 'PENDING',
     APPROVED = 'APPROVED',
@@ -8,6 +10,7 @@ export enum InspectorStatus {
 export interface IDayAvailability {
     enabled: boolean;
     slots: number;
+    timeSlots: TimeSlot[];
 }
 
 export type WeeklyAvailability = {
@@ -17,6 +20,7 @@ export type WeeklyAvailability = {
     Thursday: IDayAvailability;
     Friday: IDayAvailability;
     Saturday: IDayAvailability;
+    Sunday: IDayAvailability;
 };
 
 export interface IInspector {
@@ -40,6 +44,11 @@ export interface IInspector {
         date: Date;
         slotsBooked: number;
         bookedBy: string[];
+    }[];
+    unavailabilityPeriods:{
+        startDate: Date;
+        endDate: Date;
+        reason: string;
     }[];
     isListed: boolean;
     isCompleted: boolean;

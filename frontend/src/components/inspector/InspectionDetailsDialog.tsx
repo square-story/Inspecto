@@ -67,7 +67,7 @@ export default function InspectionDetailsDialog({
                                 {(inspection.status || "unknown").replace("_", " ")}
                             </Badge>
                             <Badge variant="outline" className="text-sm">
-                                {(inspection.inspectionType || "STANDARD").toUpperCase()} INSPECTION
+                                {(inspection.inspectionType.name).toUpperCase()}
                             </Badge>
                         </div>
 

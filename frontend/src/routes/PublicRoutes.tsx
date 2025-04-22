@@ -5,7 +5,7 @@ import ContactPage from "../pages/common/ContactPage";
 import { PublicRoute } from "./ProtectedRoute";
 import UserForget from "../pages/user/ForgetPasswordPreview";
 import ResetPasswordPreview from "@/pages/user/ResetPassword";
-import NotMatch from "@/pages/NotMatch";
+import NotMatch from "@/pages/common/NotMatch";
 
 const PublicRoutes = () => (
     <Routes>
