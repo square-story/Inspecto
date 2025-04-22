@@ -11,6 +11,7 @@ import { RootState } from "@/store";
 import { toast } from "sonner";
 import { getSignedPdfUrl } from "@/utils/cloudinary";
 import { saveAs } from "file-saver"
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -52,6 +53,8 @@ export const VehicleDetailSheet = ({
 
     const inspection = useSelector((state: RootState) => state.inspections.data.find(inspection => inspection.vehicle._id === vehicle._id)) || null;
 
+    const navigate = useNavigate();
+
     const DownloadReport = async () => {
         try {
             if (!inspection?.report?.reportPdfUrl) {
@@ -83,11 +86,7 @@ export const VehicleDetailSheet = ({
                 return
             }
 
-            // Get signed URL from backend
-            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl)
-
-            // Open the PDF in a new tab
-            window.open(signedUrl, "_blank")
+            navigate(`/user/dashboard/report/${inspection._id}`);
 
             toast.success("Report opened in new tab")
         } catch {

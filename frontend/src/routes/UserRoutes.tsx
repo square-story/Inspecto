@@ -9,6 +9,7 @@ import UserDashboardView from "@/app/UserDashboard/dashboard";
 import VehicleManagement from "@/app/UserDashboard/VehicleManagment";
 import InspectionManagement from "@/app/UserDashboard/InspectionManagement";
 import PaymentHistory from "@/app/UserDashboard/PaymentHistory";
+import UserReportPage from "@/components/user/ViewReport";
 
 const UserRoutes = () => (
     <Routes>
@@ -21,6 +22,7 @@ const UserRoutes = () => (
             <Route path="vehicles" element={<VehicleManagement />} />
             <Route path="inspection" element={<InspectionManagement />} />
             <Route path="history" element={<PaymentHistory />} />
+            <Route path="report/:id" element={<UserReportPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
