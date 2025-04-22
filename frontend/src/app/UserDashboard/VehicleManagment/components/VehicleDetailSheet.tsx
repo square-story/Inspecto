@@ -4,7 +4,13 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
 import { useSignedImage } from "@/hooks/useSignedImage";
-import { Barcode, Calendar, Car, ClipboardCheck, Edit, Fuel, Palette, ShieldCheck, Trash2, Wrench } from "lucide-react";
+import { Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, Palette, ShieldCheck, Trash2, View, Wrench } from "lucide-react";
+import { format } from 'date-fns';
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { toast } from "sonner";
+import { getSignedPdfUrl } from "@/utils/cloudinary";
+import { saveAs } from "file-saver"
 
 
 
@@ -36,13 +42,58 @@ export const VehicleDetailSheet = ({
     onDelete: () => void;
 }) => {
     const formatDate = (date: Date) =>
-        new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        format(new Date(date), 'MMM dd, yyyy');
 
     const { imageUrl: frontImageUrl, isLoading: isFrontLoading, error: frontError } =
         useSignedImage(isOpen ? vehicle.frontViewImage : null);
 
     const { imageUrl: rearImageUrl, isLoading: isRearLoading, error: rearError } =
         useSignedImage(isOpen ? vehicle.rearViewImage : null);
+
+    const inspection = useSelector((state: RootState) => state.inspections.data.find(inspection => inspection.vehicle._id === vehicle._id)) || null;
+
+    const DownloadReport = async () => {
+        try {
+            if (!inspection?.report?.reportPdfUrl) {
+                toast.error("Report PDF not available")
+                return
+            }
+
+            // Get signed URL from backend
+            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl)
+
+            // Fetch the PDF blob
+            const response = await fetch(signedUrl)
+            const pdfBlob = await response.blob()
+
+            // Download with proper filename
+            const filename = `Inspection-Report-${inspection.bookingReference}.pdf`
+            saveAs(pdfBlob, filename)
+
+            toast.success("Report download started")
+        } catch {
+            toast.error("Error downloading report")
+        }
+    };
+
+    const ViewReport = async () => {
+        try {
+            if (!inspection?.report?.reportPdfUrl) {
+                toast.error("Report PDF not available")
+                return
+            }
+
+            // Get signed URL from backend
+            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl)
+
+            // Open the PDF in a new tab
+            window.open(signedUrl, "_blank")
+
+            toast.success("Report opened in new tab")
+        } catch {
+            toast.error("Error opening report")
+        }
+    };
 
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -136,6 +187,19 @@ export const VehicleDetailSheet = ({
                                         label="Color"
                                         value={vehicle.color || 'N/A'}
                                     />
+                                    {inspection && inspection.report && (
+                                        <>
+                                            <Button onClick={() => DownloadReport()} className="col-span-2 mt-4" variant="outline">
+                                                <Download className="h-4 w-4 mr-2" />
+                                                Download Inspection Report
+                                            </Button>
+                                            <Button onClick={() => ViewReport()} className="col-span-2 mt-4" variant="outline">
+                                                <View className="h-4 w-4 mr-2" />
+                                                View Inspection Report
+                                            </Button>
+                                        </>
+
+                                    )}
                                 </div>
                             </div>
 
