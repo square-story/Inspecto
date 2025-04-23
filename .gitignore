@@ -77,4 +77,3 @@ docker-compose.log
 .dockerignore
 frontend/.env.development
 frontend/.env.production
-frontend/src/app/InspectionTypesManagement/.txt
