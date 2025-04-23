@@ -61,8 +61,6 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
       return false;
     }
 
-    console.log(existingBooking, 'existing booking')
-
     // Then check if the inspector has marked this time slot as unavailable
     const inspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId))
     if (!inspector) {

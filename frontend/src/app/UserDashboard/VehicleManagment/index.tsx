@@ -10,6 +10,8 @@ const VehicleManagement = () => {
     const dispatch = useDispatch<AppDispatch>();
     const vehicles = useSelector((state: RootState) => state.vehicle.vehicles);
 
+    console.log(vehicles);
+
     const refreshVehicles = React.useCallback(() => {
         dispatch(fetchVehicles());
     }, [dispatch]);

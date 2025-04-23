@@ -4,10 +4,8 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
 import { useSignedImage } from "@/hooks/useSignedImage";
-import { Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, Palette, ShieldCheck, Trash2, View, Wrench } from "lucide-react";
+import { AlertCircle, Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, Palette, ShieldCheck, Trash2, View, Wrench } from "lucide-react";
 import { format } from 'date-fns';
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
 import { toast } from "sonner";
 import { getSignedPdfUrl } from "@/utils/cloudinary";
 import { saveAs } from "file-saver"
@@ -51,26 +49,24 @@ export const VehicleDetailSheet = ({
     const { imageUrl: rearImageUrl, isLoading: isRearLoading, error: rearError } =
         useSignedImage(isOpen ? vehicle.rearViewImage : null);
 
-    const inspection = useSelector((state: RootState) => state.inspections.data.find(inspection => inspection.vehicle._id === vehicle._id)) || null;
-
     const navigate = useNavigate();
 
     const DownloadReport = async () => {
         try {
-            if (!inspection?.report?.reportPdfUrl) {
+            if (!vehicle?.lastInspectionId?.report?.reportPdfUrl) {
                 toast.error("Report PDF not available")
                 return
             }
 
             // Get signed URL from backend
-            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl)
+            const signedUrl = await getSignedPdfUrl(vehicle.lastInspectionId.report.reportPdfUrl)
 
             // Fetch the PDF blob
             const response = await fetch(signedUrl)
             const pdfBlob = await response.blob()
 
             // Download with proper filename
-            const filename = `Inspection-Report-${inspection.bookingReference}.pdf`
+            const filename = `Inspection-Report-${vehicle.lastInspectionId.bookingReference}.pdf`
             saveAs(pdfBlob, filename)
 
             toast.success("Report download started")
@@ -81,12 +77,12 @@ export const VehicleDetailSheet = ({
 
     const ViewReport = async () => {
         try {
-            if (!inspection?.report?.reportPdfUrl) {
+            if (!vehicle?.lastInspectionId?.report?.reportPdfUrl) {
                 toast.error("Report PDF not available")
                 return
             }
 
-            navigate(`/user/dashboard/report/${inspection._id}`);
+            navigate(`/user/dashboard/report/${vehicle.lastInspectionId._id}`);
 
             toast.success("Report opened in new tab")
         } catch {
@@ -186,7 +182,7 @@ export const VehicleDetailSheet = ({
                                         label="Color"
                                         value={vehicle.color || 'N/A'}
                                     />
-                                    {inspection && inspection.report && (
+                                    {vehicle.lastInspectionId && vehicle.lastInspectionId.report?.reportPdfUrl && (
                                         <>
                                             <Button onClick={() => DownloadReport()} className="col-span-2 mt-4" variant="outline">
                                                 <Download className="h-4 w-4 mr-2" />
@@ -222,14 +218,14 @@ export const VehicleDetailSheet = ({
                                 <h3 className="text-lg font-semibold">Dates</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <DetailItem
-                                        icon={<Calendar className="h-5 w-5" />}
-                                        label="Insurance Expiry"
-                                        value={vehicle.insuranceExpiry ? formatDate(vehicle.insuranceExpiry) : 'N/A'}
+                                        icon={<AlertCircle className="h-5 w-5" />}
+                                        label="Last Inspection Status"
+                                        value={vehicle.lastInspectionId?.report?.status ? vehicle.lastInspectionId.report.status : 'N/A'}
                                     />
                                     <DetailItem
                                         icon={<ClipboardCheck className="h-5 w-5" />}
                                         label="Last Inspection"
-                                        value={vehicle.lastInspectionDate ? formatDate(vehicle.lastInspectionDate) : 'N/A'}
+                                        value={vehicle.lastInspectionId?.date ? formatDate(vehicle.lastInspectionId.date) : 'N/A'}
                                     />
                                 </div>
                             </div>

@@ -32,7 +32,7 @@ export interface IVehicleInput {
     fuelType: "petrol" | "diesel" | "electric" | "hybrid";
     transmission: Transmission;
     insuranceExpiry: Date;
-    lastInspectionDate?: Date;
+    lastInspectionId?: ObjectId;
     frontViewImage?: string;
     rearViewImage?: string;
 }
@@ -55,9 +55,8 @@ const VehicleSchema: Schema = new Schema<IVehicleDocument>({
     chassisNumber: { type: String, required: true, unique: true }, // Chassis Number
     fuelType: { type: String, enum: ["petrol", "diesel", "electric", "hybrid"], required: true }, // Fuel Type
     transmission: { type: String, enum: Object.values(Transmission), required: true }, // Transmission Type
-    insuranceExpiry: { type: Date }, // Insurance Expiry Date
-    lastInspectionDate: { type: Date }, // Last Inspection Date (Optional)
-
+    insuranceExpiry: { type: Date }, // Last Inspection Date (Optional)
+    lastInspectionId: { type: Schema.Types.ObjectId, ref: "Inspection" }, // Reference to the Last Inspection (Optional)
     // New Fields for Vehicle Images
     frontViewImage: { type: String }, // Stores Front View Image URL
     rearViewImage: { type: String },  // Stores Rear View Image URL

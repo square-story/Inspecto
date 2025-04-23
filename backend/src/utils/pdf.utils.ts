@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { IInspector } from "../models/inspector.model";
 import { IUsers } from "../models/user.model";
 import { IVehicleDocument } from "../models/vehicle.model";
+import appConfig from '../config/app.config';
 
 export const generateInspectionPDF = async (inspection: IInspectionDocument): Promise<Buffer> => {
     try {
@@ -448,6 +449,9 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                             <div style="margin-top: 15px;">
                                 <div class="info-label">Photos:</div>
                                 <div class="notes">${inspection.report.photos.length} photos taken during inspection (available in online report)</div>
+                                <div class="report-link">
+                                <a href="${appConfig.frontEndUrl}/user/dashboard/report/${inspection._id}" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 500;">View Full Report Online</a>
+                                </div>
                             </div>
                             ` : ''}
                         </div>

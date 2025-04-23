@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { IInspectionInput, InspectionStatus } from "../models/inspection.model";
-import { ObjectId } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
@@ -9,13 +9,15 @@ import { ServiceError } from "../core/errors/service.error";
 import { generateInspectionPDF } from "../utils/pdf.utils";
 import { uploadToCloudinary } from "../utils/cloudinary.utils";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
+import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 
 
 @injectable()
 export class InspectionController implements IInspectionController {
     constructor(
         @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
-        @inject(TYPES.PaymentService) private _paymentService: IPaymentService
+        @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+        @inject(TYPES.VehicleService) private _vehicleService: IVehicleService
     ) { }
 
     createInspection = async (req: Request, res: Response): Promise<void> => {
@@ -276,6 +278,10 @@ export class InspectionController implements IInspectionController {
                         reportPdfUrl: pdfUrl
                     }
                 })
+
+                await this._vehicleService.update(report.vehicle as unknown as Types.ObjectId, {
+                    lastInspectionId: id,
+                });
             }
             res.status(200).json({
                 message: isDraft ? 'Report saved as draft' : 'Report submitted successfully',
