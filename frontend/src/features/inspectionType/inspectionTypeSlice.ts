@@ -44,7 +44,6 @@ export const featchActiveInspectionTypes = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get('/inspection-types/active');
-            console.log(response.data.data, 'something thisoifdskjkfdsjkadfsjklaj');
             return response.data.data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch inspection types');
