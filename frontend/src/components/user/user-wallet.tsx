@@ -53,7 +53,7 @@ export default function UserWallet() {
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">My Wallet</h1>
+        <h3 className="text-lg font-medium">Your Wallet</h3>
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="p-4">
