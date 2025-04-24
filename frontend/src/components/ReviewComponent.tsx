@@ -12,6 +12,7 @@ import { Star } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { ReviewService } from "@/services/review.service";
+import { IReview } from "@/types/review";
 
 const reviewSchema = z.object({
     rating: z.number().min(1).max(5),
@@ -26,9 +27,10 @@ interface ReviewDialogProps {
     onOpenChange: (open: boolean) => void;
     inspectionId: string;
     inspectorId: string;
+    existingReview?: IReview;
 }
 
-export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: ReviewDialogProps) {
+export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId,existingReview }: ReviewDialogProps) {
     const [hoveredRating, setHoveredRating] = useState(0);
     const user = useSelector((state: RootState) => state.user)
 
@@ -58,11 +60,32 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: 
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Rate Your Inspection Experience</DialogTitle>
+                    <DialogTitle>{existingReview ? "Your Review" : "Leave a Review"}</DialogTitle>
                     <DialogDescription>
-                        Share your feedback about the inspection service
+                    {existingReview 
+                            ? "Here's the review you submitted for this inspection." 
+                            : "Share your experience with this inspection."}
                     </DialogDescription>
                 </DialogHeader>
+                {existingReview ? (
+                    // Display existing review
+                    <div className="space-y-4">
+                        <div className="flex items-center">
+                            <div className="flex">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                        key={star}
+                                        className={`h-6 w-6 ${star <= existingReview.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                    />
+                                ))}
+                            </div>
+                            <span className="ml-2 text-sm text-muted-foreground">
+                                {new Date(existingReview.createdAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                        <p className="text-sm">{existingReview.comment}</p>
+                    </div>
+                ) : (
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
@@ -106,11 +129,15 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId }: 
                                 </FormItem>
                             )}
                         />
+                        <Button variant="outline" onClick={() => onOpenChange(false)}>
+                            Close
+                        </Button>
                         <Button type="submit" className="w-full">
                             Submit Review
                         </Button>
                     </form>
                 </Form>
+                )}
             </DialogContent>
         </Dialog>
     )

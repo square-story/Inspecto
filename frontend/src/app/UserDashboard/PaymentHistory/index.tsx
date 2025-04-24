@@ -47,6 +47,8 @@ import { saveAs } from "file-saver"
 import { ReviewDialog } from "@/components/ReviewComponent"
 import { PaymentService } from "@/services/payment.service"
 import { useConfirm } from "@omit/react-confirm-dialog"
+import { ReviewService } from "@/services/review.service"
+import { IReview } from "@/types/review"
 
 const ITEMS_PER_PAGE = 5
 
@@ -188,6 +190,8 @@ export default function PaymentHistory() {
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
     const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
+    const [existingReview, setExistingReview] = useState<IReview | null>(null);
+    const [hasExistingReview, setHasExistingReview] = useState(false);
     const [retryPayment, setRetryPayment] = useState<any>(null)
     const confirm = useConfirm()
     const dispatch = useDispatch<AppDispatch>()
@@ -199,7 +203,28 @@ export default function PaymentHistory() {
         dispatch(fetchPayments())
     }, [dispatch])
 
-    
+    const checkExistingReview = async (inspectionId:string) => {
+        try {
+            // Call your review service to check for existing reviews
+            const review = await ReviewService.getInspectionReview(inspectionId);
+            
+            if (review) {
+                setExistingReview(review);
+                setHasExistingReview(true);
+            } else {
+                setExistingReview(null);
+                setHasExistingReview(false);
+            }
+        } catch (error) {
+            console.error("Error checking for existing review:", error);
+            toast.error("Failed to check for existing review");
+            setExistingReview(null);
+            setHasExistingReview(false);
+            setReviewDialogOpen(true);
+        }
+    };
+
+
 
     // Reset pagination when filters change
     useEffect(() => {
@@ -662,20 +687,20 @@ export default function PaymentHistory() {
                                                                 {/* Additional inspection details */}
                                                                 <p className="text-muted-foreground">Inspection Type:</p>
                                                                 <p className="capitalize">{payment.inspection.inspectionType.name}</p>
-                                                                
+
                                                                 <p className="text-muted-foreground">Inspection Date:</p>
                                                                 <p>{formatDateTime(payment.inspection.date as unknown as string).date}</p>
-                                                                
+
                                                                 <p className="text-muted-foreground">Inspection Status:</p>
                                                                 <p>
                                                                     <Badge className={getStatusBadgeColor(payment.inspection.status)}>
                                                                         {payment.inspection.status.charAt(0).toUpperCase() + payment.inspection.status.slice(1)}
                                                                     </Badge>
                                                                 </p>
-                                                                
+
                                                                 <p className="text-muted-foreground">Inspector:</p>
                                                                 <p className="capitalize">{payment.inspection.inspector?.firstName || "Not assigned"}</p>
-                                                                
+
                                                                 <p className="text-muted-foreground">Location:</p>
                                                                 <p>{payment.inspection.location}</p>
 
@@ -862,7 +887,9 @@ export default function PaymentHistory() {
                                                 )}
 
                                                 <Dialog>
-                                                    <DialogTrigger asChild>
+                                                    <DialogTrigger asChild onClick={()=>{
+                                                        checkExistingReview(inspection._id);
+                                                    }}>
                                                         <Button variant="ghost" size="icon">
                                                             <Info className="h-4 w-4" />
                                                             <span className="sr-only">More info</span>
@@ -913,9 +940,23 @@ export default function PaymentHistory() {
                                                                         <Download className="h-4 w-4 mr-2" />
                                                                         Download Inspection Report
                                                                     </Button>
-                                                                    <Button onClick={() => setReviewDialogOpen(true)} className="w-full">
-                                                                        Give Review
-                                                                        <Star className="fill-white h-4 w-4 mr-2" />
+                                                                    <Button
+                                                                        onClick={() => {
+                                                                            setReviewDialogOpen(true);
+                                                                        }}
+                                                                        className="w-full"
+                                                                    >
+                                                                        {hasExistingReview || existingReview ? (
+                                                                            <>
+                                                                                View Review
+                                                                                <Star className="fill-yellow-400 h-4 w-4 ml-2" />
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                Give Review
+                                                                                <Star className="fill-white h-4 w-4 ml-2" />
+                                                                            </>
+                                                                        )}
                                                                     </Button>
                                                                 </>
                                                             )}
@@ -925,6 +966,7 @@ export default function PaymentHistory() {
                                                             onOpenChange={setReviewDialogOpen}
                                                             inspectionId={inspection._id}
                                                             inspectorId={inspection.inspector._id}
+                                                            existingReview={existingReview || undefined}
                                                         />
                                                     </DialogContent>
                                                 </Dialog>

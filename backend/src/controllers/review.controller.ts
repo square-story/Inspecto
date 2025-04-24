@@ -17,6 +17,10 @@ export class ReviewController implements IReviewController {
     createReview = async (req: Request, res: Response) => {
         try {
             const data = req.body
+            if (!data) {
+                res.status(400).json({ success: false, message: 'Data Not Found' })
+                return
+            }
             const response = await this._reviewService.create(data)
             res.status(200).json({ message: 'Review Successfully Added', review: response, success: true, })
         } catch (error) {
