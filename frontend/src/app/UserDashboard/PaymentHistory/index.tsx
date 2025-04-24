@@ -199,6 +199,9 @@ export default function PaymentHistory() {
         dispatch(fetchPayments())
     }, [dispatch])
 
+    console.log(payments)
+    console.log(inspections)
+
     // Reset pagination when filters change
     useEffect(() => {
         setPaymentPage(1)
@@ -656,6 +659,26 @@ export default function PaymentHistory() {
 
                                                                 <p className="text-muted-foreground">Payment ID:</p>
                                                                 <p className="font-mono text-xs break-all">{payment.stripePaymentIntentId}</p>
+
+                                                                {/* Additional inspection details */}
+                                                                <p className="text-muted-foreground">Inspection Type:</p>
+                                                                <p className="capitalize">{payment.inspection.inspectionType.name}</p>
+                                                                
+                                                                <p className="text-muted-foreground">Inspection Date:</p>
+                                                                <p>{formatDateTime(payment.inspection.date as unknown as string).date}</p>
+                                                                
+                                                                <p className="text-muted-foreground">Inspection Status:</p>
+                                                                <p>
+                                                                    <Badge className={getStatusBadgeColor(payment.inspection.status)}>
+                                                                        {payment.inspection.status.charAt(0).toUpperCase() + payment.inspection.status.slice(1)}
+                                                                    </Badge>
+                                                                </p>
+                                                                
+                                                                <p className="text-muted-foreground">Inspector:</p>
+                                                                <p className="capitalize">{payment.inspection.inspector?.firstName || "Not assigned"}</p>
+                                                                
+                                                                <p className="text-muted-foreground">Location:</p>
+                                                                <p>{payment.inspection.location}</p>
 
                                                                 {payment.metadata && Object.keys(payment.metadata).length > 0 && (
                                                                     <>

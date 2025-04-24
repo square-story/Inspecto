@@ -22,7 +22,13 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
     async findUserPayments(userId: string): Promise<IPaymentDocument[]> {
         return await this.model.find({
             user: userId
-        }).populate('inspection').populate('user').sort({ createdAt: -1 });
+        }).populate([
+            { path: 'inspection', populate: [
+                { path: 'inspectionType' },
+                { path: 'inspector' }
+            ]},
+            { path: 'user' }
+        ]).sort({ createdAt: -1 });
     }
     async findStalePayments(status: PaymentStatus, beforeDate: Date): Promise<IPaymentDocument[]> {
         return await this.find({
