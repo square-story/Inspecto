@@ -208,8 +208,6 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             const validDate = this.validateDate(data.date);
             const dayOfWeek = validDate.toLocaleDateString('en-US', { weekday: 'long' });
 
-            console.log('Day of the week:', dayOfWeek);
-
             // Check if the date falls within any unavailability periods
             const isUnavailable = inspector.unavailabilityPeriods?.some(period => {
                 const periodStart = new Date(period.startDate);

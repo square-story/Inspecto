@@ -150,7 +150,6 @@ export default function InspectionReportPage() {
             label: 'View Report',
             onClick: async () => {
               try {
-                console.log('Getting signed URL for PDF:', pdfUrl);
                 const signedUrl = await getSignedPdfUrl(pdfUrl);
                 window.open(signedUrl, "_blank");
               } catch (error) {

@@ -199,8 +199,7 @@ export default function PaymentHistory() {
         dispatch(fetchPayments())
     }, [dispatch])
 
-    console.log(payments)
-    console.log(inspections)
+    
 
     // Reset pagination when filters change
     useEffect(() => {

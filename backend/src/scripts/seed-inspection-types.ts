@@ -10,7 +10,7 @@ const seedInspectionTypes = async () => {
         // Check if inspection types already exist
         const count = await InspectionTypeModel.countDocuments();
         if (count > 0) {
-            console.log('Inspection types already exist, skipping seed');
+            console.log('Inspection types already exist. Skipping seeding.');
             await mongoose.disconnect();
             return;
         }

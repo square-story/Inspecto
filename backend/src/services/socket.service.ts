@@ -44,7 +44,6 @@ export class SocketService {
         });
 
         this.io.on('connection', (socket) => {
-            console.log('New client connected', socket.id);
 
             // Get userId from socket data (set in middleware)
             const userId = socket.data.userId;

@@ -35,12 +35,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Add connection listeners
         newSocket.on('connect', () => {
-            console.log('Socket connectedfdsjkdfs');
+            console.log('Socket connected');
         });
-
-        newSocket.on('notification', (data) => {
-            console.log('data is :', data)
-        })
 
         newSocket.on('connect_error', (error) => {
             console.error('Socket connection error:', error);

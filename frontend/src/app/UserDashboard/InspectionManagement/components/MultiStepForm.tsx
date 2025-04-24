@@ -40,10 +40,7 @@ const MultiStepForm = () => {
 
         try {
             setLoading(true);
-            console.log("Form values before booking:", methods.getValues());
             const response = await axiosInstance.post("/inspections/book", methods.getValues());
-
-            console.log("Booking response:", response.data);
 
             if (response.status === 201) {
                 setBookingData(response.data.data);
