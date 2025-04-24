@@ -1,4 +1,4 @@
-import { TimeSlot } from "@/components/AvailabilityPicker";
+import { TimeSlot } from "@/components/minimal-availability-picker";
 
 export enum InspectorStatus {
     PENDING = 'PENDING',
@@ -20,7 +20,6 @@ export type WeeklyAvailability = {
     Thursday: IDayAvailability;
     Friday: IDayAvailability;
     Saturday: IDayAvailability;
-    Sunday: IDayAvailability;
 };
 
 export interface IInspector {
@@ -45,7 +44,7 @@ export interface IInspector {
         slotsBooked: number;
         bookedBy: string[];
     }[];
-    unavailabilityPeriods:{
+    unavailabilityPeriods: {
         startDate: Date;
         endDate: Date;
         reason: string;

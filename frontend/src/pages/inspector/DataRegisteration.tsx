@@ -22,12 +22,11 @@ import { inspectorService } from "@/services/inspector.service";
 import { SpecializationSelect } from "@/components/fancy-multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
-import AvailabilityPicker, { WeeklyAvailability } from "@/components/AvailabilityPicker"
-import { generateDefaultTimeSlots } from '@/utils/generateDefaultTimeSlots'
+import MinimalAvailabilityPicker from "@/components/minimal-availability-picker";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
-const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"]
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"];
 
 const FileSchema = z.object({
   file: typeof window === 'undefined'
@@ -36,7 +35,7 @@ const FileSchema = z.object({
       .refine(file => file.size <= MAX_FILE_SIZE, "Max file size is 5MB")
       .refine(file => ACCEPTED_IMAGE_TYPES.includes(file.type), "Only .jpg, .jpeg, .png and .webp formats are supported."),
   preview: z.string()
-})
+});
 
 const timeSlotSchema = z.object({
   startTime: z.string(),
@@ -49,16 +48,6 @@ const dayAvailabilitySchema = z.object({
   slots: z.number().min(0).max(10),
   timeSlots: z.array(timeSlotSchema)
 });
-
-const defaultAvailability: WeeklyAvailability = {
-  Monday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
-  Tuesday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
-  Wednesday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
-  Thursday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
-  Friday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
-  Saturday: { enabled: false, slots: 0, timeSlots: [] },
-  Sunday: { enabled: false, slots: 0, timeSlots: [] }
-};
 
 // Validation schema
 const formSchema = z.object({
@@ -79,7 +68,6 @@ const formSchema = z.object({
     Thursday: dayAvailabilitySchema,
     Friday: dayAvailabilitySchema,
     Saturday: dayAvailabilitySchema,
-    Sunday: dayAvailabilitySchema,
   }),
   unavailabilityPeriods: z.array(
     z.object({
@@ -103,6 +91,15 @@ export default function InspectorForm() {
   const navigate = useNavigate()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const defaultAvailability = {
+    Monday: { enabled: false, slots: 0, timeSlots: [] },
+    Tuesday: { enabled: false, slots: 0, timeSlots: [] },
+    Wednesday: { enabled: false, slots: 0, timeSlots: [] },
+    Thursday: { enabled: false, slots: 0, timeSlots: [] },
+    Friday: { enabled: false, slots: 0, timeSlots: [] },
+    Saturday: { enabled: false, slots: 0, timeSlots: [] },
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -323,7 +320,7 @@ export default function InspectorForm() {
                   <FormItem>
                     <FormLabel>Available Slots</FormLabel>
                     <FormControl>
-                      <AvailabilityPicker
+                      <MinimalAvailabilityPicker
                         value={field.value}
                         onChange={field.onChange}
                       />

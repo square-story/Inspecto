@@ -1,5 +1,5 @@
-import AvailabilityPicker from "@/components/AvailabilityPicker"
 import LoadingSpinner from "@/components/LoadingSpinner";
+import MinimalAvailabilityPicker from "@/components/minimal-availability-picker";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import UnavailabilityManager from "@/components/UnavailabilityManager";
@@ -42,8 +42,7 @@ const availabilityFormSchema = z.object({
         Wednesday: dayAvailabilitySchema,
         Thursday: dayAvailabilitySchema,
         Friday: dayAvailabilitySchema,
-        Saturday: dayAvailabilitySchema,
-        Sunday: dayAvailabilitySchema,
+        Saturday: dayAvailabilitySchema
     }),
     unavailabilityPeriods: z.array(unavailabilityPeriodSchema)
 });
@@ -53,6 +52,7 @@ const availabilityFormSchema = z.object({
 export type SlotFormValues = z.infer<typeof availabilityFormSchema>;
 
 export default function InspectorSlotForm() {
+
     const { inspector, loading } = useInspectorDetails()
     const dispatch = useDispatch<AppDispatch>()
     const form = useForm<SlotFormValues>({
@@ -62,6 +62,7 @@ export default function InspectorSlotForm() {
             unavailabilityPeriods: inspector.unavailabilityPeriods || []
         },
     })
+
 
     async function onSubmit(data: SlotFormValues) {
         try {
@@ -84,10 +85,7 @@ export default function InspectorSlotForm() {
                         <FormItem>
                             <FormLabel>Available Slots</FormLabel>
                             <FormControl>
-                                <AvailabilityPicker
-                                    value={field.value ?? inspector.availableSlots}
-                                    onChange={field.onChange}
-                                />
+                                <MinimalAvailabilityPicker value={field.value} onChange={field.onChange} />
                             </FormControl>
                             <FormDescription>
                                 Set your available slots for booking (for each day).

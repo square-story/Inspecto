@@ -21,10 +21,28 @@ export default {
     				'20%,50%': {
     					opacity: '0'
     				}
+    			},
+    			'accordion-down': {
+    				from: {
+    					height: '0'
+    				},
+    				to: {
+    					height: 'var(--radix-accordion-content-height)'
+    				}
+    			},
+    			'accordion-up': {
+    				from: {
+    					height: 'var(--radix-accordion-content-height)'
+    				},
+    				to: {
+    					height: '0'
+    				}
     			}
     		},
     		animation: {
-    			'caret-blink': 'caret-blink 1.25s ease-out infinite'
+    			'caret-blink': 'caret-blink 1.25s ease-out infinite',
+    			'accordion-down': 'accordion-down 0.2s ease-out',
+    			'accordion-up': 'accordion-up 0.2s ease-out'
     		},
     		colors: {
     			primary: {
@@ -83,9 +101,9 @@ export default {
     			md: 'calc(var(--radius) - 2px)',
     			sm: 'calc(var(--radius) - 4px)'
     		},
-			backgroundImage: {
-				'holo-gradient': 'linear-gradient(135deg, hsl(350, 100%, 85%), hsl(0, 100%, 90%), hsl(300, 100%, 90%), hsl(260, 40%, 70%), hsl(0, 100%, 90%))',
-			  },
+    		backgroundImage: {
+    			'holo-gradient': 'linear-gradient(135deg, hsl(350, 100%, 85%), hsl(0, 100%, 90%), hsl(300, 100%, 90%), hsl(260, 40%, 70%), hsl(0, 100%, 90%))'
+    		}
     	}
     },
 	plugins: [require("tailwindcss-animate")],

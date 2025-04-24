@@ -68,7 +68,7 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
     }
 
     // Get the day of the week
-    const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parsedDate.getDay()] as keyof WeeklyAvailability;
+    const dayOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parsedDate.getDay()] as keyof WeeklyAvailability;
 
 
     // Check if the day is enabled

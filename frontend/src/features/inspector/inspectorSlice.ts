@@ -24,7 +24,6 @@ const initialState: IInspector = {
         Thursday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
         Friday: { enabled: true, slots: 5, timeSlots: generateDefaultTimeSlots(5) },
         Saturday: { enabled: false, slots: 0, timeSlots: [] },
-        Sunday: { enabled: false, slots: 0, timeSlots: [] }
     },
     bookedSlots: [],
     unavailabilityPeriods: [],
