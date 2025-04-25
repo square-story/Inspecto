@@ -1,4 +1,5 @@
 import mongoose, { Document, ObjectId, Schema } from "mongoose";
+import { TimeSlot } from "./inspector.model";
 
 export enum InspectionStatus {
     PENDING = "pending",
@@ -31,7 +32,7 @@ export interface IInspectionReport {
     status: ReportStatus;
     submittedAt: Date;
     reportPdfUrl?: string;
-    version: number; 
+    version: number;
 }
 
 // Adding timeSlot to track specific booking time
@@ -44,14 +45,14 @@ export interface IInspectionInput {
     longitude: string;
     phone: string;
     inspectionType: ObjectId;
-    date: Date;
-    slotNumber: number;           // Track which slot was booked (1-10)
+    date: Date;        // Track which slot was booked (1-10)
+    timeSlot: TimeSlot;
     bookingReference: string;     // Unique booking reference
     confirmAgreement: boolean;
     status: InspectionStatus;
     notes?: string;
     version: number;              // For optimistic locking
-    report?:IInspectionReport;
+    report?: IInspectionReport;
 }
 
 export interface IInspectionDocument extends IInspectionInput, Document { }
@@ -71,7 +72,11 @@ const InspectionSchema: Schema = new Schema<IInspectionDocument>(
             required: true
         },
         date: { type: Date, required: true },
-        slotNumber: { type: Number, required: true },
+        timeSlot: {
+            startTime: { type: String, required: true },
+            endTime: { type: String, required: true },
+            isAvailable: { type: Boolean, required: true, default: true }
+        },
         bookingReference: {
             type: String,
             required: true,
@@ -145,6 +150,6 @@ const InspectionSchema: Schema = new Schema<IInspectionDocument>(
 );
 
 // compound index for slot uniqueness
-InspectionSchema.index({ date: 1, inspector: 1, slotNumber: 1 }, { unique: true, partialFilterExpression: { status: { $ne: InspectionStatus.CANCELLED } } });
+InspectionSchema.index({ date: 1, inspector: 1 }, { unique: true, partialFilterExpression: { status: { $ne: InspectionStatus.CANCELLED } } });
 
 export default mongoose.model<IInspectionDocument>("Inspection", InspectionSchema);

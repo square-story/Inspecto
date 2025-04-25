@@ -203,11 +203,11 @@ export default function PaymentHistory() {
         dispatch(fetchPayments())
     }, [dispatch])
 
-    const checkExistingReview = async (inspectionId:string) => {
+    const checkExistingReview = async (inspectionId: string) => {
         try {
             // Call your review service to check for existing reviews
             const review = await ReviewService.getInspectionReview(inspectionId);
-            
+
             if (review) {
                 setExistingReview(review);
                 setHasExistingReview(true);
@@ -449,11 +449,11 @@ export default function PaymentHistory() {
         await dispatch(fetchPayments())
     }
 
-    const getTimeSlotLabel = (slotNumber: number) => {
-        if (slotNumber <= 2) return "Morning (9 AM - 12 PM)"
-        if (slotNumber <= 4) return "Afternoon (1 PM - 4 PM)"
-        return "Evening (5 PM - 8 PM)"
-    }
+    // const getTimeSlotLabel = (slotNumber: number) => {
+    //     if (slotNumber <= 2) return "Morning (9 AM - 12 PM)"
+    //     if (slotNumber <= 4) return "Afternoon (1 PM - 4 PM)"
+    //     return "Evening (5 PM - 8 PM)"
+    // }
 
     const showCancelButton = (payment: IPayments): boolean => {
         const createdAtTime = new Date(payment.createdAt).getTime()
@@ -887,7 +887,7 @@ export default function PaymentHistory() {
                                                 )}
 
                                                 <Dialog>
-                                                    <DialogTrigger asChild onClick={()=>{
+                                                    <DialogTrigger asChild onClick={() => {
                                                         checkExistingReview(inspection._id);
                                                     }}>
                                                         <Button variant="ghost" size="icon">
@@ -916,8 +916,8 @@ export default function PaymentHistory() {
                                                                 <p className="text-muted-foreground">Date:</p>
                                                                 <p>{formatDateTime(inspection.date as unknown as string).date}</p>
 
-                                                                <p className="text-muted-foreground">Time Slot:</p>
-                                                                <p>{getTimeSlotLabel(inspection.slotNumber)}</p>
+                                                                {/* <p className="text-muted-foreground">Time Slot:</p>
+                                                                <p>{getTimeSlotLabel(inspection.slotNumber)}</p> */}
 
                                                                 <p className="text-muted-foreground">Status:</p>
                                                                 <p>

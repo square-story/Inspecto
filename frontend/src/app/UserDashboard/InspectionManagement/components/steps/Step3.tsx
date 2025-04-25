@@ -1,3 +1,4 @@
+import { TimeSlot } from "@/components/minimal-availability-picker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -34,7 +35,7 @@ export const TimeSlotMap: Record<number, string> = {
 
 export default function Step3() {
     const { control, watch, formState: { errors } } = useFormContext();
-    const [availableSlots, setAvailableSlots] = useState<number[]>([]);
+    const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const selectedDate = watch('date');
@@ -47,11 +48,12 @@ export default function Step3() {
             setIsLoading(true);
             setError(null);
             try {
-                const slots = await InspectionService.getAvailableSlots(
+                const timeSlots = await InspectionService.getAvailableSlots(
                     selectedInspector,
                     selectedDate
                 );
-                setAvailableSlots(slots);
+                console.log(timeSlots);
+                setAvailableSlots(timeSlots);
             } catch (error) {
                 setError('Unable to fetch available time slots. Please try again.');
                 console.error('Error fetching slots:', error);
@@ -108,7 +110,7 @@ export default function Step3() {
             {selectedDate && (
                 <FormField
                     control={control}
-                    name="slotNumber"
+                    name="timeSlot"
                     render={({ field }) => (
                         <FormItem className="space-y-3">
                             <FormLabel>Available Time Slots</FormLabel>
@@ -122,9 +124,7 @@ export default function Step3() {
                                 </Alert>
                             ) : availableSlots.length === 0 ? (
                                 <Alert>
-                                    <AlertDescription>
-                                        No time slots available for this date. Please select a different date.
-                                    </AlertDescription>
+                                    <AlertDescription>No time slots available for this date. Please select a different date.</AlertDescription>
                                 </Alert>
                             ) : (
                                 <FormControl>
@@ -133,19 +133,19 @@ export default function Step3() {
                                         value={field.value}
                                         className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4"
                                     >
-                                        {availableSlots.map((slot) => (
-                                            <div key={slot} className="space-y-2">
+                                        {availableSlots.map((slot, index) => (
+                                            <div key={index} className="space-y-2">
                                                 <RadioGroupItem
-                                                    value={slot.toString()}
-                                                    id={`slot-${slot}`}
+                                                    value={JSON.stringify(slot)}
+                                                    id={`slot-${index}`}
                                                     className="peer sr-only"
                                                 />
                                                 <Label
-                                                    htmlFor={`slot-${slot}`}
+                                                    htmlFor={`slot-${index}`}
                                                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                                                 >
                                                     <Clock className="mb-2 h-6 w-6" />
-                                                    <span className="font-medium">{TimeSlotMap[slot]}</span>
+                                                    <span className="font-medium">{`${slot.startTime} - ${slot.endTime}`}</span>
                                                 </Label>
                                             </div>
                                         ))}
@@ -153,7 +153,6 @@ export default function Step3() {
                                 </FormControl>
                             )}
                             <FormMessage />
-                            <p className="text-sm text-muted-foreground">Time will fluctuate with situation.</p>
                         </FormItem>
                     )}
                 />

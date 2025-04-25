@@ -1,6 +1,6 @@
 import mongoose, { ClientSession } from "mongoose";
 import { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
-import { WeeklyAvailability } from "../models/inspector.model";
+import { TimeSlot, WeeklyAvailability } from "../models/inspector.model";
 import { BaseService } from "../core/abstracts/base.service";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { inject, injectable } from "inversify";
@@ -121,18 +121,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         }
     }
 
-    async checkSlotAvaliability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean> {
-        try {
-            return await this._inspectionRepository.checkSlotAvailability(inspectorId, date, slotNumber, session);
-        } catch (error) {
-            if (error instanceof Error) {
-                throw new ServiceError(`Error checking slot availability: ${error.message}`);
-            }
-            throw error;
-        }
-    }
-
-    async getAvailableSlots(inspectorId: string, date: Date): Promise<number[]> {
+    async getAvailableSlots(inspectorId: string, date: Date): Promise<TimeSlot[]> {
         try {
             const inspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
             if (!inspector) throw new ServiceError('Inspector not found');
@@ -160,18 +149,18 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         }
     }
 
-    async createInspection(data: IInspectionInput): Promise<{ booking: IInspectionDocument;amount: number; walletDeduction: number; remainingAmount: number  }> {
+    async createInspection(data: IInspectionInput): Promise<{ booking: IInspectionDocument; amount: number; walletDeduction: number; remainingAmount: number }> {
         const session: ClientSession = await mongoose.startSession();
         session.startTransaction();
         try {
-            if (!data.user || !data.inspector || !data.date || !data.slotNumber) {
+            if (!data.user || !data.inspector || !data.date || !data.timeSlot) {
                 throw new ServiceError('Missing required booking data');
             }
 
             const existingBooking = await this._inspectionRepository.existingInspection({
                 date: data.date,
                 inspector: data.inspector.toString(),
-                slotNumber: data.slotNumber,
+                timeSlot: data.timeSlot,
             }, session);
 
             // If there's an existing booking and it's not cancelled, throw error
@@ -179,16 +168,16 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 throw new ServiceError('Slot is no longer available');
             }
 
-            const isAvailable = await this.checkSlotAvaliability(
-                data.inspector!.toString(),
-                data.date!,
-                data.slotNumber!,
-                session
-            );
+            // const isAvailable = await this.checkSlotAvaliability(
+            //     data.inspector!.toString(),
+            //     data.date!,
+            //     data.slotNumber!,
+            //     session
+            // );
 
-            if (!isAvailable) {
-                throw new ServiceError('Slot is no longer available');
-            }
+            // if (!isAvailable) {
+            //     throw new ServiceError('Slot is no longer available');
+            // }
 
             const inspectionType = await this._inspectionTypeRepository.findById(data.inspectionType as unknown as Types.ObjectId);
             if (!inspectionType) {
@@ -200,6 +189,8 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             }
 
             const bookingReference = await this.generateBookingReference();
+
+
             if (!data.user) {
                 throw new ServiceError('User is required for booking');
             }
@@ -209,27 +200,16 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             if (!inspector) {
                 throw new ServiceError('Inspector not found');
             }
+            const dayOfWeek = format(data.date, 'EEEE') as keyof WeeklyAvailability;
+            const dayAvailability = inspector.availableSlots[dayOfWeek];
 
-            const validDate = this.validateDate(data.date);
-            const dayOfWeek = validDate.toLocaleDateString('en-US', { weekday: 'long' });
-
-            // Check if the date falls within any unavailability periods
-            const isUnavailable = inspector.unavailabilityPeriods?.some(period => {
-                const periodStart = new Date(period.startDate);
-                const periodEnd = new Date(period.endDate);
-                return validDate >= periodStart && validDate <= periodEnd;
-            });
-
-            if (isUnavailable) {
-                throw new ServiceError('Inspector is unavailable on this date');
-            }
-
-            const dayAvailability = inspector.availableSlots[dayOfWeek as keyof WeeklyAvailability];
             if (!dayAvailability.enabled) {
                 throw new ServiceError('Inspector is not available on this day');
             }
 
-            const timeSlot = dayAvailability.timeSlots[data.slotNumber! - 1];
+            const timeSlot = dayAvailability.timeSlots.find(slot => slot.startTime === data.timeSlot.startTime && slot.endTime === data.timeSlot.endTime);
+
+
             if (!timeSlot || !timeSlot.isAvailable) {
                 throw new ServiceError('The selected time slot is not available');
             }
@@ -263,7 +243,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 data.date,
                 session
             );
-            
+
             let amount = 0;
             if (data.inspectionType) {
                 const inspectionType = await this._inspectionTypeService.findById(data.inspectionType as unknown as Types.ObjectId);
@@ -276,14 +256,14 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
             let walletDeduction = 0;
             let remainingAmount = amount;
 
-            
+
             if (!booking) {
                 throw new ServiceError('Failed to create or update booking');
             }
 
-            const userWallet = await this._walletRepository.findOne({owner:data.user,ownerType:WalletOwnerType.USER});
+            const userWallet = await this._walletRepository.findOne({ owner: data.user, ownerType: WalletOwnerType.USER });
 
-            if(userWallet && userWallet.balance >0){
+            if (userWallet && userWallet.balance > 0) {
                 walletDeduction = Math.min(userWallet.balance, amount);
                 remainingAmount = Math.max(0, amount - walletDeduction);
 
@@ -307,7 +287,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 );
             }
 
-            if(remainingAmount === 0){
+            if (remainingAmount === 0) {
                 await this._inspectionRepository.updateInspection(
                     booking.id,
                     {
@@ -317,7 +297,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                     session
                 );
             }
-            
+
 
             await session.commitTransaction();
 
