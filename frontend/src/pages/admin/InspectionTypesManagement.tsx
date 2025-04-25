@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { TagsInput } from "@/components/ui/tags-input"
 import {
+    createInspectionType,
     deleteInspectionType,
     featchAllInspectionTypes,
     type InspectionType,
@@ -26,21 +27,27 @@ import {
 import type { AppDispatch, RootState } from "@/store"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useConfirm } from "@omit/react-confirm-dialog"
-import { Pencil, Trash } from "lucide-react"
+import { Pencil, Plus, Trash } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "react-redux"
 import { toast } from "sonner"
 import { z } from "zod"
 
-const defaultFormData: Partial<InspectionType> = {
-    price: 0,
-    platformFee: 0,
-    duration: "",
-    features: [""],
-}
+// Full schema for creating new inspection types
+const inspectionTypeCreateSchema = z.object({
+    name: z
+        .string()
+        .min(2, { message: "Name must be at least 2 characters." })
+        .max(20, { message: "Name must not be longer than 20 characters." }),
+    price: z.coerce.number().min(50, "minimum value will 50").max(700, "Maximum value will 700"),
+    platformFee: z.coerce.number().min(50, "minimum value will 50").max(700, "Maximum value will 700"),
+    duration: z.string().min(2, { message: "duration will be at least 2 characters" }),
+    features: z.array(z.string()).min(1, { message: "At least one feature is required" }),
+    isActive: z.boolean().default(true),
+})
 
-// Simplified schema that only includes editable fields
+// Simplified schema for editing (without name field)
 const inspectionTypeEditSchema = z.object({
     price: z.coerce.number().min(50, "minimum value will 50").max(700, "Maximum value will 700"),
     platformFee: z.coerce.number().min(50, "minimum value will 50").max(700, "Maximum value will 700"),
@@ -48,16 +55,42 @@ const inspectionTypeEditSchema = z.object({
     features: z.array(z.string()).min(1, { message: "At least one feature is required" }),
 })
 
+export type InspectionTypeCreateValues = z.infer<typeof inspectionTypeCreateSchema>
 export type InspectionTypeEditValues = z.infer<typeof inspectionTypeEditSchema>
 
+const defaultCreateValues: InspectionTypeCreateValues = {
+    name: "",
+    price: 50,
+    platformFee: 50,
+    duration: "",
+    features: [""],
+    isActive: true,
+}
+
+const defaultEditValues: InspectionTypeEditValues = {
+    price: 50,
+    platformFee: 50,
+    duration: "",
+    features: [""],
+}
+
 const InspectionTypesManagement = () => {
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [currentType, setCurrentType] = useState<InspectionType | null>(null)
     const confirm = useConfirm()
 
-    const form = useForm<InspectionTypeEditValues>({
+    // Create form
+    const createForm = useForm<InspectionTypeCreateValues>({
+        resolver: zodResolver(inspectionTypeCreateSchema),
+        defaultValues: defaultCreateValues,
+        mode: "onChange",
+    })
+
+    // Edit form
+    const editForm = useForm<InspectionTypeEditValues>({
         resolver: zodResolver(inspectionTypeEditSchema),
-        defaultValues: defaultFormData,
+        defaultValues: defaultEditValues,
         mode: "onChange",
     })
 
@@ -68,6 +101,19 @@ const InspectionTypesManagement = () => {
     useEffect(() => {
         dispatch(featchAllInspectionTypes())
     }, [dispatch])
+
+    // Handle create form submission
+    const handleCreateSubmit = async (data: InspectionTypeCreateValues) => {
+        try {
+            await dispatch(createInspectionType(data)).unwrap()
+            toast.success("Inspection type created successfully!")
+            setIsCreateDialogOpen(false)
+            createForm.reset(defaultCreateValues)
+            dispatch(featchAllInspectionTypes()) // Refresh the data
+        } catch (error: any) {
+            toast.error(error.message || "Failed to create inspection type")
+        }
+    }
 
     // Handle toggle status
     const handleToggleStatus = async (id: string) => {
@@ -83,7 +129,7 @@ const InspectionTypesManagement = () => {
     // Open edit dialog with current type data
     const handleEditClick = (type: InspectionType) => {
         setCurrentType(type)
-        form.reset({
+        editForm.reset({
             price: type.price,
             platformFee: type.platformFee,
             duration: type.duration,
@@ -148,34 +194,49 @@ const InspectionTypesManagement = () => {
         }
     }
 
-    // Close dialog and reset form
-    const handleCloseDialog = () => {
-        setIsEditDialogOpen(false)
-        setCurrentType(null)
-        form.reset(defaultFormData)
-    }
-
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-3xl font-bold tracking-tight">Inspection Types</h2>
+                    <Button onClick={() => setIsCreateDialogOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Type
+                    </Button>
                 </div>
 
-                {/* Edit Dialog */}
-                <Dialog open={isEditDialogOpen} onOpenChange={handleCloseDialog}>
+                {/* Create Dialog */}
+                <Dialog
+                    open={isCreateDialogOpen}
+                    onOpenChange={(open) => {
+                        setIsCreateDialogOpen(open)
+                        if (!open) createForm.reset(defaultCreateValues)
+                    }}
+                >
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                            <DialogTitle>Edit {currentType?.name}</DialogTitle>
-                            <DialogDescription>Modify price, fee, duration and features.</DialogDescription>
+                            <DialogTitle>Add New Inspection Type</DialogTitle>
+                            <DialogDescription>Create a new inspection type with details and features.</DialogDescription>
                         </DialogHeader>
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(handleEditSubmit)}>
+                        <Form {...createForm}>
+                            <form onSubmit={createForm.handleSubmit(handleCreateSubmit)}>
                                 <ScrollArea className="max-h-[60vh] pr-4">
                                     <div className="grid gap-4 py-2">
+                                        <FormField
+                                            control={createForm.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Inspection Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Inspection Name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                         <div className="grid grid-cols-2 gap-4">
                                             <FormField
-                                                control={form.control}
+                                                control={createForm.control}
                                                 name="price"
                                                 render={({ field }) => (
                                                     <FormItem>
@@ -188,7 +249,7 @@ const InspectionTypesManagement = () => {
                                                 )}
                                             />
                                             <FormField
-                                                control={form.control}
+                                                control={createForm.control}
                                                 name="platformFee"
                                                 render={({ field }) => (
                                                     <FormItem>
@@ -202,7 +263,7 @@ const InspectionTypesManagement = () => {
                                             />
                                         </div>
                                         <FormField
-                                            control={form.control}
+                                            control={createForm.control}
                                             name="duration"
                                             render={({ field }) => (
                                                 <FormItem>
@@ -215,7 +276,110 @@ const InspectionTypesManagement = () => {
                                             )}
                                         />
                                         <FormField
-                                            control={form.control}
+                                            control={createForm.control}
+                                            name="features"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Features</FormLabel>
+                                                    <FormControl>
+                                                        <TagsInput
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                            placeholder="Enter features..."
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={createForm.control}
+                                            name="isActive"
+                                            render={({ field }) => (
+                                                <FormItem className="flex items-center space-x-2">
+                                                    <FormLabel>Is Active</FormLabel>
+                                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </ScrollArea>
+                                <DialogFooter className="mt-6">
+                                    <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" disabled={loading}>
+                                        Create
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Edit Dialog */}
+                <Dialog
+                    open={isEditDialogOpen}
+                    onOpenChange={(open) => {
+                        setIsEditDialogOpen(open)
+                        if (!open) {
+                            setCurrentType(null)
+                            editForm.reset(defaultEditValues)
+                        }
+                    }}
+                >
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit {currentType?.name}</DialogTitle>
+                            <DialogDescription>Modify price, fee, duration and features.</DialogDescription>
+                        </DialogHeader>
+                        <Form {...editForm}>
+                            <form onSubmit={editForm.handleSubmit(handleEditSubmit)}>
+                                <ScrollArea className="max-h-[60vh] pr-4">
+                                    <div className="grid gap-4 py-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <FormField
+                                                control={editForm.control}
+                                                name="price"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Price (₹)</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={editForm.control}
+                                                name="platformFee"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Platform Fee (₹)</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                        <FormField
+                                            control={editForm.control}
+                                            name="duration"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Duration</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g. 45-60 mins" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={editForm.control}
                                             name="features"
                                             render={({ field }) => (
                                                 <FormItem>
@@ -234,7 +398,7 @@ const InspectionTypesManagement = () => {
                                     </div>
                                 </ScrollArea>
                                 <DialogFooter className="mt-6">
-                                    <Button type="button" variant="outline" onClick={handleCloseDialog}>
+                                    <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                                         Cancel
                                     </Button>
                                     <Button type="submit" disabled={loading}>
