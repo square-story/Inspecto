@@ -9,6 +9,7 @@ import { IInspectorRepository } from "../core/interfaces/repositories/inspector.
 import { IEmailService } from "../core/interfaces/services/email.service.interface";
 import { NotificationService } from "./notification.service";
 import { NotificationType } from "../models/notification.model";
+import appConfig from "../config/app.config";
 
 export type ChangePasswordResponse = {
     status: boolean;
@@ -27,7 +28,18 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
         const response = await this.repository.findByIdAndUpdate(new Types.ObjectId(userId), data)
+
         if (response) {
+            await this._notificationService.createAndSendNotification(
+                appConfig.adminId,
+                "Admin",
+                NotificationType.SYSTEM,
+                "Inspector Profile Completed",
+                `${response?.firstName} ${response?.lastName} has completed their profile.`,
+                {
+                    userId
+                }
+            )
             return await this._inspectorRepository.updateInspectorProfileCompletion(userId)
         }
     }
@@ -85,6 +97,13 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                     updatedInspector.firstName,
                     reason
                 );
+                await this._notificationService.createAndSendNotification(
+                    updatedInspector._id.toString(),
+                    "Inspector",
+                    NotificationType.SYSTEM,
+                    "Inspector Profile Completed",
+                    `${updatedInspector?.firstName} ${updatedInspector?.lastName} has Denied their profile.`,
+                )
             }
 
             return updatedInspector;
@@ -112,6 +131,15 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
             //         await EmailService.sendUnblockNotification(updatedInspector.email, updatedInspector.firstName);
             //     }
             // }
+
+            await this._notificationService.createAndSendNotification(
+                inspectorId,
+                "Inspector",
+                NotificationType.SYSTEM,
+                "Inspector Blocked",
+                `Your account has been ${updates.status === InspectorStatus.BLOCKED ? 'blocked' : 'unblocked'}.`,
+            )
+
             return updates.status === InspectorStatus.APPROVED ? "UnBlocked" : "Blocked"
         } catch (error) {
             console.error('Error in denyInspector:', error);

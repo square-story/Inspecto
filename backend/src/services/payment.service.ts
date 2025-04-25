@@ -333,7 +333,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 String(user._id),
                 'User',
                 NotificationType.INSPECTION_COMPLETED,
-                'Payment Successful',
+                'Inspection Report Successful',
                 `Your Inspection is completed ready to download`,
                 {
                     inspectionId: inspection._id,

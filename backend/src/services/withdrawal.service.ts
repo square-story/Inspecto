@@ -8,13 +8,17 @@ import { IWalletRepository } from "../core/interfaces/repositories/wallet.reposi
 import { ServiceError } from "../core/errors/service.error";
 import mongoose, { Types } from "mongoose";
 import { WalletOwnerType } from "../models/wallet.model";
+import appConfig from "../config/app.config";
+import { NotificationType } from "../models/notification.model";
+import { INotificationService } from "../core/interfaces/services/notification.service.interface";
 
 
 @injectable()
 export class WithdrawalService extends BaseService<IWithdrawal> implements IWithDrawalService {
     constructor(
         @inject(TYPES.WithdrawalRepository) private _withdrawalRepository: IWithdrawalRepository,
-        @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository
+        @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
+        @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     ) {
         super(_withdrawalRepository)
     }
@@ -50,6 +54,18 @@ export class WithdrawalService extends BaseService<IWithdrawal> implements IWith
                 status: WithdrawalStatus.PENDING,
                 requestDate: new Date()
             });
+
+            //notification to admin
+            await this._notificationService.createAndSendNotification(
+                appConfig.adminId,
+                "Admin",
+                NotificationType.SYSTEM,
+                "Withdrawal Request",
+                `${withdrawal.inspector} has requested a withdrawal of ₹${withdrawal.amount}`,
+                {
+                    userId: inspectorId
+                }
+            )
 
             // Lock amount in wallet
             await this._walletRepository.findOneAndUpdate(
@@ -105,6 +121,18 @@ export class WithdrawalService extends BaseService<IWithdrawal> implements IWith
                         totalWithdrawn: withdrawal.amount
                     }
                 })
+
+                // Send notification to inspector
+                await this._notificationService.createAndSendNotification(
+                    withdrawal.inspector.toString(),
+                    "Inspector",
+                    NotificationType.SYSTEM,
+                    "Withdrawal Approved",
+                    `Your withdrawal request of ₹${withdrawal.amount} has been approved.`,
+                    {
+                        withdrawalId
+                    }
+                )
             } else {
                 await this._withdrawalRepository.findOneAndUpdate(new Types.ObjectId(withdrawalId), {
                     status: WithdrawalStatus.REJECTED,
@@ -124,6 +152,18 @@ export class WithdrawalService extends BaseService<IWithdrawal> implements IWith
                         }
                     }
                 );
+
+                // Send notification to inspector
+                await this._notificationService.createAndSendNotification(
+                    withdrawal.inspector.toString(),
+                    "Inspector",
+                    NotificationType.SYSTEM,
+                    "Withdrawal Rejected",
+                    `Your withdrawal request of ₹${withdrawal.amount} has been rejected.`,
+                    {
+                        withdrawalId
+                    }
+                )
             }
 
             await session.commitTransaction();

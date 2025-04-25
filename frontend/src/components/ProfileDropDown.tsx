@@ -13,6 +13,7 @@ import { AppDispatch } from '@/store'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { NotificationBell } from './NotificationBell'
 
 export function ProfileDropdown() {
     const dispatch: AppDispatch = useDispatch()
@@ -43,14 +44,7 @@ export function ProfileDropdown() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className='w-56' align='end' forceMount>
-                <DropdownMenuLabel className='font-normal'>
-                    <div className='flex flex-col space-y-1'>
-                        <p className='text-sm font-medium leading-none'>Admin</p>
-                        <p className='text-xs leading-none text-muted-foreground'>
-                            admin@gmail.com
-                        </p>
-                    </div>
-                </DropdownMenuLabel>
+                <DropdownMenuLabel className="flex justify-between items-center">Hey Admin👋<NotificationBell /></DropdownMenuLabel>
                 <DropdownMenuItem onClick={handleLogout}>
                     Log out
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>

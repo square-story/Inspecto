@@ -19,9 +19,10 @@ interface AppConfig {
     stripSecret: string;
     stripWebhook: string;
     frontEndUrl: string;
-    cloud_name: string,
-    api_key: string,
-    api_secret: string
+    cloud_name: string;
+    api_key: string;
+    api_secret: string;
+    adminId: string;
 }
 
 const appConfig: AppConfig = {
@@ -44,6 +45,7 @@ const appConfig: AppConfig = {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
     api_key: process.env.CLOUDINARY_API_KEY || '',
     api_secret: process.env.CLOUDINARY_API_SECRET || '',
+    adminId: process.env.ADMIN_ID || '',
 };
 
 export default appConfig;
