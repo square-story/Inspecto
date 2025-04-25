@@ -17,6 +17,7 @@ import { INotificationService } from "../core/interfaces/services/notification.s
 import { NotificationType } from "../models/notification.model";
 import { IInspector } from "../models/inspector.model";
 import { IUsers } from "../models/user.model";
+import { IInspectionTypeRepository } from "../core/interfaces/repositories/inspection-type.repository.interface";
 
 export const stripe = new Stripe(appConfig.stripSecret, {
     apiVersion: '2025-01-27.acacia'
@@ -32,6 +33,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
         @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
         @inject(TYPES.NotificationService) private _notificationService: INotificationService,
+        @inject(TYPES.InspectionTypeRepository) private _inspectionTypeRepository: IInspectionTypeRepository,
     ) {
         super(_paymentRepository);
     }
@@ -218,7 +220,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         try {
             const inspection = await this._inspectionRepository.findById(
                 new Types.ObjectId(inspectionId),
-                ['inspector', 'user']
+                ['inspector', 'user','inspectionType']
             );
 
             if (!inspection) throw new ServiceError('Inspection not found');
@@ -231,12 +233,17 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 status: PaymentStatus.SUCCEEDED
             })
 
-            if (!payment) {
-                throw new ServiceError('payment Not Found')
+            const inspectionType = await this._inspectionTypeRepository.findById(
+                inspection.inspectionType as unknown as Types.ObjectId
+            );
+
+            if (!inspectionType) {
+                throw new ServiceError('Inspection type not found');
             }
 
-            const platformFee = 50;
-            const inspectorAmount = payment.amount - platformFee
+            const platformFee = inspectionType.platformFee;
+            const totalAmount = payment ? payment.amount : inspectionType.price + platformFee;
+            const inspectorAmount = totalAmount - platformFee;
 
             let inspectorWallet = await this._walletRepository.findOne({
                 owner: inspection.inspector,
@@ -330,7 +337,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 `Your Inspection is completed ready to download`,
                 {
                     inspectionId: inspection._id,
-                    amount: payment.amount
+                    amount: inspectorAmount
                 }
             )
 
@@ -415,7 +422,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 payment.inspection.toString(),
                 `Refund for inspection #${payment.inspection.toString()}`
             );
-            
+
             //Cancel Inspection
             await this._inspectionRepository.update(
                 payment.inspection,

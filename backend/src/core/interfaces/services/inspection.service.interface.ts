@@ -3,7 +3,12 @@ import { IInspectionStats } from "../../types/inspection.stats.type";
 import { IBaseService } from "./base/base.service.interface";
 
 export interface IInspectionService extends IBaseService<IInspectionDocument> {
-    createInspection(data: IInspectionInput): Promise<IInspectionDocument>;
+    createInspection(data: IInspectionInput): Promise<{
+        booking: IInspectionDocument;
+        amount: number;
+        walletDeduction: number;
+        remainingAmount: number;
+    }>;
     updateInspection(id: string, data: Partial<IInspectionInput>): Promise<IInspectionDocument | null>;
     getInspectionById(id: string): Promise<IInspectionDocument | null>;
     getUserInspections(userId: string): Promise<IInspectionDocument[]>;

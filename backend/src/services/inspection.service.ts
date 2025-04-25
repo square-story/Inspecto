@@ -13,6 +13,9 @@ import { IInspectionStats } from "../core/types/inspection.stats.type";
 import { IPaymentRepository } from "../core/interfaces/repositories/payment.repository.interface";
 import { IInspectionTypeRepository } from "../core/interfaces/repositories/inspection-type.repository.interface";
 import { format } from "date-fns";
+import { IInspectionTypeService } from "../core/interfaces/services/inspection-type.service.interface";
+import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
+import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/wallet.model";
 
 @injectable()
 export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
@@ -20,7 +23,9 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
         @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
-        @inject(TYPES.InspectionTypeRepository) private _inspectionTypeRepository: IInspectionTypeRepository
+        @inject(TYPES.InspectionTypeRepository) private _inspectionTypeRepository: IInspectionTypeRepository,
+        @inject(TYPES.InspectionTypeService) private _inspectionTypeService: IInspectionTypeService,
+        @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
     ) {
         super(_inspectionRepository);
     }
@@ -155,7 +160,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         }
     }
 
-    async createInspection(data: IInspectionInput): Promise<IInspectionDocument> {
+    async createInspection(data: IInspectionInput): Promise<{ booking: IInspectionDocument;amount: number; walletDeduction: number; remainingAmount: number  }> {
         const session: ClientSession = await mongoose.startSession();
         session.startTransaction();
         try {
@@ -258,11 +263,66 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
                 data.date,
                 session
             );
-            await session.commitTransaction();
+            
+            let amount = 0;
+            if (data.inspectionType) {
+                const inspectionType = await this._inspectionTypeService.findById(data.inspectionType as unknown as Types.ObjectId);
+                if (!inspectionType) {
+                    throw new ServiceError('Inspection type not found');
+                }
+                amount = (inspectionType.price + inspectionType.platformFee);
+            }
+
+            let walletDeduction = 0;
+            let remainingAmount = amount;
+
+            
             if (!booking) {
                 throw new ServiceError('Failed to create or update booking');
             }
-            return booking;
+
+            const userWallet = await this._walletRepository.findOne({owner:data.user,ownerType:WalletOwnerType.USER});
+
+            if(userWallet && userWallet.balance >0){
+                walletDeduction = Math.min(userWallet.balance, amount);
+                remainingAmount = Math.max(0, amount - walletDeduction);
+
+                await this._walletRepository.findOneAndUpdate(
+                    { _id: userWallet._id },
+                    {
+                        $inc: {
+                            balance: -walletDeduction,
+                            pendingBalance: walletDeduction
+                        },
+                        $push: {
+                            transactions: {
+                                amount: walletDeduction,
+                                type: TransactionType.PAYMENT,
+                                status: TransactionStatus.COMPLETED,
+                                reference: booking?._id,
+                                description: `Payment for inspection #${booking.bookingReference}`
+                            }
+                        }
+                    },
+                );
+            }
+
+            if(remainingAmount === 0){
+                await this._inspectionRepository.updateInspection(
+                    booking.id,
+                    {
+                        status: InspectionStatus.CONFIRMED,
+                        version: booking.version + 1
+                    },
+                    session
+                );
+            }
+            
+
+            await session.commitTransaction();
+
+
+            return { booking, amount, walletDeduction, remainingAmount };
 
         } catch (error) {
             await session.abortTransaction();

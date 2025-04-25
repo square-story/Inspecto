@@ -28,7 +28,12 @@ export class UserController implements IUserController {
             }
             res.status(200).json(user);
         } catch (error) {
-            console.error(error)
+            console.error("Error occurred while updating user details:", error);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error. Please try again later."
+            });
+            return;
         }
     };
 

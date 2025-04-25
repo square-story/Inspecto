@@ -34,10 +34,13 @@ export class InspectionController implements IInspectionController {
             inspectionData.user = user as unknown as ObjectId
             inspectionData.inspector = inspectorId as unknown as ObjectId
             inspectionData.vehicle = vehicleId as unknown as ObjectId
-            const inspection = await this._inspectionService.createInspection(inspectionData);
+            const { booking, amount, remainingAmount, walletDeduction } = await this._inspectionService.createInspection(inspectionData);
             res.status(201).json({
                 success: true,
-                data: inspection,
+                data: booking,
+                amount: amount,
+                remainingAmount: remainingAmount,
+                walletDeduction: walletDeduction,
                 message: "Inspection booking saved successfully.",
             });
         } catch (error) {
