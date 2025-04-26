@@ -22,7 +22,7 @@ import {
     type SortingState,
     useReactTable,
 } from "@tanstack/react-table"
-import { Search, SortAsc, SortDesc, Star, } from "lucide-react"
+import { Search, SortAsc, SortDesc, } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { SignedAvatar } from "@/components/SignedAvatar"
@@ -129,12 +129,8 @@ const Step2 = () => {
                                 <div className="font-medium">
                                     {inspector.firstName} {inspector.lastName}
                                 </div>
-                                <div className="text-sm text-muted-foreground">{inspector.email}</div>
-                                <div className="flex items-center mt-1">
-                                    <Star className="h-4 w-4 text-yellow-500 mr-1" fill="currentColor" />
-                                    <span className="text-sm font-medium">5</span>
-                                    <span className="text-xs text-muted-foreground ml-1">({58} reviews)</span>
-                                </div>
+                                <div className="text-sm text-muted-foreground mb-2">{inspector.email}</div>
+                                <InspectorRating inspectorId={inspector._id} />
                             </div>
                         </div>
                     )

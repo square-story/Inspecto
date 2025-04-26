@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import appConfig from './app.config';
 
-const uri = appConfig.databaseUrl || 'mongodb+srv://<username>:<password>@<cluster-url>/inspectodb?retryWrites=true&w=majority';
+const uri = appConfig.databaseUrl;
 
 export const connectToDatabase = async () => {
     await mongoose.connect(uri)

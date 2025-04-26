@@ -10,7 +10,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
     return (
         <div className="space-y-4">
             {reviews.map((review) => (
-                <div key={review._id} className="border rounded-lg p-4 bg-white shadow-sm">
+                <div key={review._id} className="border rounded-lg p-4 bg-primary shadow-sm">
                     <div className="flex justify-between items-start mb-2">
                         <div>
                             <p className="font-semibold">{review.user.firstName}</p>
