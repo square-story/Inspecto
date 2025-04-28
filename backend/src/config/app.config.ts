@@ -25,6 +25,23 @@ interface AppConfig {
     adminId: string;
 }
 
+const validateEnv = () => {
+    const requiredEnvVars = [
+      'DATABASE_URL',
+      'ACCESS_TOKEN_SECRET',
+      'REFRESH_TOKEN_SECRET',
+      'REDIS_HOST'
+    ];
+    
+    const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+    
+    if (missingEnvVars.length > 0) {
+      throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+    }
+  };
+
+  validateEnv();
+
 const appConfig: AppConfig = {
     port: parseInt(process.env.PORT || '5000', 10),
     databaseUrl: process.env.DATABASE_URL as string,

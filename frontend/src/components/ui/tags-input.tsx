@@ -86,7 +86,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
                 const tags = e.clipboardData.getData("text").split(SPLITTER_REGEX);
                 const newValue = [...value];
                 tags.forEach((item) => {
-                    const parsedItem = item.replaceAll(FORMATTING_REGEX, "").trim();
+                    const parsedItem = item.replace(FORMATTING_REGEX, "").trim();
                     if (
                         parsedItem.length > 0 &&
                         !newValue.includes(parsedItem) &&

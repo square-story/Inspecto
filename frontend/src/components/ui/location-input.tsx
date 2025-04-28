@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
@@ -20,6 +19,7 @@ import { cn } from '@/lib/utils'
 // Import JSON data directly
 import countries from '@/data/countries.json'
 import states from '@/data/states.json'
+import { useState } from 'react'
 
 interface Timezone {
   zoneName: string

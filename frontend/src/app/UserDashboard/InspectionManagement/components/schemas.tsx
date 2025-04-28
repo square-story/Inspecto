@@ -17,12 +17,6 @@ export const Step2Schema = z.object({
     inspectorId: z.string().min(1, "Select an inspector"),
 })
 
-const timeSlotSchema = z.object({
-    startTime: z.string(),
-    endTime: z.string(),
-    isAvailable: z.boolean(),
-});
-
 export const Step3Schema = z.object({
     date: z.date({
         required_error: "A date of slot is required.",

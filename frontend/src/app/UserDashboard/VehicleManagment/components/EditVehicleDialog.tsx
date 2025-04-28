@@ -75,16 +75,16 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
                     ? new Date(vehicle.insuranceExpiry)
                     : vehicle.insuranceExpiry)
                 : undefined,
-            lastInspectionDate: vehicle.lastInspectionDate
-                ? (typeof vehicle.lastInspectionDate === 'string'
-                    ? new Date(vehicle.lastInspectionDate)
-                    : vehicle.lastInspectionDate)
+            lastInspectionDate: vehicle.lastInspectionId?.date
+                ? (typeof vehicle.lastInspectionId?.date === 'string'
+                    ? new Date(vehicle.lastInspectionId?.date)
+                    : vehicle.lastInspectionId?.date)
                 : undefined,
             frontViewImage: vehicle.frontViewImage || "",
             rearViewImage: vehicle.rearViewImage || "",
             color: vehicle.color || "",
         },
-        mode:'onSubmit'
+        mode: 'onSubmit'
     });
 
     const handleFront = (url: string | null) => {

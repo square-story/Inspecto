@@ -56,8 +56,8 @@ export const VehicleDetails = ({ vehicle }: { vehicle: Vehicle }) => {
                 <div>
                     <p className="text-gray-500">Last Inspection</p>
                     <p className="font-medium">
-                        {vehicle.lastInspectionDate
-                            ? format(new Date(vehicle.lastInspectionDate), 'dd MMM yyyy')
+                        {vehicle.lastInspectionId?.date
+                            ? format(new Date(vehicle.lastInspectionId.date), 'dd MMM yyyy')
                             : "N/A"}
                     </p>
                 </div>
