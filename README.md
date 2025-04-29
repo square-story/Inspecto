@@ -1,62 +1,54 @@
-# 🚗 Inspecto – Centralized Vehicle Inspection Platform  
+# 🚗 **Inspecto** – Your Trusted Vehicle Inspection Platform 
 
-## 📌 Overview  
-**Inspecto** is a full-stack web application designed to streamline vehicle inspections by connecting users with verified inspectors. It provides a secure and transparent system for managing inspection requests, reports, and user-inspector communication.  
-
----
-
-## 🚀 Features  
-
-### 👤 User Features  
-- Register/Login securely  
-- Add and manage vehicle details  
-- Request inspections from verified inspectors  
-- View and download inspection reports  
-- Communicate with inspectors via messaging  
-
-### 🔍 Inspector Features  
-- Register/Login & get verified  
-- View and accept inspection requests  
-- Conduct inspections and upload reports  
-- Communicate with users  
-
-### 🛠️ Admin Features  
-- Manage users and inspectors  
-- Approve and verify inspectors  
-- Oversee inspection reports  
+Inspecto is a cutting-edge platform that connects vehicle owners with certified inspectors for seamless, reliable, and transparent vehicle inspections. Whether you're buying a car, maintaining one, or need a professional inspection report, Inspecto has you covered.  
 
 ---
 
-## 🏗️ Tech Stack  
-- **Frontend**: React.js (Vite) + Tailwind CSS + Styled Components  
+## 🌟 **Key Features**
+
+### 👤 **For Users**
+- **Secure Registration & Login**: Your data is safe with us.
+- **Vehicle Management**: Add, edit, and manage your vehicle details effortlessly.
+- **Book Inspections**: Schedule inspections with verified professionals in just a few clicks.
+- **Access Reports**: View, download, and share detailed inspection reports.
+- **Stay Connected**: Communicate directly with inspectors for updates and queries.
+
+### 🔍 **For Inspectors**
+- **Get Verified**: Register and get approved to start offering your services.
+- **Manage Requests**: View and accept inspection requests with ease.
+- **Upload Reports**: Submit detailed inspection reports directly through the platform.
+- **Grow Your Business**: Reach more customers and build trust with verified credentials.
+
+### 🛠️ **For Admins**
+- **User & Inspector Management**: Approve, verify, and manage users and inspectors.
+- **Oversee Inspections**: Monitor inspection activities and reports.
+- **Analytics Dashboard**: Gain insights into platform performance and user activity.
+
+---
+
+## 🏗️ **Tech Stack**
+- **Frontend**: React.js (Vite) + Tailwind CSS
 - **Backend**: Node.js + Express.js  
 - **Database**: MongoDB  
 - **State Management**: Redux Toolkit  
 - **Authentication**: JWT (Access & Refresh Tokens)  
-- **API Calls**: Axios  
-- **Messaging**: Internal user-inspector communication  
-- **Code Structure**: Class-based approach with Repository Pattern in TypeScript  
+- **API Communication**: Axios  
+- **File Storage**: Cloudinary for secure image and document uploads  
 
 ---
 
-## 🔒 Security & Authentication  
-- Role-based authentication (Admin, Inspector, User) using JWT  
-- Secure file uploads for profile images & documents  
-- Separate refresh token management for different roles  
-- Data validation and error handling  
-
----
-
-## 📅 Future Improvements  
-✅ GPS-based inspector tracking  
-✅ Enhanced analytics in the admin dashboard  
+## 🔒 **Security Highlights**
+- **Role-Based Access Control**: Separate roles for Admins, Inspectors, and Users.
+- **Secure File Uploads**: Profile images and documents are safely stored.
+- **Token-Based Authentication**: Access and refresh tokens for secure sessions.
+- **Data Validation**: Robust validation to ensure data integrity.
 
 ---
 
 ## Screenshots
 
-![Landing Page Dark](https://i.imgur.com/7kPZGTS.png)
-![Landing Page Light](https://i.imgur.com/ixp9Rx9.png)
+![Desktop View](https://i.imgur.com/iDxfDhh.jpeg)
+![Landing Page Light](https://i.imgur.com/hOvJS9n.jpeg)
 
 
 
@@ -94,18 +86,26 @@ npm run dev
 
 ---
 
-## 🤝 Contributing  
-We welcome contributions! Feel free to fork the repo and submit a pull request.  
-
----
-
-## 📜 License  
-This project is licensed under the MIT License.  
-
----
-
 ## 📩 Contact  
-For queries, feel free to reach out or raise an issue in the repository.  
+For queries, feel free to reach out or raise an issue in the repository. 
+
+- **Email** : sadik.build@gmail.com
+
+---
+
+📅 Future Enhancements
+- **GPS-Based Inspector Tracking**: Real-time location tracking for inspectors.
+- **Advanced Analytics**: Enhanced insights for admins to monitor platform performance.
+- **Mobile App**: A dedicated mobile app for users and inspectors.
+
+---
+
+🤝 Contributing
+We welcome contributions from the community!
+
+- **Fork the repository**.
+- **Create a feature branch**.
+- **Submit a pull request with a detailed description of your changes**.
 
 ---
 
