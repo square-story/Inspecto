@@ -156,7 +156,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
 
             const redisKey = `resetToken:${email}`
             await redisClient.set(redisKey, hashedToken, { EX: 3600 }) //1 hour
-            const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}&role=${role}`;
+            const resetUrl = `${appConfig.frontEndUrl}/reset-password?token=${resetToken}&email=${email}&role=${role}`;
             await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
             return { message: 'Reset link sent successfully' }
         } catch (error) {

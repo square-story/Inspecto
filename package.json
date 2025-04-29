@@ -5,7 +5,9 @@
     "start:backend": "npm start --prefix backend",
     "dev": "concurrently --names \"frontend,backend\" -c \"blue,green\" \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev --prefix frontend",
-    "dev:backend": "nodemon --exec \"./node_modules/.bin/ts-node\" ./backend/src/server.ts"
+    "dev:backend": "nodemon --exec \"./node_modules/.bin/ts-node\" ./backend/src/server.ts",
+    "start:dev": "cross-env NODE_ENV=development ts-node src/index.ts",
+    "start:prod": "cross-env NODE_ENV=production ts-node src/index.ts"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

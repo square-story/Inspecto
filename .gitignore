@@ -77,3 +77,4 @@ docker-compose.log
 .dockerignore
 frontend/.env.development
 frontend/.env.production
+backend/.env.production

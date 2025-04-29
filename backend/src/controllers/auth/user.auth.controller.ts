@@ -5,6 +5,7 @@ import { inject, injectable, } from "inversify";
 import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
+import appConfig from "../../config/app.config";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
@@ -197,7 +198,7 @@ export class UserAuthController implements IUserAuthController {
 
             const ticket = await client.verifyIdToken({
                 idToken: token,
-                audience: process.env.GOOGLE_CLIENT_ID,
+                audience: appConfig.googleClientId,
             });
             const payload = ticket.getPayload();
             if (!payload) {
