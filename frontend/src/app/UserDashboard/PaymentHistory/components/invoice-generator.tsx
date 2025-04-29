@@ -75,7 +75,7 @@ export default function InvoiceGenerator({ payment, open, onClose }: InvoiceGene
             // pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight);
             // pdf.save(`invoice-${payment.stripePaymentIntentId.slice(-8)}.pdf`);
 
-            console.log("Downloading invoice for payment:", payment._id)
+            
         } catch (error) {
             console.error("Error generating PDF:", error)
             toast.error("There was an error downloading your invoice. Please try again.")

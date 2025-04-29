@@ -37,6 +37,12 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --success: 120 60% 50%;
+    --success-foreground: 120 20% 95%;
+    --info: 200 70% 50%;
+    --info-foreground: 200 20% 95%;
+    --warning: 40 90% 50%;
+    --warning-foreground: 40 20% 95%;
   }
 
   .dark {
@@ -72,6 +78,12 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --success: 120 40% 40%;
+    --success-foreground: 120 80% 90%;
+    --info: 200 50% 40%;
+    --info-foreground: 200 80% 90%;
+    --warning: 40 70% 40%;
+    --warning-foreground: 40 80% 90%;
   }
 
   body {
@@ -114,6 +126,17 @@
 
   .nav-item.active {
     @apply text-primary font-bold;
+  }
+  .alert-success {
+    @apply bg-success text-success-foreground px-4 py-2 rounded-lg;
+  }
+
+  .alert-info {
+    @apply bg-info text-info-foreground px-4 py-2 rounded-lg;
+  }
+
+  .alert-warning {
+    @apply bg-warning text-warning-foreground px-4 py-2 rounded-lg;
   }
 }
 

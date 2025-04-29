@@ -1,18 +1,18 @@
-import { useFormContext } from "react-hook-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
+    FormControl,
     FormField,
     FormItem,
     FormLabel,
-    FormControl,
     FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
-import { TimeSlotMap } from "./Step3";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Phone, Car, Clock, CheckCircle } from "lucide-react";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { format } from "date-fns";
+import { Calendar, Car, CheckCircle, Clock, MapPin, Phone } from "lucide-react";
+import { useFormContext } from "react-hook-form";
+import { useSelector } from "react-redux";
+import { TimeSlotMap } from "./Step3";
 
 interface ReviewSectionProps {
     label: string;

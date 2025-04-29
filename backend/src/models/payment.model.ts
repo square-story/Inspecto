@@ -4,7 +4,8 @@ export enum PaymentStatus {
     PENDING = "pending",
     SUCCEEDED = "succeeded",
     FAILED = "failed",
-    REFUNDED = "refunded"
+    REFUNDED = "refunded",
+    CANCELLED = "cancelled"
 }
 
 export interface IPaymentInput {
@@ -14,6 +15,8 @@ export interface IPaymentInput {
     currency: string;
     stripePaymentIntentId: string;
     status: PaymentStatus;
+    createdAt: Date,
+    updatedAt: Date,
     metadata?: Record<string, unknown>;
 }
 

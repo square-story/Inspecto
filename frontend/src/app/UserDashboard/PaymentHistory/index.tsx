@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
+    AlertTriangle,
     CalendarClock,
     ChevronLeft,
     ChevronRight,
@@ -9,6 +11,7 @@ import {
     FileText,
     Info,
     RefreshCcw,
+    Star,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
@@ -35,10 +38,17 @@ import { fetchAppointments } from "@/features/inspection/inspectionSlice"
 import { fetchPayments } from "@/features/payments/paymentSlice"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import InvoiceGenerator from "./components/invoice-generator"
-import { IPayments } from "@/features/payments/types"
+import type { IPayments } from "@/features/payments/types"
 import StripePaymentWrapper from "@/components/StripePaymentWrapper"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { getSignedPdfUrl } from "@/utils/cloudinary"
+import { saveAs } from "file-saver"
+import { ReviewDialog } from "@/components/ReviewComponent"
+import { PaymentService } from "@/services/payment.service"
+import { useConfirm } from "@omit/react-confirm-dialog"
+import { ReviewService } from "@/services/review.service"
+import { IReview } from "@/types/review"
 
 const ITEMS_PER_PAGE = 5
 
@@ -59,10 +69,11 @@ enum InspectionStatus {
 
 // Function to format currency in Indian Rupees
 const formatIndianRupees = (amount: number) => {
+    const maximumFractionDigits = 0
     return new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits,
     }).format(amount)
 }
 
@@ -118,35 +129,203 @@ const PaymentTimer = ({ createdAt, onExpired }: { createdAt: string; onExpired: 
     )
 }
 
+// Timer component for cancellation window
+const CancellationTimer = ({ createdAt }: { createdAt: string }) => {
+    const [timeLeft, setTimeLeft] = useState<number>(0)
+    const [progress, setProgress] = useState<number>(100)
+
+    useEffect(() => {
+        const paymentTime = new Date(createdAt).getTime()
+        const expiryTime = paymentTime + 10 * 60 * 1000 // 10 minutes in milliseconds
+
+        const calculateTimeLeft = () => {
+            const now = new Date().getTime()
+            const difference = expiryTime - now
+
+            if (difference <= 0) {
+                setTimeLeft(0)
+                setProgress(0)
+                clearInterval(timer)
+                return
+            }
+
+            const minutes = Math.floor((difference / 1000 / 60) % 60)
+            const seconds = Math.floor((difference / 1000) % 60)
+            setTimeLeft(minutes * 60 + seconds)
+
+            // Calculate progress percentage
+            const totalTime = 10 * 60 // 10 minutes in seconds
+            const elapsedTime = totalTime - (minutes * 60 + seconds)
+            const progressPercentage = 100 - (elapsedTime / totalTime) * 100
+            setProgress(progressPercentage)
+        }
+
+        calculateTimeLeft()
+        const timer = setInterval(calculateTimeLeft, 1000)
+
+        return () => clearInterval(timer)
+    }, [createdAt])
+
+    const minutes = Math.floor(timeLeft / 60)
+    const seconds = timeLeft % 60
+
+    return (
+        <div className="text-xs text-muted-foreground mt-1">
+            <div className="flex justify-between items-center">
+                <span>Refund window:</span>
+                <span className="font-medium">{`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`}</span>
+            </div>
+            <Progress value={progress} className="h-1 mt-1" />
+        </div>
+    )
+}
+
 export default function PaymentHistory() {
     const [paymentFilter, setPaymentFilter] = useState("all")
     const [appointmentFilter, setAppointmentFilter] = useState("all")
+    const [paymentDateFilter, setPaymentDateFilter] = useState("all")
+    const [appointmentDateFilter, setAppointmentDateFilter] = useState("all")
     const [paymentPage, setPaymentPage] = useState(1)
     const [appointmentPage, setAppointmentPage] = useState(1)
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
+    const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
+    const [existingReview, setExistingReview] = useState<IReview | null>(null);
+    const [hasExistingReview, setHasExistingReview] = useState(false);
     const [retryPayment, setRetryPayment] = useState<any>(null)
+    const confirm = useConfirm()
     const dispatch = useDispatch<AppDispatch>()
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
-
 
     useEffect(() => {
         dispatch(fetchAppointments())
         dispatch(fetchPayments())
     }, [dispatch])
 
+    const checkExistingReview = async (inspectionId: string) => {
+        try {
+            // Call your review service to check for existing reviews
+            const review = await ReviewService.getInspectionReview(inspectionId);
+
+            if (review) {
+                setExistingReview(review);
+                setHasExistingReview(true);
+            } else {
+                setExistingReview(null);
+                setHasExistingReview(false);
+            }
+        } catch (error) {
+            console.error("Error checking for existing review:", error);
+            toast.error("Failed to check for existing review");
+            setExistingReview(null);
+            setHasExistingReview(false);
+            setReviewDialogOpen(true);
+        }
+    };
+
+
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setPaymentPage(1)
+    }, [paymentFilter, paymentDateFilter])
+
+    useEffect(() => {
+        setAppointmentPage(1)
+    }, [appointmentFilter, appointmentDateFilter])
+
+    // Add this function to filter by date
+    const filterByDate = (dateString: string, filterType: string) => {
+        if (!dateString) return false
+
+        try {
+            const itemDate = new Date(dateString)
+            // Check if date is valid
+            if (isNaN(itemDate.getTime())) return false
+
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+
+            const yesterday = new Date(today)
+            yesterday.setDate(yesterday.getDate() - 1)
+
+            const tomorrow = new Date(today)
+            tomorrow.setDate(tomorrow.getDate() + 1)
+
+            const thisWeekStart = new Date(today)
+            thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay())
+
+            const thisWeekEnd = new Date(thisWeekStart)
+            thisWeekEnd.setDate(thisWeekEnd.getDate() + 6)
+
+            const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+            const thisMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+            const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0)
+
+            itemDate.setHours(0, 0, 0, 0)
+
+            switch (filterType) {
+                case "today":
+                    return itemDate.getTime() === today.getTime()
+                case "yesterday":
+                    return itemDate.getTime() === yesterday.getTime()
+                case "tomorrow":
+                    return itemDate.getTime() === tomorrow.getTime()
+                case "this-week":
+                    return itemDate >= thisWeekStart && itemDate <= thisWeekEnd
+                case "this-month":
+                    return itemDate >= thisMonthStart && itemDate <= thisMonthEnd
+                case "last-month":
+                    return itemDate >= lastMonthStart && itemDate <= lastMonthEnd
+                default:
+                    return true
+            }
+        } catch (error) {
+            console.error("Error filtering by date:", error)
+            return false
+        }
+    }
+
+    // Update the filteredPayments useMemo to include date filtering
     const filteredPayments = useMemo(() => {
         if (!payments) return []
-        if (paymentFilter === "all") return payments
-        return payments.filter((payment) => payment.status === paymentFilter)
-    }, [payments, paymentFilter])
 
+        // First filter by status
+        let filtered = payments
+        if (paymentFilter !== "all") {
+            filtered = filtered.filter((payment) => payment.status === paymentFilter)
+        }
+
+        // Then filter by date
+        if (paymentDateFilter !== "all") {
+            filtered = filtered.filter((payment) => filterByDate(payment.createdAt, paymentDateFilter))
+        }
+
+        return filtered
+    }, [payments, paymentFilter, paymentDateFilter])
+
+    // Update the filteredInspections useMemo to include date filtering
     const filteredInspections = useMemo(() => {
         if (!inspections) return []
-        if (appointmentFilter === "all") return inspections
-        return inspections.filter((inspection) => inspection.status === appointmentFilter)
-    }, [inspections, appointmentFilter])
+
+        // First filter by status
+        let filtered = inspections
+        if (appointmentFilter !== "all") {
+            filtered = filtered.filter((inspection) => inspection.status === appointmentFilter)
+        }
+
+        // Then filter by date
+        if (appointmentDateFilter !== "all") {
+            filtered = filtered.filter((inspection) =>
+                filterByDate(inspection.date as unknown as string, appointmentDateFilter),
+            )
+        }
+
+        return filtered
+    }, [inspections, appointmentFilter, appointmentDateFilter])
 
     const paginatedPayments = useMemo(() => {
         const startIndex = (paymentPage - 1) * ITEMS_PER_PAGE
@@ -190,13 +369,63 @@ export default function PaymentHistory() {
     }
 
     const handleDownloadInvoice = (payment: IPayments) => {
-        console.log(`Opening invoice for payment: ${payment._id}`)
         setInvoicePayment(payment)
     }
 
-    const handleDownloadReport = (inspectionId: string) => {
-        console.log(`Downloading report for inspection: ${inspectionId}`)
-        // Implement actual report download functionality here
+    const handleDownloadReport = async (inspectionId: string) => {
+        try {
+            const inspection = inspections?.find((i) => i._id === inspectionId)
+            if (!inspection?.report?.reportPdfUrl) {
+                toast.error("Report PDF not available")
+                return
+            }
+
+            // Get signed URL from backend
+            const signedUrl = await getSignedPdfUrl(inspection.report.reportPdfUrl)
+
+            // Fetch the PDF blob
+            const response = await fetch(signedUrl)
+            const pdfBlob = await response.blob()
+
+            // Download with proper filename
+            const filename = `Inspection-Report-${inspection.bookingReference}.pdf`
+            saveAs(pdfBlob, filename)
+
+            toast.success("Report download started")
+        } catch (error) {
+            console.error("Error downloading report:", error)
+            toast.error("Failed to download report. Please try again.")
+        }
+    }
+
+    const handleCancelPayment = async (payment: IPayments) => {
+        try {
+            const result = await confirm({
+                title: `Cancel Inspection`,
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: `Are you sure you want to Cancel this Inspection?`,
+                confirmButton: {
+                    className: "bg-red-500 hover:bg-red-600",
+                },
+                cancelButton: {
+                    className: "bg-gray-200 hover:bg-gray-300",
+                },
+                alertDialogTitle: {
+                    className: "flex items-center gap-5",
+                },
+            })
+            if (result) {
+                await PaymentService.cancelPayment(payment.stripePaymentIntentId)
+                toast.success("Payment cancelled successfully")
+                // Refresh payments list
+                await dispatch(fetchPayments())
+                // Refresh inspections list
+                await dispatch(fetchAppointments())
+            }
+        } catch (error) {
+            console.error("Error cancelling payment:", error)
+            toast.error("Failed to cancel payment. Please try again.")
+        }
     }
 
     const handlePaymentExpired = (paymentId: string) => {
@@ -208,23 +437,59 @@ export default function PaymentHistory() {
         setRetryPayment(payment)
     }
 
-
     const handleRetrySuccess = async () => {
-        toast.success(`Payment retry successful`);
-        setRetryPayment(null);
-        await dispatch(fetchPayments());
+        toast.success(`Payment retry successful`)
+        setRetryPayment(null)
+        await dispatch(fetchPayments())
     }
 
     const handleRetryError = async (message: string) => {
-        toast.error(`Payment retry failed: ${message}`);
-        setRetryPayment(null);
-        await dispatch(fetchPayments());
+        toast.error(`Payment retry failed: ${message}`)
+        setRetryPayment(null)
+        await dispatch(fetchPayments())
     }
 
-    const getTimeSlotLabel = (slotNumber: number) => {
-        if (slotNumber <= 2) return "Morning (9 AM - 12 PM)"
-        if (slotNumber <= 4) return "Afternoon (1 PM - 4 PM)"
-        return "Evening (5 PM - 8 PM)"
+    // const getTimeSlotLabel = (slotNumber: number) => {
+    //     if (slotNumber <= 2) return "Morning (9 AM - 12 PM)"
+    //     if (slotNumber <= 4) return "Afternoon (1 PM - 4 PM)"
+    //     return "Evening (5 PM - 8 PM)"
+    // }
+
+    const showCancelButton = (payment: IPayments): boolean => {
+        const createdAtTime = new Date(payment.createdAt).getTime()
+        const now = Date.now()
+        const diffInMinutes = (now - createdAtTime) / (1000 * 60)
+        return payment.status === PaymentStatus.SUCCEEDED && diffInMinutes <= 10
+    }
+
+    const handleCancelSuccessfulPayment = async (payment: IPayments) => {
+        try {
+            const result = await confirm({
+                title: `Cancel Inspection`,
+                icon: <AlertTriangle className="size-4 text-yellow-500" />,
+                description: `Are you sure you want to Cancel this Inspection?`,
+                confirmButton: {
+                    className: "bg-red-500 hover:bg-red-600",
+                },
+                cancelButton: {
+                    className: "bg-gray-200 hover:bg-gray-300",
+                },
+                alertDialogTitle: {
+                    className: "flex items-center gap-5",
+                },
+            })
+            if (result) {
+                await PaymentService.cancelSuccessfulPayment(payment.stripePaymentIntentId)
+                toast.success("Payment cancelled successfully")
+                // Refresh payments list
+                await dispatch(fetchPayments())
+                // Refresh inspections list
+                await dispatch(fetchAppointments())
+            }
+        } catch (error) {
+            console.error("Error cancelling payment:", error)
+            toast.error("Failed to cancel payment. Please try again.")
+        }
     }
 
     return (
@@ -246,17 +511,33 @@ export default function PaymentHistory() {
                                     <CardTitle>Payment Transactions</CardTitle>
                                     <CardDescription>View and manage all your payment transactions</CardDescription>
                                 </div>
-                                <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                                    <SelectTrigger className="w-full sm:w-[180px]">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Payments</SelectItem>
-                                        <SelectItem value="succeeded">Succeeded</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="failed">Failed</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <Select value={paymentDateFilter} onValueChange={setPaymentDateFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by date" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Dates</SelectItem>
+                                            <SelectItem value="today">Today</SelectItem>
+                                            <SelectItem value="yesterday">Yesterday</SelectItem>
+                                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                                            <SelectItem value="this-week">This Week</SelectItem>
+                                            <SelectItem value="this-month">This Month</SelectItem>
+                                            <SelectItem value="last-month">Last Month</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Payments</SelectItem>
+                                            <SelectItem value="succeeded">Succeeded</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="failed">Failed</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -327,6 +608,49 @@ export default function PaymentHistory() {
                                                     </TooltipProvider>
                                                 )}
 
+                                                {showCancelButton(payment) && (
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <div className="flex flex-col">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleCancelSuccessfulPayment(payment)}
+                                                                        className="text-red-600 hover:text-red-700"
+                                                                    >
+                                                                        Cancel & Refund
+                                                                    </Button>
+                                                                    <CancellationTimer createdAt={payment.createdAt} />
+                                                                </div>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Cancel booking and request refund</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                )}
+
+                                                {payment.status === PaymentStatus.PENDING && (
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleCancelPayment(payment)}
+                                                                    className="text-red-600 hover:text-red-700"
+                                                                >
+                                                                    Cancel Payment
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Cancel this pending payment</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                )}
+
                                                 <Dialog>
                                                     <DialogTrigger asChild>
                                                         <Button variant="ghost" size="icon">
@@ -359,6 +683,26 @@ export default function PaymentHistory() {
 
                                                                 <p className="text-muted-foreground">Payment ID:</p>
                                                                 <p className="font-mono text-xs break-all">{payment.stripePaymentIntentId}</p>
+
+                                                                {/* Additional inspection details */}
+                                                                <p className="text-muted-foreground">Inspection Type:</p>
+                                                                <p className="capitalize">{payment.inspection.inspectionType.name}</p>
+
+                                                                <p className="text-muted-foreground">Inspection Date:</p>
+                                                                <p>{formatDateTime(payment.inspection.date as unknown as string).date}</p>
+
+                                                                <p className="text-muted-foreground">Inspection Status:</p>
+                                                                <p>
+                                                                    <Badge className={getStatusBadgeColor(payment.inspection.status)}>
+                                                                        {payment.inspection.status.charAt(0).toUpperCase() + payment.inspection.status.slice(1)}
+                                                                    </Badge>
+                                                                </p>
+
+                                                                <p className="text-muted-foreground">Inspector:</p>
+                                                                <p className="capitalize">{payment.inspection.inspector?.firstName || "Not assigned"}</p>
+
+                                                                <p className="text-muted-foreground">Location:</p>
+                                                                <p>{payment.inspection.location}</p>
 
                                                                 {payment.metadata && Object.keys(payment.metadata).length > 0 && (
                                                                     <>
@@ -455,18 +799,34 @@ export default function PaymentHistory() {
                                     <CardTitle>Inspection Appointments</CardTitle>
                                     <CardDescription>Your scheduled vehicle inspections</CardDescription>
                                 </div>
-                                <Select value={appointmentFilter} onValueChange={setAppointmentFilter}>
-                                    <SelectTrigger className="w-full sm:w-[180px]">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Inspections</SelectItem>
-                                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="completed">Completed</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <Select value={appointmentDateFilter} onValueChange={setAppointmentDateFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by date" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Dates</SelectItem>
+                                            <SelectItem value="today">Today</SelectItem>
+                                            <SelectItem value="yesterday">Yesterday</SelectItem>
+                                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                                            <SelectItem value="this-week">This Week</SelectItem>
+                                            <SelectItem value="this-month">This Month</SelectItem>
+                                            <SelectItem value="last-month">Last Month</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select value={appointmentFilter} onValueChange={setAppointmentFilter}>
+                                        <SelectTrigger className="w-full sm:w-[180px]">
+                                            <SelectValue placeholder="Filter by status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Inspections</SelectItem>
+                                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
+                                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -494,8 +854,7 @@ export default function PaymentHistory() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">
-                                                        {inspection.inspectionType.charAt(0).toUpperCase() + inspection.inspectionType.slice(1)}{" "}
-                                                        Inspection
+                                                        {inspection.inspectionType.name}
                                                     </p>
                                                     <p className="text-sm text-muted-foreground">
                                                         {inspection.bookingReference} • {formatDateTime(inspection.date as unknown as string).date}
@@ -528,7 +887,9 @@ export default function PaymentHistory() {
                                                 )}
 
                                                 <Dialog>
-                                                    <DialogTrigger asChild>
+                                                    <DialogTrigger asChild onClick={() => {
+                                                        checkExistingReview(inspection._id);
+                                                    }}>
                                                         <Button variant="ghost" size="icon">
                                                             <Info className="h-4 w-4" />
                                                             <span className="sr-only">More info</span>
@@ -546,14 +907,17 @@ export default function PaymentHistory() {
                                                                 <p className="text-muted-foreground">Reference:</p>
                                                                 <p className="font-medium">{inspection.bookingReference}</p>
 
+                                                                <p className="text-muted-foreground">Inspector Name</p>
+                                                                <p className="capitalize">{inspection.inspector.firstName}</p>
+
                                                                 <p className="text-muted-foreground">Type:</p>
-                                                                <p className="capitalize">{inspection.inspectionType}</p>
+                                                                <p className="capitalize">{inspection.inspectionType.name}</p>
 
                                                                 <p className="text-muted-foreground">Date:</p>
                                                                 <p>{formatDateTime(inspection.date as unknown as string).date}</p>
 
-                                                                <p className="text-muted-foreground">Time Slot:</p>
-                                                                <p>{getTimeSlotLabel(inspection.slotNumber)}</p>
+                                                                {/* <p className="text-muted-foreground">Time Slot:</p>
+                                                                <p>{getTimeSlotLabel(inspection.slotNumber)}</p> */}
 
                                                                 <p className="text-muted-foreground">Status:</p>
                                                                 <p>
@@ -568,15 +932,42 @@ export default function PaymentHistory() {
                                                         </div>
                                                         <DialogFooter className="flex justify-between items-center mt-4">
                                                             {inspection.status === InspectionStatus.COMPLETED && (
-                                                                <Button
-                                                                    onClick={() => handleDownloadReport(inspection._id)}
-                                                                    className="w-full sm:w-auto"
-                                                                >
-                                                                    <Download className="h-4 w-4 mr-2" />
-                                                                    Download Inspection Report
-                                                                </Button>
+                                                                <>
+                                                                    <Button
+                                                                        onClick={() => handleDownloadReport(inspection._id)}
+                                                                        className="w-full sm:w-auto"
+                                                                    >
+                                                                        <Download className="h-4 w-4 mr-2" />
+                                                                        Download Inspection Report
+                                                                    </Button>
+                                                                    <Button
+                                                                        onClick={() => {
+                                                                            setReviewDialogOpen(true);
+                                                                        }}
+                                                                        className="w-full"
+                                                                    >
+                                                                        {hasExistingReview || existingReview ? (
+                                                                            <>
+                                                                                View Review
+                                                                                <Star className="fill-yellow-400 h-4 w-4 ml-2" />
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                Give Review
+                                                                                <Star className="fill-white h-4 w-4 ml-2" />
+                                                                            </>
+                                                                        )}
+                                                                    </Button>
+                                                                </>
                                                             )}
                                                         </DialogFooter>
+                                                        <ReviewDialog
+                                                            open={reviewDialogOpen}
+                                                            onOpenChange={setReviewDialogOpen}
+                                                            inspectionId={inspection._id}
+                                                            inspectorId={inspection.inspector._id}
+                                                            existingReview={existingReview || undefined}
+                                                        />
                                                     </DialogContent>
                                                 </Dialog>
                                             </div>
@@ -666,9 +1057,7 @@ export default function PaymentHistory() {
                             <Button variant="outline" onClick={() => setActivePaymentId(null)} className="w-full sm:w-auto">
                                 Cancel
                             </Button>
-                            <Button className="w-full sm:w-auto">
-                                Proceed to Payment
-                            </Button>
+                            <Button className="w-full sm:w-auto">Proceed to Payment</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

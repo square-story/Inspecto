@@ -6,6 +6,7 @@ import inspectorReducer from '@/features/inspector/inspectorSlice'
 import vehicleReducer from '@/features/vehicle/vehicleSlice'
 import inspectionReducer from '@/features/inspection/inspectionSlice'
 import paymentReducer from '@/features/payments/paymentSlice'
+import inspectionTypeReducer from '@/features/inspectionType/inspectionTypeSlice'
 
 export const store = configureStore({
     reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
         vehicle: vehicleReducer,
         inspections: inspectionReducer,
         payments: paymentReducer,
+        inspectionType: inspectionTypeReducer,
     },
 });
 

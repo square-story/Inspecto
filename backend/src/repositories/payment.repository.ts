@@ -3,6 +3,7 @@ import { IPaymentRepository } from "../core/interfaces/repositories/payment.repo
 import paymentModel, { IPaymentInput, IPaymentDocument, PaymentStatus } from "../models/payment.model";
 import { BaseRepository } from "../core/abstracts/base.repository";
 import { IInspectionStatesFromPaymentDB } from "../core/types/inspection.stats.type";
+import { Types } from "mongoose";
 
 @injectable()
 export class PaymentRepository extends BaseRepository<IPaymentDocument> implements IPaymentRepository {
@@ -21,7 +22,13 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
     async findUserPayments(userId: string): Promise<IPaymentDocument[]> {
         return await this.model.find({
             user: userId
-        }).populate('inspection').populate('user').sort({ createdAt: -1 });
+        }).populate([
+            { path: 'inspection', populate: [
+                { path: 'inspectionType' },
+                { path: 'inspector' }
+            ]},
+            { path: 'user' }
+        ]).sort({ createdAt: -1 });
     }
     async findStalePayments(status: PaymentStatus, beforeDate: Date): Promise<IPaymentDocument[]> {
         return await this.find({
@@ -51,7 +58,7 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
             },
             {
                 $match: {
-                    'inspection.inspector': inspectorId
+                    'inspection.inspector': new Types.ObjectId(inspectorId)
                 }
             },
             {
@@ -82,7 +89,7 @@ export class PaymentRepository extends BaseRepository<IPaymentDocument> implemen
             },
             {
                 $match: {
-                    'inspection.inspector': inspectorId
+                    'inspection.inspector': new Types.ObjectId(inspectorId)
                 }
             },
             {

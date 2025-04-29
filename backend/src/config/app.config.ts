@@ -19,10 +19,28 @@ interface AppConfig {
     stripSecret: string;
     stripWebhook: string;
     frontEndUrl: string;
-    cloud_name: string,
-    api_key: string,
-    api_secret: string
+    cloud_name: string;
+    api_key: string;
+    api_secret: string;
+    adminId: string;
 }
+
+const validateEnv = () => {
+    const requiredEnvVars = [
+      'DATABASE_URL',
+      'ACCESS_TOKEN_SECRET',
+      'REFRESH_TOKEN_SECRET',
+      'REDIS_HOST'
+    ];
+    
+    const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+    
+    if (missingEnvVars.length > 0) {
+      throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+    }
+  };
+
+  validateEnv();
 
 const appConfig: AppConfig = {
     port: parseInt(process.env.PORT || '5000', 10),
@@ -44,6 +62,7 @@ const appConfig: AppConfig = {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
     api_key: process.env.CLOUDINARY_API_KEY || '',
     api_secret: process.env.CLOUDINARY_API_SECRET || '',
+    adminId: process.env.ADMIN_ID || '',
 };
 
 export default appConfig;

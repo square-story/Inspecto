@@ -1,17 +1,23 @@
 import { Request, Response } from "express";
-import { IInspectionInput } from "../models/inspection.model";
-import { ObjectId } from "mongoose";
+import { IInspectionInput, InspectionStatus } from "../models/inspection.model";
+import { ObjectId, Types } from "mongoose";
 import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { ServiceError } from "../core/errors/service.error";
+import { generateInspectionPDF } from "../utils/pdf.utils";
+import { uploadToCloudinary } from "../utils/cloudinary.utils";
+import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
+import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 
 
 @injectable()
 export class InspectionController implements IInspectionController {
     constructor(
-        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService
+        @inject(TYPES.InspectionService) private _inspectionService: IInspectionService,
+        @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+        @inject(TYPES.VehicleService) private _vehicleService: IVehicleService
     ) { }
 
     createInspection = async (req: Request, res: Response): Promise<void> => {
@@ -28,10 +34,13 @@ export class InspectionController implements IInspectionController {
             inspectionData.user = user as unknown as ObjectId
             inspectionData.inspector = inspectorId as unknown as ObjectId
             inspectionData.vehicle = vehicleId as unknown as ObjectId
-            const inspection = await this._inspectionService.createInspection(inspectionData);
+            const { booking, amount, remainingAmount, walletDeduction } = await this._inspectionService.createInspection(inspectionData);
             res.status(201).json({
                 success: true,
-                data: inspection,
+                data: booking,
+                amount: amount,
+                remainingAmount: remainingAmount,
+                walletDeduction: walletDeduction,
                 message: "Inspection booking saved successfully.",
             });
         } catch (error) {
@@ -211,6 +220,76 @@ export class InspectionController implements IInspectionController {
                 response,
             });
 
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
+        }
+    }
+
+    submitInspectionReport = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { reportData, id, isDraft } = req.body;
+            if (!id) {
+                res.status(400).json({ message: 'Inspection ID is required' });
+                return;
+            }
+            const report = await this._inspectionService.getInspectionById(id)
+            if (!report) {
+                res.status(404).json({ message: 'Inspection not found' });
+                return;
+            }
+            if (report.report?.status == 'completed') {
+                res.status(400).json({ message: 'Report already submitted' });
+                return;
+            }
+            await this._inspectionService.updateInspection(id, {
+                report: {
+                    ...reportData,
+                    status: isDraft ? 'draft' : 'completed'
+                }
+            });
+            let pdfUrl = ''
+            if (!isDraft) {
+                const populatedInspection = await this._inspectionService.getInspectionById(
+                    id,
+                );
+                if (!populatedInspection) {
+                    res.status(404).json({ message: 'Populated inspection data not found' });
+                    return;
+                }
+                const pdfBuffer = await generateInspectionPDF(populatedInspection);
+                const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
+                pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
+
+                await this._paymentService.processInspectionPayment(id)
+
+                await this._inspectionService.updateInspection(id, {
+                    status: InspectionStatus.COMPLETED,
+                    report: {
+                        ...reportData,
+                        status: 'completed',
+                        reportPdfUrl: pdfUrl
+                    }
+                })
+
+                await this._vehicleService.update(report.vehicle as unknown as Types.ObjectId, {
+                    lastInspectionId: id,
+                });
+            }
+            res.status(200).json({
+                message: isDraft ? 'Report saved as draft' : 'Report submitted successfully',
+                pdfUrl
+            });
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(400).json({

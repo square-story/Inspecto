@@ -32,6 +32,36 @@ export const TYPES = {
     //Email
     EmailService: Symbol.for('EmailService'),
 
+    //Wallet
+    WalletRepository: Symbol.for('WalletRepository'),
+    WalletService: Symbol.for('WalletService'),
+    WalletController: Symbol.for('WalletController'),
+
+
+    //Socket
+    SocketService: Symbol.for('SocketService'),
+
+    //Notification
+    NotificationRepository: Symbol.for('NotificationRepository'),
+    NotificationService: Symbol.for('NotificationService'),
+    NotificationController: Symbol.for('NotificationController'),
+
+    //Inspection Type
+    InspectionTypeRepository: Symbol.for('InspectionTypeRepository'),
+    InspectionTypeService: Symbol.for('InspectionTypeService'),
+    InspectionTypeController: Symbol.for('InspectionTypeController'),
+
+    //WithDrawal
+    WithdrawalService: Symbol.for('WithdrawalService'),
+    WithdrawalRepository: Symbol.for('WithdrawalRepository'),
+    WithdrawalContoller: Symbol.for('WithDrawalController'),
+
+
+    //Review
+    ReviewRepository: Symbol.for('ReviewRepository'),
+    ReviewService: Symbol.for('ReviewService'),
+    ReviewController: Symbol.for('ReviewController'),
+
     //Auth Services
     AdminAuthService: Symbol.for('AdminAuthService'),
     InspectorAuthService: Symbol.for('InspectorAuthService'),

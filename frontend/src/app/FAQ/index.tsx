@@ -9,40 +9,40 @@ import {
 
 const faq = [
     {
-        icon: Undo2,
-        question: "What is your return policy?",
+        icon: ShieldCheck,
+        question: "Is the platform secure?",
         answer:
-            "You can return unused items in their original packaging within 30 days for a refund or exchange. Contact support for assistance.",
-    },
-    {
-        icon: Route,
-        question: "How do I track my order?",
-        answer:
-            "Track your order using the link provided in your confirmation email, or log into your account to view tracking details.",
+            "Yes, we use advanced encryption and secure authentication methods to ensure your data is safe and protected.",
     },
     {
         icon: Truck,
-        question: "Do you ship internationally?",
+        question: "How do I book an inspection?",
         answer:
-            "Yes, we ship worldwide. Shipping fees and delivery times vary by location, and customs duties may apply for some countries.",
+            "You can book an inspection by logging into your account, selecting your vehicle, and choosing an available time slot.",
     },
     {
         icon: BadgeDollarSign,
-        question: "What payment methods do you accept?",
+        question: "What are the payment options?",
         answer:
-            "We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay, ensuring secure payment options for all customers.",
+            "We accept credit/debit cards, PayPal, and wallet balance for seamless and secure transactions.",
     },
     {
-        icon: ShieldCheck,
-        question: "What if I receive a damaged item?",
+        icon: Route,
+        question: "Can I track the inspector's location?",
         answer:
-            "Please contact our support team within 48 hours of delivery with photos of the damaged item. We’ll arrange a replacement or refund.",
+            "Yes, you can track the inspector's location in real-time once the inspection is confirmed.",
+    },
+    {
+        icon: Undo2,
+        question: "What is the cancellation policy?",
+        answer:
+            "You can cancel your booking up to 24 hours before the scheduled inspection time for a full refund.",
     },
     {
         icon: UserRoundCheck,
-        question: "How can I contact customer support?",
+        question: "How do I contact support?",
         answer:
-            "Reach out via email at support@example.com or call us at 1-800-123-4567 for assistance with any inquiries.",
+            "You can contact our support team via email at support@inspecto.com or call us at 1-800-INSPECT for assistance.",
     },
 ];
 

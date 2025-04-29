@@ -1,5 +1,5 @@
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { z } from "zod";
+import { string, z } from "zod";
 
 export const Step1Schema = z.object({
     vehicleId: z.string().min(1, "Vehicle selection is required"),
@@ -21,7 +21,7 @@ export const Step3Schema = z.object({
     date: z.date({
         required_error: "A date of slot is required.",
     }),
-    slotNumber: z.string().min(1, "Select a slot"),
+    timeSlot: string(),
 })
 
 

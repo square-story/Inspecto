@@ -1,24 +1,17 @@
 import { Info } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-
-
-export type INSPECTION_TYPE = {
-    id: string;
-    name: string;
-    price: number;
-    platformFee: number,
-    duration: string;
-    features: string[];
-};
+import { InspectionType } from "@/features/inspectionType/inspectionTypeSlice";
 
 
 
-export const InspectionTypeCard = ({ type, selected, onSelect }: { type: INSPECTION_TYPE, selected: boolean, onSelect: (id: string) => void }) => (
+
+
+export const InspectionTypeCard = ({ type, selected, onSelect }: { type: InspectionType, selected: boolean, onSelect: (id: string) => void }) => (
     <Card
         className={`cursor-pointer transition-all ${selected ? 'ring-2 ring-primary' : 'hover:shadow-md'
             }`}
-        onClick={() => onSelect(type.id)}
+        onClick={() => onSelect(type._id)}
     >
         <CardContent className="p-4">
             <div className="flex justify-between items-start mb-3">

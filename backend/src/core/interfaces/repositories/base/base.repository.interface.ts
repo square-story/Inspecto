@@ -5,7 +5,7 @@ export interface IBaseRepository<T extends Document> {
      * Retrieves All Documents From In This Collection
      * @return Promise<Document>
     */
-    findAll(): Promise<T[]>;
+    findAll(populate?: string[]): Promise<T[]>;
 
     /**
      * Create a particular Data to this Collection
@@ -34,21 +34,21 @@ export interface IBaseRepository<T extends Document> {
      * @param filter
      * @return Promise<Document[]>
     */
-    find(filter: FilterQuery<T>): Promise<T[]>;
+    find(filter: FilterQuery<T>, populate?: string[]): Promise<T[]>;
 
     /**
      * Retrieve the One specific Details
      * @param filter
      * @return Promise<Document | null>
     */
-    findOne(filter: FilterQuery<T>): Promise<T | null>;
+    findOne(filter: FilterQuery<T>, populate?: string[]): Promise<T | null>;
 
     /**
      * Find document by ID
      * @param id
      * @return Promise<Document | null>
     */
-    findById(id: Types.ObjectId): Promise<T | null>;
+    findById(id: Types.ObjectId, populate?: string[]): Promise<T | null>;
 
     /**
      * Find document by ID and update

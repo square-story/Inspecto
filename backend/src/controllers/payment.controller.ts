@@ -30,7 +30,8 @@ export class PaymentController implements IPaymentController {
 
             res.status(200).json({
                 success: true,
-                clientSecret: paymentIntent.client_secret
+                clientSecret: paymentIntent.client_secret,
+                message: 'Payment intent created successfully'
             });
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -147,6 +148,72 @@ export class PaymentController implements IPaymentController {
                 res.status(500).json({
                     success: false,
                     message: 'Internal server error',
+                });
+            }
+        }
+    }
+
+    cancelPayment = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { paymentIntentId } = req.params;
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+                return;
+            }
+
+            await this._paymentService.cancelPayment(paymentIntentId, userId);
+
+            res.status(200).json({
+                success: true,
+                message: 'Payment cancelled successfully'
+            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
+        }
+    };
+    cancelSuccessfulPayment = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { paymentIntentId } = req.params;
+            const userId = req.user?.userId
+
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: "User Not Authenticated"
+                });
+                return;
+            }
+
+            await this._paymentService.cancelSuccessfulPayment(paymentIntentId, userId)
+            res.status(200).json({
+                success: true,
+                message: "Payment cancelled and refunded successfully"
+            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error'
                 });
             }
         }

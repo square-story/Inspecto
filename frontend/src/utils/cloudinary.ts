@@ -13,6 +13,18 @@ export const getSignedImageUrl = async (
     }
 }
 
+export const getSignedPdfUrl = async (pdfUrl:string):Promise<string>=>{
+    try {
+        const response = await axiosInstance.get('/cloudinary/signed-pdf-url', {
+            params: { pdfUrl }
+        });
+        return response.data.signedUrl;
+    } catch (error) {
+        console.error('Error getting signed PDF URL:', error);
+        throw new Error('Failed to get signed PDF URL');
+    }
+}
+
 export const getSecureImageUrl = async (
     publicId: string,
     uploadType: "certificate" | "signature" | "face" | "none" = "none"): Promise<string> => {

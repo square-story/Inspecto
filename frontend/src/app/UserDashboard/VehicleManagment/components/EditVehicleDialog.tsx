@@ -46,8 +46,8 @@ const editVehicleSchema = z.object({
         z.date(),
         z.string().transform((val) => val ? new Date(val) : undefined)
     ]).optional(),
-    frontViewImage: z.string().url().optional(),
-    rearViewImage: z.string().url().optional(),
+    frontViewImage: z.string().optional(),
+    rearViewImage: z.string().optional(),
     color: z.string().optional(),
 });
 
@@ -75,15 +75,16 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
                     ? new Date(vehicle.insuranceExpiry)
                     : vehicle.insuranceExpiry)
                 : undefined,
-            lastInspectionDate: vehicle.lastInspectionDate
-                ? (typeof vehicle.lastInspectionDate === 'string'
-                    ? new Date(vehicle.lastInspectionDate)
-                    : vehicle.lastInspectionDate)
+            lastInspectionDate: vehicle.lastInspectionId?.date
+                ? (typeof vehicle.lastInspectionId?.date === 'string'
+                    ? new Date(vehicle.lastInspectionId?.date)
+                    : vehicle.lastInspectionId?.date)
                 : undefined,
             frontViewImage: vehicle.frontViewImage || "",
             rearViewImage: vehicle.rearViewImage || "",
             color: vehicle.color || "",
         },
+        mode: 'onSubmit'
     });
 
     const handleFront = (url: string | null) => {

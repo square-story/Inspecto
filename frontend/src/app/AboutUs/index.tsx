@@ -1,48 +1,48 @@
 import {
-    Blocks,
     Bot,
-    ChartPie,
-    Film,
-    MessageCircle,
-    Settings2,
+    Calendar,
+    FileText,
+    Folder,
+    Headphones,
+    ShieldCheck,
 } from "lucide-react";
 
 const features = [
     {
-        icon: Settings2,
-        title: "Verified Inspectors",
-        description:
-            "Design your space with drag-and-drop simplicity—create grids, lists, or galleries in seconds.",
-    },
-    {
-        icon: Blocks,
-        title: "Easy & Fast Car Inspection Booking",
-        description:
-            "Easily schedule inspections at your convenience.",
-    },
-    {
         icon: Bot,
-        title: "Hassle-Free Reports",
+        title: "Certified Experts",
         description:
-            "Access your inspection results anytime, anywhere.",
+            "Get your vehicle inspected by top-rated professionals you can trust.",
     },
     {
-        icon: Film,
-        title: " 24/7 Customer Support",
+        icon: Calendar,
+        title: "Seamless Booking Experience",
         description:
-            "We’re here to help whenever you need us.",
+            "Book your car inspection in just a few clicks—quick, easy, and hassle-free.",
     },
     {
-        icon: ChartPie,
-        title: "Safe and Secure Process",
+        icon: FileText,
+        title: "Instant Inspection Reports",
         description:
-            "Your vehicle and data are in good hands.",
+            "Receive detailed, easy-to-understand reports right at your fingertips.",
     },
     {
-        icon: MessageCircle,
-        title: "Centralized Reports",
+        icon: Headphones,
+        title: "Round-the-Clock Support",
         description:
-            "Access and share detailed inspection reports anytime.",
+            "Our dedicated team is available 24/7 to assist you whenever you need help.",
+    },
+    {
+        icon: ShieldCheck,
+        title: "Secure & Transparent Process",
+        description:
+            "Enjoy peace of mind with a process designed for your safety and clarity.",
+    },
+    {
+        icon: Folder,
+        title: "All-in-One Report Access",
+        description:
+            "Easily access, manage, and share your inspection reports anytime, anywhere.",
     },
 ];
 

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "@/features/auth/authAPI";
 import { toast } from "sonner";
 import { EmailVerificationAlert } from "../components/EmailVerifcation";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const InspectorNavBar = () => {
     const Inspector = useSelector((state: RootState) => state.inspector);
@@ -39,6 +40,7 @@ const InspectorNavBar = () => {
             {!Inspector.isListed && (
                 <EmailVerificationAlert onClose={handleClose} />
             )}
+            <NotificationBell/>
         </>
     );
 };

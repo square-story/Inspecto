@@ -5,4 +5,6 @@ export interface IPaymentController {
     handleWebhook: (req: Request, res: Response) => Promise<void>;
     verifyPayment: (req: Request, res: Response) => Promise<void>;
     findPayments: (req: Request, res: Response) => Promise<void>;
+    cancelPayment: (req: Request, res: Response) => Promise<void>;
+    cancelSuccessfulPayment: (req: Request, res: Response) => Promise<void>;
 }

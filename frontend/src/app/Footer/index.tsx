@@ -1,8 +1,8 @@
 import { Separator } from "@/components/ui/separator";
 import {
-    DribbbleIcon,
     GithubIcon,
-    TwitchIcon,
+    Instagram,
+    Linkedin,
     TwitterIcon,
 } from "lucide-react";
 
@@ -60,22 +60,22 @@ const Footer05Page = () => {
                         <span className="text-muted-foreground">
                             &copy; {new Date().getFullYear()}{" "}
                             <a href="/" target="_blank">
-                                Shadcn UI Blocks
+                                Inspecto
                             </a>
                             . All rights reserved.
                         </span>
 
                         <div className="flex items-center gap-5 text-muted-foreground">
-                            <a href="#" target="_blank">
+                            <a href="https://x.com/SadikBuilds" target="_blank">
                                 <TwitterIcon className="h-5 w-5" />
                             </a>
-                            <a href="#" target="_blank">
-                                <DribbbleIcon className="h-5 w-5" />
+                            <a href="https://www.linkedin.com/in/sadikkp/" target="_blank">
+                                <Linkedin className="h-5 w-5" />
                             </a>
-                            <a href="#" target="_blank">
-                                <TwitchIcon className="h-5 w-5" />
+                            <a href="https://www.instagram.com/square_story/" target="_blank">
+                                <Instagram className="h-5 w-5" />
                             </a>
-                            <a href="#" target="_blank">
+                            <a href="https://github.com/square-story" target="_blank">
                                 <GithubIcon className="h-5 w-5" />
                             </a>
                         </div>

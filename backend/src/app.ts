@@ -1,7 +1,5 @@
 import "reflect-metadata";
 import express, { Request, Response } from "express";
-import appConfig from "./config/app.config";
-import { connectToDatabase } from "./config/db.config";
 import cookieParser from 'cookie-parser';
 import adminRoutes from "./routes/admin.routes";
 import userRoutes from './routes/user.routes';
@@ -10,15 +8,20 @@ import vehiclesRoutes from "./routes/vehicles.routes";
 import inspectionRoutes from "./routes/inspection.routes";
 import paymentsRoutes from './routes/payment.routes';
 import cloudinaryRoutes from './routes/cloudinary.routes';
+import reviewRouter from "./routes/review.routes";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import { errorHandler } from './middlewares/error.middleware';
-import morgan from 'morgan';
 import { blacklistToken } from "./utils/token.utils";
 import { container } from './di/container';
 import { TYPES } from './di/types';
 import { PaymentStatusChecker } from './utils/checkPaymentStatus';
 import { IPaymentService } from './core/interfaces/services/payment.service.interface';
+import { developmentLogger, errorLogger } from "./config/logger.config";
+import withdrawalRoutes from "./routes/withdrawal.routes";
+import walletRoutes from "./routes/wallet.routes";
+import notificationRouter from "./routes/notification.routes";
+import inspectionTypeRoutes from "./routes/inspection-type.routes";
 
 const app = express();
 
@@ -39,11 +42,9 @@ app.use((req, res, next) => {
     }
 });
 
-app.use(morgan('dev'));
+app.use(developmentLogger);  // Log successful requests
+app.use(errorLogger);
 app.use(cookieParser());
-
-// Connect Database
-connectToDatabase();
 
 app.use(cors({
     origin: ["http://localhost:5173", "http://frontend:5173"],
@@ -95,7 +96,12 @@ app.use('/user', userRoutes);
 app.use('/vehicles', vehiclesRoutes);
 app.use('/inspections', inspectionRoutes);
 app.use('/payments', paymentsRoutes);
-app.use('/cloudinary', cloudinaryRoutes)
+app.use('/cloudinary', cloudinaryRoutes);
+app.use('/reviews', reviewRouter);
+app.use('/withdrawals', withdrawalRoutes);
+app.use('/wallet',walletRoutes);
+app.use('/notifications',notificationRouter);
+app.use('/inspection-types',inspectionTypeRoutes)
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({
@@ -112,7 +118,5 @@ app.use((err: Error, req: Request, res: Response) => {
 const paymentService = container.get<IPaymentService>(TYPES.PaymentService);
 new PaymentStatusChecker(paymentService);
 
-app.listen(appConfig.port, () => {
-    console.log(`server is running on port ${appConfig.port}`);
-});
+export default app
 

@@ -53,11 +53,15 @@ import { IVehicleController } from "../core/interfaces/controllers/vehicle.contr
 import { VehicleController } from "../controllers/vehicle.controller";
 
 
+//Wallet
+import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
+import { WalletRepository } from "../repositories/wallet.repository";
 
 //Email
 import { IEmailService } from "../core/interfaces/services/email.service.interface";
 import { EmailService } from "../services/email.service";
 
+//Review
 
 import { InspectorAuthService } from "../services/auth/inspector.auth.service";
 import { UserAuthService } from "../services/auth/user.auth.service";
@@ -71,10 +75,38 @@ import { AuthMiddleware } from "../middlewares/auth.middleware";
 import { PaymentStatusChecker } from "../utils/checkPaymentStatus";
 
 
-
 import { IAdminAuthService, IInspectorAuthService, IUserAuthService } from "../core/interfaces/services/auth.service.interface";
 import { IAdminAuthController, IInspectorAuthController, IUserAuthController } from "../core/interfaces/controllers/auth.controller.interface";
 import { CloudinaryController } from "../controllers/cloudinary.controller";
+import { IReviewRepository } from "../core/interfaces/repositories/review.repository.interface";
+import { ReviewRepository } from "../repositories/review.repository";
+import { IReviewService } from "../core/interfaces/services/review.service.interface";
+import { ReviewService } from "../services/review.service";
+import { IReviewController } from "../core/interfaces/controllers/review.controller.interface";
+import { ReviewController } from "../controllers/review.controller";
+import { IWithdrawalRepository } from "../core/interfaces/repositories/withdrawal.repository.interface";
+import { WithdrawalRepository } from "../repositories/withdrawal.repository";
+import { IWithDrawalService } from "../core/interfaces/services/withdrawal.service.interface";
+import { WithdrawalService } from "../services/withdrawal.service";
+import { IWithDrawalController } from "../core/interfaces/controllers/withdrawal.controller.interface";
+import { WithdrawalController } from "../controllers/withdrawar.controller";
+import { IWalletService } from "../core/interfaces/services/wallet.service.interface";
+import { WalletService } from "../services/wallet.service";
+import { IWalletController } from "../core/interfaces/controllers/wallet.controller.interface";
+import { WalletController } from "../controllers/wallet.controller";
+import { SocketService } from "../services/socket.service";
+import { NotificationRepository } from "../repositories/notification.repository";
+import { NotificationService } from "../services/notification.service";
+import { NotificationController } from "../controllers/notification.controller";
+import { INotificationController } from "../core/interfaces/controllers/notification.controller.interface";
+import { INotificationService } from "../core/interfaces/services/notification.service.interface";
+import { INotificationRepository } from "../core/interfaces/repositories/notification.repository.interface";
+import { IInspectionTypeRepository } from "../core/interfaces/repositories/inspection-type.repository.interface";
+import { InspectionTypeRepository } from "../repositories/inspection-type.repository";
+import { IInspectionTypeService } from "../core/interfaces/services/inspection-type.service.interface";
+import { InspectionTypeService } from "../services/inspection-type.service";
+import { IInspectionTypeController } from "../core/interfaces/controllers/inspection-type.controller.interface";
+import { InspectionTypeController } from "../controllers/inspection-type.controller";
 
 
 
@@ -110,6 +142,37 @@ container.bind<IPaymentController>(TYPES.PaymentController).to(PaymentController
 container.bind<IVehicleRepository>(TYPES.VehicleRepository).to(VehicleRepository);
 container.bind<IVehicleService>(TYPES.VehicleService).to(VehicleService);
 container.bind<IVehicleController>(TYPES.VehicleController).to(VehicleController);
+
+//Wallet
+container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
+container.bind<IWalletService>(TYPES.WalletService).to(WalletService);
+container.bind<IWalletController>(TYPES.WalletController).to(WalletController);
+
+//socket
+container.bind<SocketService>(TYPES.SocketService).to(SocketService).inSingletonScope();
+
+//Notification
+container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository).inSingletonScope();
+container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService).inSingletonScope();
+container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
+
+
+//Inspection-type
+container.bind<IInspectionTypeRepository>(TYPES.InspectionTypeRepository).to(InspectionTypeRepository);
+container.bind<IInspectionTypeService>(TYPES.InspectionTypeService).to(InspectionTypeService);
+container.bind<IInspectionTypeController>(TYPES.InspectionTypeController).to(InspectionTypeController);
+
+
+
+//WithDrawal
+container.bind<IWithdrawalRepository>(TYPES.WithdrawalRepository).to(WithdrawalRepository);
+container.bind<IWithDrawalService>(TYPES.WithdrawalService).to(WithdrawalService);
+container.bind<IWithDrawalController>(TYPES.WithdrawalContoller).to(WithdrawalController);
+
+//Review
+container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);
+container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);
+container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
 
 //Email
 container.bind<IEmailService>(TYPES.EmailService).to(EmailService);

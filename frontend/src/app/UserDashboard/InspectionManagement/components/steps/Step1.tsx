@@ -1,5 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useFormContext } from "react-hook-form";
+import { InspectionTypeCard } from '@/components/InspectionTypeCard';
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
     Select,
     SelectContent,
@@ -7,70 +23,16 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import {
-    FormField,
-    FormItem,
-    FormLabel,
-    FormControl,
-    FormMessage,
-} from "@/components/ui/form";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogDescription
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Info } from "lucide-react";
-import AddressAutocomplete from "../AddressAutocomplete";
-import { PhoneInput } from "@/components/ui/phone-input";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store";
-import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
-import { INSPECTION_TYPE, InspectionTypeCard } from '@/components/InspectionTypeCard';
 import { VehicleDetails } from '@/components/VehicleDetailsCard';
-
-
-
-
-
-
-const INSPECTION_TYPES: INSPECTION_TYPE[] = [
-    {
-        id: 'basic',
-        name: 'Basic Inspection',
-        price: 200,
-        platformFee: 50,
-        duration: '45-60 mins',
-        features: [
-            'External visual inspection',
-            'Basic engine diagnostics',
-            'Tire condition check',
-            'Brake system check'
-        ]
-    },
-    {
-        id: 'full',
-        name: 'Full Inspection',
-        price: 250,
-        platformFee: 50,
-        duration: '90-120 mins',
-        features: [
-            'Complete external & internal inspection',
-            'Advanced computer diagnostics',
-            'Suspension system check',
-            'Electrical systems check',
-            'Test drive evaluation',
-            'Detailed report with photos'
-        ]
-    }
-];
-
-
-
-
+import { fetchVehicles } from "@/features/vehicle/vehicleSlice";
+import { AppDispatch, RootState } from "@/store";
+import { Info } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useFormContext } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import AddressAutocomplete from "../AddressAutocomplete";
+import { featchActiveInspectionTypes } from '@/features/inspectionType/inspectionTypeSlice';
+import { fetchAppointments } from '@/features/inspection/inspectionSlice';
 
 
 
@@ -83,12 +45,26 @@ const Step1 = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const vehicles = useSelector((state: RootState) => state.vehicle.vehicles);
+    const inspectionTypes = useSelector((state: RootState) => state.inspectionType.activeInspectionTypes);
+    const inspections = useSelector((state: RootState) => state.inspections.data);
+    const loading = useSelector((state: RootState) => state.inspectionType.loading);
 
     const selectedVehicle = vehicles.find(v => v._id === selectedVehicleId);
 
     useEffect(() => {
         dispatch(fetchVehicles());
+        dispatch(featchActiveInspectionTypes());
+        dispatch(fetchAppointments());
     }, [dispatch]);
+
+    const availableVehicles = vehicles.filter(vehicle => {
+        const hasPendingInspection = inspections.some(
+            inspection => inspection.vehicle._id === vehicle._id &&
+                (inspection.status === "pending" || inspection.status === "confirmed")
+        );
+        // Only include vehicles that don't have pending inspections
+        return !hasPendingInspection;
+    });
 
     return (
         <div className="space-y-6">
@@ -106,18 +82,24 @@ const Step1 = () => {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent className="max-h-72">
-                                    {vehicles.map((vehicle) => (
-                                        <SelectItem key={vehicle._id} value={vehicle._id}>
-                                            <div className="flex flex-col gap-2 text-start">
-                                                <span className="font-medium">
-                                                    {vehicle.make} ({vehicle.vehicleModel})
-                                                </span>
-                                                <span className="text-sm text-gray-500">
-                                                    {vehicle.registrationNumber || "N/A"}
-                                                </span>
-                                            </div>
-                                        </SelectItem>
-                                    ))}
+                                    {availableVehicles.length > 0 ? (
+                                        availableVehicles.map((vehicle) => (
+                                            <SelectItem key={vehicle._id} value={vehicle._id}>
+                                                <div className="flex flex-col gap-2 text-start">
+                                                    <span className="font-medium">
+                                                        {vehicle.make} ({vehicle.vehicleModel})
+                                                    </span>
+                                                    <span className="text-sm text-gray-500">
+                                                        {vehicle.registrationNumber || "N/A"}
+                                                    </span>
+                                                </div>
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <div className="p-4 text-center text-gray-500">
+                                            No vehicles available
+                                        </div>
+                                    )}
                                 </SelectContent>
                             </Select>
                             {selectedVehicle && (
@@ -198,15 +180,21 @@ const Step1 = () => {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Inspection Type</FormLabel>
-                        <div className="grid gap-4 mt-2 ">
-                            {INSPECTION_TYPES.map((type) => (
-                                <InspectionTypeCard
-                                    key={type.id}
-                                    type={type}
-                                    selected={field.value === type.id}
-                                    onSelect={(value) => field.onChange(value)}
-                                />
-                            ))}
+                        <div className="grid gap-4 mt-2">
+                            {loading ? (
+                                <div className="text-center py-4">Loading inspection types...</div>
+                            ) : inspectionTypes.length === 0 ? (
+                                <div className="text-center py-4">No inspection types available</div>
+                            ) : (
+                                inspectionTypes.map((type) => (
+                                    <InspectionTypeCard
+                                        key={type._id}
+                                        type={type}
+                                        selected={field.value === type._id}
+                                        onSelect={(value) => field.onChange(value)}
+                                    />
+                                ))
+                            )}
                         </div>
                     </FormItem>
                 )}

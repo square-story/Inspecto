@@ -1,6 +1,6 @@
 import { ClientSession } from "mongoose";
 import { IInspectionDocument, IInspectionInput } from "../../../models/inspection.model";
-import { IDayAvailability } from "../../../models/inspector.model";
+import { IDayAvailability, TimeSlot } from "../../../models/inspector.model";
 import { BaseRepository } from "../../abstracts/base.repository";
 import { IInspectionStatsFromInspectionDB } from "../../types/inspection.stats.type";
 
@@ -9,10 +9,10 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
      * Checks if a slot is available for booking.
      * @param inspectorId ObjectId
      * @param date Date
-     * @param slotNumber number
+     * @param timeSlot TimeSlot
      * @returns Promise<boolean>
      */
-    checkSlotAvailability(inspectorId: string, date: Date, slotNumber: number, session: ClientSession): Promise<boolean>;
+    checkSlotAvailability(inspectorId: string, date: Date, timeSlot: TimeSlot, session: ClientSession): Promise<boolean>;
 
     /**
      * Retrieves available slots for a given inspector and date.
@@ -22,7 +22,7 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
      * @returns Promise<number[]>
      */
 
-    getAvailableSlots(inspectorId: string, date: Date, dayAvailability: IDayAvailability): Promise<number[]>;
+    getAvailableSlots(inspectorId: string, date: Date, dayAvailability: IDayAvailability): Promise<TimeSlot[]>;
 
     /** 
      * Retrieves User inspection by userId
@@ -43,14 +43,14 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
          * Retrieves inspection existing state by datas
          * @param date Date
          * @param inspector String
-         * @param slotNumber Number
+         * @param timeSlot TimeSlot
          * @return Promise<IInspectionDocument | null>
         */
 
     existingInspection(data: {
         date: Date;
         inspector: string;
-        slotNumber: number;
+        timeSlot: TimeSlot;
     }, session: ClientSession): Promise<IInspectionDocument | null>
 
     updateInspection(id: string, updateData: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument | null>;

@@ -13,12 +13,15 @@ import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
 import { IInspectorRepository } from "../../core/interfaces/repositories/inspector.repository.interface";
 import { ServiceError } from '../../core/errors/service.error';
+import { NotificationType } from "../../models/notification.model";
+import { INotificationService } from "../../core/interfaces/services/notification.service.interface";
 
 @injectable()
 export class InspectorAuthService extends BaseAuthService implements IInspectorAuthService {
 
     constructor(
-        @inject(TYPES.InspectorRepository) private readonly _inspectorRepository: IInspectorRepository
+        @inject(TYPES.InspectorRepository) private readonly _inspectorRepository: IInspectorRepository,
+        @inject(TYPES.NotificationService) private readonly _notificationService: INotificationService,
     ) {
         super();
     }
@@ -99,6 +102,19 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             await redisClient.del(redisKey)
             const payload = { userId: newInspector.id, role: newInspector.role }
             const { accessToken, refreshToken } = this.generateTokens(payload)
+
+            //send notification to admin
+            await this._notificationService.createAndSendNotification(
+                appConfig.adminId,
+                "Admin",
+                NotificationType.SYSTEM,
+                "New Inspector Registered",
+                `${newInspector.firstName} ${newInspector.lastName} has registered as an inspector.`,
+                {
+                    userId: newInspector.id
+                }
+            )
+
             return { message: "Inspector registered successfully", accessToken, refreshToken }
         } catch (error) {
             if (error instanceof ServiceError) throw error

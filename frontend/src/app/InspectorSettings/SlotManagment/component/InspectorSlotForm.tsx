@@ -1,7 +1,8 @@
-import AvailabilityPicker from "@/components/AvailabilityPicker"
 import LoadingSpinner from "@/components/LoadingSpinner";
+import MinimalAvailabilityPicker from "@/components/minimal-availability-picker";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import UnavailabilityManager from "@/components/UnavailabilityManager";
 import { setInspector } from "@/features/inspector/inspectorSlice";
 import { useInspectorDetails } from "@/hooks/useInspectorDetails";
 import { inspectorService } from "@/services/inspector.service";
@@ -13,55 +14,55 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 
+const timeSlotSchema = z.object({
+    startTime: z.string(),
+    endTime: z.string(),
+    isAvailable: z.boolean()
+});
+
+const dayAvailabilitySchema = z.object({
+    enabled: z.boolean(),
+    slots: z.number().min(0).max(10),
+    timeSlots: z.array(timeSlotSchema)
+});
+
+const unavailabilityPeriodSchema = z.object({
+    id: z.string(),
+    startDate: z.date(),
+    endDate: z.date(),
+    reason: z.string()
+});
 
 
 
 const availabilityFormSchema = z.object({
     availableSlots: z.object({
-        Monday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }),
-        Tuesday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }),
-        Wednesday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }),
-        Thursday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }),
-        Friday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }),
-        Saturday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }),
-        Sunday: z.object({
-            enabled: z.boolean(),
-            slots: z.number().min(0).max(10),
-        }).optional(),
+        Monday: dayAvailabilitySchema,
+        Tuesday: dayAvailabilitySchema,
+        Wednesday: dayAvailabilitySchema,
+        Thursday: dayAvailabilitySchema,
+        Friday: dayAvailabilitySchema,
+        Saturday: dayAvailabilitySchema
     }),
-})
+    unavailabilityPeriods: z.array(unavailabilityPeriodSchema)
+});
 
 
 
 export type SlotFormValues = z.infer<typeof availabilityFormSchema>;
 
 export default function InspectorSlotForm() {
+
     const { inspector, loading } = useInspectorDetails()
     const dispatch = useDispatch<AppDispatch>()
     const form = useForm<SlotFormValues>({
         resolver: zodResolver(availabilityFormSchema),
         defaultValues: {
-            availableSlots: inspector.availableSlots
+            availableSlots: inspector.availableSlots,
+            unavailabilityPeriods: inspector.unavailabilityPeriods || []
         },
     })
+
 
     async function onSubmit(data: SlotFormValues) {
         try {
@@ -84,13 +85,29 @@ export default function InspectorSlotForm() {
                         <FormItem>
                             <FormLabel>Available Slots</FormLabel>
                             <FormControl>
-                                <AvailabilityPicker
-                                    value={field.value || inspector.availableSlots}
+                                <MinimalAvailabilityPicker value={field.value} onChange={field.onChange} />
+                            </FormControl>
+                            <FormDescription>
+                                Set your available slots for booking (for each day).
+                            </FormDescription>
+                            <FormMessage>{error && error.message}</FormMessage>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="unavailabilityPeriods"
+                    render={({ field, fieldState: { error } }) => (
+                        <FormItem>
+                            <FormLabel>Unavailability Periods</FormLabel>
+                            <FormControl>
+                                <UnavailabilityManager
+                                    periods={field.value || []}
                                     onChange={field.onChange}
                                 />
                             </FormControl>
                             <FormDescription>
-                                Set your available slots for booking (for each day).
+                                Set specific periods when you are unavailable (vacation, sick leave, etc.)
                             </FormDescription>
                             <FormMessage>{error && error.message}</FormMessage>
                         </FormItem>

@@ -1,6 +1,7 @@
 import axiosInstance from "@/api/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { Inspection } from "../inspection/types";
 
 
 // Async thunk for fetching vehicles
@@ -95,7 +96,7 @@ export interface Vehicle {
     fuelType: "petrol" | "diesel" | "electric" | "hybrid";
     transmission: Transmission;
     insuranceExpiry?: Date;
-    lastInspectionDate?: Date;
+    lastInspectionId?: Inspection;
     frontViewImage?: string;
     rearViewImage?: string;
     color?: string;

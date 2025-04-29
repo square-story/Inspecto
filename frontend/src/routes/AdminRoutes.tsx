@@ -5,6 +5,8 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminDashBoardContent from "@/app/adminDashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import InspectorMangement from "@/pages/admin/InspectorMangement";
+import WalletManagement from "@/pages/admin/WalletManagement";
+import InspectionTypesManagement from "@/pages/admin/InspectionTypesManagement";
 
 const AdminRoutes = () => (
     <Routes>
@@ -13,8 +15,9 @@ const AdminRoutes = () => (
             <Route path="" element={<AdminDashBoardContent />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="inspectors" element={<InspectorMangement />} />
+            <Route path="wallet" element={<WalletManagement />} />
+            <Route path="inspection-types" element={<InspectionTypesManagement />} />
         </Route>
-
     </Routes>
 );
 

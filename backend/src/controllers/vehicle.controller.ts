@@ -131,7 +131,7 @@ export class VehicleController implements IVehicleController {
                 return;
             }
 
-            const vehicles = await this._vehicleService.find({ user: userId });
+            const vehicles = await this._vehicleService.find({ user: userId }, ["lastInspectionId", "lastInspectionId.inspectionTypeId"]);
             if (!vehicles || vehicles.length === 0) {
                 res.status(404).json({
                     message: "No vehicles found for this user"

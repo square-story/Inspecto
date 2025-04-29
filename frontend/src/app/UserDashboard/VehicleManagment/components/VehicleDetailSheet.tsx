@@ -3,7 +3,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
-import { Barcode, Calendar, Car, ClipboardCheck, Edit, Fuel, Palette, ShieldCheck, Trash2, Wrench } from "lucide-react";
+import { useSignedImage } from "@/hooks/useSignedImage";
+import { AlertCircle, Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, Palette, ShieldCheck, Trash2, View, Wrench } from "lucide-react";
+import { format } from 'date-fns';
+import { toast } from "sonner";
+import { getSignedPdfUrl } from "@/utils/cloudinary";
+import { saveAs } from "file-saver"
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -35,7 +41,54 @@ export const VehicleDetailSheet = ({
     onDelete: () => void;
 }) => {
     const formatDate = (date: Date) =>
-        new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        format(new Date(date), 'MMM dd, yyyy');
+
+    const { imageUrl: frontImageUrl, isLoading: isFrontLoading, error: frontError } =
+        useSignedImage(isOpen ? vehicle.frontViewImage : null);
+
+    const { imageUrl: rearImageUrl, isLoading: isRearLoading, error: rearError } =
+        useSignedImage(isOpen ? vehicle.rearViewImage : null);
+
+    const navigate = useNavigate();
+
+    const DownloadReport = async () => {
+        try {
+            if (!vehicle?.lastInspectionId?.report?.reportPdfUrl) {
+                toast.error("Report PDF not available")
+                return
+            }
+
+            // Get signed URL from backend
+            const signedUrl = await getSignedPdfUrl(vehicle.lastInspectionId.report.reportPdfUrl)
+
+            // Fetch the PDF blob
+            const response = await fetch(signedUrl)
+            const pdfBlob = await response.blob()
+
+            // Download with proper filename
+            const filename = `Inspection-Report-${vehicle.lastInspectionId.bookingReference}.pdf`
+            saveAs(pdfBlob, filename)
+
+            toast.success("Report download started")
+        } catch {
+            toast.error("Error downloading report")
+        }
+    };
+
+    const ViewReport = async () => {
+        try {
+            if (!vehicle?.lastInspectionId?.report?.reportPdfUrl) {
+                toast.error("Report PDF not available")
+                return
+            }
+
+            navigate(`/user/dashboard/report/${vehicle.lastInspectionId._id}`);
+
+            toast.success("Report opened in new tab")
+        } catch {
+            toast.error("Error opening report")
+        }
+    };
 
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -60,18 +113,42 @@ export const VehicleDetailSheet = ({
                         {(vehicle.frontViewImage || vehicle.rearViewImage) && (
                             <div className="grid grid-cols-2 gap-4">
                                 {vehicle.frontViewImage && (
-                                    <img
-                                        src={vehicle.frontViewImage}
-                                        alt="Front view"
-                                        className="w-full h-40 object-cover rounded-lg"
-                                    />
+                                    <div className="relative w-full h-40">
+                                        {isFrontLoading ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-muted-foreground">Loading...</span>
+                                            </div>
+                                        ) : frontError ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-red-500">Failed to load image</span>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={frontImageUrl}
+                                                alt="Front view"
+                                                className="w-full h-40 object-cover rounded-lg"
+                                            />
+                                        )}
+                                    </div>
                                 )}
                                 {vehicle.rearViewImage && (
-                                    <img
-                                        src={vehicle.rearViewImage}
-                                        alt="Rear view"
-                                        className="w-full h-40 object-cover rounded-lg"
-                                    />
+                                    <div className="relative w-full h-40">
+                                        {isRearLoading ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-muted-foreground">Loading...</span>
+                                            </div>
+                                        ) : rearError ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-muted/30 rounded-lg">
+                                                <span className="text-xs text-red-500">Failed to load image</span>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={rearImageUrl}
+                                                alt="Rear view"
+                                                className="w-full h-40 object-cover rounded-lg"
+                                            />
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -105,6 +182,19 @@ export const VehicleDetailSheet = ({
                                         label="Color"
                                         value={vehicle.color || 'N/A'}
                                     />
+                                    {vehicle.lastInspectionId && vehicle.lastInspectionId.report?.reportPdfUrl && (
+                                        <>
+                                            <Button onClick={() => DownloadReport()} className="col-span-2 mt-4" variant="outline">
+                                                <Download className="h-4 w-4 mr-2" />
+                                                Download Inspection Report
+                                            </Button>
+                                            <Button onClick={() => ViewReport()} className="col-span-2 mt-4" variant="outline">
+                                                <View className="h-4 w-4 mr-2" />
+                                                View Inspection Report
+                                            </Button>
+                                        </>
+
+                                    )}
                                 </div>
                             </div>
 
@@ -128,14 +218,14 @@ export const VehicleDetailSheet = ({
                                 <h3 className="text-lg font-semibold">Dates</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <DetailItem
-                                        icon={<Calendar className="h-5 w-5" />}
-                                        label="Insurance Expiry"
-                                        value={vehicle.insuranceExpiry ? formatDate(vehicle.insuranceExpiry) : 'N/A'}
+                                        icon={<AlertCircle className="h-5 w-5" />}
+                                        label="Last Inspection Status"
+                                        value={vehicle.lastInspectionId?.report?.status ? vehicle.lastInspectionId.report.status : 'N/A'}
                                     />
                                     <DetailItem
                                         icon={<ClipboardCheck className="h-5 w-5" />}
                                         label="Last Inspection"
-                                        value={vehicle.lastInspectionDate ? formatDate(vehicle.lastInspectionDate) : 'N/A'}
+                                        value={vehicle.lastInspectionId?.date ? formatDate(vehicle.lastInspectionId.date) : 'N/A'}
                                     />
                                 </div>
                             </div>

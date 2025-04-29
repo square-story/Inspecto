@@ -15,27 +15,27 @@ export abstract class BaseService<T extends Document> implements IBaseService<T>
         }
     }
 
-    async findById(id: Types.ObjectId): Promise<T | null> {
+    async findById(id: Types.ObjectId, populate?: string[]): Promise<T | null> {
         try {
-            return await this.repository.findById(id);
+            return await this.repository.findById(id, populate);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
             throw new ServiceError('Error finding document by ID')
         }
     }
 
-    async findOne(conditions: FilterQuery<T>): Promise<T | null> {
+    async findOne(conditions: FilterQuery<T>, populate?: string[]): Promise<T | null> {
         try {
-            return await this.repository.findOne(conditions);
+            return await this.repository.findOne(conditions, populate);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
             throw new ServiceError('Error finding one document')
         }
     }
 
-    async find(conditions: FilterQuery<T>): Promise<T[]> {
+    async find(conditions: FilterQuery<T>, populate?: string[]): Promise<T[]> {
         try {
-            return await this.repository.find(conditions);
+            return await this.repository.find(conditions, populate);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
             throw new ServiceError('Error finding documents')
@@ -57,6 +57,15 @@ export abstract class BaseService<T extends Document> implements IBaseService<T>
         } catch (error) {
             if (error instanceof ServiceError) throw error;
             throw new ServiceError('Error Deleting documents')
+        }
+    }
+
+    async findAll(populate?: string[]): Promise<T[]> {
+        try {
+            return await this.repository.findAll(populate);
+        } catch (error) {
+            if (error instanceof ServiceError) throw error;
+            throw new ServiceError('Error finding all documents')
         }
     }
 }

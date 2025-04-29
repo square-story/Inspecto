@@ -7,11 +7,20 @@ export enum InspectorStatus {
     BLOCKED = 'BLOCKED'
 }
 
+export interface TimeSlot {
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+}
+
 // Simplified day availability interface
 export interface IDayAvailability {
     enabled: boolean;
     slots: number;
+    timeSlots: TimeSlot[];
 }
+
+
 
 export type WeeklyAvailability = {
     Monday: IDayAvailability;
@@ -21,6 +30,12 @@ export type WeeklyAvailability = {
     Friday: IDayAvailability;
     Saturday: IDayAvailability;
 };
+
+export interface UnavailabilityPeriod {
+    startDate: Date;
+    endDate: Date;
+    reason: string;
+}
 
 export interface IInspectorInput {
     firstName: string;
@@ -37,6 +52,7 @@ export interface IInspectorInput {
     signature: string;
     specialization: [string];
     availableSlots: WeeklyAvailability;
+    unavailabilityPeriods: UnavailabilityPeriod[];
     bookedSlots: {
         _id: Types.ObjectId;
         date: Date,
@@ -66,7 +82,24 @@ export interface IInspector extends Document, IInspectorInput {
 const DayAvailabilitySchema = new Schema<IDayAvailability>(
     {
         enabled: { type: Boolean, required: true, default: false },
-        slots: { type: Number, required: true, default: 0, min: 0, max: 10 }
+        slots: { type: Number, required: true, default: 8, min: 0, max: 10 },
+        timeSlots: {
+            type: [{
+                startTime: { type: String, required: true },
+                endTime: { type: String, required: true },
+                isAvailable: { type: Boolean, required: true, default: true }
+            }],
+            default: [
+                { startTime: "09:00", endTime: "10:00", isAvailable: true },
+                { startTime: "10:00", endTime: "11:00", isAvailable: true },
+                { startTime: "11:00", endTime: "12:00", isAvailable: true },
+                { startTime: "12:00", endTime: "13:00", isAvailable: true },
+                { startTime: "13:00", endTime: "14:00", isAvailable: true },
+                { startTime: "14:00", endTime: "15:00", isAvailable: true },
+                { startTime: "15:00", endTime: "16:00", isAvailable: true },
+                { startTime: "16:00", endTime: "17:00", isAvailable: true }
+            ]
+        }
     },
     { _id: false }
 );
@@ -100,7 +133,12 @@ const InspectorSchema: Schema = new Schema<IInspector>({
         slotsBooked: { type: Number, required: true, min: 1 },
         bookedBy: [{ type: Schema.Types.ObjectId, ref: "User" }]
     }],
-
+    unavailabilityPeriods: [{
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        reason: { type: String, required: true } 
+    }],
+    
     isListed: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     approvedAt: { type: Date },

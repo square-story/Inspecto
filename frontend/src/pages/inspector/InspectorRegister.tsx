@@ -70,30 +70,39 @@ export default function InspectorRegister() {
     const navigate = useNavigate()
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
-        try {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                formData.append(key, value);
-            });
-            const response = await AuthServices.registerUser('inspector', formData);
-
-            if (response) {
-                localStorage.setItem('otp-email', data.email)
-                toast.success(response.data?.message)
-                toast.info('Please Check Your Mail For Verification')
-                navigate('/inspector/verify-otp')
-            }
-        } catch (error) {
-            if (error instanceof AxiosError && error.response?.data?.message) {
-                form.setError("email", {
-                    type: "manual",
-                    message: error.response.data.message,
+        const promise = (async () => {
+            try {
+                const formData = new FormData();
+                Object.entries(data).forEach(([key, value]) => {
+                    formData.append(key, value);
                 });
-                toast.error(error.response.data.message)
-            } else {
-                console.error("Unexpected error:", error);
+                const response = await AuthServices.registerUser('inspector', formData);
+
+                if (response) {
+                    localStorage.setItem('otp-email', data.email);
+                    toast.success(response.data?.message);
+                    toast.info('Please Check Your Mail For Verification');
+                    navigate('/inspector/verify-otp');
+                }
+            } catch (error) {
+                if (error instanceof AxiosError && error.response?.data?.message) {
+                    form.setError("email", {
+                        type: "manual",
+                        message: error.response.data.message,
+                    });
+                    throw new Error(error.response.data.message);
+                } else {
+                    console.error("Unexpected error:", error);
+                    throw new Error("Unexpected error occurred");
+                }
             }
-        }
+        })();
+
+        toast.promise(promise, {
+            loading: 'Registering...',
+            success: 'Registration otp sented to your email!',
+            error: (err) => err.message || 'Registration failed!',
+        });
     }
 
     return (
