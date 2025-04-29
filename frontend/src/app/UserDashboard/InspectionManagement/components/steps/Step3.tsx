@@ -52,7 +52,6 @@ export default function Step3() {
                     selectedInspector,
                     selectedDate
                 );
-                console.log(timeSlots);
                 setAvailableSlots(timeSlots);
             } catch (error) {
                 setError('Unable to fetch available time slots. Please try again.');

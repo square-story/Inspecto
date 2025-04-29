@@ -22,9 +22,9 @@ const Contact03Page = () => (
                     </p>
                     <a
                         className="font-bold text-primary tracking-tight"
-                        href="mailto:akashmoradiya3444@gmail.com"
+                        href="mailto:sadik.build@gmail.com"
                     >
-                        akashmoradiya3444@gmail.com
+                        sadik.build@gmail.com
                     </a>
                 </div>
                 <div className="bg-secondary/10 p-6 pb-10 rounded-lg">
@@ -52,7 +52,7 @@ const Contact03Page = () => (
                         href="https://map.google.com"
                         target="_blank"
                     >
-                        100 Smith Street Collingwood <br /> VIC 3066 AU
+                        Kakanchery, Kerala
                     </a>
                 </div>
                 <div className="bg-secondary/10 p-6 pb-10 rounded-lg">
@@ -65,9 +65,9 @@ const Contact03Page = () => (
                     </p>
                     <a
                         className="font-bold text-primary tracking-tight"
-                        href="tel:akashmoradiya3444@gmail.com"
+                        href="tel:+911234567890"
                     >
-                        +1 (555) 000-0000
+                        +91 123 456 7890
                     </a>
                 </div>
             </div>
