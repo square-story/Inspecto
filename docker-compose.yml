@@ -14,42 +14,19 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    restart: unless-stopped
+    restart: always
     env_file: ./backend/.env
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - FRONTEND_URL=http://frontend:5173
-      - PORT=5000
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - NODE_ENV=production
+      - PORT=10000
     networks:
       - inspecto
     ports:
-      - "5000:5000"
+      - "10000:10000"
     depends_on:
       - redis
-  
-  frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file: ./frontend/.env
-    environment:
-      - NODE_ENV=production
-      - VITE_API_URL=http://localhost:5000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    networks:
-      - inspecto
-    ports:
-      - 5173:5173
-    command: npm run dev -- --host
-    depends_on:
-      - api
 
 volumes:
   redis_data:

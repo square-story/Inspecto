@@ -22,6 +22,7 @@ import withdrawalRoutes from "./routes/withdrawal.routes";
 import walletRoutes from "./routes/wallet.routes";
 import notificationRouter from "./routes/notification.routes";
 import inspectionTypeRoutes from "./routes/inspection-type.routes";
+import appConfig from "./config/app.config";
 
 const app = express();
 
@@ -47,14 +48,14 @@ app.use(errorLogger);
 app.use(cookieParser());
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://frontend:5173"],
+    origin: [appConfig.frontEndUrl],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('server is up and running');
+    res.send(`server is up and running at port ${appConfig.port} and the frontend url is ${appConfig.frontEndUrl}`);
 });
 
 app.post('/logout', async (req: Request, res: Response): Promise<void> => {
