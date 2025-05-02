@@ -18,8 +18,6 @@ export class InspectorAuthController implements IInspectorAuthController {
             const { accessToken, refreshToken } = await this._inspectorAuthService.login(email, password)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
             });
             res.status(200).json({ accessToken: accessToken, role: 'inspector', status: true })
         } catch (error) {
@@ -115,8 +113,6 @@ export class InspectorAuthController implements IInspectorAuthController {
             const { accessToken, refreshToken, message } = await this._inspectorAuthService.verifyOTP(email, otp)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
             })
             const result = { accessToken, message }
             res.status(200).json(result)

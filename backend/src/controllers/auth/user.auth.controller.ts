@@ -24,8 +24,6 @@ export class UserAuthController implements IUserAuthController {
             const { accessToken, refreshToken } = await this._userAuthService.login(email, password);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
             });
             const response = { accessToken: accessToken, role: 'user', status: true }
             res.status(200).json(response);
@@ -122,8 +120,6 @@ export class UserAuthController implements IUserAuthController {
             const { accessToken, message, refreshToken } = await this._userAuthService.verifyOTP(email, otp)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
             });
             const result = { accessToken, message }
 
@@ -213,8 +209,6 @@ export class UserAuthController implements IUserAuthController {
             const { refreshToken, accessToken, user } = await this._userAuthService.googleLoginOrRegister(email, name, picture, family_name);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
             });
 
             if (!accessToken) {

@@ -50,15 +50,6 @@ app.use(cookieParser());
 app.use(cors({
     origin: [appConfig.frontEndUrl],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'Cookie',
-        'Accept',
-        'X-Requested-With'
-    ],
-    maxAge: 86400,  // 24 hours
 }));
 
 app.get('/', (req: Request, res: Response) => {
@@ -89,7 +80,6 @@ app.post('/logout', async (req: Request, res: Response): Promise<void> => {
         res.clearCookie('refreshToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
         });
         res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
@@ -107,9 +97,9 @@ app.use('/payments', paymentsRoutes);
 app.use('/cloudinary', cloudinaryRoutes);
 app.use('/reviews', reviewRouter);
 app.use('/withdrawals', withdrawalRoutes);
-app.use('/wallet',walletRoutes);
-app.use('/notifications',notificationRouter);
-app.use('/inspection-types',inspectionTypeRoutes)
+app.use('/wallet', walletRoutes);
+app.use('/notifications', notificationRouter);
+app.use('/inspection-types', inspectionTypeRoutes)
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({
