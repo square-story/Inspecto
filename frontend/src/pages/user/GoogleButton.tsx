@@ -27,13 +27,15 @@ const GoogleButton = () => {
             }
 
             const { accessToken } = response.data;
+            if (!accessToken) {
+                toast.error("Access token is missing")
+                return;
+            }
             dispatch(setCredentials({ accessToken, role: 'user', status: response.data.status }));
             navigate('/');
         } catch (error) {
             console.error("Error during Google registration:", error);
             toast.error("Error during Google registration")
-        } finally {
-            toast.info('completed')
         }
     };
 

@@ -215,8 +215,14 @@ export class UserAuthController implements IUserAuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict'
-            })
-            res.status(200).json({ message: 'Authentication successful', response: { accessToken, user }, status: user?.status });
+            });
+
+            if (!accessToken) {
+                res.status(400).json({ message: 'Access token is missing' });
+                return;
+            }
+
+            res.status(200).json({ message: 'Authentication successful', accessToken, status: user?.status });
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(400).json({
