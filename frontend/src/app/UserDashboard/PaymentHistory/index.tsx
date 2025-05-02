@@ -198,10 +198,19 @@ export default function PaymentHistory() {
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
 
+    const fetchData = async () => {
+        try {
+            await dispatch(fetchPayments());
+            await dispatch(fetchAppointments());
+        } catch (error) {
+            console.error("Error fetching data:", error)
+            toast.error("Failed to load data");
+        }
+    }
+    
     useEffect(() => {
-        dispatch(fetchAppointments())
-        dispatch(fetchPayments())
-    }, [dispatch])
+        fetchData();
+    }, [dispatch]);
 
     const checkExistingReview = async (inspectionId: string) => {
         try {
