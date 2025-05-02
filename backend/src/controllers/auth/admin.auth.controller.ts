@@ -19,6 +19,8 @@ export class AdminAuthController implements IAdminAuthController {
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
             });
             const response = { accessToken: accessToken, role: 'admin', status: true }
             res.status(200).json(response);

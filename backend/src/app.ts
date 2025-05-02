@@ -50,6 +50,10 @@ app.use(cookieParser());
 app.use(cors({
     origin: [appConfig.frontEndUrl],
     credentials: true,
+    methods: ['*'],
+    allowedHeaders: ['*'],
+    exposedHeaders: ['Authorization'],
+    maxAge: 3600,
 }));
 
 app.get('/', (req: Request, res: Response) => {
