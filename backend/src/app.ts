@@ -54,6 +54,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 
+
 app.get('/', (req: Request, res: Response) => {
     res.send(`server is up and running at port ${appConfig.port} and the frontend url is ${appConfig.frontEndUrl}`);
 });

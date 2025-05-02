@@ -19,7 +19,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
             });
             res.status(200).json({ accessToken: accessToken, role: 'inspector', status: true })
         } catch (error) {
@@ -116,7 +116,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
             });
             const result = { accessToken, message }
             res.status(200).json(result)

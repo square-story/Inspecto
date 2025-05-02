@@ -25,7 +25,7 @@ export class UserAuthController implements IUserAuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
             });
             const response = { accessToken: accessToken, role: 'user', status: true }
             res.status(200).json(response);
@@ -123,7 +123,7 @@ export class UserAuthController implements IUserAuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
             });
             const result = { accessToken, message }
 
@@ -214,7 +214,7 @@ export class UserAuthController implements IUserAuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
             });
 
             if (!accessToken) {
