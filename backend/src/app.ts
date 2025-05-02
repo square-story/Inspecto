@@ -51,7 +51,14 @@ app.use(cors({
     origin: [appConfig.frontEndUrl],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Cookie',
+        'Accept',
+        'X-Requested-With'
+    ],
+    maxAge: 86400,  // 24 hours
 }));
 
 app.get('/', (req: Request, res: Response) => {
