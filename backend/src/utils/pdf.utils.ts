@@ -1,4 +1,4 @@
-import html_to_pdf from 'html-pdf-node';
+import puppeteer from 'puppeteer';
 import { IInspectionDocument } from "../models/inspection.model";
 import { format } from "date-fns";
 import { IInspector } from "../models/inspector.model";
@@ -18,7 +18,7 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
         const user = inspection.user as unknown as IUsers;
         const inspector = inspection.inspector as unknown as IInspector;
 
-        // Create HTML template with modern, minimal design
+        // Create HTML template (same template as before)
         const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -479,26 +479,41 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
         </html>
         `;
 
-        // Configure PDF options
-        const options = {
-            format: 'A4' as const,
+        // Launch a headless browser
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu'
+            ]
+        });
+
+        // Create a new page
+        const page = await browser.newPage();
+
+        // Set the content of the page
+        await page.setContent(htmlContent, {
+            waitUntil: 'networkidle0' // Wait until the network is idle (no more than 0 connections for at least 500ms)
+        });
+
+        // Generate PDF
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
             margin: {
                 top: '10mm',
                 right: '10mm',
                 bottom: '10mm',
                 left: '10mm'
-            },
-            printBackground: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        };
+            }
+        });
 
-        // Generate PDF
-        const file = { content: htmlContent };
-        const pdfBuffer = await html_to_pdf.generatePdf(file, options) as unknown as Buffer;
-        if (!pdfBuffer || pdfBuffer.length === 0) {
-            throw new Error('Failed to generate PDF buffer');
-        }
-        return pdfBuffer;
+        // Close the browser
+        await browser.close();
+
+        return Buffer.from(pdfBuffer);
     } catch (error) {
         console.error('PDF Generation Failed:', {
             inspectionId: inspection._id,
