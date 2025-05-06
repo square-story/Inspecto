@@ -30,8 +30,10 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-            echo "${{ secrets.SSH_KEY }}" > private_key.pem
+            echo "$SSH_KEY" > private_key.pem
             chmod 600 private_key.pem
+        env:
+            SSH_KEY: ${{ secrets.SSH_KEY }}
 
       - name: Test SSH Connection
         env:
