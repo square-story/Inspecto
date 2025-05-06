@@ -35,7 +35,7 @@ jobs:
           chmod 600 private_key.pem
 
       - name: Deploy to AWS EC2
-      env:
+        env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
         run: |
