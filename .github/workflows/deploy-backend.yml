@@ -37,26 +37,29 @@ jobs:
         env:
             SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
         run: |
-            ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-            ssh -i private_key.pem ubuntu@$SERVER_IP echo "SSH connection successful"
+                mkdir -p ~/.ssh
+                touch ~/.ssh/known_hosts
+                ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+                ssh -i private_key.pem -o "UserKnownHostsFile=~/.ssh/known_hosts" ubuntu@$SERVER_IP echo "SSH connection successful"
 
       - name: Deploy to AWS EC2
         env:
-            SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
+                SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
         run: |
-            set -e
-            ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-            ssh -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
-              sudo apt-get update
-              sudo apt-get install -y docker-compose
-              if [ ! -d "~/Inspecto" ]; then
-                git clone https://github.com/square-story/Inspecto.git ~/Inspecto
-              fi
-              cd ~/Inspecto
-              docker-compose pull
-              docker-compose up -d
-            EOF
-
+                set -e
+                mkdir -p ~/.ssh
+                touch ~/.ssh/known_hosts
+                ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+                ssh -i private_key.pem -o "UserKnownHostsFile=~/.ssh/known_hosts" ubuntu@$SERVER_IP << 'EOF'
+                  sudo apt-get update
+                  sudo apt-get install -y docker-compose
+                  if [ ! -d "~/Inspecto" ]; then
+                    git clone https://github.com/square-story/Inspecto.git ~/Inspecto
+                  fi
+                  cd ~/Inspecto
+                  docker-compose pull
+                  docker-compose up -d
+                EOF
       - name: Clean Up SSH Key
         run: |
             rm -f private_key.pem
