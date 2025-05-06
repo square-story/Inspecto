@@ -33,8 +33,8 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem root@$SERVER_IP << 'EOF'
-          cd ~/Inspecto
-          docker-compose -f docker-compose.yml pull
-          docker-compose -f docker-compose.yml up -d
-          EOF
+            ssh -i "$SSH_KEY" ubuntu@$SERVER_IP << 'EOF'
+            cd ~/Inspecto
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d
+            EOF
