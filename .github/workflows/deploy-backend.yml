@@ -35,8 +35,11 @@ jobs:
           chmod 600 private_key.pem
 
       - name: Deploy to AWS EC2
+      env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem root@${{ secrets.PRODUCTION_SERVER_IP }} << 'EOF'
+          ssh -i "$SSH_KEY" ubuntu@$SERVER_IP << 'EOF'
             cd ~/Inspecto
             docker-compose pull
             docker-compose up -d
