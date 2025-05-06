@@ -1,4 +1,3 @@
-
 name: Deploy Backend to AWS
 
 on:
@@ -31,16 +30,33 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-          echo "${{ secrets.SSH_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
+            echo "${{ secrets.SSH_KEY }}" > private_key.pem
+            chmod 600 private_key.pem
+
+      - name: Test SSH Connection
+        env:
+            SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
+        run: |
+            ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+            ssh -i private_key.pem ubuntu@$SERVER_IP echo "SSH connection successful"
 
       - name: Deploy to AWS EC2
         env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
+            SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
         run: |
-          ssh -i "$SSH_KEY" ubuntu@$SERVER_IP << 'EOF'
-            cd ~/Inspecto
-            docker-compose pull
-            docker-compose up -d
-          EOF
+            set -e
+            ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+            ssh -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
+              sudo apt-get update
+              sudo apt-get install -y docker-compose
+              if [ ! -d "~/Inspecto" ]; then
+                git clone https://github.com/square-story/Inspecto.git ~/Inspecto
+              fi
+              cd ~/Inspecto
+              docker-compose pull
+              docker-compose up -d
+            EOF
+
+      - name: Clean Up SSH Key
+        run: |
+            rm -f private_key.pem
