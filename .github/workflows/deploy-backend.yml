@@ -47,8 +47,8 @@ jobs:
                 ssh -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
                   sudo apt-get update
                   cd ~/Inspecto
-                  docker-compose pull
-                  docker-compose up -d
+                  docker-compose pull --no-cache
+                  docker-compose up -d --force-recreate
                 EOF
 
       - name: Clean Up SSH Key
