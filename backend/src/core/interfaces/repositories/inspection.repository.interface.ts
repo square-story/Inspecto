@@ -56,4 +56,6 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
     updateInspection(id: string, updateData: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument | null>;
     createInspection(data: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument>;
     getInspectionStats(inspectorId: string): Promise<IInspectionStatsFromInspectionDB>;
+    getUpcomingInspectionsByUser(userId: string): Promise<IInspectionDocument[]>;
+    getCompletedInspectionsByUser(userId: string): Promise<IInspectionDocument[]>;
 }

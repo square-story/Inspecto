@@ -16,5 +16,10 @@ export const userService = {
     },
     changePassword: async (data: passwordFormSchema) => {
         return await axiosInstance.put('/user/change-password', data)
+    },
+    getUserDashboard: async () => {
+        const response = await axiosInstance.get('/user/dashboard')
+        console.log(response.data)
+        return response.data
     }
 }
