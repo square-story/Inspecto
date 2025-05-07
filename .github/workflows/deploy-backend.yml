@@ -26,7 +26,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: inspecto_api:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/inspecto_api:latest
 
       - name: Setup SSH Key
         run: |
