@@ -1,6 +1,7 @@
 import axiosInstance from "@/api/axios";
 import { ReviewFormValues } from "@/components/ReviewComponent";
 import { IReview } from "@/types/review";
+import { AxiosError } from "axios";
 
 export const ReviewService = {
     createReview: async (values: ReviewFormValues, user: string, inspector: string, inspection: string): Promise<IReview> => {
@@ -30,14 +31,15 @@ export const ReviewService = {
         const response = await axiosInstance.get(`/reviews/user/${userId}`);
         return response.data.reviews;
     },
-    getInspectionReview: async (inspectionId: string): Promise<IReview | null> => {
-        if (!inspectionId) return null;
+    getInspectionReview: async (inspectionId: string): Promise<IReview> => {
+        if (!inspectionId) throw new Error("Inspection ID cannot be null");
         try {
             const response = await axiosInstance.get(`/reviews/inspection/${inspectionId}`);
             return response.data;
         } catch (error) {
-            console.log(error)
-            return null;
+            if (error instanceof AxiosError) throw error.response?.data.message;
+
+            throw new Error("An unexpected error occurred while fetching the inspection review.");
         }
     }
 }
