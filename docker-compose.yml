@@ -1,4 +1,5 @@
 name: inspecto
+version: '3.8'
 
 services:
   redis:
