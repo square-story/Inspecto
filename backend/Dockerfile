@@ -48,8 +48,7 @@ COPY package*.json ./
 RUN npm ci
 
 # Ensure Puppeteer's Chrome gets downloaded
-RUN npx puppeteer browsers install chrome \
-    && rm -rf ~/.cache/puppeteer
+RUN npx puppeteer browsers install chrome
 
 COPY . .
 
