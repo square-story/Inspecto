@@ -9,18 +9,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+      # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Step 3: Build and push the Docker image
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
@@ -28,31 +28,18 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/inspecto_api:latest
 
-      - name: Setup SSH Key
-        run: |
-                echo "$SSH_KEY" > private_key.pem
-                chmod 600 private_key.pem
-        env:
-                SSH_KEY: ${{ secrets.SSH_KEY }}
-        
-      - name: Add Server to Known Hosts
-        run: |
-                mkdir -p ~/.ssh
-                ssh-keyscan -H ${{ secrets.PRODUCTION_SERVER_IP }} >> ~/.ssh/known_hosts
-        
+      # Step 4: Deploy to AWS EC2
       - name: Deploy to AWS EC2
         env:
           SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          ssh -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
-          set -e
-          sudo sed -i 's/noble/bullseye/g' /etc/apt/sources.list
-          sudo apt-get update
-          cd ~/Inspecto
-          docker-compose pull
-          docker-compose up -d
+          echo "$SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
+            set -e
+            cd ~/Inspecto
+            docker-compose pull
+            docker-compose up -d --force-recreate
           EOF
-
-      - name: Clean Up SSH Key
-        run: |
-            rm -f private_key.pem
+          rm -f private_key.pem
