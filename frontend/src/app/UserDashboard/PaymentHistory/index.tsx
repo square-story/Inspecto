@@ -11,7 +11,6 @@ import {
     FileText,
     Info,
     RefreshCcw,
-    Star,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
@@ -44,11 +43,9 @@ import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getSignedPdfUrl } from "@/utils/cloudinary"
 import { saveAs } from "file-saver"
-import { ReviewDialog } from "@/components/ReviewComponent"
 import { PaymentService } from "@/services/payment.service"
 import { useConfirm } from "@omit/react-confirm-dialog"
-import { ReviewService } from "@/services/review.service"
-import { IReview } from "@/types/review"
+import InspectionInfo from "@/components/user/InspectionInfo"
 
 const ITEMS_PER_PAGE = 5
 
@@ -189,40 +186,25 @@ export default function PaymentHistory() {
     const [appointmentPage, setAppointmentPage] = useState(1)
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
-    const [reviewDialogOpen, setReviewDialogOpen] = useState<boolean>(false)
-    const [existingReview, setExistingReview] = useState<IReview | null>(null);
-    const [hasExistingReview, setHasExistingReview] = useState(false);
     const [retryPayment, setRetryPayment] = useState<any>(null)
     const confirm = useConfirm()
     const dispatch = useDispatch<AppDispatch>()
     const { data: payments, loading: paymentsLoading } = useSelector((state: RootState) => state.payments)
     const { data: inspections, loading: inspectionsLoading } = useSelector((state: RootState) => state.inspections)
 
-    useEffect(() => {
-        dispatch(fetchAppointments())
-        dispatch(fetchPayments())
-    }, [dispatch])
-
-    const checkExistingReview = async (inspectionId: string) => {
+    const fetchData = async () => {
         try {
-            // Call your review service to check for existing reviews
-            const review = await ReviewService.getInspectionReview(inspectionId);
-
-            if (review) {
-                setExistingReview(review);
-                setHasExistingReview(true);
-            } else {
-                setExistingReview(null);
-                setHasExistingReview(false);
-            }
+            await dispatch(fetchPayments());
+            await dispatch(fetchAppointments());
         } catch (error) {
-            console.error("Error checking for existing review:", error);
-            toast.error("Failed to check for existing review");
-            setExistingReview(null);
-            setHasExistingReview(false);
-            setReviewDialogOpen(true);
+            console.error("Error fetching data:", error)
+            toast.error("Failed to load data");
         }
-    };
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, [dispatch]);
 
 
 
@@ -885,91 +867,7 @@ export default function PaymentHistory() {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 )}
-
-                                                <Dialog>
-                                                    <DialogTrigger asChild onClick={() => {
-                                                        checkExistingReview(inspection._id);
-                                                    }}>
-                                                        <Button variant="ghost" size="icon">
-                                                            <Info className="h-4 w-4" />
-                                                            <span className="sr-only">More info</span>
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-md">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Inspection Details</DialogTitle>
-                                                            <DialogDescription>
-                                                                Information about your vehicle inspection appointment
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <div className="space-y-4">
-                                                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                                                                <p className="text-muted-foreground">Reference:</p>
-                                                                <p className="font-medium">{inspection.bookingReference}</p>
-
-                                                                <p className="text-muted-foreground">Inspector Name</p>
-                                                                <p className="capitalize">{inspection.inspector.firstName}</p>
-
-                                                                <p className="text-muted-foreground">Type:</p>
-                                                                <p className="capitalize">{inspection.inspectionType.name}</p>
-
-                                                                <p className="text-muted-foreground">Date:</p>
-                                                                <p>{formatDateTime(inspection.date as unknown as string).date}</p>
-
-                                                                {/* <p className="text-muted-foreground">Time Slot:</p>
-                                                                <p>{getTimeSlotLabel(inspection.slotNumber)}</p> */}
-
-                                                                <p className="text-muted-foreground">Status:</p>
-                                                                <p>
-                                                                    <Badge className={getStatusBadgeColor(inspection.status)}>
-                                                                        {inspection.status.charAt(0).toUpperCase() + inspection.status.slice(1)}
-                                                                    </Badge>
-                                                                </p>
-
-                                                                <p className="text-muted-foreground">Location:</p>
-                                                                <p>{inspection.location}</p>
-                                                            </div>
-                                                        </div>
-                                                        <DialogFooter className="flex justify-between items-center mt-4">
-                                                            {inspection.status === InspectionStatus.COMPLETED && (
-                                                                <>
-                                                                    <Button
-                                                                        onClick={() => handleDownloadReport(inspection._id)}
-                                                                        className="w-full sm:w-auto"
-                                                                    >
-                                                                        <Download className="h-4 w-4 mr-2" />
-                                                                        Download Inspection Report
-                                                                    </Button>
-                                                                    <Button
-                                                                        onClick={() => {
-                                                                            setReviewDialogOpen(true);
-                                                                        }}
-                                                                        className="w-full"
-                                                                    >
-                                                                        {hasExistingReview || existingReview ? (
-                                                                            <>
-                                                                                View Review
-                                                                                <Star className="fill-yellow-400 h-4 w-4 ml-2" />
-                                                                            </>
-                                                                        ) : (
-                                                                            <>
-                                                                                Give Review
-                                                                                <Star className="fill-white h-4 w-4 ml-2" />
-                                                                            </>
-                                                                        )}
-                                                                    </Button>
-                                                                </>
-                                                            )}
-                                                        </DialogFooter>
-                                                        <ReviewDialog
-                                                            open={reviewDialogOpen}
-                                                            onOpenChange={setReviewDialogOpen}
-                                                            inspectionId={inspection._id}
-                                                            inspectorId={inspection.inspector._id}
-                                                            existingReview={existingReview || undefined}
-                                                        />
-                                                    </DialogContent>
-                                                </Dialog>
+                                                <InspectionInfo inspection={inspection} />
                                             </div>
                                         </div>
                                     ))

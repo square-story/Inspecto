@@ -1,4 +1,4 @@
-name: inspecto
+version: '3.8'
 
 services:
   redis:
@@ -11,9 +11,7 @@ services:
       - inspecto
 
   api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: squarestory/inspecto_api:latest
     restart: always
     env_file: ./backend/.env
     environment:

@@ -23,6 +23,7 @@ router.post('/forget', userAuthController.forgetPassword)
 router.post('/reset', userAuthController.resetPassword)
 router.get('/details', authenticateToken, authorizeRole('user'), userController.getUserDetails)
 router.put('/update', authenticateToken, authorizeRole('user'), userController.updateUserDetails)
+router.get('/dashboard', authenticateToken, authorizeRole('user'), userController.getUserDashboard)
 
 //block/unblock
 router.patch('/block/:userId', authenticateToken, authorizeRole('admin'), userController.updateStatus)

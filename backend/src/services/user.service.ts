@@ -10,6 +10,9 @@ import { IUserRepository } from "../core/interfaces/repositories/user.repository
 import { ServiceError } from "../core/errors/service.error";
 import { INotificationService } from "../core/interfaces/services/notification.service.interface";
 import { NotificationType } from "../models/notification.model";
+import { IUserDashboardStats } from "../core/types/user.dashboard.stats.type";
+import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { IVehicleRepository } from "../core/interfaces/repositories/vehicle.repository.interface";
 
 
 @injectable()
@@ -17,6 +20,8 @@ export class UserService extends BaseService<IUsers> implements IUserService {
     constructor(
         @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
         @inject(TYPES.NotificationService) private _notificationService: INotificationService,
+        @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
+        @inject(TYPES.VehicleRepository) private _vehicleRepository: IVehicleRepository,
     ) {
         super(_userRepository);
     }
@@ -89,6 +94,31 @@ export class UserService extends BaseService<IUsers> implements IUserService {
             }
         } catch (error) {
             console.error('Error in changePassword:', error);
+            throw error;
+        }
+    }
+
+    async getUserDashboard(userId: string): Promise<IUserDashboardStats> {
+        try {
+            const user = await this._userRepository.findById(new Types.ObjectId(userId));
+            if (!user) {
+                throw new ServiceError('User not found');
+            }
+
+            const upcomingInspections = await this._inspectionRepository.getUpcomingInspectionsByUser(userId);
+            const completedInspections = await this._inspectionRepository.getCompletedInspectionsByUser(userId);
+            const myVehicles = await this._vehicleRepository.findVehiclesByUser(userId);
+
+            return {
+                upcomingInspections: upcomingInspections.length,
+                completedInspections: completedInspections.length,
+                myVehicles: myVehicles.length,
+                upcomingInspectionsList: upcomingInspections,
+                completedInspectionsList: completedInspections,
+                myVehiclesList: myVehicles,
+            };
+        } catch (error) {
+            console.error('Error in getUserDashboard:', error);
             throw error;
         }
     }

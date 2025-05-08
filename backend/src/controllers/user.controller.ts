@@ -152,4 +152,28 @@ export class UserController implements IUserController {
             return
         }
     }
+    getUserDashboard = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const userId = req.user?.userId; // Extract user ID from the token
+            if (!userId) {
+                res.status(400).json({ message: "User ID is missing from the token" });
+                return;
+            }
+
+            // Fetch user dashboard stats from the database
+            const stats = await this._userService.getUserDashboard(userId);
+            if (!stats) {
+                res.status(404).json({ message: "User dashboard stats not found" });
+                return;
+            }
+            res.status(200).json(stats);
+        } catch (error) {
+            console.error("Error occurred while fetching user dashboard stats:", error);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error. Please try again later."
+            });
+            return;
+        }
+    };
 }

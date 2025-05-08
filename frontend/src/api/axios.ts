@@ -85,9 +85,7 @@ axiosInstance.interceptors.response.use(
 
                 const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}${refreshEndpoint}`,
-                    {
-
-                    },
+                    {},
                     { withCredentials: true }
                 );
                 const { accessToken, status, blockReason } = await response.data;

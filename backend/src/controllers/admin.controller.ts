@@ -12,6 +12,8 @@ export class AdminController implements IAdminController {
         @inject(TYPES.AdminService) private _adminService: IAdminService
     ) { }
 
+
+
     getAllInspectors = async (req: Request, res: Response): Promise<void> => {
         try {
             const response = await this._adminService.getAllInspectors()

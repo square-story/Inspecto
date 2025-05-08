@@ -101,4 +101,20 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
   async updateInspection(id: string, updateData: Partial<IInspectionInput>, session: ClientSession): Promise<IInspectionDocument | null> {
     return await this.model.findByIdAndUpdate(id, updateData, { new: true }).session(session).exec();
   }
+
+  async getUpcomingInspectionsByUser(userId: string): Promise<IInspectionDocument[]> {
+    return await this.model.find({
+      user: userId,
+      date: { $gte: new Date() },
+      status: { $ne: InspectionStatus.CANCELLED },
+    }).populate('vehicle').populate('inspector').populate('inspectionType').sort({ date: 1 });
+  }
+
+  async getCompletedInspectionsByUser(userId: string): Promise<IInspectionDocument[]> {
+    return await this.model.find({
+      user: userId,
+      date: { $lt: new Date() },
+      status: InspectionStatus.COMPLETED,
+    }).populate('vehicle').populate('inspector').populate('inspectionType').sort({ date: -1 });
+  }
 }
