@@ -53,4 +53,24 @@ export class AdminController implements IAdminController {
             }
         }
     }
+
+    getAdminDashboardStats = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const response = await this._adminService.getAdminDashboardStats()
+            res.status(200).json(response)
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
+        }
+    }
 }

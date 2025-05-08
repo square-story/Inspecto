@@ -2,24 +2,48 @@ import LoadingSpinner from "@/components/LoadingSpinner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip } from "@/components/ui/tooltip"
+import { useLoadingState } from "@/hooks/useLoadingState"
+import { AdminService } from "@/services/admin.service"
+import { IAdminDashboardStats } from "@/types/admin.dashboard.stats"
+import { AxiosError } from "axios"
 import { Dock, User, User2 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { toast } from "sonner"
 
-const earningData = [
-    { name: "Jan", platformFee: 4000, inspectorFee: 2400, total: 6400 },
-    { name: "Feb", platformFee: 3000, inspectorFee: 1398, total: 4398 },
-    { name: "Mar", platformFee: 2000, inspectorFee: 9800, total: 11800 },
-    { name: "Apr", platformFee: 2780, inspectorFee: 3908, total: 6688 },
-    { name: "May", platformFee: 1890, inspectorFee: 4800, total: 6690 },
-    { name: "Jun", platformFee: 2390, inspectorFee: 3800, total: 6190 },
-    { name: "Jul", platformFee: 3490, inspectorFee: 4300, total: 7790 },
-]
 
 const AdminDashBoardContent = () => {
-    const [loading] = useState(false)
+    const { loading, withLoading } = useLoadingState()
+    const [stats, setStats] = useState<IAdminDashboardStats>({
+        earningData: [],
+        totalEarnings: 0,
+        totalInspectors: 0,
+        totalInspections: 0,
+        totalUsers: 0,
+    })
     const navigate = useNavigate();
+
+
+
+    const fetchData = useCallback(async () => {
+        await withLoading(async () => {
+            try {
+                const response = await AdminService.adminDashboardStats()
+                console.log(response)
+                setStats(response)
+            } catch (error) {
+                if (error instanceof AxiosError) {
+                    toast.error(error?.response?.data?.message || "Something went wrong")
+                }
+            }
+        })
+    }, [withLoading]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
     return (
         <div className="flex flex-col gap-6 p-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -29,7 +53,7 @@ const AdminDashBoardContent = () => {
                         <User className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : 13}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalUsers}</div>
                         <p className="text-xs text-muted-foreground">+12% from last month</p>
                     </CardContent>
                 </Card>
@@ -40,7 +64,7 @@ const AdminDashBoardContent = () => {
                         <User2 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `12`}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalInspectors}</div>
                         <p className="text-xs text-muted-foreground">+8% from last month</p>
                     </CardContent>
                 </Card>
@@ -51,7 +75,7 @@ const AdminDashBoardContent = () => {
                         <Dock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : 80}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalInspections}</div>
                         <p className="text-xs text-muted-foreground">Requires attention</p>
                     </CardContent>
                 </Card>
@@ -61,7 +85,7 @@ const AdminDashBoardContent = () => {
                         <Dock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : 8650}</div>
+                        <div className="text-2xl font-bold">{loading ? <LoadingSpinner /> : stats.totalEarnings}</div>
                         <p className="text-xs text-muted-foreground">Requires attention</p>
                     </CardContent>
                 </Card>
@@ -87,7 +111,7 @@ const AdminDashBoardContent = () => {
                     </CardHeader>
                     <CardContent className="pl-2">
                         <ResponsiveContainer width="100%" height={350}>
-                            <BarChart data={earningData}>
+                            <BarChart data={stats.earningData}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis />
@@ -106,7 +130,7 @@ const AdminDashBoardContent = () => {
                     </CardHeader>
                     <CardContent className="pl-2">
                         <ResponsiveContainer width="100%" height={350}>
-                            <LineChart data={earningData}>
+                            <LineChart data={stats.earningData}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis />
