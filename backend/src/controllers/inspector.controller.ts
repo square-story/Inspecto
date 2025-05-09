@@ -335,4 +335,34 @@ export class InspectorController implements IInspectorController {
             }
         }
     }
+
+    getInspectorDashboardStats = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const inspectorId = req.user?.userId
+            if (!inspectorId) {
+                res.status(400).json({ message: 'User ID is missing in the token' });
+                return;
+            }
+            const response = await this._inspectorService.getInspectorDashboardStats(inspectorId)
+            if (response) {
+                res.status(200).json(response);
+                return;
+            }
+            res.status(400).json({ message: 'Failed to fetch inspector dashboard stats' });
+            return;
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message,
+                    field: error.field
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error',
+                });
+            }
+        }
+    }
 }

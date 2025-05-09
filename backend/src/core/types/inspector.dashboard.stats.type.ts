@@ -1,4 +1,4 @@
-import { Inspection } from "@/features/inspection/types";
+import { IInspectionDocument } from "../../models/inspection.model";
 
 export interface IInspectorDashboardStats {
     totalInspections: number;
@@ -6,5 +6,5 @@ export interface IInspectorDashboardStats {
     totalEarnings: number;
     completionRate: number;
     completedInspections: number;
-    recentInspections: Inspection[];
+    recentInspections: IInspectionDocument[];
 }

@@ -10,6 +10,11 @@ import { IEmailService } from "../core/interfaces/services/email.service.interfa
 import { NotificationService } from "./notification.service";
 import { NotificationType } from "../models/notification.model";
 import appConfig from "../config/app.config";
+import { ServiceError } from "../core/errors/service.error";
+import { IInspectorDashboardStats } from "../core/types/inspector.dashboard.stats.type";
+import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
+import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
+import { WalletOwnerType } from "../models/wallet.model";
 
 export type ChangePasswordResponse = {
     status: boolean;
@@ -22,6 +27,8 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
         @inject(TYPES.EmailService) private _emailService: IEmailService,
         @inject(TYPES.NotificationService) private _notificationService: NotificationService,
+        @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
+        @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
     ) {
         super(_inspectorRepository);
     }
@@ -207,5 +214,33 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
     }
     async unBookingHandler(inspectorId: string, userId: string, date: Date) {
         return await this._inspectorRepository.unbookingHandler(inspectorId, userId, date)
+    }
+
+    async getInspectorDashboardStats(inspectorId: string): Promise<IInspectorDashboardStats> {
+        try {
+            const inspector = await this._inspectorRepository.findById(new Types.ObjectId(inspectorId));
+            if (!inspector) {
+                throw new ServiceError('Inspector not found');
+            }
+
+            const totalEarnings = await this._walletRepository.findOne({ owner: inspectorId, ownerType: WalletOwnerType.INSPECTOR }).then((wallet) => wallet?.balance || 0);
+            const { completedInspections, pendingInspections, totalInspections } = await this._inspectionRepository.getInspectionStats(inspectorId);
+            const completionRate = totalInspections > 0 ? (completedInspections / totalInspections) * 100 : 0;
+            const recentInspections = await this._inspectionRepository.getRecentInspectionsByInspector(inspectorId);
+            return {
+                totalEarnings,
+                totalInspections,
+                completedInspections,
+                pendingInspections,
+                completionRate,
+                recentInspections,
+            };
+        } catch (error) {
+
+            if (error instanceof Error) {
+                throw new ServiceError(`Error getting inspector inspections: ${error.message}`);
+            }
+            throw error;
+        }
     }
 }
