@@ -29,5 +29,8 @@ export const AdminService = {
     },
     updateUserStatus: async (userId: string): Promise<AxiosResponse<UpdateStatusResponse>> => {
         return await axiosInstance.patch(`/user/block/${userId}`)
+    },
+    adminDashboardStats: async () => {
+        return (await axiosInstance.get('/admin/dashboard')).data
     }
 }

@@ -11,23 +11,10 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { WalletService } from "@/services/wallet.service";
 import { IAdminWalletStats } from "@/types/wallet.stats";
-import { format } from "date-fns";
 import { Clock } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const earningData = [
-    { name: "Jan", platformFee: 4000, inspectorFee: 2400, total: 6400 },
-    { name: "Feb", platformFee: 3000, inspectorFee: 1398, total: 4398 },
-    { name: "Mar", platformFee: 2000, inspectorFee: 9800, total: 11800 },
-    { name: "Apr", platformFee: 2780, inspectorFee: 3908, total: 6688 },
-    { name: "May", platformFee: 1890, inspectorFee: 4800, total: 6690 },
-    { name: "Jun", platformFee: 2390, inspectorFee: 3800, total: 6190 },
-    { name: "Jul", platformFee: 3490, inspectorFee: 4300, total: 7790 },
-]
 
 
 
@@ -41,7 +28,8 @@ export default function WalletManagement() {
         totalWithdrawalAmount: 0,
         pendingWithdrawalAmount: 0,
         withdrawalStats: [],
-        earningsStats: []
+        earningsStats: [],
+        earningData: []
     })
     const { loading, withLoading } = useLoadingState();
     const [activeTab, setActiveTab] = useState("overview")
@@ -64,32 +52,6 @@ export default function WalletManagement() {
     useEffect(() => {
         fetchStats();
     }, [fetchStats])
-
-
-    const monthlyEarnings = useMemo(() => {
-        return stats.earningsStats.reduce((acc, transaction) => {
-            const month = format(new Date(transaction.date), 'MMM');
-            const existing = acc.find(item => item.name === month);
-            const amount = transaction.amount;
-
-            if (existing) {
-                existing.total += amount;
-                if (transaction.type === "PLATFORM_FEE") {
-                    existing.platformFee += amount;
-                } else {
-                    existing.inspectorFee += amount;
-                }
-            } else {
-                acc.push({
-                    name: month,
-                    platformFee: transaction.type === "PLATFORM_FEE" ? amount : 0,
-                    inspectorFee: transaction.type !== "PLATFORM_FEE" ? amount : 0,
-                    total: amount
-                });
-            }
-            return acc;
-        }, [] as typeof earningData);
-    }, [stats.earningsStats]);
 
 
     return (
@@ -141,7 +103,7 @@ export default function WalletManagement() {
                                 </CardHeader>
                                 <CardContent className="pl-2">
                                     <ResponsiveContainer width="100%" height={350}>
-                                        <BarChart data={monthlyEarnings}>
+                                        <BarChart data={stats.earningData}>
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="name" />
                                             <YAxis />
@@ -160,7 +122,7 @@ export default function WalletManagement() {
                                 </CardHeader>
                                 <CardContent className="pl-2">
                                     <ResponsiveContainer width="100%" height={350}>
-                                        <LineChart data={monthlyEarnings}>
+                                        <LineChart data={stats.earningData}>
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="name" />
                                             <YAxis />

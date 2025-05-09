@@ -12,7 +12,7 @@ const VehicleDetails = ({ vehicles, loading }: { vehicles: Vehicle[]; loading: b
     const navigate = useNavigate();
 
     const handleAddVehicle = () => {
-        navigate("/user/dashboard/vehicles/add");
+        navigate("/user/dashboard/vehicles");
     };
 
     const handleViewVehicle = () => {

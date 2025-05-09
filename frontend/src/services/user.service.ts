@@ -19,7 +19,6 @@ export const userService = {
     },
     getUserDashboard: async () => {
         const response = await axiosInstance.get('/user/dashboard')
-        console.log(response.data)
         return response.data
     }
 }

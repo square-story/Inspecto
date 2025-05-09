@@ -8,6 +8,7 @@ import { TYPES } from "../di/types";
 import { IWithdrawalRepository } from "../core/interfaces/repositories/withdrawal.repository.interface";
 import { IWithdrawal, WithdrawalStatus } from "../models/withdrawal.model";
 import mongoose from "mongoose";
+import { earningData } from "../utils/earningsData";
 
 @injectable()
 export class WalletRepository extends BaseRepository<IWallet> implements IWalletRepository {
@@ -85,6 +86,8 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
             description: t.description || `Transaction for ${t.date.toISOString()}`
         })) || [];
 
+        const fullWalletTransactions = (await this.model.find({})).map(wallet => wallet.transactions).flat();
+
         const withdrawalStats = allWithdrawals.map(w => ({
             id: w._id?.toString() as unknown as string || '',
             user: w.inspector.toString(),
@@ -108,7 +111,8 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
             pendingWithdrawalAmount: pendingWithdrawals
                 .reduce((sum, w) => sum + w.amount, 0),
             withdrawalStats,
-            earningsStats
+            earningsStats,
+            earningData: earningData(fullWalletTransactions)
         }
     }
     async WalletStatsUser(userId: string): Promise<IUserWalletStats> {
@@ -134,11 +138,11 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
 
         wallet.transactions.forEach((transaction) => {
             const month = format(parseISO(transaction.date.toISOString()), "yyyy-MM");
-            
+
             if (!monthlyStatsMap[month]) {
                 monthlyStatsMap[month] = { spent: 0, refunds: 0, transactionCount: 0 };
             }
-    
+
             if (transaction.type === TransactionType.PAYMENT) {
                 totalSpent += transaction.amount;
                 monthlyStatsMap[month].spent += transaction.amount;
@@ -146,7 +150,7 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
                 totalRefunds += transaction.amount;
                 monthlyStatsMap[month].refunds += transaction.amount;
             }
-    
+
             monthlyStatsMap[month].transactionCount += 1;
         });
 
@@ -166,9 +170,9 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
     }
 
     async processRefundToUserWallet(userId: string, amount: number, reference: string, description: string): Promise<IWallet> {
-        let userWallet = await this.findOne({owner:userId,ownerType:WalletOwnerType.USER})
+        let userWallet = await this.findOne({ owner: userId, ownerType: WalletOwnerType.USER })
 
-        if(!userWallet){
+        if (!userWallet) {
             userWallet = await this.model.create({
                 owner: new mongoose.Types.ObjectId(userId),
                 ownerType: WalletOwnerType.USER,

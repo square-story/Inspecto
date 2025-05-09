@@ -16,5 +16,6 @@ router.post('/login', adminAuthController.login)
 router.post('/refresh', adminAuthController.refreshToken)
 router.get('/get-inspectors', authMiddleware.authenticateToken, authorizeRole('admin'), adminController.getAllInspectors)
 router.get('/get-users', authMiddleware.authenticateToken, authorizeRole('admin'), adminController.getAllUsers)
+router.get('/dashboard', authMiddleware.authenticateToken, authorizeRole('admin'), adminController.getAdminDashboardStats)
 
 export default router

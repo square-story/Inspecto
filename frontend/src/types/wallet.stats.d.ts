@@ -36,6 +36,7 @@ export interface IAdminWalletStats {
     pendingWithdrawalAmount: number;
     withdrawalStats: WithdrawalStats[];
     earningsStats: IAdminEarningsStats[];
+    earningData: EarningData[];
 }
 
 export interface WithdrawalStats {
@@ -71,4 +72,11 @@ export interface UserMonthlyStats {
     spent: number;
     refunds: number;
     transactionCount: number;
+}
+
+export interface EarningData {
+    name: string;
+    platformFee: number;
+    inspectorFee: number;
+    total: number;
 }
