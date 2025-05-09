@@ -20,7 +20,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 3: Build and push the Docker image
+      # Step 3: Start Redis Container
+      - name: Start Redis
+        run: |
+          docker run -d --name redis-container -p 6379:6379 redis:alpine
+
+      # Step 4: Build and push the Docker image
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
@@ -28,7 +33,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/inspecto_api:latest
 
-      # Step 4: Deploy to AWS EC2
+      # Step 5: Deploy to AWS EC2
       - name: Deploy to AWS EC2
         env:
           SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
