@@ -74,6 +74,7 @@ const AddressManagment = () => {
     <ContentSection
       title="Address Managment"
       desc="Update Your Address in here"
+      scrollAreaClassName=""
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
