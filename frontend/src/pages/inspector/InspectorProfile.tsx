@@ -38,9 +38,9 @@ const sidebarNavItems = [
         icon: <TimerIcon size={18} />,
         href: '/inspector/dashboard/settings/slot',
     },
-    {
-        title: 'Document Managment',
-        icon: <DockIcon size={18} />,
-        href: '/inspector/dashboard/settings/document',
-    }
+    // {
+    //     title: 'Document Managment',
+    //     icon: <DockIcon size={18} />,
+    //     href: '/inspector/dashboard/settings/document',
+    // }
 ]
