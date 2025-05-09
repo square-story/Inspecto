@@ -14,6 +14,8 @@ import { InspectionService } from "@/services/inspection.service"
 import { useLoadingState } from "@/hooks/useLoadingState";
 import LoadingSpinner from "@/components/LoadingSpinner"
 import { SignedAvatar } from "@/components/SignedAvatar"
+import { Inspection } from "@/features/inspection/types"
+import InspectionDetailsDialog from "@/components/inspector/InspectionDetailsDialog"
 
 export default function Dashboard() {
     const dispatch = useDispatch<AppDispatch>()
@@ -25,6 +27,13 @@ export default function Dashboard() {
         thisMonthEarnings: 0
     })
     const { loading, withLoading } = useLoadingState();
+    const [openDetails, setOpenDetails] = useState(false);
+    const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
+
+    const handleRowClick = (inspection: Inspection) => {
+        setSelectedInspection(inspection);
+        setOpenDetails(true);
+    };
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -157,7 +166,7 @@ export default function Dashboard() {
                                     </TableCell>
                                     <TableCell>{inspection.inspectionType.price}</TableCell>
                                     <TableCell>
-                                        <Button variant="ghost" size="sm" onClick={() => navigate(`/inspector/dashboard/inspection/${inspection.bookingReference}`)}>
+                                        <Button variant="ghost" size="sm" onClick={() => handleRowClick(inspection)}>
                                             <ArrowRight className="h-4 w-4" />
                                         </Button>
                                     </TableCell>
@@ -166,6 +175,7 @@ export default function Dashboard() {
                         </TableBody>
                     </Table>
                 </CardContent>
+
             </Card>
 
             {/* Monthly Overview */}
@@ -221,6 +231,9 @@ export default function Dashboard() {
                         </div>
                     </CardContent>
                 </Card>
+                {selectedInspection && openDetails && (
+                    <InspectionDetailsDialog onOpenChange={setOpenDetails} inspection={selectedInspection} open={openDetails} />
+                )}
             </div>
         </div>
     )
