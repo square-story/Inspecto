@@ -1,6 +1,6 @@
 import SidebarNav from "@/components/side-nav"
 import { Separator } from "@/components/ui/separator"
-import { DockIcon, LocateFixedIcon, TimerIcon, User } from "lucide-react"
+import { LocateFixedIcon, TimerIcon, User } from "lucide-react"
 import { Outlet } from "react-router-dom"
 
 const InspectorProfile = () => {
