@@ -51,43 +51,47 @@ export default function UserWallet() {
   }, [fetchStats]);
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-medium">Your Wallet</h3>
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 space-y-4">
+      <div className="flex flex-col gap-2 sm:gap-4">
+      <h3 className="text-base sm:text-lg font-medium">Your Wallet</h3>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="p-4">
-            <h3 className="font-medium text-sm text-muted-foreground">Wallet Balance</h3>
-            <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.walletBalance}`}</p>
+      <div className="grid gap-2 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <Card className="p-3 sm:p-4">
+                <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Wallet Balance</h3>
+                <p className="text-xl sm:text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.walletBalance}`}</p>
+            </Card>
+          <Card className="p-3 sm:p-4">
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Total Spent</h3>
+            <p className="text-xl sm:text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalSpent}`}</p>
           </Card>
-          <Card className="p-4">
-            <h3 className="font-medium text-sm text-muted-foreground">Total Spent</h3>
-            <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalSpent}`}</p>
-          </Card>
-          <Card className="p-4">
-            <h3 className="font-medium text-sm text-muted-foreground">Total Refunds</h3>
-            <p className="text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalRefunds}`}</p>
+          <Card className="p-3 sm:p-4">
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Total Refunds</h3>
+            <p className="text-xl sm:text-2xl font-bold">{loading ? <LoadingSpinner /> : `₹${stats.totalRefunds}`}</p>
           </Card>
         </div>
       </div>
 
-      <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="transactions">Transaction History</TabsTrigger>
-          <TabsTrigger value="stats">Monthly Stats</TabsTrigger>
+      <Tabs defaultValue="transactions" className="space-y-2 sm:space-y-4">
+      <TabsList className="w-full overflow-x-auto">
+            <TabsTrigger value="transactions" className="text-xs sm:text-sm px-3 sm:px-4">
+                Transactions
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs sm:text-sm px-3 sm:px-4">
+                Monthly Stats
+            </TabsTrigger>
         </TabsList>
-        <TabsContent value="transactions" className="space-y-4">
-          <div className="rounded-md border">
-            <table className="min-w-full divide-y divide-secondary">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Description</th>
-                </tr>
-              </thead>
+        <TabsContent value="transactions">
+            <div className="rounded-md border overflow-x-auto">
+                <table className="min-w-[600px] sm:min-w-full divide-y divide-secondary">
+                    <thead>
+                        <tr>
+                            <th className="px-3 sm:px-6 py-2 text-xs">Date</th>
+                            <th className="px-3 sm:px-6 py-2 text-xs">Type</th>
+                            <th className="px-3 sm:px-6 py-2 text-xs">Amount</th>
+                            <th className="hidden xs:table-cell px-3 sm:px-6 py-2 text-xs">Status</th>
+                            <th className="hidden sm:table-cell px-3 sm:px-6 py-2 text-xs">Description</th>
+                        </tr>
+                    </thead>
               <tbody className=" divide-y divide-secondary">
                 {loading ? (
                   <tr>
@@ -104,19 +108,19 @@ export default function UserWallet() {
                 ) : (
                   stats.recentTransactions.map((transaction, index) => (
                     <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 sm:px-6 py-2 whitespace-nowrap text-xs sm:text-sm">
                         {new Date(transaction.date).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 sm:px-6 py-2 whitespace-nowrap text-xs sm:text-sm">
                         {transaction.type}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 sm:px-6 py-2 whitespace-nowrap text-xs sm:text-sm">
                         ₹{transaction.amount}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 sm:px-6 py-2 whitespace-nowrap text-xs sm:text-sm">
                         {transaction.status}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 sm:px-6 py-2 whitespace-nowrap text-xs sm:text-sm">
                         {transaction.description}
                       </td>
                     </tr>

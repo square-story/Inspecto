@@ -58,7 +58,7 @@ const UserDashboardView = () => {
             desc='Welcome to your Inspecto dashboard. View your upcoming inspections, vehicle details, and recent reports.'
             scrollAreaClassName="">
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     <DashboardCard
                         title="Upcoming Inspections"
                         value={loading ? "..." : stats.upcomingInspections.toString()}
@@ -77,8 +77,11 @@ const UserDashboardView = () => {
                 </div>
 
                 <Tabs defaultValue="wallet" className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="wallet">Wallet Info</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 overflow-x-auto">
+                        <TabsTrigger value="wallet" className="whitespace-nowrap">
+                            <span className="sm:hidden">Wallet</span>
+                        <span className="hidden sm:inline">Wallet Info</span>
+                        </TabsTrigger>
                         <TabsTrigger value="upcoming">Upcoming Inspections</TabsTrigger>
                         <TabsTrigger value="vehicles">My Vehicles</TabsTrigger>
                         <TabsTrigger value="reports">Recent Reports</TabsTrigger>
