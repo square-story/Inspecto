@@ -9,4 +9,5 @@ export interface IInspectorController {
     updateInspector: (req: Request, res: Response) => Promise<void>;
     changePassword: (req: Request, res: Response) => Promise<void>;
     getNearbyInspectors: (req: Request, res: Response) => Promise<void>;
+    getInspectorDashboardStats: (req: Request, res: Response) => Promise<void>;
 }

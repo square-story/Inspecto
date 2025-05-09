@@ -39,5 +39,7 @@ router.put('/change-password', authenticateToken, authorizeRole('inspector'), in
 
 router.get('/', inspectorController.getNearbyInspectors)
 
+router.get('/dashboard', authenticateToken, authorizeRole('inspector'), inspectorController.getInspectorDashboardStats)
+
 
 export default router

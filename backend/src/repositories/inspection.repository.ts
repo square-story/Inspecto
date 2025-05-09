@@ -117,4 +117,12 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
       status: InspectionStatus.COMPLETED,
     }).populate('vehicle').populate('inspector').populate('inspectionType').sort({ date: -1 });
   }
+
+  async getRecentInspectionsByInspector(inspectorId: string): Promise<IInspectionDocument[]> {
+    return await this.model.find({
+      inspector: inspectorId,
+      date: { $lt: new Date() },
+      status: { $ne: InspectionStatus.CANCELLED },
+    })
+  }
 }

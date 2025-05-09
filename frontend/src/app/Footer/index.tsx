@@ -37,11 +37,11 @@ const Footer05Page = () => {
     return (
         <div className="flex flex-col">
             <div className="grow bg-muted" />
-            <footer>
+            <footer className="px-4 sm:px-6 lg:px-8">
                 <div className="max-w-screen-xl mx-auto">
-                    <div className="py-12 flex flex-col justify-start items-center text-center">
-                        <span className="text-7xl font-bold">Inspecto</span>
-                        <ul className="mt-6 flex items-center text-center gap-4 flex-wrap">
+                <div className="py-12 flex flex-col items-center text-center">
+                <span className="text-4xl md:text-7xl font-bold">Inspecto</span>
+                <ul className="mt-6 flex flex-wrap justify-center gap-2 md:gap-4">
                             {footerLinks.map(({ title, href }) => (
                                 <li key={title}>
                                     <a

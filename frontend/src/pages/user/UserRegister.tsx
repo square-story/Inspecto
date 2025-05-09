@@ -27,6 +27,8 @@ import BackButton from '@/components/BackButton'
 import GoogleButton from './GoogleButton'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { AuthServices } from '@/services/auth.service'
+import { useState } from 'react'
+import { Loader } from 'lucide-react'
 
 
 // Define validation schema using Zod
@@ -62,10 +64,13 @@ export default function RegisterPreview() {
         },
     })
 
+    const [loading, setLoading] = useState(false)
+
     const navigate = useNavigate()
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
         try {
+            setLoading(true)
             const formData = new FormData();
             Object.entries(data).forEach(([key, value]) => {
                 formData.append(key, value);
@@ -78,6 +83,7 @@ export default function RegisterPreview() {
                 navigate('/user/verify-otp')
             }
         } catch (error) {
+            setLoading(false)
             if (error instanceof AxiosError && error.response?.data?.message) {
                 form.setError("email", {
                     type: "manual",
@@ -87,6 +93,8 @@ export default function RegisterPreview() {
             } else {
                 console.error("Unexpected error:", error);
             }
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -195,8 +203,8 @@ export default function RegisterPreview() {
                                     )}
                                 />
 
-                                <Button type="submit" className="w-full">
-                                    Register
+                                <Button type="submit" className="w-full" disabled={loading}>
+                                    {loading ? <Loader /> : "Register"}
                                 </Button>
                                 <Button variant='link' className="w-full">
                                     <GoogleOAuthProvider clientId={import.meta.env.VITE_REACT_APP_GOOGLE_CLIENT_ID}>

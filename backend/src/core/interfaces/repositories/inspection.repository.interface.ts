@@ -58,4 +58,5 @@ export interface IInspectionRepository extends BaseRepository<IInspectionDocumen
     getInspectionStats(inspectorId: string): Promise<IInspectionStatsFromInspectionDB>;
     getUpcomingInspectionsByUser(userId: string): Promise<IInspectionDocument[]>;
     getCompletedInspectionsByUser(userId: string): Promise<IInspectionDocument[]>;
+    getRecentInspectionsByInspector(inspectorId: string): Promise<IInspectionDocument[]>;
 }

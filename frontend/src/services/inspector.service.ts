@@ -1,6 +1,7 @@
 import axiosInstance from "@/api/axios";
 import { passwordFormSchema } from "./user.service";
 import { IInspector } from "@/types/inspector";
+import { IInspectorDashboardStats } from "@/types/inspector.dashboard.stats";
 
 interface IsubmitData {
     address: string;
@@ -28,5 +29,10 @@ export const inspectorService = {
     },
     getInspectorsBasedOnLocation: async (latitude: string, longitude: string) => {
         return await axiosInstance.get(`/inspector?latitude=${latitude}&longitude=${longitude}`)
+    },
+    getInspectorDashboardStats: async (): Promise<IInspectorDashboardStats> => {
+        const response = await axiosInstance.get('/inspector/dashboard')
+        console.log(response.data)
+        return response.data as IInspectorDashboardStats;
     }
 }

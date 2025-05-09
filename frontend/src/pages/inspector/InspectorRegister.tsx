@@ -27,6 +27,8 @@ import BackButton from '@/components/BackButton'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { isValidPhoneNumber } from 'react-phone-number-input'
 import { AuthServices } from '@/services/auth.service'
+import { useState } from 'react'
+import { Loader } from 'lucide-react'
 
 
 // Define validation schema using Zod
@@ -66,12 +68,13 @@ export default function InspectorRegister() {
 
         },
     })
-
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
         const promise = (async () => {
             try {
+                setLoading(true)
                 const formData = new FormData();
                 Object.entries(data).forEach(([key, value]) => {
                     formData.append(key, value);
@@ -85,6 +88,7 @@ export default function InspectorRegister() {
                     navigate('/inspector/verify-otp');
                 }
             } catch (error) {
+                setLoading(false)
                 if (error instanceof AxiosError && error.response?.data?.message) {
                     form.setError("email", {
                         type: "manual",
@@ -95,6 +99,8 @@ export default function InspectorRegister() {
                     console.error("Unexpected error:", error);
                     throw new Error("Unexpected error occurred");
                 }
+            } finally {
+                setLoading(false);
             }
         })();
 
@@ -223,8 +229,8 @@ export default function InspectorRegister() {
                                     )}
                                 />
 
-                                <Button type="submit" className="w-full">
-                                    Register
+                                <Button type="submit" className="w-full" disabled={loading}>
+                                    {loading ? <Loader /> : 'Register'}
                                 </Button>
                             </div>
                         </form>
