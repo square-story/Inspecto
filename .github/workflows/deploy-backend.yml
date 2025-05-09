@@ -40,6 +40,6 @@ jobs:
             set -e
             cd ~/Inspecto
             docker-compose pull
-            docker-compose up -d --force-recreate
+            docker-compose up -d
           EOF
           rm -f private_key.pem
