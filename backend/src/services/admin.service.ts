@@ -13,8 +13,8 @@ import { IInspectionRepository } from "../core/interfaces/repositories/inspectio
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
 import { IAdminDashboardStats } from "../core/types/admin.dasboard.stats.type";
 import { InspectionStatus } from "../models/inspection.model";
-import { TransactionType, WalletOwnerType } from "../models/wallet.model";
-import { format } from "date-fns";
+import { WalletOwnerType } from "../models/wallet.model";
+import { earningData } from "../utils/earningsData";
 
 @injectable()
 export class AdminService extends BaseService<IAdmin> implements IAdminService {
@@ -69,32 +69,7 @@ export class AdminService extends BaseService<IAdmin> implements IAdminService {
 
             const fullWalletTransactions = (await this._walletRepository.find({})).map(wallet => wallet.transactions).flat();
 
-            const earningData = () => {
-                return fullWalletTransactions.reduce((acc, transaction) => {
-                    const month = format(new Date(transaction.date), 'MMM');
-                    const existing = acc.find(item => item.name === month);
-                    const amount = transaction.amount;
-
-                    if (existing) {
-                        existing.total += amount;
-                        if (transaction.type === "PLATFORM_FEE") {
-                            existing.platformFee += amount;
-                        } else {
-                            existing.inspectorFee += amount;
-                        }
-                    } else {
-                        acc.push({
-                            name: month,
-                            platformFee: transaction.type === "PLATFORM_FEE" ? amount : 0,
-                            inspectorFee: transaction.type !== "PLATFORM_FEE" && transaction.type !== TransactionType.REFUND ? amount : 0,
-                            total: amount
-                        });
-                    }
-                    return acc;
-                }, [] as { name: string; platformFee: number; inspectorFee: number; total: number }[]);
-            };
-
-            return { totalUsers, totalInspectors, totalInspections, totalEarnings, earningData: earningData() };
+            return { totalUsers, totalInspectors, totalInspections, totalEarnings, earningData: earningData(fullWalletTransactions) };
 
         } catch (error) {
             if (error instanceof Error) {
