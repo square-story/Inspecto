@@ -53,6 +53,14 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
             set -e
             cd ~/Inspecto
+            echo "Freeing up disk space..."
+            docker system prune -af
+            docker volume prune -f
+            docker network prune -f
+            docker rmi $(docker images -f "dangling=true" -q) || true
+            echo "Disk space after cleanup:"
+            df -h
+            echo "Pulling latest changes from GitHub..."
             docker compose pull
             docker compose up -d
           EOF
