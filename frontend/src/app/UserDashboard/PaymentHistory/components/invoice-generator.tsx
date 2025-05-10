@@ -1,35 +1,20 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { Download, Printer } from "lucide-react"
+import { useRef } from "react"
+import { Printer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { IPayments } from "@/features/payments/types"
 
 interface InvoiceGeneratorProps {
-    payment: {
-        _id: string
-        amount: number
-        currency: string
-        stripePaymentIntentId: string
-        createdAt: string
-        inspection: {
-            bookingReference: string
-            inspectionType: string
-        }
-        user: {
-            firstName: string
-            email: string
-        }
-    }
+    payment: IPayments
     open: boolean
     onClose: () => void
 }
 
 export default function InvoiceGenerator({ payment, open, onClose }: InvoiceGeneratorProps) {
-    const [generating, setGenerating] = useState(false)
     const invoiceRef = useRef<HTMLDivElement>(null)
 
     const formatIndianRupees = (amount: number) => {
@@ -48,41 +33,6 @@ export default function InvoiceGenerator({ payment, open, onClose }: InvoiceGene
         })
     }
 
-    const handleDownload = async () => {
-        setGenerating(true)
-
-        try {
-            // In a real implementation, you would use one of these approaches:
-            // 1. Client-side PDF generation (jspdf + html2canvas)
-            // 2. Server-side PDF generation via API call
-            // 3. Using a dedicated PDF library like react-pdf
-
-            // Simulating PDF generation delay
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-
-            // Show success toast
-            toast.success('Your invoice has been downloaded successfully')
-
-            // In a real implementation, you would trigger the download:
-            // Example with jspdf + html2canvas:
-            // const element = invoiceRef.current;
-            // const canvas = await html2canvas(element);
-            // const data = canvas.toDataURL('image/png');
-            // const pdf = new jsPDF();
-            // const imgProperties = pdf.getImageProperties(data);
-            // const pdfWidth = pdf.internal.pageSize.getWidth();
-            // const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-            // pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            // pdf.save(`invoice-${payment.stripePaymentIntentId.slice(-8)}.pdf`);
-
-            
-        } catch (error) {
-            console.error("Error generating PDF:", error)
-            toast.error("There was an error downloading your invoice. Please try again.")
-        } finally {
-            setGenerating(false)
-        }
-    }
 
     const handlePrint = () => {
         window.print()
@@ -139,9 +89,7 @@ export default function InvoiceGenerator({ payment, open, onClose }: InvoiceGene
                                             <tr className="border-b">
                                                 <td className="p-3">
                                                     <p>
-                                                        {payment.inspection.inspectionType.charAt(0).toUpperCase() +
-                                                            payment.inspection.inspectionType.slice(1)}{" "}
-                                                        Inspection
+                                                        {payment.inspection.inspectionType.name}
                                                     </p>
                                                     <p className="text-sm text-muted-foreground">
                                                         Booking Reference: {payment.inspection.bookingReference}
@@ -179,7 +127,7 @@ export default function InvoiceGenerator({ payment, open, onClose }: InvoiceGene
                                     <Printer className="h-4 w-4 mr-2" />
                                     Print
                                 </Button>
-                                <Button onClick={handleDownload} disabled={generating}>
+                                {/* <Button onClick={handleDownload} disabled={generating}>
                                     {generating ? (
                                         <span className="flex items-center">
                                             <svg
@@ -210,7 +158,7 @@ export default function InvoiceGenerator({ payment, open, onClose }: InvoiceGene
                                             Download PDF
                                         </span>
                                     )}
-                                </Button>
+                                </Button> */}
                             </CardFooter>
                         </Card>
                     </div>

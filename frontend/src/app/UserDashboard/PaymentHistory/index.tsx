@@ -186,6 +186,7 @@ export default function PaymentHistory() {
     const [appointmentPage, setAppointmentPage] = useState(1)
     const [activePaymentId, setActivePaymentId] = useState<string | null>(null)
     const [invoicePayment, setInvoicePayment] = useState<any>(null)
+    const [invoiceOpen, setInvoiceOpen] = useState(false)
     const [retryPayment, setRetryPayment] = useState<any>(null)
     const confirm = useConfirm()
     const dispatch = useDispatch<AppDispatch>()
@@ -352,6 +353,7 @@ export default function PaymentHistory() {
 
     const handleDownloadInvoice = (payment: IPayments) => {
         setInvoicePayment(payment)
+        setInvoiceOpen(true)
     }
 
     const handleDownloadReport = async (inspectionId: string) => {
@@ -962,8 +964,8 @@ export default function PaymentHistory() {
             )}
 
             {/* Invoice Generator Dialog */}
-            {invoicePayment && (
-                <InvoiceGenerator payment={invoicePayment} open={!!invoicePayment} onClose={() => setInvoicePayment(null)} />
+            {invoicePayment && invoiceOpen && (
+                <InvoiceGenerator payment={invoicePayment} open={invoiceOpen} onClose={() => setInvoiceOpen(false)} />
             )}
             {retryPayment && (
                 <Dialog open={!!retryPayment} onOpenChange={(open) => !open && setRetryPayment(null)}>
