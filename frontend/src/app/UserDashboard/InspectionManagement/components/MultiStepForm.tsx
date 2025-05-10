@@ -62,13 +62,10 @@ const MultiStepForm = () => {
         try {
             setLoading(true);
             const value = methods.getValues();
-            console.log("Form Values:", value);
             const timeSlot = JSON.parse(value.timeSlot);
-            console.log("Time Slot:", timeSlot);
             const response = await axiosInstance.post("/inspections/book", { ...value, timeSlot });
 
             if (response.status === 201) {
-                console.log("Booking Response:", response.data);
 
                 if (response.data.remainingAmount <= 0) {
                     toast.success("Inspection booked successfully using your wallet balance!");

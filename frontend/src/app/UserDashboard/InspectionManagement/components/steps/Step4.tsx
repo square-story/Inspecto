@@ -7,12 +7,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { RootState } from "@/store";
+import { featchActiveInspectionTypes } from "@/features/inspectionType/inspectionTypeSlice";
+import { AppDispatch, RootState } from "@/store";
 import { format } from "date-fns";
-import { Calendar, Car, CheckCircle, Clock, MapPin, Phone } from "lucide-react";
+import { Calendar, Car, CheckCircle, Clock, LucideWallet, MapPin, Phone, Wallet } from "lucide-react";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { TimeSlotMap } from "./Step3";
+import { useDispatch, useSelector } from "react-redux";
 
 interface ReviewSectionProps {
     label: string;
@@ -36,8 +37,15 @@ const Step4 = () => {
     const { getValues, control } = useFormContext();
     const values = getValues();
     const vehicles = useSelector((state: RootState) => state.vehicle.vehicles);
+    const dispatch = useDispatch<AppDispatch>();
+    const inspectionTypes = useSelector((state: RootState) => state.inspectionType.activeInspectionTypes);
 
     const selectedVehicle = vehicles.find(v => v._id === values.vehicleId);
+    useEffect(()=>{
+        dispatch(featchActiveInspectionTypes());
+    },[dispatch])
+
+    const selectedInspectionType = inspectionTypes.find(t => t._id === values.inspectionType);
 
 
     return (
@@ -50,7 +58,7 @@ const Step4 = () => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <ReviewSection
                             label="Vehicle"
                             value={selectedVehicle?.registrationNumber || "N/A"}
@@ -68,7 +76,7 @@ const Step4 = () => {
                         />
                         <ReviewSection
                             label="Inspection Type"
-                            value={values.inspectionType}
+                            value={selectedInspectionType?.name || "N/A"}
                             icon={CheckCircle}
                         />
                         <ReviewSection
@@ -78,8 +86,18 @@ const Step4 = () => {
                         />
                         <ReviewSection
                             label="Time Slot"
-                            value={TimeSlotMap[values.slotNumber]}
+                            value={JSON.parse(values.timeSlot).startTime + " - " + JSON.parse(values.timeSlot).endTime}
                             icon={Clock}
+                        />
+                        <ReviewSection
+                            label="Platform Fee"
+                            value={selectedInspectionType?.platformFee?.toString() || "N/A"}
+                            icon={Wallet}
+                        />
+                        <ReviewSection
+                            label="Inspector Fee"
+                            value={selectedInspectionType?.price?.toString() || "N/A"}
+                            icon={LucideWallet}
                         />
                     </div>
 

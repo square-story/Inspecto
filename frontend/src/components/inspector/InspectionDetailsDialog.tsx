@@ -148,7 +148,7 @@ export default function InspectionDetailsDialog({
                                             <div className="text-sm text-muted-foreground">
                                                 {inspection.date ? safeFormatDate(inspection.date) : "Date not specified"}
                                                 <br />
-                                                Slot {inspection.slotNumber || "Not specified"}
+                                                Slot {inspection.timeSlot.startTime + "-" + inspection.timeSlot.endTime|| "Not specified"}
                                             </div>
                                         </div>
                                     </div>
