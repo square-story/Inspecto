@@ -222,10 +222,7 @@ export default function InspectionReportPage() {
                         <Label htmlFor="year">Year</Label>
                         <Input id="year" value={inspection?.vehicle.year || ""} disabled />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="color">Color</Label>
-                        <Input id="color" value={inspection?.vehicle.color || ""} disabled />
-                      </div>
+                      
                     </div>
                   </div>
                   <Separator />

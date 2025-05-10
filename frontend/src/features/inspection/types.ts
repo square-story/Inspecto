@@ -26,6 +26,12 @@ export enum ReportStatus {
     COMPLETED = "completed"
 }
 
+export interface TimeSlot{
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+}
+
 export interface IInspectionReport {
     mileage: string;
     exteriorCondition: 'excellent' | 'good' | 'fair' | 'poor';
@@ -54,7 +60,7 @@ export interface Inspection {
     phone: string;
     inspectionType: IInspectionType;
     date: Date;
-    slotNumber: number;
+    timeSlot: TimeSlot;
     confirmAgreement: boolean;
     status: InspectionStatus;
     notes?: string;

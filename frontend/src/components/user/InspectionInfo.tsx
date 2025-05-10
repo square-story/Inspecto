@@ -109,8 +109,8 @@ const InspectionInfo = ({ inspection }: { inspection: Inspection }) => {
                         <p className="text-muted-foreground">Date:</p>
                         <p>{formatDate(inspection.date, 'MM/dd/yyyy')}</p>
 
-                        {/* <p className="text-muted-foreground">Time Slot:</p>
-                    <p>{getTimeSlotLabel(inspection.slotNumber)}</p> */}
+                        <p className="text-muted-foreground">Time Slot:</p>
+                    <p>{inspection.timeSlot.startTime + '-' + inspection.timeSlot.endTime}</p>
 
                         <p className="text-muted-foreground">Status:</p>
                         <p>

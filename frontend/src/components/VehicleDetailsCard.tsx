@@ -30,10 +30,6 @@ export const VehicleDetails = ({ vehicle }: { vehicle: Vehicle }) => {
                     <p className="font-medium capitalize">{vehicle.type || "N/A"}</p>
                 </div>
                 <div>
-                    <p className="text-gray-500">Color</p>
-                    <p className="font-medium capitalize">{vehicle.color || "N/A"}</p>
-                </div>
-                <div>
                     <p className="text-gray-500">Fuel Type</p>
                     <p className="font-medium capitalize">{vehicle.fuelType || "N/A"}</p>
                 </div>

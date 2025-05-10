@@ -13,12 +13,15 @@ createRoot(document.getElementById('root')!).render(
   <ConfirmDialogProvider>
     <Provider store={store}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <SocketProvider>
-        <NotificationProvider>
-          <App />
-        <Toaster richColors />
-        </NotificationProvider>
-      </SocketProvider>
+        <SocketProvider>
+          <NotificationProvider>
+            <App />
+            <Toaster
+              richColors
+              position={window.innerWidth <= 768 ? "top-right" : "bottom-right"}
+            />
+          </NotificationProvider>
+        </SocketProvider>
       </ThemeProvider>
     </Provider>
   </ConfirmDialogProvider>

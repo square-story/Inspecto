@@ -1,21 +1,10 @@
-version: '3.8'
-
 services:
-  redis:
-    image: redis:alpine
-    ports:
-      - 6379:6379
-    volumes:
-      - redis_data:/data
-    networks:
-      - inspecto
-
   api:
     image: squarestory/inspecto_api:latest
     restart: always
     env_file: ./backend/.env
     environment:
-      - REDIS_HOST=redis
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
       - NODE_ENV=production
       - PORT=10000
@@ -23,11 +12,7 @@ services:
       - inspecto
     ports:
       - "10000:10000"
-    depends_on:
-      - redis
 
-volumes:
-  redis_data:
 networks:
   inspecto:
     driver: bridge

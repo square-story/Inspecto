@@ -9,6 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 0: Free Up Disk Space
+      - name: Free Up Disk Space
+        run: |
+          echo "Freeing up disk space..."
+          docker system prune -af
+          docker volume prune -f
+          docker network prune -f
+          docker rmi $(docker images -f "dangling=true" -q) || true
+          
       # Step 1: Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,7 +29,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 3: Build and push the Docker image
+      # Step 3: Start Redis Container
+      - name: Start Redis
+        run: |
+          docker run -d --name redis-container -p 6379:6379 redis:alpine
+
+      # Step 4: Build and push the Docker image
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
@@ -28,7 +42,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/inspecto_api:latest
 
-      # Step 4: Deploy to AWS EC2
+      # Step 5: Deploy to AWS EC2
       - name: Deploy to AWS EC2
         env:
           SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
@@ -39,7 +53,15 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$SERVER_IP << 'EOF'
             set -e
             cd ~/Inspecto
-            docker-compose pull
-            docker-compose up -d --force-recreate
+            echo "Freeing up disk space..."
+            docker system prune -af
+            docker volume prune -f
+            docker network prune -f
+            docker rmi $(docker images -f "dangling=true" -q) || true
+            echo "Disk space after cleanup:"
+            df -h
+            echo "Pulling latest changes from GitHub..."
+            docker compose pull
+            docker compose up -d
           EOF
           rm -f private_key.pem
