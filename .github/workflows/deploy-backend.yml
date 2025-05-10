@@ -9,6 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 0: Free Up Disk Space
+      - name: Free Up Disk Space
+        run: |
+          echo "Freeing up disk space..."
+          docker system prune -af
+          docker volume prune -f
+          docker network prune -f
+          docker rmi $(docker images -f "dangling=true" -q) || true
+          
       # Step 1: Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v4
