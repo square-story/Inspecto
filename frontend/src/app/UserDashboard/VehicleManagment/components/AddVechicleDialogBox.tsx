@@ -32,7 +32,9 @@ interface AddVehicleDialogProps {
 const addVehicleSchema = z.object({
     make: z.string().min(2, { message: "Make must be at least 2 characters." }),
     vehicleModel: z.string().min(2, { message: "Model must be at least 2 characters." }),
-    year: z.coerce.number().min(1900, { message: "Year must be valid." }),
+    year: z.coerce.number()
+        .min(1900, { message: "Year must be valid." })
+        .max(new Date().getFullYear() - 1, { message: "Year cannot be current or future year." }),
     type: z.nativeEnum(VehicleType),
     registrationNumber: z.string().min(6, { message: "Registration number is required." }),
     chassisNumber: z.string().min(12, { message: "Chassis number is required." }),
@@ -164,13 +166,12 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
                                             <FormItem>
                                                 <FormLabel>Year</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" {...field} />
+                                                    <Input type="number" placeholder="2022" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    
                                 </FormSection>
 
                                 <FormSection title="Registration & Identification">
