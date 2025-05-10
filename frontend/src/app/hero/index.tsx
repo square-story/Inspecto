@@ -10,9 +10,9 @@ const Hero01 = () => {
     return (
 
         <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-            <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-8 md:gap-12 py-8 md:py-12">
+            <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-8 md:gap-12 py-8 md:py-12 mt-16 lg:mt-0">
             <div className="text-center lg:text-left">
-                    <Badge className="cursor-default animate-bounce bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
+                    <Badge className="cursor-default animate-bounce bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none hidden md:inline-flex">
                         Just released v1.0.0
                     </Badge>
                     <h1 className="mt-6 max-w-[15ch] text-4xl sm:text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tighter">

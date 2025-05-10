@@ -20,7 +20,8 @@ export class InspectionRepository extends BaseRepository<IInspectionDocument> im
   async getInspectionStats(inspectorId: string): Promise<IInspectionStatsFromInspectionDB> {
     try {
       const totalInspections = await this.model.countDocuments({
-        inspector: inspectorId
+        inspector: inspectorId,
+        status: { $ne: InspectionStatus.CANCELLED }
       })
       const pendingInspections = await this.model.countDocuments({
         inspector: inspectorId,

@@ -48,7 +48,6 @@ const editVehicleSchema = z.object({
     ]).optional(),
     frontViewImage: z.string().optional(),
     rearViewImage: z.string().optional(),
-    color: z.string().optional(),
 });
 
 export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
@@ -82,7 +81,6 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
                 : undefined,
             frontViewImage: vehicle.frontViewImage || "",
             rearViewImage: vehicle.rearViewImage || "",
-            color: vehicle.color || "",
         },
         mode: 'onSubmit'
     });
@@ -198,19 +196,6 @@ export const EditVehicleDialog: React.FC<EditVehicleDialogProps> = ({
                                                 <FormLabel>Year</FormLabel>
                                                 <FormControl>
                                                     <Input type="number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="color"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Color</FormLabel>
-                                                <FormControl>
-                                                    <Input type="color" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
