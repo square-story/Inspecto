@@ -12,6 +12,9 @@ import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserRepository } from "../../core/interfaces/repositories/user.repository.interface";
 import { IUsers } from "../../models/user.model";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(appConfig.googleClientId)
 
 @injectable()
 export class UserAuthService extends BaseAuthService implements IUserAuthService {
@@ -114,18 +117,25 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         return { message: 'OTP resent successfully' }
     }
 
-    async googleLoginOrRegister(email: string, name: string, picture: string, familyName?: string): Promise<{ user: IUsers; accessToken: string; refreshToken: string; }> {
+    async googleLoginOrRegister(token:string): Promise<{ user: IUsers; accessToken: string; refreshToken: string; }> {
         try {
-            if (!email || !name) {
-                throw new ServiceError("Google account lacks required information");
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: appConfig.googleClientId
+            })
+            const { email, name, picture,family_name } = ticket.getPayload()!;
+
+            if (!email || !name || !picture) {
+                throw new ServiceError("Invalid google login");
             }
-            const user = await this._userRepository.findUserByEmail(email);
+
+            const user = await this._userRepository.findUserByEmail(email)
 
             if (!user) {
                 await this._userRepository.create({
                     email,
                     firstName: name,
-                    lastName: familyName,
+                    lastName: family_name || "",
                     profile_image: picture,
                     authProvider: "google",
                     password: null

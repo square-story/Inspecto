@@ -28,6 +28,7 @@ import { useSignedImage } from "@/hooks/useSignedImage"
 import { Skeleton } from "@/components/ui/skeleton"
 import { InspectionService } from "@/services/inspection.service"
 import { getSignedPdfUrl } from "@/utils/cloudinary"
+import {saveAs} from "file-saver"
 
 
 const inspectionFormSchema = z.object({
@@ -147,11 +148,11 @@ export default function InspectionReportPage() {
         : "Your inspection report has been submitted successfully.",
         {
           action: !isDraft && pdfUrl ? {
-            label: 'View Report',
+            label: 'Download Report',
             onClick: async () => {
               try {
                 const signedUrl = await getSignedPdfUrl(pdfUrl);
-                window.open(signedUrl, "_blank");
+                saveAs(signedUrl, 'inspection_report.pdf');
               } catch (error) {
                 console.error('Error opening PDF:', error);
                 toast.error('Unable to open PDF. Please try again later.');

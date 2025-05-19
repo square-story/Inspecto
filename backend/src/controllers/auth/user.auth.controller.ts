@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
-import { OAuth2Client } from "google-auth-library";
 import { IUserAuthController } from "../../core/interfaces/controllers/auth.controller.interface";
 import { inject, injectable, } from "inversify";
 import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
-import appConfig from "../../config/app.config";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
 
 @injectable()
 export class UserAuthController implements IUserAuthController {
@@ -196,21 +194,7 @@ export class UserAuthController implements IUserAuthController {
                 return;
             }
 
-            const ticket = await client.verifyIdToken({
-                idToken: token,
-                audience: appConfig.googleClientId,
-            });
-            const payload = ticket.getPayload();
-            if (!payload) {
-                res.status(400).json({ message: 'Invalid Google token' });
-                return;
-            }
-            const { email, name, picture, family_name } = payload;
-            if (!email || !name || !picture) {
-                res.status(400).json({ message: 'Missing required Google account information' });
-                return;
-            }
-            const { refreshToken, accessToken, user } = await this._userAuthService.googleLoginOrRegister(email, name, picture, family_name);
+            const { refreshToken, accessToken, user } = await this._userAuthService.googleLoginOrRegister(token);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
