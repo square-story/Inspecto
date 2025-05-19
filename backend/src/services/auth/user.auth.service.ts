@@ -129,10 +129,10 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
                 throw new ServiceError("Invalid google login");
             }
 
-            const user = await this._userRepository.findUserByEmail(email)
+            let user = await this._userRepository.findUserByEmail(email)
 
             if (!user) {
-                await this._userRepository.create({
+                user = await this._userRepository.create({
                     email,
                     firstName: name,
                     lastName: family_name || "",
@@ -140,9 +140,6 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
                     authProvider: "google",
                     password: null
                 })
-            }
-            if (!user) {
-                throw new ServiceError("User not found");
             }
             const { accessToken, refreshToken } = this.generateTokens({ userId: user.id, role: user.role });
             return { user, accessToken, refreshToken };
