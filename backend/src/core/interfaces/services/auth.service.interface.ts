@@ -16,7 +16,7 @@ export interface IInspectorAuthService extends IAuthService {
 }
 
 export interface IUserAuthService extends IAuthService {
-    googleLoginOrRegister(email: string, name: string, picture: string, familyName?: string): Promise<{
+    googleLoginOrRegister(token:string): Promise<{
         user: IUsers;
         accessToken: string;
         refreshToken: string;
