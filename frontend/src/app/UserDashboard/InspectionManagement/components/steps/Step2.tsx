@@ -245,7 +245,7 @@ const Step2 = () => {
             columnFilters,
         },
         enableSorting: true,
-        manualFiltering: true, // We're handling filtering manually
+        manualFiltering: true,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
