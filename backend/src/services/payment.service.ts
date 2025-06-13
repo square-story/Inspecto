@@ -220,7 +220,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         try {
             const inspection = await this._inspectionRepository.findById(
                 new Types.ObjectId(inspectionId),
-                ['inspector', 'user','inspectionType']
+                ['inspector', 'user', 'inspectionType']
             );
 
             if (!inspection) throw new ServiceError('Inspection not found');
@@ -233,6 +233,10 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
                 status: PaymentStatus.SUCCEEDED
             })
 
+            if (!payment) {
+                throw new ServiceError('Inspection payment is not found')
+            }
+
             const inspectionType = await this._inspectionTypeRepository.findById(
                 inspection.inspectionType as unknown as Types.ObjectId
             );
@@ -242,7 +246,7 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
             }
 
             const platformFee = inspectionType.platformFee;
-            const totalAmount = payment ? payment.amount : inspectionType.price + platformFee;
+            const totalAmount = inspectionType.price + platformFee;
             const inspectorAmount = totalAmount - platformFee;
 
             let inspectorWallet = await this._walletRepository.findOne({
