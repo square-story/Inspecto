@@ -28,7 +28,8 @@ Inspecto is a cutting-edge platform that connects vehicle owners with certified 
 
 ## 🏗️ **Tech Stack**
 - **Frontend**: React.js (Vite) + Tailwind CSS
-- **Backend**: Node.js + Express.js  
+- **Backend**: Node.js + Express.js
+- **Real Time Communcation**: Socket.io
 - **Database**: MongoDB  
 - **State Management**: Redux Toolkit  
 - **Authentication**: JWT (Access & Refresh Tokens)  
