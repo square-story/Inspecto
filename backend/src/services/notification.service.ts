@@ -1,6 +1,5 @@
 import { inject, injectable } from "inversify";
-import { BaseService } from "../core/abstracts/base.service";
-import { INotificationDocument, NotificationType } from "../models/notification.model";
+import { NotificationType } from "../models/notification.model";
 import { TYPES } from "../di/types";
 import { SocketService } from "./socket.service";
 import { NotificationRepository } from "../repositories/notification.repository";
@@ -8,12 +7,11 @@ import { Types } from "mongoose";
 import { INotificationService } from "../core/interfaces/services/notification.service.interface";
 
 @injectable()
-export class NotificationService extends BaseService<INotificationDocument> implements INotificationService {
+export class NotificationService implements INotificationService {
     constructor(
         @inject(TYPES.NotificationRepository) private _notificationRepository: NotificationRepository,
         @inject(TYPES.SocketService) private _socketService: SocketService
     ) {
-        super(_notificationRepository)
     }
 
     async createAndSendNotification(

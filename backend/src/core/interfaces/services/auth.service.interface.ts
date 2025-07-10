@@ -1,8 +1,7 @@
 import { IUsers } from "../../../models/user.model";
 import { UserRole } from "../../types/user.role.type";
-import { IBaseAuthService } from "./base/base.auth.service.interface";
 
-export interface IAuthService extends IBaseAuthService {
+export interface IAuthService {
     login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }>;
 }
 
@@ -16,7 +15,7 @@ export interface IInspectorAuthService extends IAuthService {
 }
 
 export interface IUserAuthService extends IAuthService {
-    googleLoginOrRegister(token:string): Promise<{
+    googleLoginOrRegister(token: string): Promise<{
         user: IUsers;
         accessToken: string;
         refreshToken: string;

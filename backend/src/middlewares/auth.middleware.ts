@@ -5,7 +5,6 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 import { IUserService } from "../core/interfaces/services/user.service.interface";
-import { Types } from "mongoose";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -31,7 +30,7 @@ export class AuthMiddleware {
         try {
             const payload = await verifyAccessToken(token) as unknown as { userId: string; role: string; }
             if (payload.role === 'inspector') {
-                const inspector = await this.inspectorService.findById(new Types.ObjectId(payload.userId))
+                const inspector = await this.inspectorService.getInspectorById(payload.userId)
                 if (!inspector) {
                     res.status(404).json({
                         success: false,
@@ -48,7 +47,7 @@ export class AuthMiddleware {
                     return;
                 }
             } else if (payload.role === 'user') {
-                const user = await this.userService.findById(new Types.ObjectId(payload.userId))
+                const user = await this.userService.getUserById(payload.userId);
                 if (!user) {
                     res.status(404).json({
                         success: false,

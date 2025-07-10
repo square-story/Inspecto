@@ -1,9 +1,8 @@
 import { IInspectionDocument, IInspectionInput } from "../../../models/inspection.model";
 import { TimeSlot } from "../../../models/inspector.model";
 import { IInspectionStats } from "../../types/inspection.stats.type";
-import { IBaseService } from "./base/base.service.interface";
 
-export interface IInspectionService extends IBaseService<IInspectionDocument> {
+export interface IInspectionService {
     createInspection(data: IInspectionInput): Promise<{
         booking: IInspectionDocument;
         amount: number;

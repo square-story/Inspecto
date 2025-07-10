@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import { IInspector, InspectorStatus } from "../models/inspector.model";
 import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
-import { BaseService } from "../core/abstracts/base.service";
 import { TYPES } from "../di/types";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
@@ -15,6 +14,7 @@ import { IInspectorDashboardStats } from "../core/types/inspector.dashboard.stat
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
 import { WalletOwnerType } from "../models/wallet.model";
+import { toObjectId } from "../utils/toObjectId.utils";
 
 export type ChangePasswordResponse = {
     status: boolean;
@@ -22,7 +22,7 @@ export type ChangePasswordResponse = {
 };
 
 @injectable()
-export class InspectorService extends BaseService<IInspector> implements IInspectorService {
+export class InspectorService implements IInspectorService {
     constructor(
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
         @inject(TYPES.EmailService) private _emailService: IEmailService,
@@ -30,11 +30,10 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
     ) {
-        super(_inspectorRepository);
     }
 
     async completeInspectorProfile(userId: string, data: Partial<IInspector>) {
-        const response = await this.repository.findByIdAndUpdate(new Types.ObjectId(userId), data)
+        const response = await this._inspectorRepository.findByIdAndUpdate(new Types.ObjectId(userId), data)
 
         if (response) {
             await this._notificationService.createAndSendNotification(
@@ -59,7 +58,7 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
                 denialReason: '',
                 approvedAt: new Date(),
             };
-            const updatedInspector = await this.repository.findByIdAndUpdate(new Types.ObjectId(inspectorId), updates)
+            const updatedInspector = await this._inspectorRepository.findByIdAndUpdate(new Types.ObjectId(inspectorId), updates)
             if (updatedInspector) {
                 // Send approval email
                 await this._emailService.sendApprovalEmail(
@@ -240,6 +239,24 @@ export class InspectorService extends BaseService<IInspector> implements IInspec
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting inspector inspections: ${error.message}`);
             }
+            throw error;
+        }
+    }
+
+    async getInspectorById(inspectorId: string): Promise<IInspector | null> {
+        try {
+            return await this._inspectorRepository.findById(toObjectId(inspectorId));
+        } catch (error) {
+            console.error('Error in getInspectorById:', error);
+            throw error;
+        }
+    }
+
+    async updateInspector(inspectorId: string, data: Partial<IInspector>): Promise<IInspector | null> {
+        try {
+            return await this._inspectorRepository.update(toObjectId(inspectorId), data);
+        } catch (error) {
+            console.error('Error in updateInspector:', error);
             throw error;
         }
     }

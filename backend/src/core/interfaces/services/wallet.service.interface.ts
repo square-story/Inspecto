@@ -1,8 +1,7 @@
 import { IWallet } from "../../../models/wallet.model";
 import { IAdminWalletStats, IUserWalletStats, IWalletStats } from "../../types/wallet.stats.type";
-import { IBaseService } from "./base/base.service.interface";
 
-export interface IWalletService extends IBaseService<IWallet> {
+export interface IWalletService {
     getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats>;
     getWalletStatsAboutAdmin(): Promise<IAdminWalletStats>;
     getWalletStatsAboutUser(userId: string): Promise<IUserWalletStats>;

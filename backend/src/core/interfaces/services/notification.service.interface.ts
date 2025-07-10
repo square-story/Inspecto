@@ -1,7 +1,6 @@
 import { INotificationDocument, NotificationType } from "../../../models/notification.model";
-import { IBaseService } from "./base/base.service.interface";
 
-export interface INotificationService extends IBaseService<INotificationDocument> {
+export interface INotificationService {
     getNotifications(userId: string, limit?: number, offset?: number): Promise<INotificationDocument[]>
     getUnreadCount(userId: string): Promise<number>;
     markAsRead(userId: string, notificationId: string): Promise<void>;

@@ -1,9 +1,9 @@
 import { IInspector } from "../../../models/inspector.model";
 import { ChangePasswordResponse } from "../../../services/inspector.service";
 import { IInspectorDashboardStats } from "../../types/inspector.dashboard.stats.type";
-import { IBaseService } from "./base/base.service.interface";
 
-export interface IInspectorService extends IBaseService<IInspector> {
+
+export interface IInspectorService {
     changePassword(currentPassword: string, newPassword: string, inspectorId: string): Promise<{ status: boolean; message: string }>;
     completeInspectorProfile(userId: string, data: Partial<IInspector>): Promise<IInspector | null | undefined>;
     approveInspector(inspectorId: string): Promise<IInspector | null>;
@@ -14,4 +14,6 @@ export interface IInspectorService extends IBaseService<IInspector> {
     bookingHandler(inspectorId: string, userId: string, date: Date): Promise<IInspector | null>;
     unBookingHandler(inspectorId: string, userId: string, date: Date): Promise<IInspector | null>;
     getInspectorDashboardStats(inspectorId: string): Promise<IInspectorDashboardStats>;
+    getInspectorById(inspectorId: string): Promise<IInspector | null>;
+    updateInspector(inspectorId: string, data: Partial<IInspector>): Promise<IInspector | null>;
 }

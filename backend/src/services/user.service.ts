@@ -1,8 +1,6 @@
 import { inject, injectable } from "inversify";
-import { IUsers } from "../models/user.model";
 import { ChangePasswordResponse } from "./inspector.service";
 import bcrypt from 'bcrypt'
-import { BaseService } from "../core/abstracts/base.service";
 import { IUserService } from "../core/interfaces/services/user.service.interface";
 import { TYPES } from "../di/types";
 import { Types } from "mongoose";
@@ -13,17 +11,18 @@ import { NotificationType } from "../models/notification.model";
 import { IUserDashboardStats } from "../core/types/user.dashboard.stats.type";
 import { IInspectionRepository } from "../core/interfaces/repositories/inspection.repository.interface";
 import { IVehicleRepository } from "../core/interfaces/repositories/vehicle.repository.interface";
+import { IUsers } from "../models/user.model";
+import { toObjectId } from "../utils/toObjectId.utils";
 
 
 @injectable()
-export class UserService extends BaseService<IUsers> implements IUserService {
+export class UserService implements IUserService {
     constructor(
         @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
         @inject(TYPES.NotificationService) private _notificationService: INotificationService,
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.VehicleRepository) private _vehicleRepository: IVehicleRepository,
     ) {
-        super(_userRepository);
     }
     async toggleStatus(userId: string) {
         try {
@@ -120,6 +119,37 @@ export class UserService extends BaseService<IUsers> implements IUserService {
         } catch (error) {
             console.error('Error in getUserDashboard:', error);
             throw error;
+        }
+    }
+
+    async getUserById(userId: string): Promise<IUsers | null> {
+        try {
+            return await this._userRepository.findById(toObjectId(userId));
+        } catch (error) {
+            console.error('Error in getUserById:', error);
+            throw error;
+        }
+    }
+
+    async getAllUsers(): Promise<IUsers[]> {
+        try {
+            const users = await this._userRepository.getAllUsers();
+            if (!users || users.length === 0) {
+                throw new ServiceError('No users found');
+            }
+            return users;
+        } catch (error) {
+            console.error('Error in getAllUsers:', error);
+            throw new ServiceError('Failed to retrieve users');
+        }
+    }
+
+    async updateUser(userId: string, data: Partial<IUsers>): Promise<IUsers | null> {
+        try {
+            return await this._userRepository.update(toObjectId(userId), data);
+        } catch (error) {
+            console.error('Error in updateUser:', error);
+            throw new ServiceError('Failed to update user');
         }
     }
 }

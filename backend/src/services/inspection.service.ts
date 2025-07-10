@@ -1,7 +1,6 @@
 import mongoose, { ClientSession } from "mongoose";
 import { IInspectionInput, IInspectionDocument, InspectionStatus } from "../models/inspection.model";
 import { TimeSlot, WeeklyAvailability } from "../models/inspector.model";
-import { BaseService } from "../core/abstracts/base.service";
 import { IInspectionService } from "../core/interfaces/services/inspection.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
@@ -18,7 +17,7 @@ import { IWalletRepository } from "../core/interfaces/repositories/wallet.reposi
 import { TransactionStatus, TransactionType, WalletOwnerType } from "../models/wallet.model";
 
 @injectable()
-export class InspectionService extends BaseService<IInspectionDocument> implements IInspectionService {
+export class InspectionService implements IInspectionService {
     constructor(
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
@@ -27,7 +26,6 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
         @inject(TYPES.InspectionTypeService) private _inspectionTypeService: IInspectionTypeService,
         @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
     ) {
-        super(_inspectionRepository);
     }
     async getStatsAboutInspector(inspectorId: string): Promise<IInspectionStats> {
         try {
@@ -246,7 +244,7 @@ export class InspectionService extends BaseService<IInspectionDocument> implemen
 
             let amount = 0;
             if (data.inspectionType) {
-                const inspectionType = await this._inspectionTypeService.findById(data.inspectionType as unknown as Types.ObjectId);
+                const inspectionType = await this._inspectionTypeService.getInspectionTypeById(data.inspectionType as unknown as Types.ObjectId);
                 if (!inspectionType) {
                     throw new ServiceError('Inspection type not found');
                 }

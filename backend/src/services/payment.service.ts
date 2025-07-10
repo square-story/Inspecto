@@ -1,9 +1,8 @@
 import Stripe from "stripe";
 import appConfig from "../config/app.config";
-import { IPaymentDocument, PaymentStatus } from "../models/payment.model";
+import { PaymentStatus } from "../models/payment.model";
 import mongoose, { ObjectId, Types } from "mongoose";
 import { InspectionStatus } from "../models/inspection.model";
-import { BaseService } from "../core/abstracts/base.service";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
@@ -24,7 +23,7 @@ export const stripe = new Stripe(appConfig.stripSecret, {
 });
 
 @injectable()
-export class PaymentService extends BaseService<IPaymentDocument> implements IPaymentService {
+export class PaymentService implements IPaymentService {
     private readonly PENDING_TIMEOUT_MS = 15 * 60 * 1000;
     private readonly CANCEL_WINDOW_MS = 10 * 60 * 1000;
     constructor(
@@ -35,7 +34,6 @@ export class PaymentService extends BaseService<IPaymentDocument> implements IPa
         @inject(TYPES.NotificationService) private _notificationService: INotificationService,
         @inject(TYPES.InspectionTypeRepository) private _inspectionTypeRepository: IInspectionTypeRepository,
     ) {
-        super(_paymentRepository);
     }
 
     private async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
