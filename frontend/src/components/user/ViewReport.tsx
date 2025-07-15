@@ -23,18 +23,41 @@ import {
     Wrench,
 } from "lucide-react"
 import { useSignedImage } from "@/hooks/useSignedImage"
+import { useEffect } from "react"
+import BackButton from "../BackButton"
+import { InspectionService } from "@/services/inspection.service"
+import { Inspection } from "@/features/inspection/types"
 
 export default function UserReportPage() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const inspection = useSelector((state: RootState) => state.inspections.data.find((insp) => insp._id === id))
+    let inspection = useSelector((state: RootState) => state.inspections.data.find((insp) => insp._id === id))
+
+    useEffect(() => {
+        const fetchInspection = async () => {
+            try {
+                const fetchedInspection = await InspectionService.getInspectionById(id as string)
+                if (fetchedInspection) {
+                    inspection = fetchedInspection
+                } else {
+                    console.error("Inspection not found")
+                }
+            } catch (error) {
+                console.error("Error fetching inspection:", error)
+            }
+        }
+
+        if (!inspection) {
+            fetchInspection()
+        }
+    }, [inspection])
 
     if (!inspection) {
         return (
             <div className="container mx-auto py-16 px-4 text-center">
                 <h2 className="text-2xl font-bold mb-4">Inspection not found</h2>
                 <p className="mb-8">The inspection report you're looking for doesn't exist or has been removed.</p>
-                <Button onClick={() => navigate("/dashboard")}>Return to Dashboard</Button>
+                <BackButton />
             </div>
         )
     }
@@ -194,7 +217,7 @@ export default function UserReportPage() {
                         <CardFooter>
                             <Button
                                 className="w-full"
-                                onClick={() => window.open(inspection.report?.reportPdfUrl, "_blank")}
+                                onClick={() => window.open((inspection as Inspection).report?.reportPdfUrl, "_blank")}
                                 disabled={!inspection.report?.reportPdfUrl}
                             >
                                 <FileText className="mr-2 h-4 w-4" /> View Full PDF Report

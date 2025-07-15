@@ -8,13 +8,17 @@ export const InspectionService = {
         const response = await axiosInstance.get(`/inspections/available-slots/${selectedInspector}/${selectedDate}`)
         return response.data.slots;
     },
-    getInspections: async (): Promise<Inspection | null> => {
+    getInspections: async (): Promise<Inspection[] | null> => {
         const response = await axiosInstance.get('/inspections')
         return response.data.inspections
     },
     submitInspectionReport: async (reportData: InspectionFormValues, id: string, isDraft: boolean): Promise<{ pdfUrl: string }> => {
         const response = await axiosInstance.post('/inspections/submit-report', { reportData, id, isDraft })
         return response.data
+    },
+    getInspectionById: async (id: string): Promise<Inspection | null> => {
+        const response = await axiosInstance.get(`/inspections/${id}`)
+        return response.data.inspection
     }
 }
 
