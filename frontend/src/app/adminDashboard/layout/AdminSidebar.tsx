@@ -58,7 +58,7 @@ const AdminSidebar = () => {
                 <NavUser user={{
                     name: "Admin",
                     email: "No email provided",
-                    avatar: "default-avatar.png",
+                    avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=Sophia",
                 }} />
             </SidebarFooter>
         </Sidebar>
