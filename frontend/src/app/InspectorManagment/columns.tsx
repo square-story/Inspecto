@@ -10,10 +10,10 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "@/components/ui/dropdown-menu";
 import { DataTableColumnHeader } from "@/components/columnHeader";
 import LongText from "@/components/ui/LongText";
+import { SignedAvatar } from "@/components/SignedAvatar";
 
 export type Inspectors = {
     _id: string;
@@ -47,10 +47,11 @@ export const columns = ({
             cell: ({ row }) => {
                 const profileImage = row.getValue("profile_image") as string;
                 return (
-                    <Avatar>
-                        <AvatarImage src={profileImage} alt="Profile" />
-                        <AvatarFallback className="rounded-full">SN</AvatarFallback>
-                    </Avatar>
+                    <SignedAvatar
+                        publicId={profileImage}
+                        fallback={`${row.getValue("firstName") || ''} ${row.getValue("lastName") || ''}`}
+                        className="h-8 w-8"
+                    />
                 );
             },
             enableHiding: false
@@ -134,7 +135,6 @@ export const columns = ({
                             >
                                 View Inspector
                             </DropdownMenuItem>
-                            <DropdownMenuItem>View payment details</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );

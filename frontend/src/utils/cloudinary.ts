@@ -13,7 +13,7 @@ export const getSignedImageUrl = async (
     }
 }
 
-export const getSignedPdfUrl = async (pdfUrl:string):Promise<string>=>{
+export const getSignedPdfUrl = async (pdfUrl: string): Promise<string> => {
     try {
         const response = await axiosInstance.get('/cloudinary/signed-pdf-url', {
             params: { pdfUrl }
