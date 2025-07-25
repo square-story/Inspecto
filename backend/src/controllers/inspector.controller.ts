@@ -4,6 +4,7 @@ import { IInspectorController } from "../core/interfaces/controllers/inspector.c
 import { TYPES } from "../di/types";
 import { ServiceError } from "../core/errors/service.error";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
+import { mapInspector } from "../dtos/implementations/inspector.dto";
 
 @injectable()
 export class InspectorController implements IInspectorController {
@@ -23,7 +24,7 @@ export class InspectorController implements IInspectorController {
                 res.status(404).json({ message: "Inspector not found" });
                 return;
             }
-            res.status(200).json(response);
+            res.status(200).json(mapInspector(response));
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(400).json({
@@ -163,7 +164,7 @@ export class InspectorController implements IInspectorController {
 
             res.status(200).json({
                 message: 'Profile denied successfully',
-                inspector: updatedInspector
+                inspector: mapInspector(updatedInspector)
             });
             return
 
@@ -245,7 +246,7 @@ export class InspectorController implements IInspectorController {
             res.status(200).json({
                 success: true,
                 message: "User details updated successfully.",
-                inspector
+                inspector: mapInspector(inspector)
             });
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -317,7 +318,7 @@ export class InspectorController implements IInspectorController {
                 return
             }
             const inspectors = await this._inspectorService.getNearbyInspectors(latitude as string, longitude as string);
-            res.status(200).json(inspectors);
+            res.status(200).json(inspectors.map(inspector => mapInspector(inspector)));
             return;
         } catch (error) {
             if (error instanceof ServiceError) {
