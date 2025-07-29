@@ -1,4 +1,5 @@
 export interface IUserDTO {
+    _id: string; // Optional, as it may not be present in all user objects
     firstName: string;
     lastName: string;
     email: string;

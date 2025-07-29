@@ -3,6 +3,7 @@ import { IInspectorDTO } from "../interfaces/inspector.dto";
 
 export function mapInspector(inspector: IInspector): IInspectorDTO {
     return {
+        _id: inspector._id.toString(),
         firstName: inspector.firstName,
         lastName: inspector.lastName,
         email: inspector.email,

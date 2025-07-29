@@ -45,6 +45,7 @@ export const columns = ({
             accessorKey: "profile_image",
             header: "Profile",
             cell: ({ row }) => {
+                console.log("row", row);
                 const profileImage = row.getValue("profile_image") as string;
                 return (
                     <SignedAvatar

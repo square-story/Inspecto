@@ -19,6 +19,7 @@ export default function UserManagmentTable() {
 
     async function featchData() {
         const response = await AdminService.getUsers()
+        console.log("response", response.data);
         setData(response.data)
     }
 

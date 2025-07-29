@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import { InspectorStatus, UnavailabilityPeriod, WeeklyAvailability } from "../../models/inspector.model";
 
 export interface IInspectorDTO {
+    _id: string; // Optional, as it may not be present in all inspector objects
     firstName: string;
     lastName: string;
     email: string;

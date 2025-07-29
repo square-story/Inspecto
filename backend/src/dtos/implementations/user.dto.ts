@@ -3,6 +3,7 @@ import { IUserDTO } from "../interfaces/user.dto";
 
 export function mapUser(user: IUsers): IUserDTO {
     return {
+        _id: user._id.toString(),
         firstName: user.firstName,
         lastName: user.lastName || "",
         email: user.email,
