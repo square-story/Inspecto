@@ -45,12 +45,11 @@ export const columns = ({
             accessorKey: "profile_image",
             header: "Profile",
             cell: ({ row }) => {
-                console.log("row", row);
                 const profileImage = row.getValue("profile_image") as string;
                 return (
                     <SignedAvatar
                         publicId={profileImage}
-                        fallback={`${row.getValue("firstName") || ''} ${row.getValue("lastName") || ''}`}
+                        fallback={`${row.getValue("fullName") || ''}`}
                         className="h-8 w-8"
                     />
                 );

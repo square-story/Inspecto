@@ -33,7 +33,7 @@ export const columns = ({
                 return (
                     <SignedAvatar
                         publicId={profileImage}
-                        fallback={`${row.getValue("firstName") || ''} ${row.getValue("lastName") || ''}`}
+                        fallback={`${row.getValue("firstName") || ''}`}
                         className="h-8 w-8"
                     />
                 );
