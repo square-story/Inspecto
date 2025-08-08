@@ -21,7 +21,7 @@ export class ReviewController implements IReviewController {
                 res.status(400).json({ success: false, message: 'Data Not Found' })
                 return
             }
-            const response = await this._reviewService.create(data)
+            const response = await this._reviewService.createReview(data)
             res.status(200).json({ message: 'Review Successfully Added', review: response, success: true, })
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -46,7 +46,7 @@ export class ReviewController implements IReviewController {
                 res.status(400).json({ success: false, message: 'Inspection Id Required' })
                 return;
             }
-            const response = await this._reviewService.findOne({ inspection: inspectionId })
+            const response = await this._reviewService.findReviewsByInspection(inspectionId)
             if (!response) {
                 res.status(400).json({ success: true, message: 'Didn\'t get Inspection Review' })
                 return;
@@ -75,7 +75,7 @@ export class ReviewController implements IReviewController {
                 res.status(400).json({ message: 'Inspector Id Needed', success: false })
                 return
             }
-            const response = await this._reviewService.find({ inspector: inspectorId })
+            const response = await this._reviewService.findReviewsByInspector(inspectorId)
             res.status(200).json({ data: response, message: "Inspector Review Featched Successfully", success: true })
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -130,7 +130,7 @@ export class ReviewController implements IReviewController {
                     success: false
                 })
             }
-            const data = await this._reviewService.find({ user: userId })
+            const data = await this._reviewService.findReviewsByUser(userId)
             res.status(200).json({ message: 'User Review Featched Successfully', reviews: data, success: true })
         } catch (error) {
             if (error instanceof ServiceError) {

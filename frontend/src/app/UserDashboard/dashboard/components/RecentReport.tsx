@@ -15,8 +15,8 @@ const RecentReports = ({ reports, loading }: { reports: Inspection[], loading: b
     const navigate = useNavigate();
 
 
-    const handleViewReport = (id: string) => {
-        navigate(`/user/dashboard/report/${id}`);
+    const handleViewReport = (report: Inspection) => {
+        navigate(`/user/dashboard/report/${report._id}`);
     };
 
     const handleDownloadReport = async (inspection: Inspection) => {
@@ -95,7 +95,7 @@ const RecentReports = ({ reports, loading }: { reports: Inspection[], loading: b
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleViewReport(report._id)}
+                                onClick={() => handleViewReport(report)}
                             >
                                 <Eye className="h-4 w-4 mr-2" />
                                 View

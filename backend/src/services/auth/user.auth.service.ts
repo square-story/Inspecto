@@ -1,11 +1,10 @@
-import { generateAccessToken, verifyRefreshToken } from "../../utils/token.utils";
+import { generateAccessToken, generateTokens, verifyRefreshToken } from "../../utils/token.utils";
 import bcrypt from 'bcrypt'
 import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis.config";
 import appConfig from "../../config/app.config";
 import { sendEmail } from "../../utils/email";
 import crypto from "crypto";
-import { BaseAuthService } from "../../core/abstracts/base.auth.service";
 import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
@@ -17,12 +16,11 @@ import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client(appConfig.googleClientId)
 
 @injectable()
-export class UserAuthService extends BaseAuthService implements IUserAuthService {
+export class UserAuthService implements IUserAuthService {
 
     constructor(
         @inject(TYPES.UserRepository) private _userRepository: IUserRepository
     ) {
-        super();
     }
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string; }> {
         try {
@@ -41,7 +39,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
                 throw new ServiceError('Account is blocked', 'email');
             }
             const payload = { userId: user.id, role: user.role };
-            return this.generateTokens(payload);
+            return generateTokens(payload);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
             throw new ServiceError('login failed', 'email');
@@ -96,7 +94,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         const newUser = await this._userRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword })
         await redisClient.del(redisKey)
         const payload = { userId: newUser.id, role: newUser.role }
-        const { accessToken, refreshToken } = this.generateTokens(payload)
+        const { accessToken, refreshToken } = generateTokens(payload)
         return { message: "User registerd successfully", accessToken, refreshToken }
     }
     async resendOTP(email: string) {
@@ -117,13 +115,13 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
         return { message: 'OTP resent successfully' }
     }
 
-    async googleLoginOrRegister(token:string): Promise<{ user: IUsers; accessToken: string; refreshToken: string; }> {
+    async googleLoginOrRegister(token: string): Promise<{ user: IUsers; accessToken: string; refreshToken: string; }> {
         try {
             const ticket = await client.verifyIdToken({
                 idToken: token,
                 audience: appConfig.googleClientId
             })
-            const { email, name, picture,family_name } = ticket.getPayload()!;
+            const { email, name, picture, family_name } = ticket.getPayload()!;
 
             if (!email || !name || !picture) {
                 throw new ServiceError("Invalid google login");
@@ -141,7 +139,7 @@ export class UserAuthService extends BaseAuthService implements IUserAuthService
                     password: null
                 })
             }
-            const { accessToken, refreshToken } = this.generateTokens({ userId: user.id, role: user.role });
+            const { accessToken, refreshToken } = generateTokens({ userId: user.id, role: user.role });
             return { user, accessToken, refreshToken };
         } catch (error) {
             if (error instanceof ServiceError) throw error;

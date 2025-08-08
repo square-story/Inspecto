@@ -55,3 +55,21 @@ export const verifyRefreshToken = async (token: string): Promise<TokenPayload | 
         return null;
     }
 };
+
+export const generateTokens = (payload: TokenPayload) => {
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+    return { accessToken, refreshToken };
+};
+
+export const refreshTokens = async (token: string): Promise<{ accessToken: string }> => {
+    const payload = await verifyRefreshToken(token);
+    if (!payload?.userId || !payload?.role) {
+        throw new Error('Invalid token payload');
+    }
+    const newAccessToken = generateAccessToken({
+        userId: payload.userId,
+        role: payload.role
+    });
+    return { accessToken: newAccessToken };
+};

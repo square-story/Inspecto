@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -13,6 +12,7 @@ import { AppDispatch } from '@/store'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { SignedAvatar } from './SignedAvatar'
 
 export function ProfileDropdown() {
     const dispatch: AppDispatch = useDispatch()
@@ -36,10 +36,11 @@ export function ProfileDropdown() {
         <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
                 <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
-                    <Avatar className='h-8 w-8'>
-                        <AvatarImage src='/avatars/01.png' alt='@shadcn' />
-                        <AvatarFallback>SN</AvatarFallback>
-                    </Avatar>
+                    <SignedAvatar
+                        publicId="https://api.dicebear.com/9.x/adventurer/svg?seed=Sophia"
+                        fallback='Admin'
+                        className='h-8 w-8 rounded-full'
+                    />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className='w-56' align='end' forceMount>

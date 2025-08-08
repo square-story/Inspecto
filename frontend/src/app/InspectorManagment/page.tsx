@@ -3,12 +3,12 @@ import { InspectorDataTable } from "./components/InspectorDataTable";
 import { Inspectors, columns } from "./columns";
 import { AdminService } from "@/services/admin.service";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useConfirm } from "@omit/react-confirm-dialog";
 import { AlertTriangle } from "lucide-react";
 import { DeleteConfirmContent } from "./components/DenyReason";
+import { SignedAvatar } from "@/components/SignedAvatar";
 
 export default function DemoPage() {
     const confirm = useConfirm();
@@ -165,12 +165,11 @@ export default function DemoPage() {
                             <div className="p-4">
                                 {/* Profile Section */}
                                 <div className="flex items-center space-x-4">
-                                    <Avatar className="h-20 w-20 border border-gray-300">
-                                        <AvatarImage src={selectedInspector.profile_image} alt="Profile" />
-                                        <AvatarFallback className="text-lg font-semibold">
-                                            {selectedInspector.firstName.charAt(0)}
-                                        </AvatarFallback>
-                                    </Avatar>
+                                    <SignedAvatar
+                                        publicId={selectedInspector.profile_image}
+                                        fallback={`${selectedInspector.firstName || ''} ${selectedInspector.lastName || ''}`}
+                                        className="h-8 w-8"
+                                    />
                                     <div>
                                         <p className="text-lg font-medium">
                                             {selectedInspector.firstName} {selectedInspector.lastName}

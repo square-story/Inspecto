@@ -1,7 +1,6 @@
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IWithdrawalRepository } from "../core/interfaces/repositories/withdrawal.repository.interface";
-import { BaseService } from "../core/abstracts/base.service";
 import { IWithdrawal, WithdrawalMethod, WithdrawalStatus } from "../models/withdrawal.model";
 import { IWithDrawalService } from "../core/interfaces/services/withdrawal.service.interface";
 import { IWalletRepository } from "../core/interfaces/repositories/wallet.repository.interface";
@@ -14,13 +13,12 @@ import { INotificationService } from "../core/interfaces/services/notification.s
 
 
 @injectable()
-export class WithdrawalService extends BaseService<IWithdrawal> implements IWithDrawalService {
+export class WithdrawalService implements IWithDrawalService {
     constructor(
         @inject(TYPES.WithdrawalRepository) private _withdrawalRepository: IWithdrawalRepository,
         @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
         @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     ) {
-        super(_withdrawalRepository)
     }
     async requestWithdrawal(
         inspectorId: string,

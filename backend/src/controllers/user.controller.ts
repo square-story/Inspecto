@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../di/types';
 import { IUserController } from "../core/interfaces/controllers/user.controller.interface";
 import { IUserService } from "../core/interfaces/services/user.service.interface";
+import { mapUser } from "../dtos/implementations/user.dto";
 
 @injectable()
 export class UserController implements IUserController {
@@ -21,12 +22,12 @@ export class UserController implements IUserController {
             }
 
             // Fetch user details from the database
-            const user = await this._userService.findById(new Types.ObjectId(userId));
+            const user = await this._userService.getUserById(userId);
             if (!user) {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
-            res.status(200).json(user);
+            res.status(200).json(mapUser(user));
         } catch (error) {
             console.error("Error occurred while updating user details:", error);
             res.status(500).json({
@@ -59,7 +60,7 @@ export class UserController implements IUserController {
                 return
             }
 
-            const user = await this._userService.update(new Types.ObjectId(userId), data);
+            const user = await this._userService.updateUser(userId, data);
             if (!user) {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(404).json({
@@ -71,7 +72,7 @@ export class UserController implements IUserController {
             res.status(200).json({
                 success: true,
                 message: "User details updated successfully.",
-                user
+                user: mapUser(user)
             });
         } catch (error) {
             console.error("Error occurred while updating user details:", error);

@@ -1,5 +1,5 @@
 import { DataTableColumnHeader } from "@/components/columnHeader";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SignedAvatar } from "@/components/SignedAvatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
@@ -31,10 +31,11 @@ export const columns = ({
             cell: ({ row }) => {
                 const profileImage = row.getValue("profile_image") as string;
                 return (
-                    <Avatar>
-                        <AvatarImage src={profileImage} alt="Profile" />
-                        <AvatarFallback className="rounded-full">SN</AvatarFallback>
-                    </Avatar>
+                    <SignedAvatar
+                        publicId={profileImage}
+                        fallback={`${row.getValue("firstName") || ''}`}
+                        className="h-8 w-8"
+                    />
                 );
             },
         },

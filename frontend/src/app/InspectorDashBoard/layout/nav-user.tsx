@@ -2,7 +2,6 @@ import {
     ChevronsUpDown,
     LogOut,
 } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,6 +21,7 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/store'
 import { logoutUser } from '@/features/auth/authAPI'
 import { toast } from 'sonner'
+import { SignedAvatar } from '@/components/SignedAvatar'
 
 export function NavUser({
     user,
@@ -60,10 +60,11 @@ export function NavUser({
                             size='lg'
                             className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                         >
-                            <Avatar className='h-8 w-8 rounded-full'>
-                                <AvatarImage className='object-cover' src={user.avatar} alt={user.name} />
-                                <AvatarFallback className='rounded-full'>SN</AvatarFallback>
-                            </Avatar>
+                            <SignedAvatar
+                                publicId={user.avatar}
+                                fallback={user.name.charAt(0)}
+                                className='h-8 w-8 rounded-full'
+                            />
                             <div className='grid flex-1 text-left text-sm leading-tight'>
                                 <span className='truncate font-semibold'>{user.name}</span>
                                 <span className='truncate text-xs'>{user.email}</span>
@@ -79,10 +80,11 @@ export function NavUser({
                     >
                         <DropdownMenuLabel className='p-0 font-normal'>
                             <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                                <Avatar className='h-8 w-8 rounded-full'>
-                                    <AvatarImage className='object-cover' src={user.avatar} alt={user.name} />
-                                    <AvatarFallback className='rounded-full'>SN</AvatarFallback>
-                                </Avatar>
+                                <SignedAvatar
+                                    publicId={user.avatar}
+                                    fallback={user.name.charAt(0)}
+                                    className='h-8 w-8 rounded-full'
+                                />
                                 <div className='grid flex-1 text-left text-sm leading-tight'>
                                     <span className='truncate font-semibold'>{user.name}</span>
                                     <span className='truncate text-xs'>{user.email}</span>

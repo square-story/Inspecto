@@ -30,7 +30,7 @@ interface ReviewDialogProps {
     existingReview?: IReview;
 }
 
-export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId,existingReview }: ReviewDialogProps) {
+export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId, existingReview }: ReviewDialogProps) {
     const [hoveredRating, setHoveredRating] = useState(0);
     const user = useSelector((state: RootState) => state.user)
 
@@ -62,8 +62,8 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId,exi
                 <DialogHeader>
                     <DialogTitle>{existingReview ? "Your Review" : "Leave a Review"}</DialogTitle>
                     <DialogDescription>
-                    {existingReview 
-                            ? "Here's the review you submitted for this inspection." 
+                        {existingReview
+                            ? "Here's the review you submitted for this inspection."
                             : "Share your experience with this inspection."}
                     </DialogDescription>
                 </DialogHeader>
@@ -73,7 +73,7 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId,exi
                         <div className="flex items-center">
                             <div className="flex">
                                 {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star 
+                                    <Star
                                         key={star}
                                         className={`h-6 w-6 ${star <= existingReview.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
                                     />
@@ -86,57 +86,57 @@ export function ReviewDialog({ open, onOpenChange, inspectionId, inspectorId,exi
                         <p className="text-sm">{existingReview.comment}</p>
                     </div>
                 ) : (
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="rating"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Rating</FormLabel>
-                                    <div className="flex gap-1">
-                                        {[1, 2, 3, 4, 5].map((rating) => (
-                                            <Star
-                                                key={rating}
-                                                className={`h-6 w-6 cursor-pointer ${rating <= (hoveredRating || field.value)
-                                                    ? "fill-yellow-400 text-yellow-400"
-                                                    : "text-gray-300"
-                                                    }`}
-                                                onMouseEnter={() => setHoveredRating(rating)}
-                                                onMouseLeave={() => setHoveredRating(0)}
-                                                onClick={() => field.onChange(rating)}
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="rating"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Rating</FormLabel>
+                                        <div className="flex gap-1">
+                                            {[1, 2, 3, 4, 5].map((rating) => (
+                                                <Star
+                                                    key={rating}
+                                                    className={`h-6 w-6 cursor-pointer ${rating <= (hoveredRating || field.value)
+                                                        ? "fill-yellow-400 text-yellow-400"
+                                                        : "text-gray-300"
+                                                        }`}
+                                                    onMouseEnter={() => setHoveredRating(rating)}
+                                                    onMouseLeave={() => setHoveredRating(0)}
+                                                    onClick={() => field.onChange(rating)}
+                                                />
+                                            ))}
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="comment"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Your Review</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Share your experience..."
+                                                {...field}
+                                                rows={4}
                                             />
-                                        ))}
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="comment"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Your Review</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Share your experience..."
-                                            {...field}
-                                            rows={4}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button variant="outline" onClick={() => onOpenChange(false)}>
-                            Close
-                        </Button>
-                        <Button type="submit" className="w-full">
-                            Submit Review
-                        </Button>
-                    </form>
-                </Form>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button variant="outline" onClick={() => onOpenChange(false)}>
+                                Close
+                            </Button>
+                            <Button type="submit" className="w-full">
+                                Submit Review
+                            </Button>
+                        </form>
+                    </Form>
                 )}
             </DialogContent>
         </Dialog>

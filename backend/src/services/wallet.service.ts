@@ -1,4 +1,3 @@
-import { BaseService } from '../core/abstracts/base.service';
 import { IWalletRepository } from '../core/interfaces/repositories/wallet.repository.interface';
 import { TYPES } from '../di/types';
 import { inject, injectable } from 'inversify';
@@ -8,11 +7,10 @@ import { IAdminWalletStats, IUserWalletStats, IWalletStats } from '../core/types
 import { ServiceError } from '../core/errors/service.error';
 
 @injectable()
-export class WalletService extends BaseService<IWallet> implements IWalletService {
+export class WalletService implements IWalletService {
   constructor(
     @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository
   ) {
-    super(_walletRepository);
   }
 
   async getWalletStatsAboutInspector(inspectorId: string): Promise<IWalletStats> {

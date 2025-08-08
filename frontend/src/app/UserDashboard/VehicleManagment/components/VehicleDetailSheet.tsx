@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
 import { useSignedImage } from "@/hooks/useSignedImage";
-import { AlertCircle, Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel,  ShieldCheck, Trash2, View, Wrench } from "lucide-react";
+import { AlertCircle, Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, ShieldCheck, Trash2, View, Wrench } from "lucide-react";
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import { getSignedPdfUrl } from "@/utils/cloudinary";
@@ -83,8 +83,6 @@ export const VehicleDetailSheet = ({
             }
 
             navigate(`/user/dashboard/report/${vehicle.lastInspectionId._id}`);
-
-            toast.success("Report opened in new tab")
         } catch {
             toast.error("Error opening report")
         }
@@ -177,7 +175,7 @@ export const VehicleDetailSheet = ({
                                         label="Fuel Type"
                                         value={vehicle.fuelType}
                                     />
-                                    
+
                                     {vehicle.lastInspectionId && vehicle.lastInspectionId.report?.reportPdfUrl && (
                                         <>
                                             <Button onClick={() => DownloadReport()} className="col-span-2 mt-4" variant="outline">

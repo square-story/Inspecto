@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { IInspectionInput, InspectionStatus } from "../models/inspection.model";
-import { ObjectId, Types } from "mongoose";
+import { ObjectId } from "mongoose";
 import { IInspectionController } from "../core/interfaces/controllers/inspection.controller.interface";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
@@ -282,7 +282,7 @@ export class InspectionController implements IInspectionController {
                     }
                 })
 
-                await this._vehicleService.update(report.vehicle as unknown as Types.ObjectId, {
+                await this._vehicleService.updateVehicle(String(report.vehicle), {
                     lastInspectionId: id,
                 });
             }

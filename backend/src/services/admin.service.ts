@@ -2,7 +2,6 @@ import { inject, injectable } from "inversify";
 import { IAdminService } from "../core/interfaces/services/admin.service.interface";
 import { TYPES } from "../di/types";
 import { IAdmin } from "../models/admin.model";
-import { BaseService } from "../core/abstracts/base.service";
 import { IUserRepository } from "../core/interfaces/repositories/user.repository.interface";
 import { IInspectorRepository } from "../core/interfaces/repositories/inspector.repository.interface";
 import { ServiceError } from "../core/errors/service.error";
@@ -17,7 +16,7 @@ import { WalletOwnerType } from "../models/wallet.model";
 import { earningData } from "../utils/earningsData";
 
 @injectable()
-export class AdminService extends BaseService<IAdmin> implements IAdminService {
+export class AdminService implements IAdminService {
     constructor(
         @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
         @inject(TYPES.InspectorRepository) private _inspectorRepository: IInspectorRepository,
@@ -25,12 +24,11 @@ export class AdminService extends BaseService<IAdmin> implements IAdminService {
         @inject(TYPES.InspectionRepository) private _inspectionRepository: IInspectionRepository,
         @inject(TYPES.WalletRepository) private _walletRepository: IWalletRepository,
     ) {
-        super(_adminRepository);
     }
 
     async findByEmail(email: string): Promise<IAdmin | null> {
         try {
-            return await this.repository.findOne({ email });
+            return await this._adminRepository.findOne({ email });
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error finding admin by email: ${error.message}`);

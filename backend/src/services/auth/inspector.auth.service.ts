@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { generateAccessToken, verifyRefreshToken } from "../../utils/token.utils";
+import { generateAccessToken, generateTokens, verifyRefreshToken } from "../../utils/token.utils";
 import { generateOtp } from "../../utils/otp";
 import redisClient from "../../config/redis.config";
 import appConfig from "../../config/app.config";
@@ -7,7 +7,6 @@ import { sendEmail } from "../../utils/email";
 import crypto from 'crypto'
 import { InspectorStatus } from "../../models/inspector.model";
 import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
-import { BaseAuthService } from "../../core/abstracts/base.auth.service";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import { Types } from "mongoose";
@@ -17,13 +16,12 @@ import { NotificationType } from "../../models/notification.model";
 import { INotificationService } from "../../core/interfaces/services/notification.service.interface";
 
 @injectable()
-export class InspectorAuthService extends BaseAuthService implements IInspectorAuthService {
+export class InspectorAuthService implements IInspectorAuthService {
 
     constructor(
         @inject(TYPES.InspectorRepository) private readonly _inspectorRepository: IInspectorRepository,
         @inject(TYPES.NotificationService) private readonly _notificationService: INotificationService,
     ) {
-        super();
     }
 
     async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
@@ -43,7 +41,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
                 throw new ServiceError('Account is Blocked', 'email');
             }
             const payload = { userId: inspector.id, role: inspector.role };
-            return this.generateTokens(payload);
+            return generateTokens(payload);
         } catch (error) {
             if (error instanceof ServiceError) throw error;
             throw new ServiceError('login failed', 'email');
@@ -101,7 +99,7 @@ export class InspectorAuthService extends BaseAuthService implements IInspectorA
             const newInspector = await this._inspectorRepository.create({ firstName: parsedData.firstName, lastName: parsedData.lastName, email: parsedData.email, password: parsedData.hashPassword, phone: parsedData.phone })
             await redisClient.del(redisKey)
             const payload = { userId: newInspector.id, role: newInspector.role }
-            const { accessToken, refreshToken } = this.generateTokens(payload)
+            const { accessToken, refreshToken } = generateTokens(payload)
 
             //send notification to admin
             await this._notificationService.createAndSendNotification(
