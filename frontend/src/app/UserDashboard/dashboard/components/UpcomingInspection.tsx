@@ -34,7 +34,7 @@ const UpcomingInspections = ({ inspections, loading }: { inspections: Inspection
 
     return (
         <div className="space-y-4">
-            {inspections.map((inspection) => (
+            {inspections && inspections.map((inspection) => (
                 <Card key={inspection._id} className="overflow-hidden">
                     <CardHeader className="bg-muted/50 pb-2">
                         <div className="flex justify-between items-center">
@@ -61,7 +61,7 @@ const UpcomingInspections = ({ inspections, loading }: { inspections: Inspection
                             </div>
                             <div className="flex items-center gap-2">
                                 <CarIcon className="h-4 w-4 text-muted-foreground" />
-                                <span>{inspection.vehicle.registrationNumber}</span>
+                                <span>{inspection.vehicle?.registrationNumber}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Car className="h-4 w-4 text-muted-foreground" />
