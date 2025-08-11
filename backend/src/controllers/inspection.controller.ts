@@ -271,6 +271,11 @@ export class InspectionController implements IInspectionController {
                 const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
 
+                if (!pdfUrl) {
+                    res.status(500).json({ message: 'Failed to upload PDF to Cloudinary' });
+                    return;
+                }
+
                 await this._paymentService.processInspectionPayment(id)
 
                 await this._inspectionService.updateInspection(id, {

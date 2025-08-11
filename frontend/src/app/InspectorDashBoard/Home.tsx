@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "@/store"
 import { useEffect, useState } from "react"
 import { fetchAppointments } from "@/features/inspection/inspectionSlice"
-import { format, formatDate } from "date-fns"
+import { format } from "date-fns"
 import { IInspectorDashboardStats } from "@/types/inspector.dashboard.stats"
 import { useLoadingState } from "@/hooks/useLoadingState";
 import LoadingSpinner from "@/components/LoadingSpinner"
@@ -180,7 +180,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Monthly Overview */}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-2">
                 <Card>
                     <CardHeader>
                         <CardTitle>Monthly Performance</CardTitle>
@@ -200,28 +200,6 @@ export default function Dashboard() {
                                 <span>Total Inspections</span>
                             </div>
                             <span className="font-bold">{stats.totalInspections}</span>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Upcoming Schedule</CardTitle>
-                        <CardDescription>Your next 3 inspections</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {stats.recentInspections.slice(0, 3).map((inspection) => (
-                                <div key={inspection._id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                                    <div className="space-y-1">
-                                        <p className="font-medium">Vehicle Inspection #{inspection.bookingReference}</p>
-                                        <p className="text-sm text-muted-foreground">Tomorrow at {formatDate(inspection.date, 'XXXXX')}</p>
-                                    </div>
-                                    <Button variant="outline" size="sm" onClick={() => handleRowClick(inspection)}>
-                                        View Details
-                                    </Button>
-                                </div>
-                            ))}
                         </div>
                     </CardContent>
                 </Card>
