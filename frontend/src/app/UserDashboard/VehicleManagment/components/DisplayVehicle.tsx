@@ -4,9 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
     Car, Wrench, ShieldCheck,
 } from "lucide-react";
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/store';
-import { deleteVehicle, Vehicle, } from '@/features/vehicle/vehicleSlice';
+import { Vehicle, } from '@/features/vehicle/vehicleSlice';
 import { EditVehicleDialog } from './EditVehicleDialog';
 import { VehicleDetailSheet } from './VehicleDetailSheet';
 
@@ -17,19 +15,8 @@ interface DisplayVehicleProps {
 
 
 const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ vehicle }) => {
-    const dispatch = useDispatch<AppDispatch>()
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
-
-
-    const handleDelete = async () => {
-        try {
-            await dispatch(deleteVehicle(vehicle._id)).unwrap();
-            setIsDetailOpen(false);
-        } catch (error) {
-            console.error('Failed to delete vehicle:', error);
-        }
-    };
 
 
     return (
@@ -70,7 +57,6 @@ const DisplayVehicle: React.FC<DisplayVehicleProps> = ({ vehicle }) => {
                 onOpenChange={setIsDetailOpen}
                 vehicle={vehicle}
                 onEdit={() => setIsEditOpen(true)}
-                onDelete={handleDelete}
             />
 
             <EditVehicleDialog

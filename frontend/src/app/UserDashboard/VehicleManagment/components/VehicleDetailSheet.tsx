@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Vehicle } from "@/features/vehicle/vehicleSlice";
 import { useSignedImage } from "@/hooks/useSignedImage";
-import { AlertCircle, Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, ShieldCheck, Trash2, View, Wrench } from "lucide-react";
+import { AlertCircle, Barcode, Calendar, Car, ClipboardCheck, Download, Edit, Fuel, ShieldCheck, View, Wrench } from "lucide-react";
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import { getSignedPdfUrl } from "@/utils/cloudinary";
@@ -32,13 +32,11 @@ export const VehicleDetailSheet = ({
     onOpenChange,
     vehicle,
     onEdit,
-    onDelete
 }: {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     vehicle: Vehicle;
     onEdit: () => void;
-    onDelete: () => void;
 }) => {
     const formatDate = (date: Date) =>
         format(new Date(date), 'MMM dd, yyyy');
@@ -97,9 +95,6 @@ export const VehicleDetailSheet = ({
                         <div className="flex gap-2">
                             <Button variant="outline" size="icon" onClick={onEdit}>
                                 <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="destructive" size="icon" onClick={onDelete}>
-                                <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
                     </div>
