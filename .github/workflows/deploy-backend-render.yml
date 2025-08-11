@@ -28,14 +28,6 @@ jobs:
 
       # Trigger Render deploy
       - name: Trigger Render Deploy
-        run: |
-          curl -X POST "$RENDER_DEPLOY_HOOK"
+        run: curl -X POST "$RENDER_DEPLOY_HOOK"
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
-            echo "Pulling latest image..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inspecto_api:latest || true
-            echo "Stopping and removing old container..."
-            docker stop inspecto_api || true
-            docker rm inspecto_api || true
-            echo "Running new container..."
-            docker run -d --name inspecto_api -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/inspecto_api:latest
