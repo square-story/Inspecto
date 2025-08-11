@@ -41,9 +41,9 @@ const Step4 = () => {
     const inspectionTypes = useSelector((state: RootState) => state.inspectionType.activeInspectionTypes);
 
     const selectedVehicle = vehicles.find(v => v._id === values.vehicleId);
-    useEffect(()=>{
+    useEffect(() => {
         dispatch(featchActiveInspectionTypes());
-    },[dispatch])
+    }, [dispatch])
 
     const selectedInspectionType = inspectionTypes.find(t => t._id === values.inspectionType);
 
