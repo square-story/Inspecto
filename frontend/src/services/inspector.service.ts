@@ -32,7 +32,6 @@ export const inspectorService = {
     },
     getInspectorDashboardStats: async (): Promise<IInspectorDashboardStats> => {
         const response = await axiosInstance.get('/inspector/dashboard')
-        console.log(response.data)
         return response.data as IInspectorDashboardStats;
     }
 }

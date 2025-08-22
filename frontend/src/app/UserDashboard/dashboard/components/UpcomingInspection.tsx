@@ -65,7 +65,7 @@ const UpcomingInspections = ({ inspections, loading }: { inspections: Inspection
                             </div>
                             <div className="flex items-center gap-2">
                                 <Car className="h-4 w-4 text-muted-foreground" />
-                                <span>{inspection.vehicle.make}{inspection.vehicle.vehicleModel}</span>
+                                <span>{inspection.vehicle?.make}{inspection.vehicle?.vehicleModel}</span>
                             </div>
                         </div>
                         <div className="flex justify-end mt-4">

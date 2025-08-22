@@ -30,7 +30,6 @@ const AdminDashBoardContent = () => {
         await withLoading(async () => {
             try {
                 const response = await AdminService.adminDashboardStats()
-                console.log(response)
                 setStats(response)
             } catch (error) {
                 if (error instanceof AxiosError) {

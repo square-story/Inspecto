@@ -28,7 +28,7 @@ import { useSignedImage } from "@/hooks/useSignedImage"
 import { Skeleton } from "@/components/ui/skeleton"
 import { InspectionService } from "@/services/inspection.service"
 import { getSignedPdfUrl } from "@/utils/cloudinary"
-import {saveAs} from "file-saver"
+import { saveAs } from "file-saver"
 
 
 const inspectionFormSchema = z.object({
@@ -209,21 +209,21 @@ export default function InspectionReportPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="registrationNumber">Registration Number</Label>
-                        <Input id="registrationNumber" value={inspection?.vehicle.registrationNumber || ""} disabled />
+                        <Input id="registrationNumber" value={inspection?.vehicle?.registrationNumber || ""} disabled />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="make">Make & Model</Label>
                         <Input
                           id="make"
-                          value={`${inspection?.vehicle.make || ""} ${inspection?.vehicle.vehicleModel || ""}`}
+                          value={`${inspection?.vehicle?.make || ""} ${inspection?.vehicle?.vehicleModel || ""}`}
                           disabled
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="year">Year</Label>
-                        <Input id="year" value={inspection?.vehicle.year || ""} disabled />
+                        <Input id="year" value={inspection?.vehicle?.year || ""} disabled />
                       </div>
-                      
+
                     </div>
                   </div>
                   <Separator />

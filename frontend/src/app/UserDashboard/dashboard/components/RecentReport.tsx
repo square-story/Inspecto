@@ -82,10 +82,10 @@ const RecentReports = ({ reports, loading }: { reports: Inspection[], loading: b
                     <CardContent className="pt-4">
                         <div className="space-y-2">
                             <p>
-                                <span className="font-medium">Vehicle:</span> {report.vehicle.make} {report.vehicle.vehicleModel}
+                                <span className="font-medium">Vehicle:</span> {report.vehicle?.make} {report.vehicle?.vehicleModel}
                             </p>
                             <p>
-                                <span className="font-medium">Registration:</span> {report.vehicle.registrationNumber}
+                                <span className="font-medium">Registration:</span> {report.vehicle?.registrationNumber}
                             </p>
                             <p>
                                 <span className="font-medium">Inspection Type:</span> {report.inspectionType.name.charAt(0).toUpperCase() + report.inspectionType.name.slice(1)}

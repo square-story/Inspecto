@@ -23,7 +23,8 @@ router.post("/book", authenticateToken, authorizeRole('user'), inspectionControl
 router.put('/update', authenticateToken, authorizeRole('user'), inspectionController.updateInspection)
 
 router.get('/available-slots/:inspectorId/:date', authenticateToken, authorizeRole('user'), inspectionController.getAvailableSlots);
-router.post('/submit-report', inspectionController.submitInspectionReport);
+
+router.post('/submit-report', authenticateToken, authorizeRole('inspector'), inspectionController.submitInspectionReport);
 
 //get single inspections
 router.get('/:inspectionId', authenticateToken, authorizeRole('user'), inspectionController.getInspectionById)

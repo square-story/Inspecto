@@ -10,6 +10,7 @@ import { generateInspectionPDF } from "../utils/pdf.utils";
 import { uploadToCloudinary } from "../utils/cloudinary.utils";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
+import { IVehicleDocument } from "../models/vehicle.model";
 
 
 @injectable()
@@ -248,6 +249,7 @@ export class InspectionController implements IInspectionController {
                 res.status(404).json({ message: 'Inspection not found' });
                 return;
             }
+            report.vehicle as unknown as IVehicleDocument;
             if (report.report?.status == 'completed') {
                 res.status(400).json({ message: 'Report already submitted' });
                 return;
@@ -271,6 +273,11 @@ export class InspectionController implements IInspectionController {
                 const publicId = `inspection_reports/${report.bookingReference}_${Date.now()}`;
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
 
+                if (!pdfUrl) {
+                    res.status(500).json({ message: 'Failed to upload PDF to Cloudinary' });
+                    return;
+                }
+
                 await this._paymentService.processInspectionPayment(id)
 
                 await this._inspectionService.updateInspection(id, {
@@ -280,9 +287,9 @@ export class InspectionController implements IInspectionController {
                         status: 'completed',
                         reportPdfUrl: pdfUrl
                     }
-                })
+                });
 
-                await this._vehicleService.updateVehicle(String(report.vehicle), {
+                await this._vehicleService.updateVehicle(String((report.vehicle as unknown as IVehicleDocument)._id), {
                     lastInspectionId: id,
                 });
             }
@@ -300,7 +307,7 @@ export class InspectionController implements IInspectionController {
             } else {
                 res.status(500).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: error instanceof Error ? error.message : 'Internal server error',
                 });
             }
         }
