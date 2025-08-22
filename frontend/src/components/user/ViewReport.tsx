@@ -1,8 +1,6 @@
 "use client"
 
 import { useParams, useNavigate } from "react-router-dom"
-import { useSelector } from "react-redux"
-import type { RootState } from "@/store"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,22 +21,25 @@ import {
     Wrench,
 } from "lucide-react"
 import { useSignedImage } from "@/hooks/useSignedImage"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import BackButton from "../BackButton"
 import { InspectionService } from "@/services/inspection.service"
 import { Inspection } from "@/features/inspection/types"
 
 export default function UserReportPage() {
     const { id } = useParams<{ id: string }>()
+    const [inspection, setInspection] = useState<Inspection>()
+    const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
-    let inspection = useSelector((state: RootState) => state.inspections.data.find((insp) => insp._id === id))
 
     useEffect(() => {
+        
         const fetchInspection = async () => {
             try {
-                const fetchedInspection = await InspectionService.getInspectionById(id as string)
-                if (fetchedInspection) {
-                    inspection = fetchedInspection
+                const data = await InspectionService.getInspectionById(id as string)
+                if (data) {
+                    setInspection(data)
+                    setLoading(false)
                 } else {
                     console.error("Inspection not found")
                 }
@@ -50,9 +51,17 @@ export default function UserReportPage() {
         if (!inspection) {
             fetchInspection()
         }
-    }, [inspection])
+    }, [inspection, loading])
 
-    if (!inspection) {
+    if (loading) {
+        return (
+            <div className="container mx-auto py-16 px-4 text-center">
+                <h2 className="text-2xl font-bold mb-4">Loading...</h2>
+            </div>
+        )
+    }
+
+    if (inspection == undefined) {
         return (
             <div className="container mx-auto py-16 px-4 text-center">
                 <h2 className="text-2xl font-bold mb-4">Inspection not found</h2>

@@ -76,20 +76,16 @@ const UserDashboardView = () => {
                     />
                 </div>
 
-                <Tabs defaultValue="wallet" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 overflow-x-auto">
-                        <TabsTrigger value="wallet" className="whitespace-nowrap">
-                            <span className="sm:hidden">Wallet</span>
-                        <span className="hidden sm:inline">Wallet Info</span>
-                        </TabsTrigger>
+                <Tabs defaultValue="upcoming" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 gap-2 overflow-x-auto">
+                        
                         <TabsTrigger value="upcoming">Upcoming Inspections</TabsTrigger>
                         <TabsTrigger value="vehicles">My Vehicles</TabsTrigger>
                         <TabsTrigger value="reports">Recent Reports</TabsTrigger>
+                        <TabsTrigger value="wallet">Wallet info</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="wallet" className="space-y-4">
-                        <UserWallet />
-                    </TabsContent>
+                    
                     <TabsContent value="upcoming" className="space-y-4">
                         <UpcomingInspections loading={loading} inspections={stats.upcomingInspectionsList || []} />
                     </TabsContent>
@@ -98,6 +94,9 @@ const UserDashboardView = () => {
                     </TabsContent>
                     <TabsContent value="reports" className="space-y-4">
                         <RecentReports loading={loading} reports={stats.completedInspectionsList || []} />
+                    </TabsContent>
+                    <TabsContent value="wallet" className="space-y-4">
+                        <UserWallet />
                     </TabsContent>
                 </Tabs>
 

@@ -483,7 +483,7 @@ export default function PaymentHistory() {
             scrollAreaClassName=""
         >
             <Tabs defaultValue="payments" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+                <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 gap-2 overflow-x-auto">
                     <TabsTrigger value="payments">Payment History</TabsTrigger>
                     <TabsTrigger value="appointments">Inspection Appointments</TabsTrigger>
                 </TabsList>
