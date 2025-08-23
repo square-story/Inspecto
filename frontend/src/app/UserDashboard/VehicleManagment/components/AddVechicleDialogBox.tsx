@@ -150,7 +150,7 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
     // Memoized form section component
     const FormSection = useMemo(() => ({ title, children }: { title: string; children: React.ReactNode }) => (
         <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-lg font-semibold">{title}</h3>
             {children}
         </div>
     ), []);
