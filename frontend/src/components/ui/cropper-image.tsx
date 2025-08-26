@@ -92,22 +92,20 @@ const CropImage = ({
     };
 
     // Upload cropped image
-    const handleUpload = async () => {
-        if (!croppedImage) {
-            console.log('No cropped image to upload', croppedImage);
+    const handleCropAndUpload = async (croppedImageUrl: string | null) => {
+        // This is your crop callback
+        if (!croppedImageUrl) {
             toast.error('Please crop the image first');
             return;
         }
-
         setIsUploading(true);
         try {
-            const response = await fetch(croppedImage);
+            const response = await fetch(croppedImageUrl);
             const blob = await response.blob();
             const file = new File([blob], 'cropped-profile.jpg', { type: 'image/jpeg' });
 
             const publicId = await uploadToCloudinary(file);
             const signedUrl = await getSecureImageUrl(publicId, 'none');
-
             setFinalImage(signedUrl);
             setSelectedFile(null);
             setCroppedImage(null);
@@ -196,14 +194,11 @@ const CropImage = ({
                         circularCrop
                         file={selectedFile}
                         maxImageSize={5 * 1024 * 1024}
-                        onCrop={(croppedImageUrl) => {
-                            console.log('Crop callback triggered:', croppedImageUrl);
-                            setCroppedImage(croppedImageUrl);
-                        }}
+                        onCrop={handleCropAndUpload}
                     >
                         <ImageCropContent className="max-w-md" />
                         <div className="flex items-center gap-2">
-                            <ImageCropApply onClick={handleUpload} disabled={isUploading} />
+                            <ImageCropApply disabled={isUploading} />
                             <ImageCropReset onClick={handleReset} />
                             <Button
                                 onClick={() => {
