@@ -396,7 +396,7 @@ export default function InspectorForm() {
                                   await handleCertificateUpload(e.target.files);
                                   toast.dismiss(loadingToast);
                                   toast.success("Certificates uploaded successfully");
-                                } catch (error) {
+                                } catch (_error) {
                                   toast.dismiss(loadingToast);
                                   toast.error("Failed to upload certificates");
                                 }
@@ -552,8 +552,7 @@ export default function InspectorForm() {
               <FormField
                 control={form.control}
                 name="signature"
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                render={({ field, fieldState: { error } }) => (
+                render={({ fieldState: { error } }) => (
                   <FormItem>
                     <FormLabel>Digital Signature *</FormLabel>
                     <FormControl>
