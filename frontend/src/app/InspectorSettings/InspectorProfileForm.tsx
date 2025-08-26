@@ -16,7 +16,8 @@ import { Form } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import SvgText from '@/components/SvgText'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { SimpleSignature, SimpleSignatureRef } from '@/components/ui/react-signature'
 
 const profileFormSchema = z.object({
     firstName: z
@@ -33,7 +34,7 @@ const profileFormSchema = z.object({
     phone: z
         .string()
         .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-    signature: z.string().optional(),
+    signature: z.string().min(1, "Signature is required"),
     profile_image: z.string().optional()
 })
 
@@ -41,7 +42,9 @@ export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 export default function InspectorProfileForm() {
     const { inspector, loading } = useInspectorDetails()
+    const [isSignatureValid, setIsSignatureValid] = useState(false);
     const dispatch = useDispatch<AppDispatch>()
+    const signatureRef = useRef<SimpleSignatureRef>(null);
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
@@ -65,12 +68,32 @@ export default function InspectorProfileForm() {
                 profile_image: inspector.profile_image || '',
                 signature: inspector.signature || ''
             })
+
+            // Set signature validity based on existing signature
+            const hasExistingSignature = !!(inspector.signature && inspector.signature.trim());
+            setIsSignatureValid(hasExistingSignature);
         }
     }, [inspector, form])
 
     async function onSubmit(data: ProfileFormValues) {
         try {
-            const updatedInspector = await inspectorService.updateInspector(data);
+            const currentSignature = data.signature || signatureRef.current?.getSignature();
+            const isEmpty = signatureRef.current?.isEmpty() ?? true;
+
+            if (!isSignatureValid || (!currentSignature && isEmpty)) {
+                toast.error("Please provide your signature");
+                return;
+            }
+
+            // Use current signature from component if it's been updated, otherwise use form data
+            const signatureToSubmit = signatureRef.current?.getSignature() || data.signature;
+
+            const submitData = {
+                ...data,
+                signature: signatureToSubmit
+            };
+
+            const updatedInspector = await inspectorService.updateInspector(submitData);
             dispatch(setInspector(updatedInspector.data.inspector))
             toast.success('Profile updated successfully!');
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -79,13 +102,24 @@ export default function InspectorProfileForm() {
         }
     }
 
+
+
     const handleImageUpload = (url: string | null) => {
         form.setValue("profile_image", url || inspector?.profile_image);
     };
 
-    const handleSignature = (url: string | null) => {
-        form.setValue("signature", url || inspector?.signature);
-    }
+    const handleSignatureChange = (signature: string | null) => {
+        const isEmpty = signatureRef.current?.isEmpty() ?? true;
+        setIsSignatureValid(!!signature && !isEmpty);
+
+        const hasNewSignature = !!signature && !isEmpty;
+        const hasExistingSignature = !signature && isEmpty && !!(inspector?.signature?.trim());
+        setIsSignatureValid(hasNewSignature || hasExistingSignature);
+
+        // Update form value - use new signature or keep existing one
+        const signatureValue = signature || (hasExistingSignature ? inspector?.signature || '' : '');
+        form.setValue('signature', signatureValue, { shouldValidate: true });
+    };
 
     if (loading) return (<LoadingSpinner />)
 
@@ -159,12 +193,35 @@ export default function InspectorProfileForm() {
                         </FormItem>
                     )}
                 />
-                <div className='relative'>
-                    <ProfileDrop headerTitle='Signature' onImageUpload={handleSignature} defaultImage={inspector?.signature} />
-                    <div className="absolute -bottom-10 left-44 ">
-                        <SvgText text='To Upload Signature' />
-                    </div>
-                </div>
+                <FormField
+                    control={form.control}
+                    name="signature"
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    render={({ field, fieldState: { error } }) => (
+                        <FormItem>
+                            <FormLabel>Digital Signature *</FormLabel>
+                            <FormControl>
+                                <div className="space-y-2">
+                                    <SimpleSignature
+                                        value={inspector?.signature} // Pass existing signature
+                                        ref={signatureRef}
+                                        onSignatureChange={handleSignatureChange}
+                                        placeholder="Please sign here"
+                                        width={400}
+                                        height={150}
+                                    />
+                                </div>
+                            </FormControl>
+                            <FormDescription>
+                                {inspector?.signature
+                                    ? "Your existing signature is displayed. You can draw over it to update or keep the current one."
+                                    : "Draw your signature in the box above"
+                                }
+                            </FormDescription>
+                            <FormMessage>{error && error.message}</FormMessage>
+                        </FormItem>
+                    )}
+                />
                 <Button type='submit'>Update profile</Button>
             </form>
         </Form>

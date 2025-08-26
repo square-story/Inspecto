@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,10 +23,15 @@ import { SpecializationSelect } from "@/components/fancy-multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
 import MinimalAvailabilityPicker from "@/components/minimal-availability-picker";
+import { SimpleSignature, SimpleSignatureRef } from "@/components/ui/react-signature";
+import { dataURLtoFile } from "@/helper/dataToFile";
+
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"];
+
+
 
 const FileSchema = z.object({
   file: typeof window === 'undefined'
@@ -49,7 +54,7 @@ const dayAvailabilitySchema = z.object({
   timeSlots: z.array(timeSlotSchema)
 });
 
-// Validation schema
+// Updated validation schema - signature is now a string (SVG)
 const formSchema = z.object({
   location: z.string().min(3, "Address must be at least 3 characters"),
   profile_image: FileSchema.nullable(),
@@ -57,7 +62,7 @@ const formSchema = z.object({
   yearOfExp: z.coerce.number()
     .min(1, "Experience must be at least 1 year")
     .max(50, "Experience must not exceed 50 years"),
-  signature: FileSchema.nullable(),
+  signature: z.string().min(1, "Signature is required"),
   specialization: z.array(z.string()).min(1, "At least one specialization is required"),
   longitude: z.string().optional().nullable(),
   latitude: z.string().optional().nullable(),
@@ -85,10 +90,12 @@ interface FileWithPreview {
 }
 
 
+
 export default function InspectorForm() {
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate()
+  const [isSignatureValid, setIsSignatureValid] = useState(false);
+  const navigate = useNavigate();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -107,7 +114,7 @@ export default function InspectorForm() {
       specialization: [],
       certificates: [],
       profile_image: null,
-      signature: null,
+      signature: "",
       availableSlots: defaultAvailability,
       unavailabilityPeriods: []
     }
@@ -132,8 +139,17 @@ export default function InspectorForm() {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     })
-
   }
+
+  const signatureRef = useRef<SimpleSignatureRef>(null);
+
+  const handleSignatureChange = (signature: string | null) => {
+    const isEmpty = signatureRef.current?.isEmpty() ?? true;
+    setIsSignatureValid(!!signature && !isEmpty);
+
+    // Update form value with data URL
+    form.setValue('signature', signature || '', { shouldValidate: true });
+  };
 
   const handleCertificateUpload = async (files: FileList) => {
     const currentCerts = form.getValues('certificates') || [];
@@ -149,6 +165,7 @@ export default function InspectorForm() {
     }
     form.setValue('certificates', [...currentCerts, ...newCerts], { shouldValidate: true });
   }
+
   const removeCertificate = (index: number) => {
     const currentCerts = form.getValues('certificates');
     form.setValue('certificates',
@@ -161,11 +178,16 @@ export default function InspectorForm() {
     setIsUploadingFiles(true);
     try {
       const profile = form.getValues('profile_image');
-      const signature = form.getValues('signature');
+      const signatureDataURL = form.getValues('signature');
       const certificates = form.getValues('certificates');
 
       const profilePublicId = profile ? await uploadToCloudinary(profile.file) : '';
-      const signaturePublicId = signature ? await uploadToCloudinary(signature.file) : '';
+
+      // Convert SVG string to file for upload
+      const signaturePublicId = signatureDataURL
+        ? await uploadToCloudinary(dataURLtoFile(signatureDataURL))
+        : '';
+
       const certificatePublicIds = await Promise.all(
         certificates.map(async cert => await uploadToCloudinary(cert.file))
       );
@@ -184,6 +206,12 @@ export default function InspectorForm() {
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    // Validate signature before submission
+    if (!isSignatureValid || !data.signature) {
+      toast.error("Please provide your signature");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const { profileUrl, signatureUrl, certificateUrls } = await uploadFiles();
@@ -333,9 +361,6 @@ export default function InspectorForm() {
                 )}
               />
 
-
-
-
               {/* Certificates */}
               <FormField
                 control={form.control}
@@ -371,7 +396,6 @@ export default function InspectorForm() {
                                   await handleCertificateUpload(e.target.files);
                                   toast.dismiss(loadingToast);
                                   toast.success("Certificates uploaded successfully");
-                                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                 } catch (error) {
                                   toast.dismiss(loadingToast);
                                   toast.error("Failed to upload certificates");
@@ -524,40 +548,24 @@ export default function InspectorForm() {
                 )}
               />
 
-              {/* Signature */}
+              {/* Signature - Updated to use FormSignature component */}
               <FormField
                 control={form.control}
                 name="signature"
-                render={({ field }) => (
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Signature</FormLabel>
+                    <FormLabel>Digital Signature *</FormLabel>
                     <FormControl>
-                      <div className="flex flex-col items-center gap-4">
-                        <Input
-                          type="file"
-                          accept={ACCEPTED_IMAGE_TYPES.join(',')}
-                          onChange={async (e) => {
-                            try {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const preview = await handleFileUpload(file);
-                                field.onChange({ file, preview });
-                              }
-                            } catch (error) {
-                              toast.error(error instanceof Error ? error.message : 'unknown error');
-                            }
-                          }}
-                        />
-                        {field.value?.preview && (
-                          <img
-                            src={field.value.preview}
-                            alt="signature"
-                            className="w-64 h-32 object-contain border rounded"
-                          />
-                        )}
-                      </div>
+                      <SimpleSignature
+                        ref={signatureRef}
+                        onSignatureChange={handleSignatureChange}
+                        placeholder="Please sign here"
+                        width={400}
+                        height={150}
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage>{error && error.message}</FormMessage>
                   </FormItem>
                 )}
               />
@@ -565,7 +573,7 @@ export default function InspectorForm() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isSubmitting || isUploadingFiles}
+                disabled={isSubmitting || isUploadingFiles || !isSignatureValid}
               >
                 {(isSubmitting || isUploadingFiles) ? (
                   <>
