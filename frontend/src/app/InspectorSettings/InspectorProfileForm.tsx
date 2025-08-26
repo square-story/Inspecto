@@ -1,5 +1,4 @@
 import LoadingSpinner from '@/components/LoadingSpinner'
-import ProfileDrop from '@/components/ProfileDrop'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -15,9 +14,9 @@ import { useDispatch } from 'react-redux'
 import { Form } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import SvgText from '@/components/SvgText'
 import { useEffect, useRef, useState } from 'react'
 import { SimpleSignature, SimpleSignatureRef } from '@/components/ui/react-signature'
+import CropImage from '@/components/ui/cropper-image'
 
 const profileFormSchema = z.object({
     firstName: z
@@ -126,12 +125,7 @@ export default function InspectorProfileForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-                <div className='relative'>
-                    <ProfileDrop headerTitle='Profile Picture' onImageUpload={handleImageUpload} defaultImage={inspector?.profile_image} />
-                    <div className="absolute -bottom-10 left-44 ">
-                        <SvgText />
-                    </div>
-                </div>
+                <CropImage onImageUpload={handleImageUpload} defaultImage={inspector?.profile_image} />
                 <FormField
                     control={form.control}
                     name='firstName'

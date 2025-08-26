@@ -14,13 +14,13 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import InputDemo from '@/components/ProfileDrop'
 import { useUserDetails } from '@/hooks/useUserDetails'
 import { useDispatch } from 'react-redux'
 import { userService } from '@/services/user.service'
 import { updateUser } from '@/features/user/userSlice'
 import React from 'react'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import CropImage from '@/components/ui/cropper-image'
 
 
 
@@ -56,10 +56,6 @@ export default function ProfileForm() {
         mode: "onChange"
     })
 
-    // const { fields, append } = useFieldArray({
-    //     name: 'urls',
-    //     control: form.control,
-    // })
     React.useEffect(() => {
         if (user) {
             form.reset({
@@ -92,7 +88,7 @@ export default function ProfileForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-                <InputDemo onImageUpload={handleImageUpload} defaultImage={user?.profile_image} />
+                <CropImage onImageUpload={handleImageUpload} defaultImage={user?.profile_image} />
                 <FormField
                     control={form.control}
                     name='firstName'
