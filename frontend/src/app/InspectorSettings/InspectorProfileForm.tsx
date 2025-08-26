@@ -196,8 +196,7 @@ export default function InspectorProfileForm() {
                 <FormField
                     control={form.control}
                     name="signature"
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    render={({ field, fieldState: { error } }) => (
+                    render={({ fieldState: { error } }) => (
                         <FormItem>
                             <FormLabel>Digital Signature *</FormLabel>
                             <FormControl>
