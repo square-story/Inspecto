@@ -25,6 +25,7 @@ import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/compon
 import MinimalAvailabilityPicker from "@/components/minimal-availability-picker";
 import { SimpleSignature, SimpleSignatureRef } from "@/components/ui/react-signature";
 import { dataURLtoFile } from "@/helper/dataToFile";
+import CropImage from "@/components/ui/cropper-image";
 
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -57,7 +58,7 @@ const dayAvailabilitySchema = z.object({
 // Updated validation schema - signature is now a string (SVG)
 const formSchema = z.object({
   location: z.string().min(3, "Address must be at least 3 characters"),
-  profile_image: FileSchema.nullable(),
+  profile_image: z.string().min(1, "Profile image is required"),
   certificates: z.array(FileSchema).min(1, "At least One Certificate is required"),
   yearOfExp: z.coerce.number()
     .min(1, "Experience must be at least 1 year")
@@ -113,7 +114,7 @@ export default function InspectorForm() {
     defaultValues: {
       specialization: [],
       certificates: [],
-      profile_image: null,
+      profile_image: '',
       signature: "",
       availableSlots: defaultAvailability,
       unavailabilityPeriods: []
@@ -177,11 +178,8 @@ export default function InspectorForm() {
   const uploadFiles = async () => {
     setIsUploadingFiles(true);
     try {
-      const profile = form.getValues('profile_image');
       const signatureDataURL = form.getValues('signature');
       const certificates = form.getValues('certificates');
-
-      const profilePublicId = profile ? await uploadToCloudinary(profile.file) : '';
 
       // Convert SVG string to file for upload
       const signaturePublicId = signatureDataURL
@@ -193,7 +191,6 @@ export default function InspectorForm() {
       );
 
       return {
-        profileUrl: profilePublicId,
         signatureUrl: signaturePublicId,
         certificateUrls: certificatePublicIds
       };
@@ -214,10 +211,10 @@ export default function InspectorForm() {
 
     try {
       setIsSubmitting(true);
-      const { profileUrl, signatureUrl, certificateUrls } = await uploadFiles();
+      const { signatureUrl, certificateUrls } = await uploadFiles();
       const submitData = {
         address: data.location,
-        profile_image: profileUrl,
+        profile_image: data.profile_image,
         signature: signatureUrl,
         certificates: certificateUrls,
         yearOfExp: data.yearOfExp,
@@ -250,46 +247,26 @@ export default function InspectorForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Profile Image */}
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="profile_image"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Profile Image</FormLabel>
-                      <FormControl>
-                        <div className="flex flex-col items-center gap-4">
-                          <Input
-                            type="file"
-                            accept={ACCEPTED_IMAGE_TYPES.join(',')}
-                            onChange={async (e) => {
-                              try {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const preview = await handleFileUpload(file);
-                                  field.onChange({ file, preview });
-                                }
-                              } catch (error) {
-                                toast.error(error instanceof Error ? error.message : 'Unknown error');
-                              }
-                            }}
-                          />
-                          {field.value?.preview && (
-                            <img
-                              src={field.value.preview}
-                              alt="Profile"
-                              className="w-32 h-32 object-cover rounded-full"
-                            />
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Basic Information */}
+              <FormField
+                control={form.control}
+                name="profile_image"
+                render={() => (
+                  <FormItem className="flex flex-col items-center">
+                    <FormLabel>Profile Image</FormLabel>
+                    <FormControl>
+                      <CropImage
+                        onImageUpload={(url) => {
+                          form.setValue('profile_image', url || '', { shouldValidate: true });
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload a clear profile picture (Max size: 5MB).
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="grid md:grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
