@@ -23,7 +23,6 @@ const CropImage = ({
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [_croppedImage, setCroppedImage] = useState<string | null>(null);
     const [finalImage, setFinalImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -62,14 +61,12 @@ const CropImage = ({
         }
 
         setSelectedFile(file);
-        setCroppedImage(null);
         setFinalImage(null); // Clear final image when selecting new file
     };
 
     // Reset state
     const handleReset = () => {
         setSelectedFile(null);
-        setCroppedImage(null);
         setFinalImage(null);
         onImageUpload(null);
         // Clear file input
@@ -83,7 +80,6 @@ const CropImage = ({
     const handleChangeImage = () => {
         // Clear current states but keep the final image until new one is selected
         setSelectedFile(null);
-        setCroppedImage(null);
         // Clear file input and trigger click
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -108,7 +104,6 @@ const CropImage = ({
             const signedUrl = await getSecureImageUrl(publicId, 'none');
             setFinalImage(signedUrl);
             setSelectedFile(null);
-            setCroppedImage(null);
             onImageUpload(publicId);
             toast.success('Image uploaded successfully!');
         } catch (error) {
@@ -203,7 +198,6 @@ const CropImage = ({
                             <Button
                                 onClick={() => {
                                     setSelectedFile(null);
-                                    setCroppedImage(null);
                                     if (fileInputRef.current) {
                                         fileInputRef.current.value = '';
                                     }
