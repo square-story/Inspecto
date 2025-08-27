@@ -20,11 +20,11 @@ import {
     Fuel,
     Wrench,
 } from "lucide-react"
-import { useSignedImage } from "@/hooks/useSignedImage"
 import { useEffect, useState } from "react"
 import BackButton from "../BackButton"
 import { InspectionService } from "@/services/inspection.service"
 import { Inspection } from "@/features/inspection/types"
+import { PhotoGallery } from "./components/PhotoGallery"
 
 export default function UserReportPage() {
     const { id } = useParams<{ id: string }>()
@@ -33,7 +33,6 @@ export default function UserReportPage() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        
         const fetchInspection = async () => {
             try {
                 const data = await InspectionService.getInspectionById(id as string)
@@ -51,7 +50,7 @@ export default function UserReportPage() {
         if (!inspection) {
             fetchInspection()
         }
-    }, [inspection, loading])
+    }, [inspection, loading, id])
 
     if (loading) {
         return (
@@ -278,44 +277,44 @@ export default function UserReportPage() {
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-sm font-medium">Engine</span>
-                                                    <span className="text-sm font-medium capitalize">{inspection.report.engineCondition}</span>
+                                                    <span className="text-sm font-medium capitalize">{inspection.report?.engineCondition}</span>
                                                 </div>
                                                 <Progress
-                                                    value={getConditionPercentage(inspection.report.engineCondition)}
-                                                    className={getConditionColor(inspection.report.engineCondition)}
+                                                    value={getConditionPercentage(inspection.report?.engineCondition)}
+                                                    className={getConditionColor(inspection.report?.engineCondition)}
                                                 />
                                             </div>
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-sm font-medium">Tires</span>
-                                                    <span className="text-sm font-medium capitalize">{inspection.report.tiresCondition}</span>
+                                                    <span className="text-sm font-medium capitalize">{inspection.report?.tiresCondition}</span>
                                                 </div>
                                                 <Progress
-                                                    value={getConditionPercentage(inspection.report.tiresCondition)}
-                                                    className={getConditionColor(inspection.report.tiresCondition)}
+                                                    value={getConditionPercentage(inspection.report?.tiresCondition)}
+                                                    className={getConditionColor(inspection.report?.tiresCondition)}
                                                 />
                                             </div>
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-sm font-medium">Lights</span>
-                                                    <span className="text-sm font-medium capitalize">{inspection.report.lightsCondition}</span>
+                                                    <span className="text-sm font-medium capitalize">{inspection.report?.lightsCondition}</span>
                                                 </div>
                                                 <Progress
-                                                    value={getConditionPercentage(inspection.report.lightsCondition)}
-                                                    className={getConditionColor(inspection.report.lightsCondition)}
+                                                    value={getConditionPercentage(inspection.report?.lightsCondition)}
+                                                    className={getConditionColor(inspection.report?.lightsCondition)}
                                                 />
                                             </div>
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-sm font-medium">Brakes</span>
-                                                    <span className="text-sm font-medium capitalize">{inspection.report.brakesCondition}</span>
+                                                    <span className="text-sm font-medium capitalize">{inspection.report?.brakesCondition}</span>
                                                 </div>
                                                 <Progress
-                                                    value={getConditionPercentage(inspection.report.brakesCondition)}
-                                                    className={getConditionColor(inspection.report.brakesCondition)}
+                                                    value={getConditionPercentage(inspection.report?.brakesCondition)}
+                                                    className={getConditionColor(inspection.report?.brakesCondition)}
                                                 />
                                             </div>
 
@@ -323,12 +322,12 @@ export default function UserReportPage() {
                                                 <div className="flex justify-between">
                                                     <span className="text-sm font-medium">Suspension</span>
                                                     <span className="text-sm font-medium capitalize">
-                                                        {inspection.report.suspensionCondition}
+                                                        {inspection.report?.suspensionCondition}
                                                     </span>
                                                 </div>
                                                 <Progress
-                                                    value={getConditionPercentage(inspection.report.suspensionCondition)}
-                                                    className={getConditionColor(inspection.report.suspensionCondition)}
+                                                    value={getConditionPercentage(inspection.report?.suspensionCondition)}
+                                                    className={getConditionColor(inspection.report?.suspensionCondition)}
                                                 />
                                             </div>
                                         </div>
@@ -408,39 +407,7 @@ export default function UserReportPage() {
                                         <CardDescription>Visual documentation of your vehicle's condition</CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        {inspection.report.photos && inspection.report.photos.length > 0 ? (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {inspection.report.photos.map((photo, index) => {
-                                                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                                                    const { imageUrl, isLoading, error } = useSignedImage(photo, "none");
-
-                                                    return (
-                                                        <div key={index} className="relative aspect-video rounded-md overflow-hidden">
-                                                            {isLoading ? (
-                                                                <div className="flex items-center justify-center w-full h-full bg-gray-200">
-                                                                    <span>Loading...</span>
-                                                                </div>
-                                                            ) : error ? (
-                                                                <div className="flex items-center justify-center w-full h-full bg-red-200">
-                                                                    <span>Error loading image</span>
-                                                                </div>
-                                                            ) : (
-                                                                <img
-                                                                    src={imageUrl || "/placeholder.svg"}
-                                                                    alt={`Inspection photo ${index + 1}`}
-                                                                    className="object-cover w-full h-full"
-                                                                    onClick={() => window.open(imageUrl, "_blank")}
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        ) : (
-                                            <div className="text-center py-8 text-muted-foreground">
-                                                <p>No photos available for this inspection</p>
-                                            </div>
-                                        )}
+                                        <PhotoGallery photos={inspection?.report?.photos || []} />
                                     </CardContent>
                                 </Card>
                             </TabsContent>

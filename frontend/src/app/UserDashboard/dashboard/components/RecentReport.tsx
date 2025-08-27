@@ -69,10 +69,10 @@ const RecentReports = ({ reports, loading }: { reports: Inspection[], loading: b
                     <CardHeader className="bg-muted/50 pb-2">
                         <div className="flex justify-between items-center">
                             <CardTitle className="text-lg">
-                                Report #{report.bookingReference}
+                                Report #{report?.bookingReference}
                             </CardTitle>
                             <Badge>
-                                {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                                {report?.status.charAt(0).toUpperCase() + report?.status.slice(1)}
                             </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -88,7 +88,7 @@ const RecentReports = ({ reports, loading }: { reports: Inspection[], loading: b
                                 <span className="font-medium">Registration:</span> {report.vehicle?.registrationNumber}
                             </p>
                             <p>
-                                <span className="font-medium">Inspection Type:</span> {report.inspectionType.name.charAt(0).toUpperCase() + report.inspectionType.name.slice(1)}
+                                <span className="font-medium">Inspection Type:</span> {report.inspectionType?.name.charAt(0).toUpperCase() + report.inspectionType?.name.slice(1)}
                             </p>
                         </div>
                         <div className="flex justify-end gap-2 mt-4">
