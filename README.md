@@ -45,8 +45,20 @@ Inspecto connects vehicle owners with certified inspectors, offering a seamless,
 ## Screenshots
 
 <!-- Add actual image files or links in the repo, not just external URLs -->
-![Desktop View](https://i.postimg.cc/xdbTjkh3/Inspecto.jpg)
-![Landing Page Light](https://i.postimg.cc/8zxNYpcJ/Inspecto.jpg)
+## 📸 Screenshots
+
+| Screenshot 1 | Screenshot 2 |
+|--------------|--------------|
+| ![Screenshot 1](https://i.postimg.cc/tZVQgnkm/Inspecto-1-35pm-08-28.jpg) | ![Screenshot 2](https://i.postimg.cc/8Fcgq06G/Inspecto-1-36pm-08-28.jpg) |
+
+| Screenshot 3 | Screenshot 4 |
+|--------------|--------------|
+| ![Screenshot 3](https://i.postimg.cc/fSn4SWgW/Inspecto-1-37pm-08-28.jpg) | ![Screenshot 4](https://i.postimg.cc/4mGkJd9B/Inspecto-1-38pm-08-28.jpg) |
+
+| Screenshot 5 | Screenshot 6 |
+|--------------|--------------|
+| ![Screenshot 5](https://i.postimg.cc/fkmQnXJV/Inspecto-1-38pm-08-28-1.jpg) | ![Screenshot 6](https://i.postimg.cc/rDyBrPg4/Inspecto-1-39pm-08-28.jpg) |
+
 
 ## Getting Started
 
