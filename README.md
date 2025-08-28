@@ -1,113 +1,125 @@
-# 🚗 **Inspecto** – Your Trusted Vehicle Inspection Platform 
+# 🚗 Inspecto – Your Trusted Vehicle Inspection Platform
 
-Inspecto is a cutting-edge platform that connects vehicle owners with certified inspectors for seamless, reliable, and transparent vehicle inspections. Whether you're buying a car, maintaining one, or need a professional inspection report, Inspecto has you covered.  
+Inspecto connects vehicle owners with certified inspectors, offering a seamless, reliable, and transparent inspection experience. Whether buying, maintaining, or needing reports for a vehicle, Inspecto simplifies your workflow.
 
----
+## Table of Contents
 
-## 🌟 **Key Features**
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Screenshots](#screenshots)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [Security](#security)
+- [Contributing](#contributing)
+- [Contact](#contact)
+- [Roadmap](#roadmap)
+- [License](#license)
 
-### 👤 **For Users**
-- **Secure Registration & Login**: Your data is safe with us.
-- **Vehicle Management**: Add, edit, and manage your vehicle details effortlessly.
-- **Book Inspections**: Schedule inspections with verified professionals in just a few clicks.
-- **Access Reports**: View, download, and share detailed inspection reports.
-- **Stay Connected**: Communicate directly with inspectors for updates and queries.
+## Features
 
-### 🔍 **For Inspectors**
-- **Get Verified**: Register and get approved to start offering your services.
-- **Manage Requests**: View and accept inspection requests with ease.
-- **Upload Reports**: Submit detailed inspection reports directly through the platform.
-- **Grow Your Business**: Reach more customers and build trust with verified credentials.
+### For Users
+- **Secure Registration & Login**
+- **Vehicle Management**: add, edit, and delete vehicles
+- **Book Inspections** with certified professionals
+- **Access, Download & Share Reports**
+- **Direct Messaging with Inspectors**
 
-### 🛠️ **For Admins**
-- **User & Inspector Management**: Approve, verify, and manage users and inspectors.
-- **Oversee Inspections**: Monitor inspection activities and reports.
-- **Analytics Dashboard**: Gain insights into platform performance and user activity.
+### For Inspectors
+- **Verification Workflow & Onboarding**
+- **Manage Inspection Requests**
+- **Upload Inspection Reports**
+- **Grow Your Customer Base**
 
----
+### For Admins
+- **Manage Users & Inspectors**
+- **Monitor Inspections & Reports**
+- **Analytics Dashboard**
 
-## 🏗️ **Tech Stack**
-- **Frontend**: React.js (Vite) + Tailwind CSS
-- **Backend**: Node.js + Express.js
-- **Real Time Communcation**: Socket.io
-- **Database**: MongoDB  
-- **State Management**: Redux Toolkit  
-- **Authentication**: JWT (Access & Refresh Tokens)  
-- **API Communication**: Axios  
-- **File Storage**: Cloudinary for secure image and document uploads  
+## Tech Stack
 
----
-
-## 🔒 **Security Highlights**
-- **Role-Based Access Control**: Separate roles for Admins, Inspectors, and Users.
-- **Secure File Uploads**: Profile images and documents are safely stored.
-- **Token-Based Authentication**: Access and refresh tokens for secure sessions.
-- **Data Validation**: Robust validation to ensure data integrity.
-
----
+- **Frontend**: React.js (Vite), Tailwind CSS, Redux Toolkit, Axios
+- **Backend**: Node.js, Express.js, MongoDB, Socket.io (real-time), JWT authentication
+- **File Storage**: Cloudinary
 
 ## Screenshots
 
-![Desktop View](https://i.imgur.com/iDxfDhh.jpeg)
-![Landing Page Light](https://i.imgur.com/hOvJS9n.jpeg)
+<!-- Add actual image files or links in the repo, not just external URLs -->
+![Desktop View](https://i.postimg.cc/xdbTjkh3/Inspecto.jpg)
+![Landing Page Light](https://i.postimg.cc/8zxNYpcJ/Inspecto.jpg)
 
+## Getting Started
 
+### Prerequisites
+- Node.js (v18+ recommended)
+- npm or yarn
+- MongoDB instance (local or cloud)
 
-## ⚡ Getting Started  
-
-### 📥 Clone the Repository  
-```sh
-git clone https://github.com/yourusername/Inspecto.git
+### Clone & Install
+```bash
+git clone https://github.com/square-story/Inspecto.git
 cd Inspecto
 ```
 
-### 🔧 Install Dependencies  
-#### Backend:  
-```sh
+#### Backend
+```bash
 cd backend
 npm install
-```
-#### Frontend:  
-```sh
-cd frontend
-npm install
+cp .env.example .env # Configure your .env variables
+npm run dev:backend
 ```
 
-### 🚀 Run the Application  
-#### Start the Backend:  
-```sh
-cd backend
-npm start
-```
-#### Start the Frontend:  
-```sh
+#### Frontend
+```bash
 cd frontend
+npm install
+cp .env.example .env # Configure your .env variables
 npm run dev
 ```
 
----
+### Test Setup
+Manual and automated test instructions go here.
 
-## 📩 Contact  
-For queries, feel free to reach out or raise an issue in the repository. 
+## Project Structure
+```
+Inspecto/
+  backend/
+    src/
+      ...
+  frontend/
+    src/
+      ...
+  docker-compose.yml
+  README.md
+```
 
-- **Email** : sadik.build@gmail.com
+## Environment Variables
+See `.env.example` files in both `backend` and `frontend` folders for configuration variables including database URIs, Cloudinary keys, and JWT secrets.
 
----
+## Security
+- Role-based access (Admin, Inspector, User)
+- Secure file uploads and cloud storage
+- JWT-based authentication
+- Input validation
 
-📅 Future Enhancements
-- **GPS-Based Inspector Tracking**: Real-time location tracking for inspectors.
-- **Advanced Analytics**: Enhanced insights for admins to monitor platform performance.
-- **Mobile App**: A dedicated mobile app for users and inspectors.
+## Contributing
+We love contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) if available, otherwise:
 
----
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/myFeature`)
+3. Commit your changes (`git commit -m "Add my feature"`)
+4. Push to the branch (`git push origin feature/myFeature`)
+5. Open a pull request with a clear description
 
-🤝 Contributing
-We welcome contributions from the community!
+## Contact
+- Open an issue on GitHub for bug reports or feature requests
+- Email: [sadik.build@gmail.com](mailto:sadik.build@gmail.com)
+- Demo: [inspecto-flax.vercel.app](https://inspecto-flax.vercel.app/)
 
-- **Fork the repository**.
-- **Create a feature branch**.
-- **Submit a pull request with a detailed description of your changes**.
+## Roadmap
+- GPS-based real-time inspector tracking
+- Advanced analytics for admins
+- Dedicated Android/iOS mobile app
 
----
-
-🚀 *Inspecto – Making Vehicle Inspections Seamless!*  
+## License
+[MIT License](LICENSE) (if applicable, clarify or add license file)
