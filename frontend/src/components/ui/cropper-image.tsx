@@ -33,7 +33,6 @@ const CropImage = ({
             if (defaultImage) {
                 setIsLoading(true);
                 try {
-                    console.log('Loading default image:', defaultImage);
                     const signedUrl = await getSecureImageUrl(defaultImage, 'none');
                     setFinalImage(signedUrl);
                 } catch (err) {

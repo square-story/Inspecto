@@ -284,8 +284,6 @@ const CameraUploadComponent: React.FC<CameraUploadComponentProps> = ({
             if (onUpload) {
                 await onUpload(files);
             } else {
-                // Default behavior - just log the files
-                console.log('Files to upload:', files.map(f => f.file));
                 toast.success(`Ready to upload ${files.length} file(s)`);
             }
         } catch (error) {

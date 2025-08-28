@@ -35,8 +35,7 @@ export const ReviewService = {
         try {
             const response = await axiosInstance.get(`/reviews/inspection/${inspectionId}`);
             return response.data[0];
-        } catch (error) {
-            console.log(error)
+        } catch (_error) {
             return null;
         }
     }

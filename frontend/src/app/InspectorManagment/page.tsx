@@ -9,6 +9,7 @@ import { useConfirm } from "@omit/react-confirm-dialog";
 import { AlertTriangle } from "lucide-react";
 import { DeleteConfirmContent } from "./components/DenyReason";
 import { SignedAvatar } from "@/components/SignedAvatar";
+import CertificateItem from "./components/certificate-viewer";
 
 export default function DemoPage() {
     const confirm = useConfirm();
@@ -214,23 +215,11 @@ export default function DemoPage() {
                                     {selectedInspector.certificates && selectedInspector.certificates.length > 0 && (
                                         <div>
                                             <strong>Certificates:</strong>
-                                            <ul className="flex flex-wrap mt-1 space-x-2">
-                                                {selectedInspector.certificates.map((certificate, index) => (
-                                                    <li key={index}>
-                                                        <a
-                                                            href={certificate}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-blue-500 hover:underline flex items-center space-x-1"
-                                                        >
-                                                            <span>View Document</span>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                                                            </svg>
-                                                        </a>
-                                                    </li>
+                                            <div className="mt-2 space-y-2">
+                                                {selectedInspector.certificates.map((cert, index) => (
+                                                    <CertificateItem key={index} certificate={cert} index={index} />
                                                 ))}
-                                            </ul>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
