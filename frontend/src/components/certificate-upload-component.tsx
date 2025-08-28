@@ -310,7 +310,7 @@ const CameraUploadComponent: React.FC<CameraUploadComponentProps> = ({
     const acceptAttribute = acceptedTypes.join(',');
 
     return (
-        <div className={`w-full max-w-2xl mx-auto p-4 space-y-4 ${className}`}>
+        <div className={`w-full ${className}`}>
             {/* Camera Modal */}
             {showCamera && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

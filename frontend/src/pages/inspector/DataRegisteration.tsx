@@ -27,6 +27,8 @@ import { SimpleSignature, SimpleSignatureRef } from "@/components/ui/react-signa
 import { dataURLtoFile } from "@/helper/dataToFile";
 import CropImage from "@/components/ui/cropper-image";
 import CameraUploadComponent from "@/components/certificate-upload-component";
+import { FileWithPreview } from "@/types/preview.file";
+import { FileSchema } from "@/types/file.schema";
 
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -35,18 +37,7 @@ const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"];
 
 
 
-const FileSchema = z.object({
-  file: typeof window === 'undefined'
-    ? z.any()
-    : z.instanceof(File)
-      .refine(file => file.size <= MAX_FILE_SIZE, "Max file size is 5MB")
-      .refine(file => ACCEPTED_IMAGE_TYPES.includes(file.type), "Only .jpg, .jpeg, .png and .webp formats are supported."),
-  preview: z.string(),
-  id: z.string(), // Add this
-  name: z.string(), // Add this
-  size: z.number(), // Add this
-  type: z.string(), // Add this
-});
+
 
 const timeSlotSchema = z.object({
   startTime: z.string(),
@@ -90,14 +81,6 @@ const formSchema = z.object({
   ),
 });
 
-interface FileWithPreview {
-  file: File;
-  preview: string;
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-}
 
 
 

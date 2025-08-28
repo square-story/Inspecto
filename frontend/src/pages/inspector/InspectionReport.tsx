@@ -21,14 +21,14 @@ import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { useDropzone } from "react-dropzone"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary"
 import { useSignedImage } from "@/hooks/useSignedImage"
 import { Skeleton } from "@/components/ui/skeleton"
 import { InspectionService } from "@/services/inspection.service"
 import { getSignedPdfUrl } from "@/utils/cloudinary"
 import { saveAs } from "file-saver"
+import CameraUploadComponent from "@/components/certificate-upload-component"
 
 
 const inspectionFormSchema = z.object({
@@ -47,7 +47,7 @@ const inspectionFormSchema = z.object({
   additionalNotes: z.string().optional(),
   recommendations: z.string().optional(),
   passedInspection: z.boolean().default(true),
-  photos: z.array(z.string()).optional(),
+  photos: z.array(z.string()).min(1, "At least one photo is required").max(10, "You can upload up to 10 photos"),
 })
 
 export type InspectionFormValues = z.infer<typeof inspectionFormSchema>
@@ -58,6 +58,8 @@ export default function InspectionReportPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [inspection, setInspection] = useState<Inspection | null>(null)
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+
 
   // Form state
   const form = useForm<InspectionFormValues>({
@@ -104,26 +106,6 @@ export default function InspectionReportPage() {
   // Fetch inspection data using useSelector outside the useEffect to avoid conditional hook call
   const { data } = useSelector((state: RootState) => state.inspections)
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
-    maxSize: 5 * 1024 * 1024, // 5MB
-    async onDrop(files) {
-      try {
-        const currentPhotos = form.getValues("photos") || [];
-        const newPhotos = await Promise.all(
-          files.map(async (file) => {
-            const publicId = await uploadToCloudinary(file);
-            return publicId;
-          })
-        );
-        form.setValue("photos", [...currentPhotos, ...newPhotos]);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        toast.error("Failed to upload photos. Please try again.");
-      }
-    },
-  });
-
   useEffect(() => {
     if (id) {
       const foundInspection = data.find((insp) => insp._id === id)
@@ -136,6 +118,7 @@ export default function InspectionReportPage() {
       }
     }
   }, [id, navigate, data])
+
 
   const onSubmit = async (values: InspectionFormValues, isDraft = false) => {
     setSubmitting(true)
@@ -539,28 +522,66 @@ export default function InspectionReportPage() {
                       )}
                     />
                   </div>
+                  <FormField
+                    control={form.control}
+                    name="photos"
+                    render={({ field, fieldState: { error } }) => (
+                      <FormItem>
+                        <FormLabel>Photos</FormLabel>
+                        <FormControl>
+                          <CameraUploadComponent
+                            onFilesChange={async (fileObjects) => {
+                              setIsUploadingFiles(true);
+                              try {
+                                // Extract the actual File objects from the FileObject array
+                                const files = fileObjects.map(fileObj => fileObj.file);
 
-                  {/* Photo Upload - In a real app, you would implement file upload functionality */}
-                  <div className="grid gap-4">
-                    <h3 className="text-lg font-semibold">Photos</h3>
-                    <div
-                      {...getRootProps()}
-                      className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
-                    >
-                      <input {...getInputProps()} />
-                      <p className="text-muted-foreground">
-                        {isDragActive ? "Drop photos here" : "Drag and drop photos here or click to upload"}
-                      </p>
-                      <Button variant="outline" className="mt-4" type="button">
-                        Upload Photos
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-4">
-                      {form.watch("photos")?.map((publicId) => (
-                        <InspectionPhotoPreview key={publicId} publicId={publicId} />
-                      ))}
-                    </div>
-                  </div>
+                                // Upload all files to Cloudinary
+                                const uploadPromises = files.map(file => uploadToCloudinary(file));
+                                const uploadedUrls = await Promise.all(uploadPromises);
+
+                                // Update form field with the uploaded URLs
+                                field.onChange(uploadedUrls);
+
+                                toast.success(`${uploadedUrls.length} photo(s) uploaded successfully`);
+                              } catch (error) {
+                                console.error('Photo upload error:', error);
+                                toast.error('Failed to upload photos. Please try again.');
+                              } finally {
+                                setIsUploadingFiles(false);
+                              }
+                            }}
+                            maxFiles={10}
+                            maxFileSize={5 * 1024 * 1024} // 5MB limit
+                            acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp']}
+
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Upload inspection photos using camera or file selection. Accepted formats: JPG, PNG, WEBP (max 5MB each, up to 10 files).
+                        </FormDescription>
+                        {isUploadingFiles && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                            Uploading photos...
+                          </div>
+                        )}
+                        <FormMessage>{error && error.message}</FormMessage>
+
+                        {/* Display uploaded photos */}
+                        {field.value && field.value.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-sm font-medium mb-2">Uploaded Photos ({field.value.length})</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                              {field.value.map((photoUrl, index) => (
+                                <InspectionPhotoPreview key={index} publicId={photoUrl} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col sm:flex-row gap-3 justify-end">
