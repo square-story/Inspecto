@@ -107,7 +107,7 @@ export const columns = ({
                                     setIsDrawerOpen(true);
                                 }}
                             >
-                                View Inspector
+                                View User
                             </DropdownMenuItem>
                             <DropdownMenuItem>View payment details</DropdownMenuItem>
                         </DropdownMenuContent>
