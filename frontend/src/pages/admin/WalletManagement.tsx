@@ -11,7 +11,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { WalletService } from "@/services/wallet.service";
 import { IAdminWalletStats } from "@/types/wallet.stats";
-import { Clock } from "lucide-react";
+import { Clock, Download, Filter } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
@@ -58,8 +58,8 @@ export default function WalletManagement() {
         <div className="flex flex-col min-h-screen bg-background">
             <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-3xl font-bold tracking-tight">Wallet Management</h2>
-                    {/* <div className="flex items-center gap-2">
+                    <h2 className="text-sm lg:text-3xl font-bold tracking-tight">Wallet Management</h2>
+                    <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm">
                             <Download className="mr-2 h-4 w-4" />
                             Export
@@ -68,10 +68,10 @@ export default function WalletManagement() {
                             <Filter className="mr-2 h-4 w-4" />
                             Filter
                         </Button>
-                    </div> */}
+                    </div>
                 </div>
                 <Tabs value={activeTab} className="space-y-4" onValueChange={setActiveTab}>
-                    <TabsList>
+                    <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2 overflow-x-auto">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="withdrawals">Withdrawal Requests</TabsTrigger>
                         <TabsTrigger value="earnings">Earnings History</TabsTrigger>
