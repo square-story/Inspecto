@@ -81,7 +81,7 @@ export default function PaymentsPage() {
             </div>
 
             <Tabs defaultValue="transactions" className="space-y-4">
-                <TabsList>
+                <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 gap-2 overflow-x-auto">
                     <TabsTrigger value="transactions">Transaction History</TabsTrigger>
                     <TabsTrigger value="withdrawals">Withdrawal Transactions</TabsTrigger>
                     <TabsTrigger value="stats">Payment Stats</TabsTrigger>
