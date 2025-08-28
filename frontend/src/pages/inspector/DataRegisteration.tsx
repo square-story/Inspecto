@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm, } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { inspectorService } from "@/services/inspector.service";
@@ -26,6 +26,7 @@ import MinimalAvailabilityPicker from "@/components/minimal-availability-picker"
 import { SimpleSignature, SimpleSignatureRef } from "@/components/ui/react-signature";
 import { dataURLtoFile } from "@/helper/dataToFile";
 import CropImage from "@/components/ui/cropper-image";
+import CameraUploadComponent from "@/components/certificate-upload-component";
 
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -40,7 +41,11 @@ const FileSchema = z.object({
     : z.instanceof(File)
       .refine(file => file.size <= MAX_FILE_SIZE, "Max file size is 5MB")
       .refine(file => ACCEPTED_IMAGE_TYPES.includes(file.type), "Only .jpg, .jpeg, .png and .webp formats are supported."),
-  preview: z.string()
+  preview: z.string(),
+  id: z.string(), // Add this
+  name: z.string(), // Add this
+  size: z.number(), // Add this
+  type: z.string(), // Add this
 });
 
 const timeSlotSchema = z.object({
@@ -86,8 +91,12 @@ const formSchema = z.object({
 });
 
 interface FileWithPreview {
-  file: File,
-  preview: string
+  file: File;
+  preview: string;
+  id: string;
+  name: string;
+  size: number;
+  type: string;
 }
 
 
@@ -122,26 +131,6 @@ export default function InspectorForm() {
   });
 
   const locationValue = form.watch("location");
-
-  const handleFileUpload = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (!file) reject(new Error("No file provided"))
-
-      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-        reject(new Error("Invalid file Type"))
-        return;
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        reject(new Error("File too large"))
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string)
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    })
-  }
-
   const signatureRef = useRef<SimpleSignatureRef>(null);
 
   const handleSignatureChange = (signature: string | null) => {
@@ -150,29 +139,6 @@ export default function InspectorForm() {
 
     // Update form value with data URL
     form.setValue('signature', signature || '', { shouldValidate: true });
-  };
-
-  const handleCertificateUpload = async (files: FileList) => {
-    const currentCerts = form.getValues('certificates') || [];
-    const newCerts: FileWithPreview[] = [];
-    for (const file of Array.from(files)) {
-      try {
-        const preview = await handleFileUpload(file);
-        newCerts.push({ file, preview });
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        toast.error(`Failed to load ${file.name}: ${errorMessage}`);
-      }
-    }
-    form.setValue('certificates', [...currentCerts, ...newCerts], { shouldValidate: true });
-  }
-
-  const removeCertificate = (index: number) => {
-    const currentCerts = form.getValues('certificates');
-    form.setValue('certificates',
-      currentCerts.filter((_, i) => i !== index),
-      { shouldValidate: true }
-    );
   };
 
   const uploadFiles = async () => {
@@ -342,167 +308,33 @@ export default function InspectorForm() {
               <FormField
                 control={form.control}
                 name="certificates"
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
                     <FormLabel>Certificates</FormLabel>
                     <FormControl>
-                      <div className="space-y-4">
-                        <div className="flex flex-col gap-2">
-                          <Input
-                            type="file"
-                            accept={ACCEPTED_DOCUMENT_TYPES.join(',')}
-                            multiple
-                            onChange={async (e) => {
-                              if (e.target.files?.length) {
-                                // Validate total number of files
-                                const currentFiles = field.value || [];
-                                const newFilesCount = e.target.files.length;
-                                const totalFiles = currentFiles.length + newFilesCount;
+                      <CameraUploadComponent
+                        onFilesChange={(files) => {
+                          const convertedFiles: FileWithPreview[] = files.map(fileObj => ({
+                            file: fileObj.file,
+                            preview: fileObj.preview,
+                            id: fileObj.id,
+                            name: fileObj.name,
+                            size: fileObj.size,
+                            type: fileObj.type
+                          }));
 
-                                if (totalFiles > 10) {
-                                  toast.error("Maximum 10 certificates allowed");
-                                  return;
-                                }
-
-                                // Create loading toast
-                                const loadingToast = toast.loading(
-                                  `Processing ${e.target.files.length} certificate${e.target.files.length > 1 ? 's' : ''}...`
-                                );
-
-                                try {
-                                  await handleCertificateUpload(e.target.files);
-                                  toast.dismiss(loadingToast);
-                                  toast.success("Certificates uploaded successfully");
-                                } catch (_error) {
-                                  toast.dismiss(loadingToast);
-                                  toast.error("Failed to upload certificates");
-                                }
-                              }
-                            }}
-                            className="w-full"
-                          />
-                          <p className="text-sm text-gray-500">
-                            Accepted formats: JPG, PNG, PDF (max 5MB each)
-                          </p>
-                        </div>
-
-                        {/* Certificate Previews */}
-                        {field.value?.length > 0 && (
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {field.value.map((cert, index) => (
-                              <div key={index} className="relative group">
-                                <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-gray-200">
-                                  {cert.file.type === 'application/pdf' ? (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                                      <div className="text-center p-4">
-                                        <svg
-                                          className="mx-auto h-12 w-12 text-gray-400"
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                          stroke="currentColor"
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                          />
-                                        </svg>
-                                        <p className="mt-2 text-sm text-gray-500 truncate">
-                                          {cert.file.name}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <img
-                                      src={cert.preview}
-                                      alt={`Certificate ${index + 1}`}
-                                      className="object-cover w-full h-full"
-                                    />
-                                  )}
-                                </div>
-
-                                {/* Hover Actions */}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-lg">
-                                  <div className="flex gap-2">
-                                    {/* Preview Button */}
-                                    <button
-                                      type="button"
-                                      onClick={() => window.open(cert.preview, '_blank')}
-                                      className="p-2 bg-white rounded-full text-gray-700 hover:text-blue-600 transition-colors"
-                                      title="Preview"
-                                    >
-                                      <svg
-                                        className="w-5 h-5"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                        />
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                        />
-                                      </svg>
-                                    </button>
-
-                                    {/* Delete Button */}
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        removeCertificate(index);
-                                        toast.success("Certificate removed");
-                                      }}
-                                      className="p-2 bg-white rounded-full text-gray-700 hover:text-red-600 transition-colors"
-                                      title="Remove"
-                                    >
-                                      <X className="w-5 h-5" />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* File Name */}
-                                <p className="mt-1 text-sm text-gray-500 truncate">
-                                  {cert.file.name}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Empty State */}
-                        {(!field.value || field.value.length === 0) && (
-                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-8">
-                            <div className="text-center">
-                              <svg
-                                className="mx-auto h-12 w-12 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                />
-                              </svg>
-                              <p className="mt-2 text-sm text-gray-500">
-                                Upload your certificates
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                          field.onChange(convertedFiles);
+                        }}
+                        maxFileSize={MAX_FILE_SIZE}
+                        acceptedTypes={ACCEPTED_DOCUMENT_TYPES}
+                        maxFiles={10}
+                        className="border-2 border-dashed border-gray-200 rounded-lg p-4"
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormDescription>
+                      Upload your certificates using camera or file selection. Accepted formats: JPG, PNG, WEBP, PDF (max 5MB each, up to 10 files).
+                    </FormDescription>
+                    <FormMessage>{error && error.message}</FormMessage>
                   </FormItem>
                 )}
               />
