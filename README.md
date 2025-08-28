@@ -11,6 +11,7 @@ Inspecto connects vehicle owners with certified inspectors, offering a seamless,
 - [Project Structure](#project-structure)
 - [Environment Variables](#environment-variables)
 - [Security](#security)
+- [Folder Structure](#folder-structure)
 - [Contributing](#contributing)
 - [Contact](#contact)
 - [Roadmap](#roadmap)
@@ -109,6 +110,86 @@ See `.env.example` files in both `backend` and `frontend` folders for configurat
 - Secure file uploads and cloud storage
 - JWT-based authentication
 - Input validation
+
+## Folder Structure
+
+```bash
+Inspecto/
+│
+├── .github/
+│   └── workflows/
+│       └── deploy-backend-render.yml
+│
+├── backend/
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── eslint.config.mjs
+│   ├── jest.config.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       ├── __tests__/
+│       ├── config/
+│       ├── controllers/
+│       ├── core/
+│       ├── di/
+│       ├── dtos/
+│       ├── middlewares/
+│       ├── models/
+│       ├── repositories/
+│       ├── routes/
+│       ├── scripts/
+│       ├── services/
+│       ├── utils/
+│       ├── app.ts
+│       └── server.ts
+│
+├── frontend/
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── components.json
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vercel.json
+│   ├── vite.config.ts
+│   ├── public/
+│   │   └── favicon.ico
+│   └── src/
+│       ├── api/
+│       ├── app/
+│       ├── components/
+│       ├── contexts/
+│       ├── features/
+│       ├── helper/
+│       ├── hooks/
+│       ├── lib/
+│       ├── pages/
+│       ├── provider/
+│       ├── routes/
+│       ├── services/
+│       ├── store/
+│       ├── types/
+│       ├── utils/
+│       ├── App.tsx
+│       ├── index.css
+│       ├── main.tsx
+│       └── vite-env.d.ts
+│
+├── .gitignore
+├── README.md
+├── docker-compose.yml
+├── package-lock.json
+└── package.json
+
+```
 
 ## Contributing
 We love contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) if available, otherwise:
