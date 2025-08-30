@@ -27,17 +27,11 @@ import { SimpleSignature, SimpleSignatureRef } from "@/components/ui/react-signa
 import { dataURLtoFile } from "@/helper/dataToFile";
 import CropImage from "@/components/ui/cropper-image";
 import CameraUploadComponent from "@/components/certificate-upload-component";
-import { FileWithPreview } from "@/types/preview.file";
-import { FileSchema } from "@/types/file.schema";
 
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const ACCEPTED_DOCUMENT_TYPES = [...ACCEPTED_IMAGE_TYPES, "application/pdf"];
-
-
-
-
 
 const timeSlotSchema = z.object({
   startTime: z.string(),
@@ -55,7 +49,7 @@ const dayAvailabilitySchema = z.object({
 const formSchema = z.object({
   location: z.string().min(3, "Address must be at least 3 characters"),
   profile_image: z.string().min(1, "Profile image is required"),
-  certificates: z.array(FileSchema).min(1, "At least One Certificate is required"),
+  certificates: z.array(z.string()).min(1, "At least One Certificate is required"),
   yearOfExp: z.coerce.number()
     .min(1, "Experience must be at least 1 year")
     .max(50, "Experience must not exceed 50 years"),
@@ -88,6 +82,7 @@ export default function InspectorForm() {
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSignatureValid, setIsSignatureValid] = useState(false);
+  const signatureRef = useRef<SimpleSignatureRef>(null);
   const navigate = useNavigate();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -114,7 +109,6 @@ export default function InspectorForm() {
   });
 
   const locationValue = form.watch("location");
-  const signatureRef = useRef<SimpleSignatureRef>(null);
 
   const handleSignatureChange = (signature: string | null) => {
     const isEmpty = signatureRef.current?.isEmpty() ?? true;
@@ -128,20 +122,14 @@ export default function InspectorForm() {
     setIsUploadingFiles(true);
     try {
       const signatureDataURL = form.getValues('signature');
-      const certificates = form.getValues('certificates');
 
       // Convert SVG string to file for upload
       const signaturePublicId = signatureDataURL
         ? await uploadToCloudinary(dataURLtoFile(signatureDataURL))
         : '';
 
-      const certificatePublicIds = await Promise.all(
-        certificates.map(async cert => await uploadToCloudinary(cert.file))
-      );
-
       return {
-        signatureUrl: signaturePublicId,
-        certificateUrls: certificatePublicIds
+        signatureUrl: signaturePublicId
       };
     } catch (error) {
       console.error('Error uploading files:', error);
@@ -160,12 +148,12 @@ export default function InspectorForm() {
 
     try {
       setIsSubmitting(true);
-      const { signatureUrl, certificateUrls } = await uploadFiles();
+      const { signatureUrl } = await uploadFiles();
       const submitData = {
         address: data.location,
         profile_image: data.profile_image,
         signature: signatureUrl,
-        certificates: certificateUrls,
+        certificates: data.certificates,
         yearOfExp: data.yearOfExp,
         specialization: data.specialization,
         longitude: data.longitude,
@@ -296,17 +284,26 @@ export default function InspectorForm() {
                     <FormLabel>Certificates</FormLabel>
                     <FormControl>
                       <CameraUploadComponent
-                        onFilesChange={(files) => {
-                          const convertedFiles: FileWithPreview[] = files.map(fileObj => ({
-                            file: fileObj.file,
-                            preview: fileObj.preview,
-                            id: fileObj.id,
-                            name: fileObj.name,
-                            size: fileObj.size,
-                            type: fileObj.type
-                          }));
+                        onFilesChange={async (fileObjects) => {
+                          setIsUploadingFiles(true);
+                          try {
+                            // Extract the actual File objects from the FileObject array
+                            const files = fileObjects.map(fileObj => fileObj.file);
 
-                          field.onChange(convertedFiles);
+                            // Upload all files to Cloudinary
+                            const uploadPromises = files.map(file => uploadToCloudinary(file));
+                            const uploadedUrls = await Promise.all(uploadPromises);
+
+                            // Update form field with the uploaded URLs
+                            field.onChange(uploadedUrls);
+
+                            toast.success(`${uploadedUrls.length} photo(s) uploaded successfully`);
+                          } catch (error) {
+                            console.error("Error uploading files:", error);
+                            toast.error("Failed to upload files. Please try again.");
+                          } finally {
+                            setIsUploadingFiles(false);
+                          }
                         }}
                         maxFileSize={MAX_FILE_SIZE}
                         acceptedTypes={ACCEPTED_DOCUMENT_TYPES}

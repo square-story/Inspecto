@@ -11,7 +11,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { WalletService } from "@/services/wallet.service";
 import { IAdminWalletStats } from "@/types/wallet.stats";
-import { Clock, Download, Filter } from "lucide-react";
+import { Clock, Download, FileUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
@@ -61,12 +61,12 @@ export default function WalletManagement() {
                     <h2 className="text-sm lg:text-3xl font-bold tracking-tight">Wallet Management</h2>
                     <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4" />
-                            Export
+                            <FileUp className="mr-2 h-4 w-4" />
+                            Export to CSV
                         </Button>
                         <Button variant="default" size="sm">
-                            <Filter className="mr-2 h-4 w-4" />
-                            Filter
+                            <Download className="mr-2 h-4 w-4" />
+                            Download to PDF
                         </Button>
                     </div>
                 </div>

@@ -72,6 +72,7 @@ const appConfig: AppConfig = {
   api_secret: process.env.CLOUDINARY_API_SECRET || '',
   adminId: process.env.ADMIN_ID || '',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+
 };
 
 export default appConfig;

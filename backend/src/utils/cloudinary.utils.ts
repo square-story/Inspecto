@@ -106,7 +106,7 @@ export const uploadToCloudinary = (
 }
 
 
-export const getSignedPdfUrl = (publicId:string)=>{
+export const getSignedPdfUrl = (publicId: string) => {
     const timestamp = Math.floor(Date.now() / 1000);
     const expiresAt = timestamp + 3600;
 

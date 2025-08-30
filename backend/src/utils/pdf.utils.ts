@@ -6,6 +6,7 @@ import { IUsers } from "../models/user.model";
 import { IVehicleDocument } from "../models/vehicle.model";
 import appConfig from '../config/app.config';
 
+
 export const generateInspectionPDF = async (inspection: IInspectionDocument): Promise<Buffer> => {
     try {
         // Ensure inspection is populated with related data
@@ -26,16 +27,26 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
             <meta charset="utf-8">
             <title>Vehicle Inspection Report</title>
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
                 
                 :root {
                     --primary: #3b82f6;
+                    --primary-dark: #2563eb;
                     --primary-light: #dbeafe;
+                    --primary-lighter: #eff6ff;
                     --success: #10b981;
+                    --success-light: #dcfce7;
                     --warning: #f59e0b;
+                    --warning-light: #fef3c7;
                     --danger: #ef4444;
+                    --danger-light: #fee2e2;
                     --neutral: #6b7280;
                     --neutral-light: #f3f4f6;
+                    --neutral-lighter: #f9fafb;
+                    --border: #e5e7eb;
+                    --text-primary: #1f2937;
+                    --text-secondary: #4b5563;
+                    --text-muted: #9ca3af;
                 }
                 
                 * {
@@ -44,26 +55,57 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                     padding: 0;
                 }
                 
+                @page {
+                    size: A4;
+                    margin: 10mm;
+                }
+                
                 body {
-                    font-family: 'Inter', sans-serif;
-                    line-height: 1.5;
-                    color: #1f2937;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                    line-height: 1.6;
+                    color: var(--text-primary);
                     background-color: white;
-                    font-size: 14px;
+                    font-size: 11pt;
+                    position: relative;
+                }
+                
+                .watermark {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 120px;
+                    font-weight: 800;
+                    color: rgba(59, 130, 246, 0.05);
+                    z-index: -1;
+                    letter-spacing: 20px;
                 }
                 
                 .container {
                     max-width: 100%;
-                    padding: 40px;
+                    padding: 20px;
+                    position: relative;
                 }
                 
+                /* Header Section */
                 .header {
                     display: flex;
                     justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 40px;
+                    align-items: flex-start;
+                    margin-bottom: 30px;
                     padding-bottom: 20px;
-                    border-bottom: 1px solid #e5e7eb;
+                    border-bottom: 2px solid var(--primary);
+                    position: relative;
+                }
+                
+                .header::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 100px;
+                    height: 2px;
+                    background: linear-gradient(90deg, var(--primary-dark), transparent);
                 }
                 
                 .logo-area {
@@ -72,166 +114,300 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                 }
                 
                 .logo-title {
-                    font-size: 24px;
-                    font-weight: 700;
-                    color: var(--primary);
-                    margin-bottom: 5px;
+                    font-size: 28px;
+                    font-weight: 800;
+                    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    margin-bottom: 2px;
                 }
                 
                 .logo-subtitle {
-                    font-size: 14px;
-                    color: var(--neutral);
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                    font-weight: 500;
+                    letter-spacing: 0.5px;
                 }
                 
-                .report-info {
+                .report-meta {
                     text-align: right;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
                 }
                 
                 .report-id {
-                    font-size: 16px;
-                    font-weight: 600;
-                    margin-bottom: 5px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    background: var(--neutral-light);
+                    padding: 4px 12px;
+                    border-radius: 6px;
                 }
                 
                 .report-date {
-                    color: var(--neutral);
-                    font-size: 14px;
+                    color: var(--text-secondary);
+                    font-size: 12px;
+                    font-weight: 500;
                 }
                 
                 .status-badge {
                     display: inline-block;
-                    padding: 4px 12px;
-                    border-radius: 9999px;
-                    font-weight: 500;
-                    font-size: 12px;
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    font-weight: 600;
+                    font-size: 11px;
                     text-transform: uppercase;
-                    margin-top: 8px;
+                    letter-spacing: 0.5px;
                 }
                 
                 .status-completed {
-                    background-color: #dcfce7;
-                    color: #166534;
+                    background: linear-gradient(135deg, var(--success-light), #bbf7d0);
+                    color: #065f46;
+                    border: 1px solid #86efac;
                 }
                 
                 .status-pending {
-                    background-color: #fef3c7;
-                    color: #92400e;
+                    background: linear-gradient(135deg, var(--warning-light), #fed7aa);
+                    color: #78350f;
+                    border: 1px solid #fbbf24;
                 }
                 
+                /* Quick Summary Bar */
+                .quick-summary {
+                    background: linear-gradient(135deg, var(--primary-lighter), var(--primary-light));
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 25px;
+                    border: 1px solid var(--primary-light);
+                }
+                
+                .summary-grid {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 20px;
+                }
+                
+                .summary-item {
+                    flex: 1;
+                    text-align: center;
+                }
+                
+                .summary-value {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: var(--primary-dark);
+                    display: block;
+                    margin-bottom: 4px;
+                }
+                
+                .summary-label {
+                    font-size: 11px;
+                    color: var(--text-secondary);
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                
+                /* Main Content Grid */
                 .grid {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 20px;
-                    margin-bottom: 30px;
+                    margin-bottom: 25px;
                 }
                 
                 .col-6 {
                     flex: 0 0 calc(50% - 10px);
                 }
                 
+                .col-12 {
+                    flex: 0 0 100%;
+                }
+                
                 .card {
                     background-color: white;
-                    border-radius: 8px;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                    padding: 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+                    padding: 18px;
                     height: 100%;
-                    border: 1px solid #e5e7eb;
+                    border: 1px solid var(--border);
+                    transition: all 0.3s ease;
                 }
                 
                 .card-title {
-                    font-size: 16px;
-                    font-weight: 600;
+                    font-size: 14px;
+                    font-weight: 700;
                     margin-bottom: 15px;
-                    color: #111827;
+                    color: var(--text-primary);
                     display: flex;
                     align-items: center;
+                    padding-bottom: 10px;
+                    border-bottom: 1px solid var(--neutral-light);
                 }
                 
-                .card-title::before {
-                    content: '';
+                .card-icon {
                     display: inline-block;
-                    width: 4px;
-                    height: 16px;
-                    background-color: var(--primary);
-                    margin-right: 8px;
-                    border-radius: 4px;
+                    width: 28px;
+                    height: 28px;
+                    background: var(--primary-light);
+                    border-radius: 6px;
+                    margin-right: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    color: var(--primary);
                 }
                 
                 .info-grid {
                     display: grid;
-                    grid-template-columns: auto 1fr;
-                    gap: 8px 16px;
+                    grid-template-columns: minmax(120px, auto) 1fr;
+                    gap: 10px 15px;
+                    font-size: 11pt;
                 }
                 
                 .info-label {
-                    color: var(--neutral);
+                    color: var(--text-secondary);
                     font-weight: 500;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
                 }
                 
                 .info-value {
-                    font-weight: 400;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    word-break: break-word;
                 }
                 
+                /* Condition Assessment Table */
                 .condition-table {
                     width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 10px;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    margin-top: 5px;
+                    overflow: hidden;
+                    border-radius: 8px;
+                    border: 1px solid var(--border);
                 }
                 
                 .condition-table th,
                 .condition-table td {
-                    padding: 10px;
+                    padding: 10px 12px;
                     text-align: left;
-                    border-bottom: 1px solid #e5e7eb;
+                    border-bottom: 1px solid var(--border);
+                }
+                
+                .condition-table thead {
+                    background: var(--neutral-lighter);
                 }
                 
                 .condition-table th {
-                    font-weight: 500;
-                    color: var(--neutral);
-                    font-size: 13px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                
+                .condition-table tbody tr:hover {
+                    background: var(--neutral-lighter);
+                }
+                
+                .condition-table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+                
+                .condition-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                
+                .condition-icon {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    font-weight: bold;
                 }
                 
                 .condition-badge {
                     display: inline-block;
-                    padding: 2px 8px;
-                    border-radius: 4px;
-                    font-weight: 500;
-                    font-size: 12px;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: capitalize;
+                    letter-spacing: 0.3px;
                 }
                 
                 .condition-excellent {
-                    background-color: #dcfce7;
-                    color: #166534;
+                    background: var(--success-light);
+                    color: #065f46;
+                    border: 1px solid #86efac;
                 }
                 
                 .condition-good {
-                    background-color: #dbeafe;
+                    background: var(--primary-light);
                     color: #1e40af;
+                    border: 1px solid #93c5fd;
                 }
                 
                 .condition-fair {
-                    background-color: #fef3c7;
-                    color: #92400e;
+                    background: var(--warning-light);
+                    color: #78350f;
+                    border: 1px solid #fbbf24;
                 }
                 
                 .condition-poor {
-                    background-color: #fee2e2;
-                    color: #b91c1c;
+                    background: var(--danger-light);
+                    color: #7f1d1d;
+                    border: 1px solid #fca5a5;
                 }
                 
+                /* Result Card */
                 .result-card {
-                    background-color: var(--primary-light);
-                    border-left: 4px solid var(--primary);
+                    background: linear-gradient(135deg, var(--primary-lighter), var(--primary-light));
+                    border: 2px solid var(--primary);
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .result-card::before {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    right: -50%;
+                    width: 200%;
+                    height: 200%;
+                    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                }
+                
+                .result-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
                 }
                 
                 .result-title {
                     font-weight: 600;
-                    margin-bottom: 5px;
+                    font-size: 13px;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
                 }
                 
                 .result-value {
-                    font-size: 18px;
-                    font-weight: 700;
+                    font-size: 24px;
+                    font-weight: 800;
+                    letter-spacing: 1px;
                 }
                 
                 .result-pass {
@@ -242,42 +418,247 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                     color: var(--danger);
                 }
                 
-                .notes {
-                    background-color: #f9fafb;
+                .rating-display {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
                     padding: 15px;
-                    border-radius: 6px;
-                    margin-top: 10px;
+                    background: white;
+                    border-radius: 8px;
+                    margin-top: 15px;
                 }
                 
-                .footer {
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    border-top: 1px solid #e5e7eb;
-                    text-align: center;
-                    color: var(--neutral);
+                .rating-score {
+                    font-size: 32px;
+                    font-weight: 800;
+                    color: var(--primary);
+                }
+                
+                .rating-details {
+                    flex: 1;
+                }
+                
+                .rating-label {
+                    font-size: 11px;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                
+                .rating-text {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                }
+                
+                /* Notes and Recommendations */
+                .notes-section {
+                    background: var(--neutral-lighter);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-top: 15px;
+                    border-left: 4px solid var(--primary);
+                }
+                
+                .notes-title {
                     font-size: 12px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    margin-bottom: 8px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
                 }
                 
-                .signature-area {
+                .notes-content {
+                    color: var(--text-primary);
+                    line-height: 1.6;
+                    font-size: 11pt;
+                }
+                
+                /* QR Code Section */
+                .qr-section {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    padding: 15px;
+                    background: var(--neutral-lighter);
+                    border-radius: 8px;
                     margin-top: 20px;
-                    padding-top: 20px;
-                    border-top: 1px dashed #e5e7eb;
+                }
+                
+                .qr-code {
+                    flex-shrink: 0;
+                }
+                
+                .qr-info {
+                    flex: 1;
+                }
+                
+                .qr-title {
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    margin-bottom: 4px;
+                }
+                
+                .qr-description {
+                    font-size: 11px;
+                    color: var(--text-secondary);
+                    line-height: 1.4;
+                }
+                
+                .qr-link {
+                    color: var(--primary);
+                    text-decoration: none;
+                    font-weight: 500;
+                    word-break: break-all;
+                }
+                
+                /* Inspector Signature */
+                .signature-section {
+                    margin-top: 30px;
+                    padding: 20px;
+                    background: var(--neutral-lighter);
+                    border-radius: 8px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                }
+                
+                .signature-box {
+                    flex: 1;
+                    max-width: 300px;
                 }
                 
                 .signature-label {
+                    font-size: 11px;
+                    color: var(--text-secondary);
+                    margin-bottom: 8px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                
+                .signature-line {
+                    border-bottom: 2px solid var(--text-secondary);
+                    margin-bottom: 5px;
+                    min-height: 40px;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: center;
+                }
+                
+                .signature-name {
                     font-size: 12px;
-                    color: var(--neutral);
-                    margin-bottom: 10px;
+                    color: var(--text-primary);
+                    font-weight: 600;
+                }
+                
+                .stamp-area {
+                    width: 100px;
+                    height: 100px;
+                    border: 2px dashed var(--border);
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--text-muted);
+                    font-size: 10px;
+                    text-align: center;
+                }
+                
+                /* Footer */
+                .footer {
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 2px solid var(--border);
+                }
+                
+                .footer-content {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+                
+                .footer-logo {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: var(--primary);
+                }
+                
+                .footer-info {
+                    text-align: right;
+                    font-size: 10px;
+                    color: var(--text-secondary);
+                    line-height: 1.4;
                 }
                 
                 .disclaimer {
-                    margin-top: 20px;
-                    font-size: 10px;
-                    color: var(--neutral);
+                    background: var(--neutral-lighter);
+                    padding: 12px;
+                    border-radius: 6px;
+                    font-size: 9px;
+                    color: var(--text-muted);
+                    line-height: 1.5;
+                    text-align: justify;
+                }
+                
+                .disclaimer-title {
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    margin-bottom: 4px;
+                    text-transform: uppercase;
+                }
+                
+                /* Page Break Control */
+                .page-break {
+                    page-break-after: always;
+                }
+                
+                @media print {
+                    body {
+                        print-color-adjust: exact;
+                        -webkit-print-color-adjust: exact;
+                    }
+                    
+                    .card {
+                        break-inside: avoid;
+                    }
+                    
+                    .condition-table {
+                        break-inside: avoid;
+                    }
+                }
+                
+                /* Responsive adjustments for smaller viewports */
+                @media (max-width: 768px) {
+                    .grid {
+                        display: block;
+                    }
+                    
+                    .col-6 {
+                        flex: 0 0 100%;
+                        margin-bottom: 15px;
+                    }
+                    
+                    .summary-grid {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    
+                    .header {
+                        flex-direction: column;
+                        gap: 15px;
+                    }
+                    
+                    .report-meta {
+                        text-align: left;
+                    }
                 }
             </style>
         </head>
         <body>
+        <div class="watermark">INSPECTO</div>
             <div class="container">
                 <!-- Header with Logo and Report Info -->
                 <div class="header">
@@ -288,7 +669,7 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                     <div class="report-info">
                         <div class="report-id">Ref: ${inspection.bookingReference}</div>
                         <div class="report-date">${format(new Date(inspection.date), 'MMMM dd, yyyy')}</div>
-                        <div class="status-badge status-${inspection.status === 'completed' ? 'completed' : 'pending'}">${inspection.status}</div>
+                        <div class="status-badge">${inspection.status}</div>
                     </div>
                 </div>
                 
@@ -322,32 +703,84 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                             </div>
                         </div>
                     </div>
+
+                    <div class="quick-summary">
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-value">${format(new Date(inspection.date), 'MMM dd')}</span>
+                            <span class="summary-label">Inspection Date</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-value">${vehicle?.type?.toUpperCase() || 'N/A'}</span>
+                            <span class="summary-label">Vehicle Type</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-value">${inspection.report?.mileage || 'N/A'}</span>
+                            <span class="summary-label">Mileage</span>
+                        </div>
+                    </div>
+                </div>
                     
-                    <!-- Contact Information -->
                     <div class="col-6">
                         <div class="card">
-                            <div class="card-title">Contact Information</div>
+                            <div class="card-title">
+                                <span class="card-icon">👤</span>
+                                Contact Details
+                            </div>
                             <div class="info-grid">
-                                <div class="info-label">Owner:</div>
+                                <div class="info-label">Owner Name</div>
                                 <div class="info-value">${user?.firstName || ''} ${user?.lastName || ''}</div>
                                 
-                                <div class="info-label">Email:</div>
+                                <div class="info-label">Email</div>
                                 <div class="info-value">${user?.email || 'N/A'}</div>
                                 
-                                <div class="info-label">Phone:</div>
+                                <div class="info-label">Phone</div>
                                 <div class="info-value">${inspection.phone || 'N/A'}</div>
                                 
-                                <div class="info-label">Inspector:</div>
+                                <div class="info-label">Location</div>
+                                <div class="info-value">${inspection.location || 'N/A'}</div>
+                                
+                                <div class="info-label">Inspector</div>
                                 <div class="info-value">${inspector?.firstName || ''} ${inspector?.lastName || ''}</div>
                                 
-                                <div class="info-label">Experience:</div>
+                                <div class="info-label">Experience</div>
                                 <div class="info-value">${inspector?.yearOfExp || 'N/A'} years</div>
                                 
-                                <div class="info-label">Specialization:</div>
+                                <div class="info-label">Specialization</div>
                                 <div class="info-value">${inspector?.specialization?.join(', ') || 'N/A'}</div>
                             </div>
                         </div>
                     </div>
+
+                     <div class="col-6">
+                        <div class="card">
+                            <div class="card-title">
+                                <span class="card-icon">🚗</span>
+                                Vehicle Information
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-label">Make & Model</div>
+                                <div class="info-value">${vehicle?.make || 'N/A'} ${vehicle?.vehicleModel || 'N/A'}</div>
+                                
+                                <div class="info-label">Year</div>
+                                <div class="info-value">${vehicle?.year || 'N/A'}</div>
+                                
+                                <div class="info-label">Registration</div>
+                                <div class="info-value">${vehicle?.registrationNumber || 'N/A'}</div>
+                                
+                                <div class="info-label">VIN/Chassis</div>
+                                <div class="info-value">${vehicle?.chassisNumber || 'N/A'}</div>
+                                
+                                <div class="info-label">Fuel Type</div>
+                                <div class="info-value">${vehicle?.fuelType ? vehicle.fuelType.charAt(0).toUpperCase() + vehicle.fuelType.slice(1) : 'N/A'}</div>
+                                
+                                <div class="info-label">Transmission</div>
+                                <div class="info-value">${vehicle?.transmission ? vehicle.transmission.charAt(0).toUpperCase() + vehicle.transmission.slice(1) : 'N/A'}</div>
+                                
+                                <div class="info-label">Insurance Expiry</div>
+                                <div class="info-value">${vehicle?.insuranceExpiry ? format(new Date(vehicle.insuranceExpiry), 'MMM dd, yyyy') : 'N/A'}</div>
+                            </div>
+                        </div>
                     
                     <!-- Condition Assessment -->
                     <div class="col-6">
@@ -463,7 +896,7 @@ export const generateInspectionPDF = async (inspection: IInspectionDocument): Pr
                     ${inspector?.signature ? `
                     <div class="signature-area">
                         <div class="signature-label">Inspector's Signature:</div>
-                        <!-- Signature would be displayed here if available as an image -->
+                        
                     </div>
                     ` : ''}
                     
@@ -542,3 +975,4 @@ function formatFuelLevel(level?: string): string {
 
     return fuelLevels[level] || level;
 }
+
