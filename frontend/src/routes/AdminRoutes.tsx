@@ -6,7 +6,7 @@ import AdminDashBoardContent from "@/app/adminDashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import InspectorMangement from "@/pages/admin/InspectorMangement";
 import WalletManagement from "@/pages/admin/WalletManagement";
-import InspectionTypesManagement from "@/pages/admin/InspectionTypesManagement";
+import InspectionTypesManagement from "@/pages/admin/InspectionTypes";
 
 const AdminRoutes = () => (
     <Routes>

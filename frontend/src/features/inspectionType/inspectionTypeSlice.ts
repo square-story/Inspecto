@@ -1,17 +1,8 @@
 import axiosInstance from "@/api/axios";
+import { InspectionType } from "@/pages/admin/InspectionTypes/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-export interface InspectionType {
-    _id: string;
-    name: string;
-    price: number;
-    platformFee: number;
-    duration: string;
-    features: string[];
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
+
 
 interface InspectionTypeState {
     inspectionTypes: InspectionType[];

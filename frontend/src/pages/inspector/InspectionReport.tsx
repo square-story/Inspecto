@@ -29,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { InspectionService } from "@/services/inspection.service"
 import { getSignedPdfUrl } from "@/utils/cloudinary"
 import { saveAs } from "file-saver"
+import { InspectionTypeCreateValues, InspectionTypeEditValues } from "../admin/InspectionTypes/types"
 
 
 const inspectionFormSchema = z.object({
@@ -50,7 +51,7 @@ const inspectionFormSchema = z.object({
   photos: z.array(z.string()).optional(),
 })
 
-export type InspectionFormValues = z.infer<typeof inspectionFormSchema>
+export type InspectionFormValues = z.infer<typeof inspectionFormSchema> | InspectionTypeCreateValues | InspectionTypeEditValues;
 
 export default function InspectionReportPage() {
   const { id } = useParams<{ id: string }>()

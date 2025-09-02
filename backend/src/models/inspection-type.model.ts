@@ -1,7 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface IInspectionTypeFeature{
-    text:string
+export interface IField {
+    label: string;
+    type: string;
+    required: boolean;
+    name: string;
+    options?: string[];
 }
 
 export interface IInspectionTypeInput {
@@ -10,10 +14,11 @@ export interface IInspectionTypeInput {
     platformFee: number;
     duration: string;
     features: string[];
+    fields: IField[];
     isActive: boolean;
 }
 
-export interface IInspectionTypeDocument extends IInspectionTypeInput, Document {}
+export interface IInspectionTypeDocument extends IInspectionTypeInput, Document { }
 
 const InspectionTypeSchema: Schema = new Schema<IInspectionTypeDocument>(
     {
@@ -22,6 +27,7 @@ const InspectionTypeSchema: Schema = new Schema<IInspectionTypeDocument>(
         platformFee: { type: Number, required: true },
         duration: { type: String, required: true },
         features: { type: [String], required: true },
+        fields: { type: [Object], required: true },
         isActive: { type: Boolean, required: true, default: true },
     },
     { timestamps: true }

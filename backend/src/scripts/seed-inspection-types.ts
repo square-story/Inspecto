@@ -29,6 +29,7 @@ const seedInspectionTypes = async () => {
                     'Tire condition check',
                     'Brake system check'
                 ],
+                fields: [],
                 isActive: true
             },
             {
@@ -37,6 +38,7 @@ const seedInspectionTypes = async () => {
                 price: 250,
                 platformFee: 50,
                 duration: '90-120 mins',
+                fields: [],
                 features: [
                     'Complete external & internal inspection',
                     'Advanced computer diagnostics',
