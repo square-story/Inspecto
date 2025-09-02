@@ -5,16 +5,8 @@ export const defaultCreateValues: InspectionTypeCreateValues = {
     price: 50,
     platformFee: 50,
     duration: "",
-    features: [""],
-    fields: [
-        {
-            label: "",
-            type: "text",
-            required: false,
-            name: "",
-            options: [],
-        },
-    ],
+    features: [],
+    fields: [],
     isActive: true,
 };
 
@@ -22,15 +14,7 @@ export const defaultEditValues: InspectionTypeEditValues = {
     price: 50,
     platformFee: 50,
     duration: "",
-    features: [""],
-    fields: [
-        {
-            label: "",
-            type: "text",
-            required: false,
-            name: "",
-            options: [],
-        },
-    ],
+    features: [],
+    fields: [],
     isActive: true,
 };
