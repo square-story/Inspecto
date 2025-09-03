@@ -1,11 +1,25 @@
 import mongoose from 'mongoose';
 import { InspectionTypeModel } from '../models/inspection-type.model';
 import appConfig from '../config/app.config';
+import { Admin } from '../models/admin.model';
 
 const seedInspectionTypes = async () => {
     try {
         await mongoose.connect(appConfig.databaseUrl as string);
         console.log('Connected to MongoDB');
+
+        const adminCount = await Admin.countDocuments();
+        if (adminCount === 0) {
+            await Admin.create({
+                email: 'admin@gmail.com',
+                password: 'admin@123',
+                role: 'admin'
+            }).then(() => {
+                console.log('Admin seeded successfully');
+            }).catch((err) => {
+                console.log('Error seeding admin:', err);
+            })
+        }
 
         // Check if inspection types already exist
         const count = await InspectionTypeModel.countDocuments();
@@ -14,6 +28,8 @@ const seedInspectionTypes = async () => {
             await mongoose.disconnect();
             return;
         }
+
+        
 
         // Seed data
         const inspectionTypes = [

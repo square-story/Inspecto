@@ -158,4 +158,6 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     }
 }, { timestamps: true });
 
+InspectorSchema.index({ location: "2dsphere" });
+
 export default mongoose.model<IInspector>("Inspector", InspectorSchema);

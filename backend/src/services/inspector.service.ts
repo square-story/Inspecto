@@ -205,7 +205,11 @@ export class InspectorService implements IInspectorService {
         }
     }
     async getNearbyInspectors(latitude: string, longitude: string) {
-        return await this._inspectorRepository.getNearbyInspectors(latitude, longitude)
+        try {
+            return await this._inspectorRepository.getNearbyInspectors(latitude, longitude)
+        } catch (error: any) {
+            throw new ServiceError('Error in getNearbyInspectors:', error.message);
+        }
     }
 
     async bookingHandler(inspectorId: string, userId: string, date: Date) {
