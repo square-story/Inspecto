@@ -162,8 +162,8 @@ const InspectionTypesManagement = () => {
                     setOpen={setIsCreateDialogOpen}
                     title="Add New Inspection Type"
                     description="Create a new inspection type with details and features."
-                    form={createForm}
-                    onSubmit={handleCreateSubmit}
+                    form={createForm as never}
+                    onSubmit={handleCreateSubmit as never}
                     loading={loading}
                 />
 
