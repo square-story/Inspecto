@@ -14,14 +14,14 @@ export interface InspectionType {
     updatedAt: string;
 }
 
-export const FIELD_TYPES = ["text", "number", "date", "select", "checkbox", "radio", "textarea", "image-drop"] as const
+export const FIELD_TYPES = ["text", "number", "date", "select", "checkbox", "radio", "textarea"] as const
 
 export const fieldSchema = z.object({
     label: z.string().min(1, "Label is required"),
     type: z.enum(FIELD_TYPES),
     required: z.boolean(),
     name: z.string().min(1, "Name is required"),
-    options: z.array(z.string()).optional(),
+    options: z.array(z.string()).optional(), // Optional for non-select/radio fields
 })
 
 export type Field = z.infer<typeof fieldSchema>
@@ -47,27 +47,22 @@ export type InspectionTypeEditValues = z.infer<typeof inspectionTypeEditSchema>
 // ----------------------
 
 
-export interface InspectionTypeFormProps<
-    T extends InspectionTypeCreateValues | InspectionTypeEditValues = InspectionTypeCreateValues | InspectionTypeEditValues
-> {
-    form: UseFormReturn<T>
+export interface InspectionTypeFormProps {
+    form: UseFormReturn<InspectionTypeCreateValues | InspectionTypeEditValues>
     isEdit?: boolean
 }
 
 
-export interface InspectionTypeDialogProps<
-    T extends InspectionTypeCreateValues | InspectionTypeEditValues = InspectionTypeCreateValues | InspectionTypeEditValues
-> {
+export interface InspectionTypeDialogProps {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
     title: string
     description: string
-    form: UseFormReturn<T>
-    onSubmit: (values: T) => void
+    form: UseFormReturn<InspectionTypeCreateValues | InspectionTypeEditValues>
+    onSubmit: (values: InspectionTypeCreateValues | InspectionTypeEditValues) => void
     loading?: boolean
     isEdit?: boolean
 }
-
 export interface InspectionFieldsManagerProps {
     fields: Field[]
     onChange: (value: Field[]) => void
