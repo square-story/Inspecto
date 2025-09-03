@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios"
-import { InspectionType, InspectionTypeCreateValues, InspectionTypeEditValues } from "@/pages/admin/InspectionTypes/types"
+import { InspectionType, InspectionTypeCreateValues, InspectionTypeEditValues } from "@/types/inspection.types"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { AxiosError } from "axios"
 

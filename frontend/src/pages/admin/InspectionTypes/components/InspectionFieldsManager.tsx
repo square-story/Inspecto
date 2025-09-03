@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Field, FIELD_TYPES, InspectionFieldsManagerProps } from "../types";
+import { Field, FIELD_TYPES, InspectionFieldsManagerProps } from "@/types/inspection.types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";

@@ -1,4 +1,4 @@
-import { InspectionTypeCreateValues, InspectionTypeEditValues } from "../types";
+import { InspectionTypeCreateValues, InspectionTypeEditValues } from "@/types/inspection.types";
 
 export const defaultCreateValues: InspectionTypeCreateValues = {
     name: "",

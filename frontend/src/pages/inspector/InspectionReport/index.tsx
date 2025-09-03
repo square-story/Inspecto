@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { InspectionService } from "@/services/inspection.service"
 import { getSignedPdfUrl } from "@/utils/cloudinary"
 import { saveAs } from "file-saver"
-import { InspectionTypeCreateValues, InspectionTypeEditValues } from "../admin/InspectionTypes/types"
+import { InspectionTypeCreateValues, InspectionTypeEditValues } from "../../../types/inspection.types"
 
 
 const inspectionFormSchema = z.object({

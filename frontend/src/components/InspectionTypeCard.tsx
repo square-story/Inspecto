@@ -1,7 +1,8 @@
 import { Info } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { InspectionType } from "@/features/inspectionType/inspectionTypeSlice";
+import { InspectionType } from "@/types/inspection.types";
+
 
 
 

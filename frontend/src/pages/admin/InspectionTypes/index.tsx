@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "react-redux"
 import { toast } from "sonner"
 import { InspectionTypeDialog } from "./components/InspectionTypeDialog"
-import { InspectionType, inspectionTypeCreateSchema, InspectionTypeCreateValues, inspectionTypeEditSchema, InspectionTypeEditValues } from "./types"
+import { InspectionType, inspectionTypeCreateSchema, InspectionTypeCreateValues, inspectionTypeEditSchema, InspectionTypeEditValues } from "@/types/inspection.types"
 import { defaultCreateValues, defaultEditValues } from "./default"
 import { AxiosError } from "axios"
 
@@ -102,7 +102,6 @@ const InspectionTypesManagement = () => {
                     id: currentType._id,
                     data: {
                         ...data,
-                        name: currentType.name, // Keep the original name
                         isActive: currentType.isActive, // Keep the original status
                     },
                 }),

@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { InspectionTypeForm } from "./InspectionTypeForm"
-import { InspectionTypeDialogProps } from "../types"
+import { InspectionTypeDialogProps } from "@/types/inspection.types"
 
 export const InspectionTypeDialog = ({
     open,

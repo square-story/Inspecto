@@ -1,5 +1,5 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { InspectionTypeFormProps } from "../types";
+import { InspectionTypeFormProps } from "@/types/inspection.types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { TagsInput } from "@/components/ui/tags-input";

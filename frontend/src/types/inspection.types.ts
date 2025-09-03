@@ -1,11 +1,6 @@
 import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
-// ----------------------
-// Types and Schemas
-// ----------------------
-
-
 export interface InspectionType {
     _id: string;
     name: string;
@@ -19,14 +14,14 @@ export interface InspectionType {
     updatedAt: string;
 }
 
-export const FIELD_TYPES = ["text", "number", "date", "select", "checkbox", "radio", "textarea"] as const
+export const FIELD_TYPES = ["text", "number", "date", "select", "checkbox", "radio", "textarea", "image-drop"] as const
 
 export const fieldSchema = z.object({
     label: z.string().min(1, "Label is required"),
     type: z.enum(FIELD_TYPES),
     required: z.boolean(),
     name: z.string().min(1, "Name is required"),
-    options: z.array(z.string()).optional(), // Optional for non-select/radio fields
+    options: z.array(z.string()).optional(),
 })
 
 export type Field = z.infer<typeof fieldSchema>
@@ -52,22 +47,27 @@ export type InspectionTypeEditValues = z.infer<typeof inspectionTypeEditSchema>
 // ----------------------
 
 
-export interface InspectionTypeFormProps {
-    form: UseFormReturn<InspectionTypeCreateValues | InspectionTypeEditValues>
+export interface InspectionTypeFormProps<
+    T extends InspectionTypeCreateValues | InspectionTypeEditValues = InspectionTypeCreateValues | InspectionTypeEditValues
+> {
+    form: UseFormReturn<T>
     isEdit?: boolean
 }
 
 
-export interface InspectionTypeDialogProps {
+export interface InspectionTypeDialogProps<
+    T extends InspectionTypeCreateValues | InspectionTypeEditValues = InspectionTypeCreateValues | InspectionTypeEditValues
+> {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
     title: string
     description: string
-    form: UseFormReturn<InspectionTypeCreateValues | InspectionTypeEditValues>
-    onSubmit: (values: InspectionTypeCreateValues | InspectionTypeEditValues) => void
+    form: UseFormReturn<T>
+    onSubmit: (values: T) => void
     loading?: boolean
     isEdit?: boolean
 }
+
 export interface InspectionFieldsManagerProps {
     fields: Field[]
     onChange: (value: Field[]) => void
