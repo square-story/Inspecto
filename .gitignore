@@ -78,3 +78,6 @@ docker-compose.log
 frontend/.env.development
 frontend/.env.production
 backend/.env.production
+
+# Ignore TODO file
+TODO
