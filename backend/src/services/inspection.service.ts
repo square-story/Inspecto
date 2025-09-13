@@ -137,7 +137,7 @@ export class InspectionService implements IInspectionService {
 
             const dayOfWeek = format(date, 'EEEE') as keyof WeeklyAvailability;
             const dayAvailability = inspector.availableSlots[dayOfWeek];
-            if (!dayAvailability.enabled) throw new ServiceError('Inspector is not available on this day');
+            if (!dayAvailability.enabled) return [];
             return await this._inspectionRepository.getAvailableSlots(inspectorId, date, dayAvailability);
         } catch (error) {
             if (error instanceof Error) {
