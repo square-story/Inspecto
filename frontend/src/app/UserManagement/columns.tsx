@@ -2,6 +2,7 @@ import { DataTableColumnHeader } from "@/components/columnHeader";
 import { SignedAvatar } from "@/components/SignedAvatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import LongText from "@/components/ui/LongText";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import { useState } from "react";
 export type IUsers = {
     _id: string;
     firstName: string;
+    lastName?: string;
     email: string;
     status: boolean;
     profile_image: string;
@@ -40,10 +42,21 @@ export const columns = ({
             },
         },
         {
-            accessorKey: "firstName",
+            id: 'fullName',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="First Name" />
+                <DataTableColumnHeader column={column} title='Full Name' />
             ),
+            cell: ({ row }) => {
+                const { firstName, lastName } = row.original
+                const fullName = `${firstName} ${lastName ? lastName : ''}`
+                return <LongText className='max-w-36'>{fullName}</LongText>
+            },
+            filterFn: (row, _columnId, filterValue) => {
+                const { firstName, lastName } = row.original
+                const fullName = `${firstName} ${lastName ? lastName : ''}`.toLowerCase()
+                return fullName.includes(filterValue.toLowerCase()) // Case-insensitive match
+            },
+            meta: { className: 'w-36' },
         },
         {
             accessorKey: "email",

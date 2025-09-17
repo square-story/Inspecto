@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { IAdminService } from "../core/interfaces/services/admin.service.interface";
+import { IAdminService, PaginationParams, PaginatedResult } from "../core/interfaces/services/admin.service.interface";
 import { TYPES } from "../di/types";
 import { IAdmin } from "../models/admin.model";
 import { IUserRepository } from "../core/interfaces/repositories/user.repository.interface";
@@ -37,9 +37,43 @@ export class AdminService implements IAdminService {
         }
     }
 
-    async getAllInspectors(): Promise<IInspector[]> {
+    async getAllInspectors(params: PaginationParams): Promise<PaginatedResult<IInspector>> {
         try {
-            return await this._inspectorRepository.findAll();
+            const { page, limit, search, isListed } = params;
+            const skip = (page - 1) * limit;
+
+            // Build filter criteria
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const filter: any = {};
+
+            if (isListed !== undefined) {
+                filter.isListed = isListed;
+            }
+
+            // Add search functionality
+            if (search) {
+                filter.$or = [
+                    { firstName: { $regex: search, $options: 'i' } },
+                    { lastName: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
+                ];
+            }
+
+            // Get all inspectors matching the filter
+            const allInspectors = await this._inspectorRepository.find(filter);
+
+            // Get total count for pagination
+            const total = allInspectors.length;
+
+            // Apply pagination and sorting manually
+            const inspectors = allInspectors
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .slice(skip, skip + limit);
+
+            return {
+                users: inspectors,
+                total
+            };
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting all inspectors: ${error.message}`);
@@ -48,9 +82,37 @@ export class AdminService implements IAdminService {
         }
     }
 
-    async getAllUsers(): Promise<IUsers[]> {
+    async getAllUsers(params: PaginationParams): Promise<PaginatedResult<IUsers>> {
         try {
-            return await this._userRepository.getAllUsers();
+            const { page, limit, search } = params;
+            const skip = (page - 1) * limit;
+
+            // Build filter criteria
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const filter: any = {};
+
+            // Add search functionality
+            if (search) {
+                filter.$or = [
+                    { firstName: { $regex: search, $options: 'i' } },
+                    { lastName: { $regex: search, $options: 'i' } },
+                ];
+            }
+
+            // Get all users matching the filter
+            const allUsers = await this._userRepository.find(filter);
+
+            // Get total count for pagination
+            const total = allUsers.length;
+
+            const users = allUsers
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .slice(skip, skip + limit);
+
+            return {
+                users,
+                total
+            };
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting all users: ${error.message}`);

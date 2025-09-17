@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { InspectorDataTable } from "./components/InspectorDataTable";
 import { Inspectors, columns } from "./columns";
 import { AdminService } from "@/services/admin.service";
+import { PaginationState, SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -10,20 +11,51 @@ import { AlertTriangle } from "lucide-react";
 import { DeleteConfirmContent } from "./components/DenyReason";
 import { SignedAvatar } from "@/components/SignedAvatar";
 import CertificateItem from "./components/certificate-viewer";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function DemoPage() {
     const confirm = useConfirm();
     const [data, setData] = useState<Inspectors[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+    const debouncedSearch = useDebounce(searchValue, 1000);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+    const [_sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [pageCount, setPageCount] = useState(0);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedInspector, setSelectedInspector] = useState<Inspectors | null>(null);
 
     useEffect(() => {
         fetchData();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pagination, debouncedSearch, columnFilters]);
 
     const fetchData = async () => {
-        const response = await AdminService.getInspectors();
-        setData(response.data);
+        setIsLoading(true);
+        try {
+            // Get isListed filter value if it exists
+            const isListedFilter = columnFilters.find(filter => filter.id === 'isListed');
+            const isListed = isListedFilter ? isListedFilter.value as boolean : undefined;
+
+            const response = await AdminService.getInspectors({
+                page: pagination.pageIndex + 1, // API uses 1-based indexing
+                limit: pagination.pageSize,
+                search: searchValue,
+                isListed: isListed
+            });
+
+            setData(response.data.data);
+            setPageCount(response.data.pagination.totalPages);
+        } catch (error) {
+            console.error('Error fetching inspectors:', error);
+            toast.error('Failed to load inspectors');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleDeny = async (inspectorId: string) => {
@@ -151,7 +183,18 @@ export default function DemoPage() {
     };
     return (
         <div className="container mx-auto py-10">
-            <InspectorDataTable columns={columns({ setIsDrawerOpen, setSelectedInspector })} data={data} />
+            <InspectorDataTable
+                columns={columns({ setIsDrawerOpen, setSelectedInspector })}
+                data={data}
+                pagination={pagination}
+                pageCount={pageCount}
+                isLoading={isLoading}
+                onPaginationChange={setPagination}
+                onSortingChange={setSorting}
+                onColumnFiltersChange={setColumnFilters}
+                searchValue={searchValue}
+                onSearchChange={setSearchValue}
+            />
             {/* Drawer for Inspector Details */}
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerContent>
