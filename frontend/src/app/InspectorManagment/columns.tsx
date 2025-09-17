@@ -122,9 +122,9 @@ export const columns = ({
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(inspector._id)}
+                                onClick={() => navigator.clipboard.writeText(inspector.firstName + ' ' + (inspector.lastName || ''))}
                             >
-                                Copy Inspector ID
+                                Copy Inspector Name
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
