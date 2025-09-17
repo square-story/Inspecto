@@ -87,7 +87,6 @@ export class AdminService implements IAdminService {
             const { page, limit, search } = params;
             const skip = (page - 1) * limit;
 
-            // Build filter criteria
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const filter: any = {};
 
@@ -96,6 +95,7 @@ export class AdminService implements IAdminService {
                 filter.$or = [
                     { firstName: { $regex: search, $options: 'i' } },
                     { lastName: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
                 ];
             }
 

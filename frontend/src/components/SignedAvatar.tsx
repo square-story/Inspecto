@@ -1,3 +1,4 @@
+import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSignedImage } from '@/hooks/useSignedImage';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,7 +10,7 @@ interface SignedAvatarProps {
     imageType?: 'certificate' | 'signature' | 'face' | 'none';
 }
 
-export function SignedAvatar({
+export const SignedAvatar = React.memo(function SignedAvatar({
     publicId,
     fallback = '',
     className = '',
@@ -18,12 +19,14 @@ export function SignedAvatar({
     const { imageUrl, isLoading } = useSignedImage(publicId, imageType);
 
     // Generate initials for fallback
-    const initials = fallback
-        .split(' ')
-        .map(name => name[0])
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
+    const initials = React.useMemo(() => {
+        return fallback
+            .split(' ')
+            .map(name => name[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
+    }, [fallback]);
 
     if (isLoading) {
         return <Skeleton className={`h-10 w-10 rounded-full ${className}`} />;
@@ -35,4 +38,4 @@ export function SignedAvatar({
             <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
     );
-}
+});
