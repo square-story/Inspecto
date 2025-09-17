@@ -2,12 +2,11 @@ import {
     ColumnDef,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
     SortingState,
     getSortedRowModel,
-    getFilteredRowModel,
     ColumnFiltersState,
+    PaginationState,
 } from "@tanstack/react-table"
 
 
@@ -19,7 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DataTablePagination } from "@/components/Pagination"
 import { DataTableToolbar } from "./DataTableToolbar"
 
@@ -27,27 +26,73 @@ import { DataTableToolbar } from "./DataTableToolbar"
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    pageCount: number
+    onPaginationChange: (pagination: PaginationState) => void
+    onSortingChange: (sorting: SortingState) => void
+    onColumnFiltersChange: (filters: ColumnFiltersState) => void
+    pagination: PaginationState
+    isLoading: boolean
+    searchValue: string
+    onSearchChange: (value: string) => void
 }
 
 export function InspectorDataTable<TData, TValue>({
     columns,
     data,
+    pageCount,
+    onPaginationChange,
+    onSortingChange,
+    onColumnFiltersChange,
+    pagination,
+    isLoading,
+    searchValue,
+    onSearchChange,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+    // Handle sorting changes
+    useEffect(() => {
+        onSortingChange(sorting);
+    }, [sorting, onSortingChange]);
+
+    // Handle filter changes
+    useEffect(() => {
+        onColumnFiltersChange(columnFilters);
+    }, [columnFilters, onColumnFiltersChange]);
+
     const table = useReactTable({
-        data, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel(), onSortingChange: setSorting,
+        data,
+        columns,
+        pageCount: pageCount,
+        getCoreRowModel: getCoreRowModel(),
+        onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
         onColumnFiltersChange: setColumnFilters,
+        onPaginationChange: (updaterOrValue) => {
+            onPaginationChange(
+                typeof updaterOrValue === "function"
+                    ? updaterOrValue(pagination)
+                    : updaterOrValue
+            );
+        },
+        manualPagination: true,
+        manualSorting: true,
+        manualFiltering: true,
         state: {
             sorting,
-            columnFilters
+            columnFilters,
+            pagination,
         },
     })
     return (
         <div className="space-y-4">
-            <DataTableToolbar table={table} />
+            <DataTableToolbar
+                table={table}
+                searchValue={searchValue}
+                onSearchChange={onSearchChange}
+                isLoading={isLoading}
+            />
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -88,7 +133,7 @@ export function InspectorDataTable<TData, TValue>({
                 </Table>
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <DataTablePagination table={table} />
+                <DataTablePagination table={table} isLoading={isLoading} />
             </div>
         </div>
     );

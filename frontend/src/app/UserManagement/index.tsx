@@ -8,18 +8,42 @@ import { Button } from "@/components/ui/button";
 import { useConfirm } from "@omit/react-confirm-dialog";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { ColumnFiltersState, PaginationState } from "@tanstack/react-table";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function UserManagmentTable() {
-    const [data, setData] = useState<IUsers[]>([]);
     const confirm = useConfirm();
+    const [data, setData] = useState<IUsers[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+    const [searchValue, setSearchValue] = useState("");
+    const debouncedSearch = useDebounce(searchValue, 1000);
+    const [pageCount, setPageCount] = useState(0);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     useEffect(() => {
-        featchData()
-    }, [])
+        fetchData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pagination, debouncedSearch, columnFilters]);
 
-    async function featchData() {
-        const response = await AdminService.getUsers()
-        setData(response.data)
+    async function fetchData() {
+        try {
+            const response = await AdminService.getUsers({
+                page: pagination.pageIndex + 1,
+                limit: pagination.pageSize,
+                search: debouncedSearch,
+            });
+            setData(response.data.data);
+            setPageCount(response.data.pagination.totalPages);
+        } catch (error) {
+            console.error("Failed to fetch user data:", error);
+            toast.error("Failed to fetch user data");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -67,7 +91,16 @@ export default function UserManagmentTable() {
 
     return (
         <div className="container mx-auto py-10">
-            <UserDataTable columns={columns({ setIsDrawerOpen, setSelectedUser, onBlockUser: handleBlockUser })} data={data} />
+            <UserDataTable columns={columns({ setIsDrawerOpen, setSelectedUser, onBlockUser: handleBlockUser })}
+                data={data}
+                pagination={pagination}
+                pageCount={pageCount}
+                onPaginationChange={setPagination}
+                isLoading={isLoading}
+                searchValue={searchValue}
+                onSearchChange={setSearchValue}
+                onColumnFiltersChange={setColumnFilters}
+            />
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerContent>
                     <DrawerHeader>

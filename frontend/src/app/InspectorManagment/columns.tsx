@@ -59,16 +59,16 @@ export const columns = ({
         {
             id: 'fullName',
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title='Name' />
+                <DataTableColumnHeader column={column} title='Full Name' />
             ),
             cell: ({ row }) => {
                 const { firstName, lastName } = row.original
-                const fullName = `${firstName} ${lastName}`
+                const fullName = `${firstName} ${lastName ? lastName : ''}`
                 return <LongText className='max-w-36'>{fullName}</LongText>
             },
             filterFn: (row, _columnId, filterValue) => {
                 const { firstName, lastName } = row.original
-                const fullName = `${firstName} ${lastName}`.toLowerCase()
+                const fullName = `${firstName} ${lastName ? lastName : ''}`.toLowerCase()
                 return fullName.includes(filterValue.toLowerCase()) // Case-insensitive match
             },
             meta: { className: 'w-36' },

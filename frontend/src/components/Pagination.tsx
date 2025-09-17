@@ -17,10 +17,12 @@ import {
 
 interface DataTablePaginationProps<TData> {
     table: Table<TData>
+    isLoading?: boolean
 }
 
 export function DataTablePagination<TData>({
     table,
+    isLoading = false,
 }: DataTablePaginationProps<TData>) {
     return (
         <div className="flex items-center justify-between px-2">
@@ -58,37 +60,37 @@ export function DataTablePagination<TData>({
                         variant="outline"
                         className="hidden h-8 w-8 p-0 lg:flex"
                         onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
+                        disabled={!table.getCanPreviousPage() || isLoading}
                     >
                         <span className="sr-only">Go to first page</span>
-                        <ChevronsLeft />
+                        <ChevronsLeft className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="outline"
                         className="h-8 w-8 p-0"
                         onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        disabled={!table.getCanPreviousPage() || isLoading}
                     >
                         <span className="sr-only">Go to previous page</span>
-                        <ChevronLeft />
+                        <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="outline"
                         className="h-8 w-8 p-0"
                         onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        disabled={!table.getCanNextPage() || isLoading}
                     >
                         <span className="sr-only">Go to next page</span>
-                        <ChevronRight />
+                        <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="outline"
                         className="hidden h-8 w-8 p-0 lg:flex"
                         onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                        disabled={!table.getCanNextPage()}
+                        disabled={!table.getCanNextPage() || isLoading}
                     >
                         <span className="sr-only">Go to last page</span>
-                        <ChevronsRight />
+                        <ChevronsRight className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
