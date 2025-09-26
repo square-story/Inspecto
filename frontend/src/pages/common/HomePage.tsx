@@ -1,7 +1,7 @@
-import Features02Page from "@/app/AboutUs"
-import Footer05Page from "@/app/Footer"
-import Hero01 from "@/app/hero"
-import Navbar04Page from "@/app/navbar/page"
+import Features02Page from "@/components/marketing/about/AboutUs"
+import Footer05Page from "@/components/marketing/footer/Footer"
+import Hero01 from "@/components/marketing/hero/hero"
+import Navbar04Page from "@/components/marketing/navbar/navbar/page"
 
 const HomePage = () => {
 

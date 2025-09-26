@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios"
-import { ProfileFormValues } from "@/app/UserDashboard/profile/ProfileForm"
+import { ProfileFormValues } from "@/features/user/dashboard/UserDashboard/profile/ProfileForm"
 
 export type passwordFormSchema = {
     currentPassword: string;

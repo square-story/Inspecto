@@ -1,4 +1,4 @@
-import { NavUser } from "@/app/InspectorDashBoard/layout/nav-user";
+import { NavUser } from "@/features/inspector/dashboard/InspectorDashBoard/layout/nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { CalendarRange, Home, InspectionPanel, Users, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";

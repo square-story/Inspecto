@@ -1,4 +1,4 @@
-import DemoPage from "@/app/InspectorManagment/page";
+import DemoPage from "@/features/admin/inspectors/page";
 
 
 const InspectorMangement = () => {

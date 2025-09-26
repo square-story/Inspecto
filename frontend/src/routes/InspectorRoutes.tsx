@@ -6,12 +6,12 @@ import InspectorRegister from "../pages/inspector/InspectorRegister";
 import InspectorOTPVerification from "../pages/inspector/VerifyOTP";
 import DetailedForm from "../pages/inspector/DataRegisteration";
 import EarningsOverview from "@/pages/inspector/EarningsOverview";
-import InspectorDashBoardHome from "@/app/InspectorDashBoard/Home";
+import InspectorDashBoardHome from "@/features/inspector/dashboard/InspectorDashBoard/Home";
 import ProfileSettings from "@/pages/inspector/InspectorProfile";
-import InspectorSettings from "@/app/InspectorSettings";
-import AddressManagment from "@/app/InspectorSettings/AddressManagement";
-import DocumentManagment from "@/app/InspectorSettings/DocumentManagment";
-import SlotManagment from "@/app/InspectorSettings/SlotManagment";
+import InspectorSettings from "@/features/inspector/settings";
+import AddressManagment from "@/features/inspector/settings/AddressManagement";
+import DocumentManagment from "@/features/inspector/settings/DocumentManagment";
+import SlotManagment from "@/features/inspector/settings/SlotManagment";
 import InspectionsAssigned from "@/pages/inspector/InspectionsAssigned";
 import InspectionReportPage from "@/pages/inspector/InspectionReport";
 

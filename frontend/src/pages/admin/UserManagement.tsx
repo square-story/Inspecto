@@ -1,4 +1,4 @@
-import UserManagmentTable from "@/app/UserManagement"
+import UserManagmentTable from "@/features/admin/users"
 
 
 const UserManagement = () => {

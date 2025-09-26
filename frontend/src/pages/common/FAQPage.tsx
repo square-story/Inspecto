@@ -1,6 +1,6 @@
-import FAQ04 from "@/app/FAQ"
-import Footer05Page from "@/app/Footer"
-import Navbar04Page from "@/app/navbar/page"
+import FAQ04 from "@/components/marketing/faq/FAQ"
+import Footer05Page from "@/components/marketing/footer/Footer"
+import Navbar04Page from "@/components/marketing/navbar/navbar/page"
 
 const FAQPage = () => {
     return (

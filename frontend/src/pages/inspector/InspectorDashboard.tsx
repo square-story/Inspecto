@@ -1,9 +1,9 @@
-import NavBar from "@/app/InspectorDashBoard/layout/InspectorNavBar"
-import Layout from "@/app/InspectorDashBoard/layout"
+import NavBar from "@/features/inspector/dashboard/InspectorDashBoard/layout/InspectorNavBar"
+import Layout from "@/features/inspector/dashboard/layout"
 import { Outlet } from "react-router-dom"
-import { Header } from "@/app/adminDashboard/layout/Header"
+import { Header } from "@/features/admin/dashboard/adminDashboard/layout/Header"
 import { ModeToggle } from "@/components/ui/DarkModeSwitch"
-import { UserNav } from "@/app/InspectorDashBoard/components/UserNav"
+import { UserNav } from "@/features/inspector/dashboard/InspectorDashBoard/components/UserNav"
 
 const InspectorDashboard = () => {
     return (

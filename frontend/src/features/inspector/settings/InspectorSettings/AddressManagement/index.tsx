@@ -1,4 +1,4 @@
-import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
+import AddressAutocomplete from "@/features/user/dashboard/UserDashboard/InspectionManagement/components/AddressAutocomplete";
 import ContentSection from "@/components/content-section";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";

@@ -21,7 +21,7 @@ import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { inspectorService } from "@/services/inspector.service";
 import { SpecializationSelect } from "@/components/fancy-multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import AddressAutocomplete from "@/app/UserDashboard/InspectionManagement/components/AddressAutocomplete";
+import AddressAutocomplete from "@/features/user/dashboard/UserDashboard/InspectionManagement/components/AddressAutocomplete";
 import MinimalAvailabilityPicker from "@/components/minimal-availability-picker";
 import { SimpleSignature, SimpleSignatureRef } from "@/components/ui/react-signature";
 import { dataURLtoFile } from "@/helper/dataToFile";

@@ -1,6 +1,6 @@
 import { Inspection } from "@/features/inspection/types";
 import { IInspector } from "./inspector";
-import { IUsers } from "@/app/UserManagement/columns";
+import { IUsers } from "@/features/admin/users/columns";
 
 export interface IReview {
     _id:string,

@@ -4,11 +4,11 @@ import LoginPage from "../pages/user/UserLoginPage";
 import UserDashboard from "../pages/user/UserDashboard";
 import UserRegister from "../pages/user/UserRegister";
 import UserInputOTP from "../pages/user/UserInputOTP";
-import SettingsProfile from "@/app/UserDashboard/profile";
-import UserDashboardView from "@/app/UserDashboard/dashboard";
-import VehicleManagement from "@/app/UserDashboard/VehicleManagment";
-import InspectionManagement from "@/app/UserDashboard/InspectionManagement";
-import PaymentHistory from "@/app/UserDashboard/PaymentHistory";
+import SettingsProfile from "@/features/user/dashboard/UserDashboard/profile";
+import UserDashboardView from "@/features/user/dashboard/UserDashboard/dashboard";
+import VehicleManagement from "@/features/user/dashboard/UserDashboard/VehicleManagment";
+import InspectionManagement from "@/features/user/dashboard/UserDashboard/InspectionManagement";
+import PaymentHistory from "@/features/user/dashboard/UserDashboard/PaymentHistory";
 import UserReportPage from "@/components/user/ViewReport";
 
 const UserRoutes = () => (

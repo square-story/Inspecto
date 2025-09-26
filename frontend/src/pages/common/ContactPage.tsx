@@ -1,6 +1,6 @@
-import Contact03Page from "@/app/Contact"
-import Footer05Page from "@/app/Footer"
-import Navbar04Page from "@/app/navbar/page"
+import Contact03Page from "@/components/marketing/contact/Contact"
+import Footer05Page from "@/components/marketing/footer/Footer"
+import Navbar04Page from "@/components/marketing/navbar/navbar/page"
 
 const ContactPage = () => {
     return (
