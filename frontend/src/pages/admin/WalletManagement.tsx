@@ -1,7 +1,7 @@
 
-import { withdrawalColumns } from "@/components/admin/wallet/column";
-import { DataTable } from "@/components/admin/wallet/data-table";
-import { earningsColumns } from "@/components/admin/wallet/earnings-columns";
+import { withdrawalColumns } from "@/components/admin/wallet";
+import { DataTable } from "@/components/admin/wallet";
+import { earningsColumns } from "@/components/admin/wallet";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,5 @@
 import NavBar from "@/features/inspector/dashboard/InspectorDashBoard/layout/InspectorNavBar"
-import Layout from "@/features/inspector/dashboard/layout"
+import Layout from "@/features/inspector/dashboard/InspectorDashBoard/layout"
 import { Outlet } from "react-router-dom"
 import { Header } from "@/features/admin/dashboard/adminDashboard/layout/Header"
 import { ModeToggle } from "@/components/ui/DarkModeSwitch"

@@ -1,1 +1,1 @@
-export { default } from './InspectorDashBoard';
+export { default } from './InspectorDashBoard/layout';

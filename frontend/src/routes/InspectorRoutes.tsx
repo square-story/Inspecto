@@ -9,9 +9,9 @@ import EarningsOverview from "@/pages/inspector/EarningsOverview";
 import InspectorDashBoardHome from "@/features/inspector/dashboard/InspectorDashBoard/Home";
 import ProfileSettings from "@/pages/inspector/InspectorProfile";
 import InspectorSettings from "@/features/inspector/settings";
-import AddressManagment from "@/features/inspector/settings/AddressManagement";
-import DocumentManagment from "@/features/inspector/settings/DocumentManagment";
-import SlotManagment from "@/features/inspector/settings/SlotManagment";
+import AddressManagment from "@/features/inspector/settings/InspectorSettings/AddressManagement";
+import DocumentManagment from "@/features/inspector/settings/InspectorSettings/DocumentManagment";
+import SlotManagment from "@/features/inspector/settings/InspectorSettings/SlotManagment";
 import InspectionsAssigned from "@/pages/inspector/InspectionsAssigned";
 import InspectionReportPage from "@/pages/inspector/InspectionReport";
 

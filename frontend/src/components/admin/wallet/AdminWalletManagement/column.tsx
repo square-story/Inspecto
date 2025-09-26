@@ -18,7 +18,7 @@ import { WithdrawalStats } from "@/types/wallet.stats"
 import { useConfirm } from "@omit/react-confirm-dialog"
 import { toast } from "sonner"
 import { WithdrawalService } from "@/services/withdrawal.service"
-import { DeleteConfirmContent } from "../InspectorManagment/components/DenyReason"
+import { DeleteConfirmContent } from "@/features/admin/inspectors/InspectorManagment/components/DenyReason"
 
 // Define the type for our data
 export type WithdrawalRequest = {
@@ -137,7 +137,7 @@ export const withdrawalColumns: ColumnDef<WithdrawalStats, unknown>[] = [
                         className: 'flex items-center gap-5'
                     },
                     contentSlot: <DeleteConfirmContent
-                        onValueChange={(value) => {
+                        onValueChange={(value: string) => {
                             successReason = value;
                         }}
                     />
@@ -181,7 +181,7 @@ export const withdrawalColumns: ColumnDef<WithdrawalStats, unknown>[] = [
                         className: 'flex items-center gap-5'
                     },
                     contentSlot: <DeleteConfirmContent
-                        onValueChange={(value) => {
+                        onValueChange={(value: string) => {
                             rejectReason = value;
                         }}
                     />
