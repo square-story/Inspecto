@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import { inject, injectable } from "inversify";
 import { IAdminAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { TYPES } from "../../di/types";
@@ -18,7 +19,10 @@ export class AdminAuthService implements IAdminAuthService {
         try {
             const admin = await this._adminRepository.findByEmail(email)
             if (!admin) throw new ServiceError('Admin Not Found', 'email')
-            if (admin.password !== password) throw new ServiceError('Invalid Password', 'password')
+
+            const isPasswordMatch = await bcrypt.compare(password, admin.password);
+            if (!isPasswordMatch) throw new ServiceError('Invalid Password', 'password')
+
             const payload = {
                 userId: new Types.ObjectId(admin._id.toString()),
                 role: admin.role || 'admin'

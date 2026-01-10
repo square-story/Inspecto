@@ -5,12 +5,14 @@ import { SocketService } from "./socket.service";
 import { NotificationRepository } from "../repositories/notification.repository";
 import { Types } from "mongoose";
 import { INotificationService } from "../core/interfaces/services/notification.service.interface";
+import { IAdminRepository } from "../core/interfaces/repositories/admin.repository.interface";
 
 @injectable()
 export class NotificationService implements INotificationService {
     constructor(
         @inject(TYPES.NotificationRepository) private _notificationRepository: NotificationRepository,
-        @inject(TYPES.SocketService) private _socketService: SocketService
+        @inject(TYPES.SocketService) private _socketService: SocketService,
+        @inject(TYPES.AdminRepository) private _adminRepository: IAdminRepository
     ) {
     }
 
@@ -41,6 +43,27 @@ export class NotificationService implements INotificationService {
             data,
             createdAt: notification.createdAt
         });
+    }
+
+    async sendToAdmins(
+        type: NotificationType,
+        title: string,
+        message: string,
+        data?: Record<string, unknown>
+    ): Promise<void> {
+        const admins = await this._adminRepository.findAllAdmins();
+        await Promise.all(
+            admins.map(admin =>
+                this.createAndSendNotification(
+                    admin._id.toString(),
+                    'Admin',
+                    type,
+                    title,
+                    message,
+                    data
+                )
+            )
+        );
     }
 
     async getNotifications(userId: string, limit: number = 20, offset: number = 0) {

@@ -54,9 +54,7 @@ export class WithdrawalService implements IWithDrawalService {
             });
 
             //notification to admin
-            await this._notificationService.createAndSendNotification(
-                appConfig.adminId,
-                "Admin",
+            await this._notificationService.sendToAdmins(
                 NotificationType.SYSTEM,
                 "Withdrawal Request",
                 `${withdrawal.inspector} has requested a withdrawal of ₹${withdrawal.amount}`,
