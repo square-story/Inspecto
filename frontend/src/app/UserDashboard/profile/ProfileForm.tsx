@@ -126,7 +126,7 @@ export default function ProfileForm() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input type="email" placeholder="Enter your email" {...field} />
+                                <Input disabled type="email" placeholder="Enter your email" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

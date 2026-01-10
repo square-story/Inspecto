@@ -360,7 +360,6 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
                             <FormSection title="Vehicle Images (Optional)">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Front View</label>
                                         <ProfileDrop
                                             onImageUpload={handleFrontImage}
                                             defaultImage={''}
@@ -368,7 +367,6 @@ const AddVehicleDialog: React.FC<AddVehicleDialogProps> = ({ onSuccess }) => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Rear View</label>
                                         <ProfileDrop
                                             onImageUpload={handleRearImage}
                                             defaultImage={''}
