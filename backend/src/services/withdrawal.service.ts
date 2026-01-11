@@ -195,4 +195,15 @@ export class WithdrawalService implements IWithDrawalService {
         }
     }
 
+    async getAllWithdrawals(page: number, limit: number, status?: string): Promise<{ withdrawals: IWithdrawal[], total: number }> {
+        try {
+            return await this._withdrawalRepository.getAllWithdrawalsPaginated(page, limit, status);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new ServiceError(`Error getting all withdrawals: ${error.message}`);
+            }
+            throw error;
+        }
+    }
+
 }

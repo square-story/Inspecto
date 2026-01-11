@@ -23,6 +23,7 @@ import { DeleteConfirmContent } from "../InspectorManagment/components/DenyReaso
 // Define the type for our data
 export type WithdrawalRequest = {
     id: string
+    inspectorName: string
     user: string
     amount: number
     requestDate: string
@@ -33,20 +34,16 @@ export type WithdrawalRequest = {
 
 export const withdrawalColumns: ColumnDef<WithdrawalStats, unknown>[] = [
     {
-        accessorKey: "id",
-        header: "Request ID",
-        cell: ({ row }) => <div className="font-medium">{row.getValue("id")}</div>,
-    },
-    {
-        accessorKey: "user",
+        accessorKey: "inspectorName",
         header: ({ column }) => {
             return (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Inspector
+                    Inspector Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
+        cell: ({ row }) => <div className="font-medium">{row.getValue("inspectorName")}</div>,
     },
     {
         accessorKey: "amount",

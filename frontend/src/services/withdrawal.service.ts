@@ -20,8 +20,10 @@ export const WithdrawalService = {
         const response = await axiosInstance.get("/withdrawals/inspector/history")
         return response.data.withdrawal
     },
-    async getAllWithdrawalHistory() {
-        const response = await axiosInstance.get("/withdrawals/admin/history")
+    async getAllWithdrawalHistory(page: number = 1, limit: number = 10, status?: string) {
+        const response = await axiosInstance.get("/withdrawals/admin/all", {
+            params: { page, limit, status }
+        })
         return response.data
     },
     async processWithdrawal(id: string, action: "approve" | "reject", remarks: string) {

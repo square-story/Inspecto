@@ -42,6 +42,7 @@ export interface IAdminWalletStats {
 export interface WithdrawalStats {
     id: string;
     user: string;
+    inspectorName: string;
     amount: number;
     requestDate: string;
     status: string;

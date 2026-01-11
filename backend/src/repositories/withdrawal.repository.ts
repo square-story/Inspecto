@@ -21,4 +21,20 @@ export class WithdrawalRepository extends BaseRepository<IWithdrawal> implements
             .find({ inspector: inspectorId })
             .sort({ requestDate: -1 })
     }
+
+    async getAllWithdrawalsPaginated(page: number, limit: number, status?: string): Promise<{ withdrawals: IWithdrawal[], total: number }> {
+        const skip = (page - 1) * limit;
+        const filter = status ? { status } : {};
+
+        const [withdrawals, total] = await Promise.all([
+            this.model.find(filter)
+                .populate('inspector')
+                .sort({ requestDate: -1 })
+                .skip(skip)
+                .limit(limit),
+            this.model.countDocuments(filter)
+        ]);
+
+        return { withdrawals, total };
+    }
 }

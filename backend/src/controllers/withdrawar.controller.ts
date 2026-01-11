@@ -62,6 +62,33 @@ export class WithdrawalController implements IWithDrawalController {
         }
     };
 
+    getAllWithdrawals = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const status = req.query.status as string;
+
+            const response = await this._withdrawalService.getAllWithdrawals(page, limit, status);
+
+            res.status(200).json({
+                success: true,
+                ...response
+            });
+        } catch (error) {
+            if (error instanceof ServiceError) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error'
+                });
+            }
+        }
+    }
+
     processWithdrawal = async (req: Request, res: Response): Promise<void> => {
         const { withdrawalId } = req.params;
         const { action, remarks } = req.body;

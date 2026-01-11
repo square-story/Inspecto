@@ -140,7 +140,7 @@ export default function WalletManagement() {
                                 <CardDescription>Showing the 5 most recent withdrawal requests</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <DataTable columns={withdrawalColumns} data={stats.withdrawalStats} searchKey="user" />
+                                <DataTable columns={withdrawalColumns} data={stats.withdrawalStats} searchKey="inspectorName" />
                             </CardContent>
                             <CardFooter>
                                 <Button variant="outline" className="w-full" onClick={() => setActiveTab('withdrawals')}>
@@ -165,7 +165,7 @@ export default function WalletManagement() {
                                 </Button>
                             </CardHeader>
                             <CardContent>
-                                <DataTable columns={withdrawalColumns} data={stats.withdrawalStats} searchKey="user" />
+                                <DataTable columns={withdrawalColumns} data={stats.withdrawalStats} searchKey="inspectorName" />
                             </CardContent>
                         </Card>
                     </TabsContent>

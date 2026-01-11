@@ -70,9 +70,15 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
     }
 
     async WalletStatsAdmin(): Promise<IAdminWalletStats> {
-        const [wallet, allWithdrawals] = await Promise.all([
+        const [wallet, recentWithdrawals, allWithdrawalsCount, approvedWithdrawals] = await Promise.all([
             this.model.findOne({ ownerType: WalletOwnerType.ADMIN }),
             this._withdrawalRepository.find({})
+                .then(withdrawals => {
+                    const sorted = withdrawals.sort((a, b) => b.requestDate.getTime() - a.requestDate.getTime()).slice(0, 5);
+                    return Promise.all(sorted.map(w => w.populate('inspector')));
+                }),
+            this._withdrawalRepository.find({}).then(w => w.length),
+            this._withdrawalRepository.find({ status: WithdrawalStatus.APPROVED })
         ]);
 
         const pendingWithdrawals: IWithdrawal[] = await this._withdrawalRepository.getPendingWithdrawals();
@@ -88,33 +94,37 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
 
         const fullWalletTransactions = (await this.model.find({})).map(wallet => wallet.transactions).flat();
 
-        const withdrawalStats = allWithdrawals.map(w => ({
-            id: w._id?.toString() as unknown as string || '',
-            user: w.inspector.toString(),
-            amount: w.amount,
-            requestDate: w.requestDate.toISOString(),
-            status: w.status,
-            method: w.withdrawalMethod,
-            accountDetails: w.bankDetails ?
-                `${w.bankDetails.accountNumber}` :
-                w.upiId || 'N/A'
-        }));
+        const withdrawalStats = recentWithdrawals.map(w => {
+            const inspector = w.inspector as any;
+            return {
+                id: w._id?.toString() as unknown as string || '',
+                user: w.inspector.toString(),
+                inspectorName: inspector ? `${inspector.firstName} ${inspector.lastName}` : 'Unknown',
+                amount: w.amount,
+                requestDate: w.requestDate.toISOString(),
+                status: w.status,
+                method: w.withdrawalMethod,
+                accountDetails: w.bankDetails ?
+                    `${w.bankDetails.accountNumber}` :
+                    w.upiId || 'N/A',
+            };
+        });
         return {
             totalPlatformEarnings: (wallet?.balance ?? 0),
             totalProfit: wallet?.balance || 0,
             totalTransactions: wallet?.transactions?.length || 0,
             recentTransactions: wallet?.transactions?.slice(-5) || [],
-            totalWithdrawals: allWithdrawals.length,
-            totalWithdrawalAmount: allWithdrawals
-                .filter(w => w.status === WithdrawalStatus.APPROVED)
+            totalWithdrawals: allWithdrawalsCount,
+            totalWithdrawalAmount: approvedWithdrawals
                 .reduce((sum, w) => sum + w.amount, 0),
             pendingWithdrawalAmount: pendingWithdrawals
                 .reduce((sum, w) => sum + w.amount, 0),
             withdrawalStats,
             earningsStats,
             earningData: earningData(fullWalletTransactions)
-        }
+        };
     }
+
     async WalletStatsUser(userId: string): Promise<IUserWalletStats> {
         const wallet = await this.model.findOne({ owner: userId, ownerType: WalletOwnerType.USER });
 
