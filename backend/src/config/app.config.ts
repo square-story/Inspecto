@@ -33,6 +33,7 @@ interface AppConfig {
   googleClientId: string;
   adminEmail: string;
   adminPassword?: string;
+  brevoApiKey: string;
 }
 
 const validateEnv = () => {
@@ -76,6 +77,7 @@ const appConfig: AppConfig = {
   googleClientId: process.env.GOOGLE_CLIENT_ID!,
   adminEmail: process.env.ADMIN_EMAIL!,
   adminPassword: process.env.ADMIN_PASSWORD,
+  brevoApiKey: process.env.BREVO_API_KEY!,
 };
 
 export default appConfig;

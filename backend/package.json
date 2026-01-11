@@ -19,6 +19,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
@@ -34,7 +35,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.3",
     "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.16",
     "puppeteer": "^24.8.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
@@ -52,7 +52,6 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.5",
     "@types/node-cron": "^3.0.11",
-    "@types/nodemailer": "^6.4.17",
     "cross-env": "^7.0.3",
     "eslint": "^9.21.0",
     "globals": "^16.0.0",
