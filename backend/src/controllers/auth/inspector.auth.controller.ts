@@ -4,6 +4,7 @@ import { IInspectorAuthController } from "../../core/interfaces/controllers/auth
 import { TYPES } from "../../di/types";
 import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { ServiceError } from "../../core/errors/service.error";
+import { HTTP_STATUS } from "../../constants/http/status-codes";
 
 
 @injectable()
@@ -21,16 +22,16 @@ export class InspectorAuthController implements IInspectorAuthController {
                 secure: true,
                 sameSite: 'none',
             });
-            res.status(200).json({ accessToken: accessToken, role: 'inspector', status: true })
+            res.status(HTTP_STATUS.OK).json({ accessToken: accessToken, role: 'inspector', status: true })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -42,20 +43,20 @@ export class InspectorAuthController implements IInspectorAuthController {
         try {
             const refreshToken = await req.cookies.refreshToken
             if (!refreshToken) {
-                res.status(401).json({ message: 'Refresh token missing' })
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Refresh token missing' })
                 return
             }
             const response = await this._inspectorAuthService.refreshToken(refreshToken)
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(403).json({
+                res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(403).json({
+                res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
                     message: 'forbidden',
                 });
@@ -68,16 +69,16 @@ export class InspectorAuthController implements IInspectorAuthController {
         try {
             const { email, role = 'inspector' } = req.body
             const response = await this._inspectorAuthService.forgetPassword(email, role)
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -89,12 +90,12 @@ export class InspectorAuthController implements IInspectorAuthController {
         try {
             const { email, password, firstName, lastName, phone } = req.body
             const response = await this._inspectorAuthService.registerInspector(email, password, firstName, lastName, phone)
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 response
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
@@ -119,16 +120,16 @@ export class InspectorAuthController implements IInspectorAuthController {
                 sameSite: 'none',
             });
             const result = { accessToken, message }
-            res.status(200).json(result)
+            res.status(HTTP_STATUS.OK).json(result)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -141,16 +142,16 @@ export class InspectorAuthController implements IInspectorAuthController {
         try {
             const { email } = req.body
             const response = await this._inspectorAuthService.resendOTP(email)
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -162,16 +163,16 @@ export class InspectorAuthController implements IInspectorAuthController {
         try {
             const { token, email, password } = req.body
             const response = await this._inspectorAuthService.resetPassword(token, email, password)
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });

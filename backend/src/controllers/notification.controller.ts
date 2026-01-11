@@ -4,6 +4,7 @@ import { NotificationService } from "../services/notification.service";
 import { Request, Response } from "express";
 import { ServiceError } from "../core/errors/service.error";
 import { INotificationController } from "../core/interfaces/controllers/notification.controller.interface";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 injectable()
 export class NotificationController implements INotificationController {
@@ -27,19 +28,19 @@ export class NotificationController implements INotificationController {
 
             const notifications = await this._notificationService.getNotifications(userId, limit, offset);
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 data: notifications
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -58,19 +59,19 @@ export class NotificationController implements INotificationController {
             }
 
             const count = await this._notificationService.getUnreadCount(userId)
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 data: count
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -82,33 +83,33 @@ export class NotificationController implements INotificationController {
             const userId = req.user?.userId
             const notificationId = req.params.notificationId
             if (!userId) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "user not found"
                 })
                 return;
             }
             if (!notificationId) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "notification not found"
                 })
                 return;
             }
             await this._notificationService.markAsRead(userId, notificationId)
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: 'marked as read'
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -120,26 +121,26 @@ export class NotificationController implements INotificationController {
         try {
             const userId = req.user?.userId
             if (!userId) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "user not found"
                 })
                 return;
             }
             await this._notificationService.markAllAsRead(userId)
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: 'All notifications marked as read'
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });

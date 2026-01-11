@@ -4,6 +4,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../di/types';
 import { IAdminAuthService } from '../../core/interfaces/services/auth.service.interface';
 import { ServiceError } from '../../core/errors/service.error';
+import { HTTP_STATUS } from '../../constants/http/status-codes';
 
 
 @injectable()
@@ -23,16 +24,16 @@ export class AdminAuthController implements IAdminAuthController {
                 sameSite: 'none',
             });
             const response = { accessToken: accessToken, role: 'admin', status: true }
-            res.status(200).json(response);
+            res.status(HTTP_STATUS.OK).json(response);
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -44,20 +45,20 @@ export class AdminAuthController implements IAdminAuthController {
         try {
             const refreshToken = await req.cookies.refreshToken;
             if (!refreshToken) {
-                res.status(401).json({ message: 'Refresh token missing' });
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Refresh token missing' });
                 return;
             }
             const { accessToken } = await this._adminAuthService.refreshToken(refreshToken);
-            res.status(200).json({ accessToken, status: true });
+            res.status(HTTP_STATUS.OK).json({ accessToken, status: true });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(403).json({
+                res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(403).json({
+                res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
                     message: 'forbidden',
                 });
