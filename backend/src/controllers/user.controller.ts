@@ -5,11 +5,13 @@ import { TYPES } from '../di/types';
 import { IUserController } from "../core/interfaces/controllers/user.controller.interface";
 import { IUserService } from "../core/interfaces/services/user.service.interface";
 import { mapUser } from "../dtos/implementations/user.dto";
+import { SocketService } from "../services/socket.service";
 
 @injectable()
 export class UserController implements IUserController {
     constructor(
-        @inject(TYPES.UserService) private _userService: IUserService
+        @inject(TYPES.UserService) private _userService: IUserService,
+        @inject(TYPES.SocketService) private _socketService: SocketService
     ) { }
 
     getUserDetails = async (req: Request, res: Response): Promise<void> => {
@@ -95,6 +97,10 @@ export class UserController implements IUserController {
                 return;
             }
             const response = await this._userService.toggleStatus(userId)
+
+            if (!response.status) {
+                this._socketService.disconnectUser(userId);
+            }
 
             res.status(200).json({
                 success: true,

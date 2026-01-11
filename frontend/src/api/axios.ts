@@ -58,11 +58,16 @@ axiosInstance.interceptors.response.use(
             error.response?.status === 403 &&
             error.response?.data?.code === 'ACCOUNT_BLOCKED'
         ) {
+            const blockReason = error.response.data.message || 'Account is blocked. Please contact support.';
             store.dispatch(setBlockedStatus({
                 status: false,
-                blockReason: error.response.data.message
+                blockReason
             }));
-            window.location.href = '/blocked-account';
+
+            // Avoid redirecting if already on the blocked page
+            if (window.location.pathname !== '/blocked-account') {
+                window.location.href = '/blocked-account';
+            }
             return Promise.reject(error);
         }
 

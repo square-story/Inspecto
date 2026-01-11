@@ -6,11 +6,13 @@ import { ServiceError } from "../core/errors/service.error";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 import { mapInspector } from "../dtos/implementations/inspector.dto";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { SocketService } from "../services/socket.service";
 
 @injectable()
 export class InspectorController implements IInspectorController {
     constructor(
-        @inject(TYPES.InspectorService) private _inspectorService: IInspectorService
+        @inject(TYPES.InspectorService) private _inspectorService: IInspectorService,
+        @inject(TYPES.SocketService) private _socketService: SocketService
     ) { }
 
     getInspectorDetails = async (req: Request, res: Response): Promise<void> => {
@@ -192,6 +194,9 @@ export class InspectorController implements IInspectorController {
                 return;
             }
             const response = await this._inspectorService.BlockHandler(inspectorId)
+            if (response === 'Blocked') {
+                this._socketService.disconnectUser(inspectorId);
+            }
             if (response) {
                 res.status(HTTP_STATUS.OK).json({
                     message: `Profile ${response} successfully`,

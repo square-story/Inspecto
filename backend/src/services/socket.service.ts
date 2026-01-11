@@ -128,4 +128,19 @@ export class SocketService {
         const key = `notifications:${userId}`;
         await redisClient.del(key);
     }
+
+    // Proactively disconnect a user's socket
+    disconnectUser(userId: string, reason: string = 'ACCOUNT_BLOCKED'): void {
+        if (this.io) {
+            this.io.to(`user:${userId}`).emit('account:blocked', { reason });
+            const socketId = this.userSocketMap.get(userId);
+            if (socketId) {
+                const socket = this.io.sockets.sockets.get(socketId);
+                if (socket) {
+                    socket.disconnect(true);
+                    console.log(`User ${userId} proactively disconnected due to: ${reason}`);
+                }
+            }
+        }
+    }
 }
