@@ -1,30 +1,23 @@
-import nodemailer from "nodemailer"
-import appConfig from "../config/app.config"
+import * as brevo from '@getbrevo/brevo';
+import appConfig from "../config/app.config";
 
-const transporter = nodemailer.createTransport({
-    host: appConfig.smtpHost,
-    port: appConfig.smtpPort,
-    secure: appConfig.smtpPort === 465,
-    auth: {
-        user: appConfig.smtpUser,
-        pass: appConfig.smtpPass
-    },
-    pool: true, // Use pooled connections for better performance
-    connectionTimeout: 30000, // 30 seconds
-});
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, appConfig.brevoApiKey);
 
 export const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
     try {
-        const mailOptions = {
-            from: `"Inspecto" <${appConfig.smtpUser}>`,
-            to,
-            subject,
-            text,
-            html: html || text
-        }
-        return transporter.sendMail(mailOptions)
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.subject = subject;
+        sendSmtpEmail.textContent = text;
+        sendSmtpEmail.htmlContent = html || text;
+        sendSmtpEmail.sender = { name: "Inspecto", email: appConfig.smtpUser };
+        sendSmtpEmail.to = [{ email: to }];
+
+        const { body } = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log('Brevo Email Result:', body);
+        return body;
     } catch (error) {
-        console.log(error)
+        console.error('Brevo Email Error:', error);
         throw new Error('Failed to send email');
     }
 }
