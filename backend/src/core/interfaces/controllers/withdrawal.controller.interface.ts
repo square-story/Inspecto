@@ -5,4 +5,5 @@ export interface IWithDrawalController {
     getPendingWithdrawals: (req: Request, res: Response) => Promise<void>;
     processWithdrawal: (req: Request, res: Response) => Promise<void>;
     getInspectorWithdrawals: (req: Request, res: Response) => Promise<void>;
+    getAllWithdrawals: (req: Request, res: Response) => Promise<void>;
 }

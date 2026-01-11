@@ -6,6 +6,8 @@ import { Request, Response } from "express";
 import { ServiceError } from "../core/errors/service.error";
 import { IInspectionTypeInput } from "../models/inspection-type.model";
 import { toObjectId } from "../utils/toObjectId.utils";
+import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 injectable()
 export class InspectionTypeController implements IInspectionTypeController {
@@ -16,18 +18,18 @@ export class InspectionTypeController implements IInspectionTypeController {
     getAllInspectionTypes = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectionTypes = await this._inspectionTypeService.findAll()
-            res.status(200).json({ data: inspectionTypes })
+            res.status(HTTP_STATUS.OK).json({ data: inspectionTypes })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -36,18 +38,18 @@ export class InspectionTypeController implements IInspectionTypeController {
     getActiveInspectionTypes = async (req: Request, res: Response): Promise<void> => {
         try {
             const inspectionTypes = await this._inspectionTypeService.getActiveInspectionTypes()
-            res.status(200).json({ data: inspectionTypes })
+            res.status(HTTP_STATUS.OK).json({ data: inspectionTypes })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -56,7 +58,7 @@ export class InspectionTypeController implements IInspectionTypeController {
         try {
             const { id } = req.params;
             if (!id) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: 'Inspection type id is required',
                     field: 'id'
@@ -64,18 +66,18 @@ export class InspectionTypeController implements IInspectionTypeController {
                 return;
             }
             const inspectionType = await this._inspectionTypeService.findById(toObjectId(id))
-            res.status(200).json({ data: inspectionType })
+            res.status(HTTP_STATUS.OK).json({ data: inspectionType })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -84,18 +86,18 @@ export class InspectionTypeController implements IInspectionTypeController {
         try {
             const inspectionTypeData: IInspectionTypeInput = req.body;
             const newInspectionType = await this._inspectionTypeService.createInspectionType(inspectionTypeData)
-            res.status(200).json({ data: newInspectionType })
+            res.status(HTTP_STATUS.OK).json({ data: newInspectionType })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -106,7 +108,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             const { id } = req.params;
             const updateData: Partial<IInspectionTypeInput> = req.body;
             if (!id) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: 'Inspection type id is required',
                     field: 'id'
@@ -116,7 +118,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             const updatedInspectionType = await this._inspectionTypeService.updateInspectionType(id, updateData)
 
             if (!updatedInspectionType) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Inspection type not found',
                     field: 'id'
@@ -124,18 +126,18 @@ export class InspectionTypeController implements IInspectionTypeController {
                 return;
             }
 
-            res.status(200).json({ data: updatedInspectionType })
+            res.status(HTTP_STATUS.OK).json({ data: updatedInspectionType })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -145,7 +147,7 @@ export class InspectionTypeController implements IInspectionTypeController {
         try {
             const { id } = req.params;
             if (!id) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: 'Inspection type id is required',
                     field: 'id'
@@ -155,7 +157,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             const updatedInspectionType = await this._inspectionTypeService.toggleInspectionTypeStatus(id)
 
             if (!updatedInspectionType) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Inspection type not found',
                     field: 'id'
@@ -163,18 +165,18 @@ export class InspectionTypeController implements IInspectionTypeController {
                 return;
             }
 
-            res.status(200).json({ data: updatedInspectionType })
+            res.status(HTTP_STATUS.OK).json({ data: updatedInspectionType })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -184,7 +186,7 @@ export class InspectionTypeController implements IInspectionTypeController {
         try {
             const { id } = req.params;
             if (!id) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: 'Inspection type id is required',
                     field: 'id'
@@ -194,7 +196,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             const deletedInspectionType = await this._inspectionTypeService.deleteInspectionType(toObjectId(id))
 
             if (!deletedInspectionType) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Inspection type not found',
                     field: 'id'
@@ -202,22 +204,22 @@ export class InspectionTypeController implements IInspectionTypeController {
                 return;
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: 'Inspection type deleted successfully',
                 field: 'id'
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

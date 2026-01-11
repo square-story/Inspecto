@@ -1,13 +1,14 @@
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
 import { AlertCompletion } from "../components/AlertCompletion";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "@/features/auth/authAPI";
 import { toast } from "sonner";
 import { EmailVerificationAlert } from "../components/EmailVerifcation";
+import { useInspectorDetails } from "@/hooks/useInspectorDetails";
 
 const InspectorNavBar = () => {
-    const Inspector = useSelector((state: RootState) => state.inspector);
+    const { inspector, loading } = useInspectorDetails();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
@@ -28,15 +29,19 @@ const InspectorNavBar = () => {
         }
     };
 
+    if (loading || !inspector.isLoaded) {
+        return null;
+    }
+
     return (
 
         <>
-            {!Inspector.isCompleted && (
+            {!inspector.isCompleted && (
                 <div>
                     <AlertCompletion isOpen onClose={handleClose} />
                 </div>
             )}
-            {!Inspector.isListed && (
+            {!inspector.isListed && (
                 <EmailVerificationAlert onClose={handleClose} />
             )}
         </>

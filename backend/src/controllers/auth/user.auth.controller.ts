@@ -4,6 +4,7 @@ import { inject, injectable, } from "inversify";
 import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
+import { HTTP_STATUS } from "../../constants/http/status-codes";
 
 
 
@@ -26,16 +27,16 @@ export class UserAuthController implements IUserAuthController {
                 sameSite: 'none',
             });
             const response = { accessToken: accessToken, role: 'user', status: true }
-            res.status(200).json(response);
+            res.status(HTTP_STATUS.OK).json(response);
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -47,20 +48,20 @@ export class UserAuthController implements IUserAuthController {
         try {
             const refreshToken = req.cookies.refreshToken;
             if (!refreshToken) {
-                res.status(401).json({ message: 'Refresh token missing' });
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Refresh token missing' });
                 return;
             }
             const accessToken = await this._userAuthService.refreshToken(refreshToken);
-            res.status(200).json(accessToken);
+            res.status(HTTP_STATUS.OK).json(accessToken);
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(403).json({
+                res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(403).json({
+                res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
                     message: 'forbidden',
                 });
@@ -72,16 +73,16 @@ export class UserAuthController implements IUserAuthController {
         try {
             const { email, role } = req.body;
             const response = await this._userAuthService.forgetPassword(email, role)
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -95,18 +96,18 @@ export class UserAuthController implements IUserAuthController {
         try {
             const { email, password, firstName, lastName } = req.body
             const response = await this._userAuthService.registerUser(email, password, firstName, lastName)
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 response
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -125,16 +126,16 @@ export class UserAuthController implements IUserAuthController {
             });
             const result = { accessToken, message }
 
-            res.status(200).json(result)
+            res.status(HTTP_STATUS.OK).json(result)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -146,16 +147,16 @@ export class UserAuthController implements IUserAuthController {
         try {
             const { email } = req.body;
             const result = await this._userAuthService.resendOTP(email);
-            res.status(200).json(result);
+            res.status(HTTP_STATUS.OK).json(result);
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -167,16 +168,16 @@ export class UserAuthController implements IUserAuthController {
         try {
             const { token, email, password } = req.body
             const response = await this._userAuthService.resetPassword(token, email, password)
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -190,7 +191,7 @@ export class UserAuthController implements IUserAuthController {
 
 
             if (!token) {
-                res.status(400).json({ message: 'Token is required' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Token is required' });
                 return;
             }
 
@@ -202,20 +203,20 @@ export class UserAuthController implements IUserAuthController {
             });
 
             if (!accessToken) {
-                res.status(400).json({ message: 'Access token is missing' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Access token is missing' });
                 return;
             }
 
-            res.status(200).json({ message: 'Authentication successful', accessToken, status: user?.status });
+            res.status(HTTP_STATUS.OK).json({ message: 'Authentication successful', accessToken, status: user?.status });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });

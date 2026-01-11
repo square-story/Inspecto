@@ -54,9 +54,7 @@ export class WithdrawalService implements IWithDrawalService {
             });
 
             //notification to admin
-            await this._notificationService.createAndSendNotification(
-                appConfig.adminId,
-                "Admin",
+            await this._notificationService.sendToAdmins(
                 NotificationType.SYSTEM,
                 "Withdrawal Request",
                 `${withdrawal.inspector} has requested a withdrawal of ₹${withdrawal.amount}`,
@@ -192,6 +190,17 @@ export class WithdrawalService implements IWithDrawalService {
         } catch (error) {
             if (error instanceof Error) {
                 throw new ServiceError(`Error getting inspector Withdrawels: ${error.message}`);
+            }
+            throw error;
+        }
+    }
+
+    async getAllWithdrawals(page: number, limit: number, status?: string): Promise<{ withdrawals: IWithdrawal[], total: number }> {
+        try {
+            return await this._withdrawalRepository.getAllWithdrawalsPaginated(page, limit, status);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new ServiceError(`Error getting all withdrawals: ${error.message}`);
             }
             throw error;
         }

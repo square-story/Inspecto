@@ -6,4 +6,5 @@ export interface INotificationService {
     markAsRead(userId: string, notificationId: string): Promise<void>;
     markAllAsRead(userId: string): Promise<void>
     createAndSendNotification(recipientId: string, recipientModel: "User" | "Inspector" | "Admin", type: NotificationType, title: string, message: string, data?: Record<string, unknown>): Promise<void>;
+    sendToAdmins(type: NotificationType, title: string, message: string, data?: Record<string, unknown>): Promise<void>;
 }

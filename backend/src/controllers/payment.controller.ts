@@ -6,6 +6,7 @@ import { TYPES } from "../di/types";
 import { IPaymentController } from "../core/interfaces/controllers/payment.controller.interface";
 import { ServiceError } from "../core/errors/service.error";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 @injectable()
 export class PaymentController implements IPaymentController {
@@ -19,7 +20,7 @@ export class PaymentController implements IPaymentController {
             const userId = req.user?.userId;
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 });
@@ -28,20 +29,20 @@ export class PaymentController implements IPaymentController {
 
             const paymentIntent = await this._paymentService.createPaymentIntent(inspectionId, userId as string, amount, isRetry, paymentIntentId);
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 clientSecret: paymentIntent.client_secret,
                 message: 'Payment intent created successfully'
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -65,16 +66,16 @@ export class PaymentController implements IPaymentController {
 
             await this._paymentService.handleWebhookEvent(event);
 
-            res.status(200).json({ received: true });
+            res.status(HTTP_STATUS.OK).json({ received: true });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -88,25 +89,25 @@ export class PaymentController implements IPaymentController {
 
             const payment = await this._paymentService.verifyPayment(paymentIntentId);
             if (!payment) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Payment not found'
                 });
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 payment
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -117,7 +118,7 @@ export class PaymentController implements IPaymentController {
         try {
             const userId = req.user?.userId;
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 });
@@ -126,26 +127,26 @@ export class PaymentController implements IPaymentController {
             const response = await this._paymentService.findPayments(userId)
 
             if (!response) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "Not found any data"
                 })
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: "Payment List generated successfully",
                 payments: response
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -158,7 +159,7 @@ export class PaymentController implements IPaymentController {
             const { paymentIntentId } = req.params;
             const userId = req.user?.userId;
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 });
@@ -167,19 +168,19 @@ export class PaymentController implements IPaymentController {
 
             await this._paymentService.cancelPayment(paymentIntentId, userId);
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: 'Payment cancelled successfully'
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -192,7 +193,7 @@ export class PaymentController implements IPaymentController {
             const userId = req.user?.userId
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: "User Not Authenticated"
                 });
@@ -200,18 +201,18 @@ export class PaymentController implements IPaymentController {
             }
 
             await this._paymentService.cancelSuccessfulPayment(paymentIntentId, userId)
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: "Payment cancelled and refunded successfully"
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error'
                 });

@@ -16,8 +16,8 @@ const initialState: AuthState = {
     isAuthenticated: !!localStorage.getItem('accessToken'),
     isLoading: false,
     error: null,
-    status: true,
-    blockReason: ''
+    status: localStorage.getItem('userStatus') !== 'blocked',
+    blockReason: localStorage.getItem('blockReason') || ''
 };
 
 
@@ -34,6 +34,7 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('role', role || '');
+            localStorage.setItem('userStatus', status ? 'active' : 'blocked');
         },
         clearCredentials(state) {
             state.accessToken = null;
@@ -41,6 +42,8 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             localStorage.removeItem('accessToken');
             localStorage.removeItem('role');
+            localStorage.removeItem('userStatus');
+            localStorage.removeItem('blockReason');
             state.status = true
         },
         setLoading(state, action: PayloadAction<boolean>) {
@@ -51,7 +54,9 @@ const authSlice = createSlice({
         },
         setBlockedStatus: (state, action) => {
             state.status = action.payload.status;
-            state.blockReason = action.payload.blockReason
+            state.blockReason = action.payload.blockReason;
+            localStorage.setItem('userStatus', action.payload.status ? 'active' : 'blocked');
+            localStorage.setItem('blockReason', action.payload.blockReason || '');
         }
     },
 });

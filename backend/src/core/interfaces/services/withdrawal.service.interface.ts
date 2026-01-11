@@ -5,6 +5,7 @@ export interface IWithDrawalService {
     ProcessWithdrawal(withdrawalId: string, action: 'approve' | 'reject', remarks?: string): Promise<void>;
     getPendingWithdrawals(): Promise<IWithdrawal[]>;
     getInspectorWithdrawals(inspectorId: string): Promise<IWithdrawal[]>;
+    getAllWithdrawals(page: number, limit: number, status?: string): Promise<{ withdrawals: IWithdrawal[], total: number }>;
 }
 
 

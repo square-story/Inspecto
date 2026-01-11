@@ -136,9 +136,9 @@ const InspectorSchema: Schema = new Schema<IInspector>({
     unavailabilityPeriods: [{
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
-        reason: { type: String, required: true } 
+        reason: { type: String, required: true }
     }],
-    
+
     isListed: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     approvedAt: { type: Date },
@@ -157,5 +157,7 @@ const InspectorSchema: Schema = new Schema<IInspector>({
         }
     }
 }, { timestamps: true });
+
+InspectorSchema.index({ location: '2dsphere' });
 
 export default mongoose.model<IInspector>("Inspector", InspectorSchema);

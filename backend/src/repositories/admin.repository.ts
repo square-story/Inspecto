@@ -11,4 +11,7 @@ export class AdminRepository extends BaseRepository<IAdmin> implements IAdminRep
     async findByEmail(email: string) {
         return this.model.findOne({ email: email })
     }
+    async findAllAdmins(): Promise<IAdmin[]> {
+        return this.model.find({ role: 'admin' });
+    }
 }

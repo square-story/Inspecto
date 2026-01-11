@@ -31,6 +31,8 @@ interface AppConfig {
   api_secret: string;
   adminId: string;
   googleClientId: string;
+  adminEmail: string;
+  adminPassword?: string;
 }
 
 const validateEnv = () => {
@@ -72,7 +74,8 @@ const appConfig: AppConfig = {
   api_secret: process.env.CLOUDINARY_API_SECRET!,
   adminId: process.env.ADMIN_ID!,
   googleClientId: process.env.GOOGLE_CLIENT_ID!,
-
+  adminEmail: process.env.ADMIN_EMAIL!,
+  adminPassword: process.env.ADMIN_PASSWORD,
 };
 
 export default appConfig;

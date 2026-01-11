@@ -6,6 +6,8 @@ import { IAdminService } from "../core/interfaces/services/admin.service.interfa
 import { ServiceError } from "../core/errors/service.error";
 import { mapInspector } from "../dtos/implementations/inspector.dto";
 import { mapUser } from "../dtos/implementations/user.dto";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -30,7 +32,7 @@ export class AdminController implements IAdminController {
                 isListed
             });
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 data: users.map(user => mapInspector(user)),
                 pagination: {
                     total,
@@ -41,7 +43,7 @@ export class AdminController implements IAdminController {
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
@@ -49,7 +51,7 @@ export class AdminController implements IAdminController {
             } else {
                 res.status(500).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -76,15 +78,15 @@ export class AdminController implements IAdminController {
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -93,18 +95,18 @@ export class AdminController implements IAdminController {
     getAdminDashboardStats = async (req: Request, res: Response): Promise<void> => {
         try {
             const response = await this._adminService.getAdminDashboardStats()
-            res.status(200).json(response)
+            res.status(HTTP_STATUS.OK).json(response)
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

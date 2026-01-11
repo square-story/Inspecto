@@ -2,7 +2,12 @@ import { IInspector, InspectorStatus, WeeklyAvailability } from '@/types/inspect
 import { generateDefaultTimeSlots } from '@/utils/generateDefaultTimeSlots';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState: IInspector = {
+interface InspectorState extends IInspector {
+    isLoading: boolean;
+    isLoaded: boolean;
+}
+
+const initialState: InspectorState = {
     _id: '',
     firstName: '',
     lastName: '',
@@ -40,6 +45,8 @@ const initialState: IInspector = {
         type: 'Point',
         coordinates: [0, 0],
     },
+    isLoading: false,
+    isLoaded: false,
 };
 
 const inspectorSlice = createSlice({
@@ -113,7 +120,13 @@ const inspectorSlice = createSlice({
             state.location = action.payload;
         },
         setInspector(state, action: PayloadAction<IInspector>) {
-            return { ...state, ...action.payload };
+            return { ...state, ...action.payload, isLoaded: true, isLoading: false };
+        },
+        setInspectorLoading(state, action: PayloadAction<boolean>) {
+            state.isLoading = action.payload;
+        },
+        setInspectorLoaded(state, action: PayloadAction<boolean>) {
+            state.isLoaded = action.payload;
         }
     },
 });
@@ -141,7 +154,9 @@ export const {
     setCoverageRadius,
     setServiceAreas,
     setLocation,
-    setInspector
+    setInspector,
+    setInspectorLoading,
+    setInspectorLoaded
 } = inspectorSlice.actions;
 
 export default inspectorSlice.reducer;

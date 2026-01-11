@@ -36,9 +36,7 @@ export class InspectorService implements IInspectorService {
         const response = await this._inspectorRepository.findByIdAndUpdate(new Types.ObjectId(userId), data)
 
         if (response) {
-            await this._notificationService.createAndSendNotification(
-                appConfig.adminId,
-                "Admin",
+            await this._notificationService.sendToAdmins(
                 NotificationType.SYSTEM,
                 "Inspector Profile Completed",
                 `${response?.firstName} ${response?.lastName} has completed their profile.`,

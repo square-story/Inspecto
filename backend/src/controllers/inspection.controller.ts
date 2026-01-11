@@ -11,6 +11,8 @@ import { uploadToCloudinary } from "../utils/cloudinary.utils";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 import { IVehicleDocument } from "../models/vehicle.model";
+import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 
 @injectable()
@@ -25,7 +27,7 @@ export class InspectionController implements IInspectionController {
         try {
             const user = req.user?.userId
             if (!user) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "User not found.",
                 });
@@ -36,7 +38,7 @@ export class InspectionController implements IInspectionController {
             inspectionData.inspector = inspectorId as unknown as ObjectId
             inspectionData.vehicle = vehicleId as unknown as ObjectId
             const { booking, amount, remainingAmount, walletDeduction } = await this._inspectionService.createInspection(inspectionData);
-            res.status(201).json({
+            res.status(HTTP_STATUS.CREATED).json({
                 success: true,
                 data: booking,
                 amount: amount,
@@ -46,15 +48,15 @@ export class InspectionController implements IInspectionController {
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -65,7 +67,7 @@ export class InspectionController implements IInspectionController {
             const id = req.user?.userId;
 
             if (!id) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "User not found.",
                 });
@@ -74,27 +76,27 @@ export class InspectionController implements IInspectionController {
             const updateData: Partial<IInspectionInput> = req.body;
             const updatedInspection = await this._inspectionService.updateInspection(id as string, updateData);
             if (!updatedInspection) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "Inspection not found.",
                 });
             }
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 inspection: updatedInspection,
                 message: "Inspection updated successfully.",
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -105,33 +107,33 @@ export class InspectionController implements IInspectionController {
             const { inspectionId } = req.params
 
             if (!inspectionId) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "inspections not found.",
                 });
             }
             const inspection = await this._inspectionService.getInspectionById(inspectionId);
             if (!inspection) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "Inspection not found.",
                 });
             }
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 inspection,
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -141,21 +143,21 @@ export class InspectionController implements IInspectionController {
         try {
             const { inspectorId, date } = req.params;
             const slots = await this._inspectionService.getAvailableSlots(inspectorId, new Date(date));
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 slots,
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -166,7 +168,7 @@ export class InspectionController implements IInspectionController {
             const userId = req.user?.userId
             const role = req.user?.role
             if (!userId || !role) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "User not found.",
                 });
@@ -178,26 +180,26 @@ export class InspectionController implements IInspectionController {
                 inspections = await this._inspectionService.findInspectionsByInspector(userId as string)
             }
             if (!inspections) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "Inspection not found.",
                 });
             }
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 inspections,
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -209,29 +211,29 @@ export class InspectionController implements IInspectionController {
 
             const role = req.user?.role
             if (!inspectorId || !role) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "User not found.",
                 });
                 return;
             }
             const response = await this._inspectionService.getStatsAboutInspector(inspectorId);
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 response,
             });
 
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -241,17 +243,17 @@ export class InspectionController implements IInspectionController {
         try {
             const { reportData, id, isDraft } = req.body;
             if (!id) {
-                res.status(400).json({ message: 'Inspection ID is required' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Inspection ID is required' });
                 return;
             }
             const report = await this._inspectionService.getInspectionById(id)
             if (!report) {
-                res.status(404).json({ message: 'Inspection not found' });
+                res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Inspection not found' });
                 return;
             }
             report.vehicle as unknown as IVehicleDocument;
             if (report.report?.status == 'completed') {
-                res.status(400).json({ message: 'Report already submitted' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Report already submitted' });
                 return;
             }
             await this._inspectionService.updateInspection(id, {
@@ -266,7 +268,7 @@ export class InspectionController implements IInspectionController {
                     id,
                 );
                 if (!populatedInspection) {
-                    res.status(404).json({ message: 'Populated inspection data not found' });
+                    res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Populated inspection data not found' });
                     return;
                 }
                 const pdfBuffer = await generateInspectionPDF(populatedInspection);
@@ -274,7 +276,7 @@ export class InspectionController implements IInspectionController {
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
 
                 if (!pdfUrl) {
-                    res.status(500).json({ message: 'Failed to upload PDF to Cloudinary' });
+                    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Failed to upload PDF to Cloudinary' });
                     return;
                 }
 
@@ -293,21 +295,21 @@ export class InspectionController implements IInspectionController {
                     lastInspectionId: id,
                 });
             }
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 message: isDraft ? 'Report saved as draft' : 'Report submitted successfully',
                 pdfUrl
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: error instanceof Error ? error.message : 'Internal server error',
+                    message: error instanceof Error ? error.message : RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

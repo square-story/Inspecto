@@ -102,9 +102,7 @@ export class InspectorAuthService implements IInspectorAuthService {
             const { accessToken, refreshToken } = generateTokens(payload)
 
             //send notification to admin
-            await this._notificationService.createAndSendNotification(
-                appConfig.adminId,
-                "Admin",
+            await this._notificationService.sendToAdmins(
                 NotificationType.SYSTEM,
                 "New Inspector Registered",
                 `${newInspector.firstName} ${newInspector.lastName} has registered as an inspector.`,

@@ -165,7 +165,7 @@ export default function InspectorProfileForm() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input placeholder='Enter Your Updated Email Address' {...field} />
+                                <Input disabled placeholder='Enter Your Updated Email Address' {...field} />
                             </FormControl>
                             <FormDescription>
                                 Email Want to verify

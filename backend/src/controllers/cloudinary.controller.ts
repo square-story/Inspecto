@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { injectable } from "inversify";
 import { getSignedImageUrl, getSignedPdfUrl } from "../utils/cloudinary.utils";
+import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 @injectable()
 export class CloudinaryController {
@@ -8,22 +10,22 @@ export class CloudinaryController {
         try {
             const { publicId, type } = req.query;
             if (!publicId || typeof publicId !== 'string') {
-                res.status(400).json({ message: 'Public ID is required' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INVALID_CREDENTIALS });
                 return;
             }
             const imageType = (type as string || 'none') as 'certificate' | 'signature' | 'face' | 'none';
             const signedUrl = getSignedImageUrl(publicId, imageType);
-            res.status(200).json({ signedUrl });
+            res.status(HTTP_STATUS.OK).json({ signedUrl });
         } catch (error) {
             console.error('Error generating signed URL:', error);
-            res.status(500).json({ message: 'Failed to generate signed URL' });
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR });
         }
     }
-    getSignedPdfUrl = async (req:Request,res:Response):Promise<void>=>{
+    getSignedPdfUrl = async (req: Request, res: Response): Promise<void> => {
         try {
             const { pdfUrl } = req.query;
-            if (!pdfUrl || typeof pdfUrl!=='string') {
-                res.status(400).json({ message: 'Public ID is required' });
+            if (!pdfUrl || typeof pdfUrl !== 'string') {
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INVALID_CREDENTIALS });
                 return;
             }
             let publicId = ''
@@ -38,11 +40,11 @@ export class CloudinaryController {
             }
 
             const signedUrl = getSignedPdfUrl(publicId);
-            res.status(200).json({ signedUrl });
+            res.status(HTTP_STATUS.OK).json({ signedUrl });
         } catch (error) {
             console.error('Error generating signed PDF URL:', error);
-            res.status(500).json({ 
-                message: 'Failed to generate signed PDF URL',
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+                message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
         }

@@ -5,6 +5,8 @@ import { RootState } from "@/store";
 import { toast } from "sonner";
 import axiosInstance from "@/api/axios";
 import { INotification } from "@/types/notification";
+import { setBlockedStatus } from "@/features/auth/authSlice";
+import { useDispatch } from "react-redux";
 
 
 
@@ -30,18 +32,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { socket } = useSocket();
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, status } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
 
   // Fetch notifications on mount and when auth state changes
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && status) {
       fetchNotifications();
       fetchUnreadCount();
     } else {
       setNotifications([]);
       setUnreadCount(0);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, status]);
 
   // Listen for real-time notifications
   useEffect(() => {
@@ -87,10 +90,26 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     };
 
+    const handleAccountBlocked = (data: { reason: string }) => {
+      console.log('Account blocked event received:', data.reason);
+      dispatch(setBlockedStatus({
+        status: false,
+        blockReason: data.reason || 'Your account has been blocked by an admin.'
+      }));
+      toast.error('Account Blocked', {
+        description: data.reason || 'Your account has been blocked. Redirecting...',
+      });
+      // Small delay to allow toast to be seen before redirect
+      setTimeout(() => {
+        window.location.href = '/blocked-account';
+      }, 2000);
+    };
+
     socket.on('connect', handleReconnect);
     socket.on('notification', handleNewNotification);
     socket.on('error', handleError);
     socket.on('pending-notifications', handlePendingNotifications);
+    socket.on('account:blocked', handleAccountBlocked);
 
     socket.emit('get-pending-notifications');
 
@@ -100,6 +119,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       socket.off('notification', handleNewNotification);
       socket.off('error', handleError);
       socket.off('pending-notifications', handlePendingNotifications);
+      socket.off('account:blocked', handleAccountBlocked);
     };
   }, [socket]);
 
