@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { format } from "date-fns"
-import { ArrowLeft, Save, Send } from "lucide-react"
+import { ArrowLeft, Send } from "lucide-react"
 import { Inspection } from "@/features/inspection/types"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
@@ -587,22 +587,6 @@ export default function InspectionReportPage() {
               <CardFooter className="flex flex-col sm:flex-row gap-3 justify-end">
                 <Button variant="outline" onClick={() => navigate(-1)}>
                   Cancel
-                </Button>
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => {
-                    const values = form.getValues();
-                    onSubmit(values, true);
-                  }}
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
-                  Save as Draft
                 </Button>
                 <Button type="submit" disabled={submitting}>
                   {submitting ? (
