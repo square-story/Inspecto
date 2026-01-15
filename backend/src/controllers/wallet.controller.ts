@@ -5,6 +5,7 @@ import { IWalletController } from "../core/interfaces/controllers/wallet.control
 import { Request, Response } from "express";
 import { ServiceError } from "../core/errors/service.error";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 @injectable()
 export class WalletController implements IWalletController {
@@ -18,7 +19,7 @@ export class WalletController implements IWalletController {
             if (!inspectorId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
-                    message: 'User not authenticated'
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED
                 });
                 return;
             }
@@ -28,7 +29,7 @@ export class WalletController implements IWalletController {
             if (!response) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Wallet stats not found'
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 });
                 return;
             }
@@ -48,7 +49,7 @@ export class WalletController implements IWalletController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -61,7 +62,7 @@ export class WalletController implements IWalletController {
             if (!adminId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
-                    message: 'User not authenticated'
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED
                 })
                 return;
             }
@@ -71,7 +72,7 @@ export class WalletController implements IWalletController {
             if (!response) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Wallet stats not found'
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 });
                 return;
             }
@@ -91,7 +92,7 @@ export class WalletController implements IWalletController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -104,7 +105,7 @@ export class WalletController implements IWalletController {
             if (!userId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
-                    message: 'User not authenticated'
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED
                 })
                 return;
             }
@@ -114,7 +115,7 @@ export class WalletController implements IWalletController {
             if (!response) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Wallet stats not found'
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 });
                 return;
             }
@@ -133,7 +134,7 @@ export class WalletController implements IWalletController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

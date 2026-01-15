@@ -6,6 +6,7 @@ import { TYPES } from "../di/types";
 import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
 import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 interface MongoErrorWithCode extends Error {
     code?: number;
@@ -45,13 +46,13 @@ export class VehicleController implements IVehicleController {
             switch (error.name) {
                 case 'ValidationError':
                     res.status(HTTP_STATUS.BAD_REQUEST).json({
-                        message: "Invalid vehicle data",
+                        message: RESPONSE_MESSAGES.ERROR.VALIDATION_ERROR,
                         error: error.message
                     });
                     break;
                 default:
                     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-                        message: "Unexpected server error",
+                        message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                         error: error.message
                     });
             }
@@ -71,7 +72,7 @@ export class VehicleController implements IVehicleController {
             // Validate user authentication
             if (!userId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
-                    message: "Unauthorized: User authentication required",
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED,
                     error: "No user ID found in request"
                 });
                 return;
@@ -95,7 +96,7 @@ export class VehicleController implements IVehicleController {
             // Validate input
             if (!vehicleId) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
-                    message: "Vehicle ID is required"
+                    message: RESPONSE_MESSAGES.ERROR.INVALID_REQUEST
                 });
                 return;
             }
@@ -110,7 +111,7 @@ export class VehicleController implements IVehicleController {
             const vehicle = await this._vehicleService.getVehicleById(vehicleId);
             if (!vehicle) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
-                    message: "Vehicle not found"
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 });
                 return;
             }
@@ -135,7 +136,7 @@ export class VehicleController implements IVehicleController {
             const vehicles = await this._vehicleService.getVehiclesByUser(userId);
             if (!vehicles || vehicles.length === 0) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
-                    message: "No vehicles found for this user"
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 });
                 return;
             }
@@ -155,7 +156,7 @@ export class VehicleController implements IVehicleController {
             // Validate inputs
             if (!vehicleId) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
-                    message: "Vehicle ID is required"
+                    message: RESPONSE_MESSAGES.ERROR.INVALID_REQUEST
                 });
                 return;
             }
@@ -169,7 +170,7 @@ export class VehicleController implements IVehicleController {
 
             if (Object.keys(updateData).length === 0) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
-                    message: "No update data provided"
+                    message: RESPONSE_MESSAGES.ERROR.INVALID_REQUEST
                 });
                 return;
             }
@@ -189,7 +190,7 @@ export class VehicleController implements IVehicleController {
             // Validate inputs
             if (!vehicleId) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
-                    message: "Vehicle ID is required"
+                    message: RESPONSE_MESSAGES.ERROR.INVALID_REQUEST
                 });
                 return;
             }

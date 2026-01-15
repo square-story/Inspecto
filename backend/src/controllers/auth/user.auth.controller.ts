@@ -5,6 +5,7 @@ import { TYPES } from "../../di/types";
 import { ServiceError } from "../../core/errors/service.error";
 import { IUserAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { HTTP_STATUS } from "../../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../../constants/http/response-messages";
 
 
 
@@ -38,7 +39,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -48,7 +49,7 @@ export class UserAuthController implements IUserAuthController {
         try {
             const refreshToken = req.cookies.refreshToken;
             if (!refreshToken) {
-                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Refresh token missing' });
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: RESPONSE_MESSAGES.ERROR.REFRESH_TOKEN_MISSING });
                 return;
             }
             const accessToken = await this._userAuthService.refreshToken(refreshToken);
@@ -63,7 +64,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
-                    message: 'forbidden',
+                    message: RESPONSE_MESSAGES.ERROR.FORBIDDEN,
                 });
             }
         }
@@ -84,7 +85,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -109,7 +110,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -137,7 +138,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -158,7 +159,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -179,7 +180,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -191,7 +192,7 @@ export class UserAuthController implements IUserAuthController {
 
 
             if (!token) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Token is required' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.TOKEN_MISSING });
                 return;
             }
 
@@ -203,11 +204,11 @@ export class UserAuthController implements IUserAuthController {
             });
 
             if (!accessToken) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Access token is missing' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.TOKEN_MISSING });
                 return;
             }
 
-            res.status(HTTP_STATUS.OK).json({ message: 'Authentication successful', accessToken, status: user?.status });
+            res.status(HTTP_STATUS.OK).json({ message: RESPONSE_MESSAGES.SUCCESS.OPERATION_SUCCESSFUL, accessToken, status: user?.status });
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -218,7 +219,7 @@ export class UserAuthController implements IUserAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

@@ -29,7 +29,7 @@ export class InspectionController implements IInspectionController {
             if (!user) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "User not found.",
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND,
                 });
             }
             const inspectionData: IInspectionInput = req.body;
@@ -44,7 +44,7 @@ export class InspectionController implements IInspectionController {
                 amount: amount,
                 remainingAmount: remainingAmount,
                 walletDeduction: walletDeduction,
-                message: "Inspection booking saved successfully.",
+                message: RESPONSE_MESSAGES.SUCCESS.CREATED,
             });
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -69,7 +69,7 @@ export class InspectionController implements IInspectionController {
             if (!id) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "User not found.",
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND,
                 });
             }
 
@@ -78,13 +78,13 @@ export class InspectionController implements IInspectionController {
             if (!updatedInspection) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "Inspection not found.",
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_NOT_FOUND,
                 });
             }
             res.status(HTTP_STATUS.OK).json({
                 success: true,
                 inspection: updatedInspection,
-                message: "Inspection updated successfully.",
+                message: RESPONSE_MESSAGES.SUCCESS.UPDATED,
             });
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -109,14 +109,14 @@ export class InspectionController implements IInspectionController {
             if (!inspectionId) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "inspections not found.",
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_NOT_FOUND,
                 });
             }
             const inspection = await this._inspectionService.getInspectionById(inspectionId);
             if (!inspection) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "Inspection not found.",
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_NOT_FOUND,
                 });
             }
             res.status(HTTP_STATUS.OK).json({
@@ -170,7 +170,7 @@ export class InspectionController implements IInspectionController {
             if (!userId || !role) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "User not found.",
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND,
                 });
             }
             let inspections;
@@ -182,7 +182,7 @@ export class InspectionController implements IInspectionController {
             if (!inspections) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "Inspection not found.",
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_NOT_FOUND,
                 });
             }
             res.status(HTTP_STATUS.OK).json({
@@ -213,7 +213,7 @@ export class InspectionController implements IInspectionController {
             if (!inspectorId || !role) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "User not found.",
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND,
                 });
                 return;
             }
@@ -248,12 +248,12 @@ export class InspectionController implements IInspectionController {
             }
             const report = await this._inspectionService.getInspectionById(id)
             if (!report) {
-                res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Inspection not found' });
+                res.status(HTTP_STATUS.NOT_FOUND).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTION_NOT_FOUND });
                 return;
             }
             report.vehicle as unknown as IVehicleDocument;
             if (report.report?.status == 'completed') {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Report already submitted' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTION_ALREADY_SUBMITTED });
                 return;
             }
             await this._inspectionService.updateInspection(id, {
@@ -268,7 +268,7 @@ export class InspectionController implements IInspectionController {
                     id,
                 );
                 if (!populatedInspection) {
-                    res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Populated inspection data not found' });
+                    res.status(HTTP_STATUS.NOT_FOUND).json({ message: RESPONSE_MESSAGES.ERROR.POPULATED_INSPECTION_DATA_NOT_FOUND });
                     return;
                 }
                 const pdfBuffer = await generateInspectionPDF(populatedInspection);
@@ -276,7 +276,7 @@ export class InspectionController implements IInspectionController {
                 pdfUrl = await uploadToCloudinary(pdfBuffer, publicId, 'pdf');
 
                 if (!pdfUrl) {
-                    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Failed to upload PDF to Cloudinary' });
+                    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: RESPONSE_MESSAGES.ERROR.FAILED_TO_UPLOAD_PDF_TO_CLOUDINARY });
                     return;
                 }
 

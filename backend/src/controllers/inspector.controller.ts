@@ -6,6 +6,7 @@ import { ServiceError } from "../core/errors/service.error";
 import { IInspectorService } from "../core/interfaces/services/inspector.service.interface";
 import { mapInspector } from "../dtos/implementations/inspector.dto";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 import { SocketService } from "../services/socket.service";
 
 @injectable()
@@ -24,7 +25,7 @@ export class InspectorController implements IInspectorController {
             }
             const response = await this._inspectorService.getInspectorById(userId)
             if (!response) {
-                res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Inspector not found" });
+                res.status(HTTP_STATUS.NOT_FOUND).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_NOT_FOUND });
                 return;
             }
             res.status(HTTP_STATUS.OK).json(mapInspector(response));
@@ -38,7 +39,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -72,12 +73,12 @@ export class InspectorController implements IInspectorController {
             const response = await this._inspectorService.completeInspectorProfile(userId, updatedData)
             if (response) {
                 res.status(HTTP_STATUS.OK).json({
-                    message: 'Profile updated successfully',
+                    message: RESPONSE_MESSAGES.SUCCESS.PROFILE_UPDATED,
                     data: response
                 });
                 return;
             }
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Failed to update profile' });
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.OPERATION_FAILED });
             return;
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -89,7 +90,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -100,26 +101,26 @@ export class InspectorController implements IInspectorController {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Inspector ID is missing in the params' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_ID_MISSING });
                 return;
             }
             const isExist = await this._inspectorService.getInspectorById(inspectorId)
             if (!isExist) {
-                res.status(HTTP_STATUS.NOT_FOUND).json("Inspector not found in the database")
+                res.status(HTTP_STATUS.NOT_FOUND).json(RESPONSE_MESSAGES.ERROR.INSPECTOR_NOT_FOUND)
                 return
             }
             if (isExist.isListed) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Inspector is already approved" });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_ALREADY_APPROVED });
                 return;
             }
             const response = await this._inspectorService.approveInspector(inspectorId)
             if (response) {
                 res.status(HTTP_STATUS.OK).json({
-                    message: 'Profile updated successfully',
+                    message: RESPONSE_MESSAGES.SUCCESS.PROFILE_UPDATED,
                 });
                 return;
             }
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Failed to update profile' });
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.OPERATION_FAILED });
             return;
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -131,7 +132,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -142,7 +143,7 @@ export class InspectorController implements IInspectorController {
             const { reason } = req.body;
 
             if (!inspectorId) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Inspector ID is missing in the params' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_ID_MISSING });
                 return;
             }
 
@@ -154,14 +155,14 @@ export class InspectorController implements IInspectorController {
             const inspector = await this._inspectorService.getInspectorById(inspectorId)
 
             if (!inspector) {
-                res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Inspector not found in the database" });
+                res.status(HTTP_STATUS.NOT_FOUND).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_NOT_FOUND });
                 return
             }
 
             const updatedInspector = await this._inspectorService.denyInspector(inspectorId, reason);
 
             if (!updatedInspector) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Failed to deny profile' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.OPERATION_FAILED });
                 return
             }
 
@@ -181,7 +182,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -190,7 +191,7 @@ export class InspectorController implements IInspectorController {
         try {
             const inspectorId = req.params.inspectorId
             if (!inspectorId) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Inspector ID is missing in the params' });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_ID_MISSING });
                 return;
             }
             const response = await this._inspectorService.BlockHandler(inspectorId)
@@ -203,7 +204,7 @@ export class InspectorController implements IInspectorController {
                 });
                 return;
             }
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Failed to update profile' });
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.OPERATION_FAILED });
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -214,7 +215,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -245,13 +246,13 @@ export class InspectorController implements IInspectorController {
                 console.error(`Error: User with ID ${userId} not found.`);
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "inspector not found."
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTOR_NOT_FOUND
                 });
                 return
             }
             res.status(HTTP_STATUS.OK).json({
                 success: true,
-                message: "User details updated successfully.",
+                message: RESPONSE_MESSAGES.SUCCESS.PROFILE_UPDATED,
                 inspector: mapInspector(inspector)
             });
         } catch (error) {
@@ -264,7 +265,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -310,7 +311,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -336,7 +337,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -354,7 +355,7 @@ export class InspectorController implements IInspectorController {
                 res.status(HTTP_STATUS.OK).json(response);
                 return;
             }
-            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Failed to fetch inspector dashboard stats' });
+            res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.OPERATION_FAILED });
             return;
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -366,7 +367,7 @@ export class InspectorController implements IInspectorController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

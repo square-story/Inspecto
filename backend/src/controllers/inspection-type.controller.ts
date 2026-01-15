@@ -60,7 +60,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!id) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
-                    message: 'Inspection type id is required',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_ID_MISSING,
                     field: 'id'
                 })
                 return;
@@ -110,7 +110,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!id) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
-                    message: 'Inspection type id is required',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_ID_MISSING,
                     field: 'id'
                 })
                 return;
@@ -120,7 +120,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!updatedInspectionType) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Inspection type not found',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_NOT_FOUND,
                     field: 'id'
                 })
                 return;
@@ -149,7 +149,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!id) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
-                    message: 'Inspection type id is required',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_ID_MISSING,
                     field: 'id'
                 })
                 return;
@@ -159,7 +159,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!updatedInspectionType) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Inspection type not found',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_NOT_FOUND,
                     field: 'id'
                 })
                 return;
@@ -188,7 +188,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!id) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
-                    message: 'Inspection type id is required',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_ID_MISSING,
                     field: 'id'
                 })
                 return;
@@ -198,7 +198,7 @@ export class InspectionTypeController implements IInspectionTypeController {
             if (!deletedInspectionType) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Inspection type not found',
+                    message: RESPONSE_MESSAGES.ERROR.INSPECTION_TYPE_NOT_FOUND,
                     field: 'id'
                 })
                 return;
@@ -206,7 +206,7 @@ export class InspectionTypeController implements IInspectionTypeController {
 
             res.status(HTTP_STATUS.OK).json({
                 success: true,
-                message: 'Inspection type deleted successfully',
+                message: RESPONSE_MESSAGES.SUCCESS.DELETED,
                 field: 'id'
             })
         } catch (error) {

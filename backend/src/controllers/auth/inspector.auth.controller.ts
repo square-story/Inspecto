@@ -5,6 +5,7 @@ import { TYPES } from "../../di/types";
 import { IInspectorAuthService } from "../../core/interfaces/services/auth.service.interface";
 import { ServiceError } from "../../core/errors/service.error";
 import { HTTP_STATUS } from "../../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../../constants/http/response-messages";
 
 
 @injectable()
@@ -33,7 +34,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -43,7 +44,7 @@ export class InspectorAuthController implements IInspectorAuthController {
         try {
             const refreshToken = await req.cookies.refreshToken
             if (!refreshToken) {
-                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Refresh token missing' })
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: RESPONSE_MESSAGES.ERROR.REFRESH_TOKEN_MISSING })
                 return
             }
             const response = await this._inspectorAuthService.refreshToken(refreshToken)
@@ -58,7 +59,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             } else {
                 res.status(HTTP_STATUS.FORBIDDEN).json({
                     success: false,
-                    message: 'forbidden',
+                    message: RESPONSE_MESSAGES.ERROR.FORBIDDEN,
                 });
             }
         }
@@ -80,7 +81,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -101,9 +102,9 @@ export class InspectorAuthController implements IInspectorAuthController {
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -131,7 +132,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -153,7 +154,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -174,7 +175,7 @@ export class InspectorAuthController implements IInspectorAuthController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
