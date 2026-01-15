@@ -4,6 +4,7 @@ import { IWalletService } from "../core/interfaces/services/wallet.service.inter
 import { IWalletController } from "../core/interfaces/controllers/wallet.controller.interface";
 import { Request, Response } from "express";
 import { ServiceError } from "../core/errors/service.error";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 @injectable()
 export class WalletController implements IWalletController {
@@ -15,7 +16,7 @@ export class WalletController implements IWalletController {
         try {
             const inspectorId = req.user?.userId;
             if (!inspectorId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 });
@@ -25,27 +26,27 @@ export class WalletController implements IWalletController {
             const response = await this._walletService.getWalletStatsAboutInspector(inspectorId);
 
             if (!response) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Wallet stats not found'
                 });
                 return;
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 response,
             });
 
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -58,7 +59,7 @@ export class WalletController implements IWalletController {
             const adminId = req.user?.userId;
 
             if (!adminId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 })
@@ -68,27 +69,27 @@ export class WalletController implements IWalletController {
             const response = await this._walletService.getWalletStatsAboutAdmin()
 
             if (!response) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Wallet stats not found'
                 });
                 return;
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 response,
             });
 
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -101,7 +102,7 @@ export class WalletController implements IWalletController {
             const userId = req.user?.userId;
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 })
@@ -111,26 +112,26 @@ export class WalletController implements IWalletController {
             const response = await this._walletService.getWalletStatsAboutUser(userId)
 
             if (!response) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: 'Wallet stats not found'
                 });
                 return;
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 response,
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });

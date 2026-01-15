@@ -4,6 +4,7 @@ import { TYPES } from "../di/types";
 import { IWithDrawalService } from "../core/interfaces/services/withdrawal.service.interface";
 import { Request, Response } from "express";
 import { ServiceError } from "../core/errors/service.error";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 injectable()
 export class WithdrawalController implements IWithDrawalController {
@@ -17,19 +18,19 @@ export class WithdrawalController implements IWithDrawalController {
         try {
             const withdrawal = await this._withdrawalService.getPendingWithdrawals();
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 withdrawal
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -48,13 +49,13 @@ export class WithdrawalController implements IWithDrawalController {
             })
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message,
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error',
                 });
@@ -70,18 +71,18 @@ export class WithdrawalController implements IWithDrawalController {
 
             const response = await this._withdrawalService.getAllWithdrawals(page, limit, status);
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 ...response
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error'
                 });
@@ -105,7 +106,7 @@ export class WithdrawalController implements IWithDrawalController {
             const inspectorId = req.user?.userId;
 
             if (!inspectorId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
                     message: 'User not authenticated'
                 });
@@ -119,20 +120,20 @@ export class WithdrawalController implements IWithDrawalController {
                 paymentDetails
             );
 
-            res.status(201).json({
+            res.status(HTTP_STATUS.CREATED).json({
                 success: true,
                 message: 'Withdrawal request created successfully',
                 withdrawal
             });
         } catch (error) {
             if (error instanceof ServiceError) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: error.message
                 });
             } else {
                 console.error('Withdrawal request error:', error);
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: 'Internal server error'
                 });

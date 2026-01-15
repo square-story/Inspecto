@@ -49,7 +49,7 @@ export class AdminController implements IAdminController {
                     field: error.field
                 });
             } else {
-                res.status(500).json({
+                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
@@ -67,7 +67,7 @@ export class AdminController implements IAdminController {
                 limit,
                 search
             });
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 data: users.map(user => mapUser(user)),
                 pagination: {
                     total,

@@ -6,6 +6,7 @@ import { IUserController } from "../core/interfaces/controllers/user.controller.
 import { IUserService } from "../core/interfaces/services/user.service.interface";
 import { mapUser } from "../dtos/implementations/user.dto";
 import { SocketService } from "../services/socket.service";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 @injectable()
 export class UserController implements IUserController {
@@ -19,20 +20,20 @@ export class UserController implements IUserController {
             // Extract user ID from the authenticated token
             const userId = req.user?.userId;
             if (!userId) {
-                res.status(400).json({ message: "User ID is missing from the token" });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "User ID is missing from the token" });
                 return;
             }
 
             // Fetch user details from the database
             const user = await this._userService.getUserById(userId);
             if (!user) {
-                res.status(404).json({ message: "User not found" });
+                res.status(HTTP_STATUS.NOT_FOUND).json({ message: "User not found" });
                 return;
             }
-            res.status(200).json(mapUser(user));
+            res.status(HTTP_STATUS.OK).json(mapUser(user));
         } catch (error) {
             console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error. Please try again later."
             });
@@ -45,7 +46,7 @@ export class UserController implements IUserController {
             const userId = req.user?.userId; // Extract user ID from the token
             if (!userId) {
                 console.error("Error: User ID is missing from the token.");
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: "User ID is missing from the token."
                 });
@@ -55,7 +56,7 @@ export class UserController implements IUserController {
             const data = req.body; // Extract data from the request body
             if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
                 console.error("Error: No valid data provided for update.");
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: "No valid data provided for update."
                 });
@@ -65,20 +66,20 @@ export class UserController implements IUserController {
             const user = await this._userService.updateUser(userId, data);
             if (!user) {
                 console.error(`Error: User with ID ${userId} not found.`);
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
                     message: "User not found."
                 });
                 return
             }
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: "User details updated successfully.",
                 user: mapUser(user)
             });
         } catch (error) {
             console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error. Please try again later."
             });
@@ -90,7 +91,7 @@ export class UserController implements IUserController {
             const { userId } = req.params
 
             if (!mongoose.Types.ObjectId.isValid(userId)) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: "Invalid user ID format"
                 });
@@ -102,7 +103,7 @@ export class UserController implements IUserController {
                 this._socketService.disconnectUser(userId);
             }
 
-            res.status(200).json({
+            res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: `User successfully ${response.status ? 'unblocked' : 'blocked'}`,
                 data: {
@@ -112,7 +113,7 @@ export class UserController implements IUserController {
             });
         } catch (error) {
             console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error. Please try again later."
             });
@@ -124,7 +125,7 @@ export class UserController implements IUserController {
             const userId = req.user?.userId
             if (!userId) {
                 console.error("Error: User ID is missing from the token.");
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: "User ID is missing from the token."
                 });
@@ -132,7 +133,7 @@ export class UserController implements IUserController {
             }
             const { currentPassword, newPassword } = req.body
             if (!currentPassword) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: "Request Body doesn't have enough data to complete"
                 })
@@ -140,19 +141,19 @@ export class UserController implements IUserController {
             }
             const response = await this._userService.changePassword(currentPassword, newPassword, userId)
             if (response.status) {
-                res.status(200).json({
+                res.status(HTTP_STATUS.OK).json({
                     success: true,
                     message: response.message,
                 });
             } else {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: response.message
                 })
             }
         } catch (error) {
             console.error("Error occurred while updating user details:", error);
-            res.status(500).json({
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error. Please try again later."
             });
@@ -163,20 +164,20 @@ export class UserController implements IUserController {
         try {
             const userId = req.user?.userId; // Extract user ID from the token
             if (!userId) {
-                res.status(400).json({ message: "User ID is missing from the token" });
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "User ID is missing from the token" });
                 return;
             }
 
             // Fetch user dashboard stats from the database
             const stats = await this._userService.getUserDashboard(userId);
             if (!stats) {
-                res.status(404).json({ message: "User dashboard stats not found" });
+                res.status(HTTP_STATUS.NOT_FOUND).json({ message: "User dashboard stats not found" });
                 return;
             }
-            res.status(200).json(stats);
+            res.status(HTTP_STATUS.OK).json(stats);
         } catch (error) {
             console.error("Error occurred while fetching user dashboard stats:", error);
-            res.status(500).json({
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error. Please try again later."
             });

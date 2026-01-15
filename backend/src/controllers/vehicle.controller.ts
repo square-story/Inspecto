@@ -5,6 +5,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../di/types";
 import { IVehicleController } from "../core/interfaces/controllers/vehicle.controller.interface";
 import { IVehicleService } from "../core/interfaces/services/vehicle.service.interface";
+import { HTTP_STATUS } from "../constants/http/status-codes";
 
 interface MongoErrorWithCode extends Error {
     code?: number;
@@ -29,7 +30,7 @@ export class VehicleController implements IVehicleController {
                 const duplicateKey = error.keyPattern ? Object.keys(error.keyPattern)[0] : 'unknown';
                 const duplicateValue = error.keyValue ? error.keyValue[duplicateKey] : 'value';
 
-                res.status(409).json({
+                res.status(HTTP_STATUS.CONFLICT).json({
                     message: `Duplicate ${duplicateKey} Error`,
                     error: `A vehicle with this ${duplicateKey} (${duplicateValue}) already exists`,
                     duplicateField: duplicateKey,
@@ -43,19 +44,19 @@ export class VehicleController implements IVehicleController {
         if (error instanceof Error) {
             switch (error.name) {
                 case 'ValidationError':
-                    res.status(400).json({
+                    res.status(HTTP_STATUS.BAD_REQUEST).json({
                         message: "Invalid vehicle data",
                         error: error.message
                     });
                     break;
                 default:
-                    res.status(500).json({
+                    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                         message: "Unexpected server error",
                         error: error.message
                     });
             }
         } else {
-            res.status(500).json({
+            res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Unexpected server error",
                 error: String(error)
             });
@@ -69,7 +70,7 @@ export class VehicleController implements IVehicleController {
 
             // Validate user authentication
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     message: "Unauthorized: User authentication required",
                     error: "No user ID found in request"
                 });
@@ -80,7 +81,7 @@ export class VehicleController implements IVehicleController {
             vehicleData.user = userId as unknown as ObjectId;
 
             const vehicle = await this._vehicleService.createVehicle(vehicleData);
-            res.status(201).json(vehicle);
+            res.status(HTTP_STATUS.CREATED).json(vehicle);
         } catch (error) {
             this.handleError(res, error);
         }
@@ -93,14 +94,14 @@ export class VehicleController implements IVehicleController {
 
             // Validate input
             if (!vehicleId) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     message: "Vehicle ID is required"
                 });
                 return;
             }
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     message: "Unauthorized: User authentication required"
                 });
                 return;
@@ -108,7 +109,7 @@ export class VehicleController implements IVehicleController {
 
             const vehicle = await this._vehicleService.getVehicleById(vehicleId);
             if (!vehicle) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     message: "Vehicle not found"
                 });
                 return;
@@ -125,7 +126,7 @@ export class VehicleController implements IVehicleController {
             const userId = req.user?.userId;
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     message: "Unauthorized: User authentication required"
                 });
                 return;
@@ -133,7 +134,7 @@ export class VehicleController implements IVehicleController {
 
             const vehicles = await this._vehicleService.getVehiclesByUser(userId);
             if (!vehicles || vehicles.length === 0) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     message: "No vehicles found for this user"
                 });
                 return;
@@ -153,21 +154,21 @@ export class VehicleController implements IVehicleController {
 
             // Validate inputs
             if (!vehicleId) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     message: "Vehicle ID is required"
                 });
                 return;
             }
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     message: "Unauthorized: User authentication required"
                 });
                 return;
             }
 
             if (Object.keys(updateData).length === 0) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     message: "No update data provided"
                 });
                 return;
@@ -187,21 +188,21 @@ export class VehicleController implements IVehicleController {
 
             // Validate inputs
             if (!vehicleId) {
-                res.status(400).json({
+                res.status(HTTP_STATUS.BAD_REQUEST).json({
                     message: "Vehicle ID is required"
                 });
                 return;
             }
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     message: "Unauthorized: User authentication required"
                 });
                 return;
             }
 
             await this._vehicleService.deleteVehicle(vehicleId);
-            res.status(204).send();
+            res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (error) {
             this.handleError(res, error);
         }
