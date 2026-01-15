@@ -7,6 +7,7 @@ import { IPaymentController } from "../core/interfaces/controllers/payment.contr
 import { ServiceError } from "../core/errors/service.error";
 import { IPaymentService } from "../core/interfaces/services/payment.service.interface";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 @injectable()
 export class PaymentController implements IPaymentController {
@@ -22,7 +23,7 @@ export class PaymentController implements IPaymentController {
             if (!userId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
-                    message: 'User not authenticated'
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED
                 });
                 return;
             }
@@ -44,7 +45,7 @@ export class PaymentController implements IPaymentController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR
                 });
             }
         }
@@ -77,7 +78,7 @@ export class PaymentController implements IPaymentController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR
                 });
             }
         }
@@ -91,7 +92,7 @@ export class PaymentController implements IPaymentController {
             if (!payment) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: 'Payment not found'
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 });
             }
 
@@ -109,7 +110,7 @@ export class PaymentController implements IPaymentController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR
                 });
             }
         }
@@ -120,7 +121,7 @@ export class PaymentController implements IPaymentController {
             if (!userId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
-                    message: 'User not authenticated'
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED
                 });
                 return;
             }
@@ -129,13 +130,13 @@ export class PaymentController implements IPaymentController {
             if (!response) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "Not found any data"
+                    message: RESPONSE_MESSAGES.ERROR.NOT_FOUND
                 })
             }
 
             res.status(HTTP_STATUS.OK).json({
                 success: true,
-                message: "Payment List generated successfully",
+                message: RESPONSE_MESSAGES.SUCCESS.FETCHED,
                 payments: response
             })
         } catch (error) {
@@ -148,7 +149,7 @@ export class PaymentController implements IPaymentController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR
                 });
             }
         }
@@ -161,7 +162,7 @@ export class PaymentController implements IPaymentController {
             if (!userId) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({
                     success: false,
-                    message: 'User not authenticated'
+                    message: RESPONSE_MESSAGES.ERROR.UNAUTHORIZED
                 });
                 return;
             }
@@ -182,7 +183,7 @@ export class PaymentController implements IPaymentController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR
                 });
             }
         }
@@ -203,7 +204,7 @@ export class PaymentController implements IPaymentController {
             await this._paymentService.cancelSuccessfulPayment(paymentIntentId, userId)
             res.status(HTTP_STATUS.OK).json({
                 success: true,
-                message: "Payment cancelled and refunded successfully"
+                message: RESPONSE_MESSAGES.SUCCESS.OPERATION_SUCCESSFUL
             });
         } catch (error) {
             if (error instanceof ServiceError) {

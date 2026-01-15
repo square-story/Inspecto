@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { ServiceError } from "../core/errors/service.error";
 import { INotificationController } from "../core/interfaces/controllers/notification.controller.interface";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 injectable()
 export class NotificationController implements INotificationController {
@@ -19,9 +20,9 @@ export class NotificationController implements INotificationController {
             const offset = parseInt(req.query.offset as string) || 0;
 
             if (!userId) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "user not found"
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND
                 })
                 return;
             }
@@ -42,7 +43,7 @@ export class NotificationController implements INotificationController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -51,9 +52,9 @@ export class NotificationController implements INotificationController {
         try {
             const userId = req.user?.userId
             if (!userId) {
-                res.status(404).json({
+                res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "user not found"
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND
                 })
                 return;
             }
@@ -73,7 +74,7 @@ export class NotificationController implements INotificationController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -85,21 +86,21 @@ export class NotificationController implements INotificationController {
             if (!userId) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "user not found"
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND
                 })
                 return;
             }
             if (!notificationId) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "notification not found"
+                    message: RESPONSE_MESSAGES.ERROR.NOTIFICATION_NOT_FOUND
                 })
                 return;
             }
             await this._notificationService.markAsRead(userId, notificationId)
             res.status(HTTP_STATUS.OK).json({
                 success: true,
-                message: 'marked as read'
+                message: RESPONSE_MESSAGES.SUCCESS.MARKED_AS_READ
             })
         } catch (error) {
             if (error instanceof ServiceError) {
@@ -111,7 +112,7 @@ export class NotificationController implements INotificationController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -123,7 +124,7 @@ export class NotificationController implements INotificationController {
             if (!userId) {
                 res.status(HTTP_STATUS.NOT_FOUND).json({
                     success: false,
-                    message: "user not found"
+                    message: RESPONSE_MESSAGES.ERROR.USER_NOT_FOUND
                 })
                 return;
             }
@@ -142,7 +143,7 @@ export class NotificationController implements INotificationController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }

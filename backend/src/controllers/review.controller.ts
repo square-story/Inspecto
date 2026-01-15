@@ -5,6 +5,7 @@ import { TYPES } from "../di/types";
 import { IReviewService } from "../core/interfaces/services/review.service.interface";
 import { ServiceError } from "../core/errors/service.error";
 import { HTTP_STATUS } from "../constants/http/status-codes";
+import { RESPONSE_MESSAGES } from "../constants/http/response-messages";
 
 injectable()
 export class ReviewController implements IReviewController {
@@ -23,7 +24,7 @@ export class ReviewController implements IReviewController {
                 return
             }
             const response = await this._reviewService.createReview(data)
-            res.status(HTTP_STATUS.OK).json({ message: 'Review Successfully Added', review: response, success: true, })
+            res.status(HTTP_STATUS.OK).json({ message: RESPONSE_MESSAGES.SUCCESS.CREATED, review: response, success: true, })
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -34,7 +35,7 @@ export class ReviewController implements IReviewController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -63,7 +64,7 @@ export class ReviewController implements IReviewController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -73,11 +74,11 @@ export class ReviewController implements IReviewController {
         try {
             const { inspectorId } = req.params
             if (!inspectorId) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'Inspector Id Needed', success: false })
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_ID_MISSING, success: false })
                 return
             }
             const response = await this._reviewService.findReviewsByInspector(inspectorId)
-            res.status(HTTP_STATUS.OK).json({ data: response, message: "Inspector Review Featched Successfully", success: true })
+            res.status(HTTP_STATUS.OK).json({ message: RESPONSE_MESSAGES.SUCCESS.FETCHED, data: response, success: true })
         } catch (error) {
             if (error instanceof ServiceError) {
                 res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -88,7 +89,7 @@ export class ReviewController implements IReviewController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -99,7 +100,7 @@ export class ReviewController implements IReviewController {
             const { inspectorId } = req.params
 
             if (!inspectorId) {
-                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'inspectorId not Found', success: false })
+                res.status(HTTP_STATUS.BAD_REQUEST).json({ message: RESPONSE_MESSAGES.ERROR.INSPECTOR_ID_MISSING, success: false })
                 return
             }
 
@@ -116,7 +117,7 @@ export class ReviewController implements IReviewController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
@@ -143,7 +144,7 @@ export class ReviewController implements IReviewController {
             } else {
                 res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: 'Internal server error',
+                    message: RESPONSE_MESSAGES.ERROR.INTERNAL_SERVER_ERROR,
                 });
             }
         }
