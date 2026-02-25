@@ -1,6 +1,6 @@
 # 🚗 Inspecto – Your Trusted Vehicle Inspection Platform
 
-Inspecto connects vehicle owners with certified inspectors, offering a seamless, reliable, and transparent inspection experience. Whether buying, maintaining, or needing reports for a vehicle, Inspecto simplifies your workflow.
+Inspecto is a vehicle inspection marketplace platform that connects vehicle owners with certified inspectors. The system facilitates the complete inspection lifecycle: booking, payment processing, inspection execution, report generation, and post-inspection reviews. The platform operates as a three-sided marketplace with distinct interfaces and workflows for Users (vehicle owners), Inspectors (service providers), and Admins (platform managers).
 
 ## Table of Contents
 
