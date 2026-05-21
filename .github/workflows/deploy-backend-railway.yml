@@ -13,8 +13,11 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Authenticate Railway CLI
+        run: |
+          mkdir -p ~/.railway
+          echo '{"user":{"token":"${{ secrets.RAILWAY_TOKEN }}","accessToken":null,"refreshToken":null,"tokenExpiresAt":0},"projects":{}}' > ~/.railway/config.json
+
       - name: Deploy to Railway
         working-directory: ./backend
         run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID }} --environment production --detach -m "Deploy from GitHub Actions (${{ github.sha }})"
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
