@@ -20,4 +20,4 @@ jobs:
 
       - name: Deploy to Railway
         working-directory: ./backend
-        run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID }} --environment production --detach -m "Deploy from GitHub Actions (${{ github.sha }})"
+        run: railway up --project 6efac80d-ef1b-4407-8695-d5cf36b1398c --service ${{ secrets.RAILWAY_SERVICE_ID }} --environment production --detach -m "Deploy from GitHub Actions (${{ github.sha }})"
