@@ -2,7 +2,7 @@ import { createClient } from "redis";
 import appConfig from "./app.config";
 
 const redisClient = createClient({
-    url: `redis://${appConfig.redisHost}:${appConfig.redisPort}`,
+    url: process.env.REDIS_URL || `redis://${appConfig.redisHost}:${appConfig.redisPort}`,
     socket: {
         reconnectStrategy: (retries) => {
             // Maximum retry delay is 10 seconds
