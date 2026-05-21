@@ -1,5 +1,6 @@
+import 'express-async-errors';
 import "reflect-metadata";
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cookieParser from 'cookie-parser';
 import adminRoutes from "./routes/admin.routes";
 import userRoutes from './routes/user.routes';
@@ -57,6 +58,10 @@ app.get('/', (req: Request, res: Response) => {
     res.send(`server is up and running at port ${appConfig.port} and the frontend url is ${appConfig.frontEndUrl}`);
 });
 
+app.get('/health', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 app.post('/logout', async (req: Request, res: Response): Promise<void> => {
     try {
         const accessToken = req.headers.authorization?.split(' ')[1];
@@ -109,8 +114,8 @@ app.use((req: Request, res: Response) => {
     });
 });
 
-app.use((err: Error, req: Request, res: Response) => {
-    errorHandler(err, req, res);
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    errorHandler(err, req, res, next);
 });
 
 // Initialize PaymentStatusChecker
