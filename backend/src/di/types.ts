@@ -77,5 +77,8 @@ export const TYPES = {
     PaymentStatusChecker: Symbol.for('PaymentStatusChecker'),
 
     //cloudinary
-    CloudinaryController: Symbol.for('CloudinaryController')
+    CloudinaryController: Symbol.for('CloudinaryController'),
+
+    //Data Transformer
+    DataTransformerService: Symbol.for('DataTransformerService')
 };

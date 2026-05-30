@@ -78,6 +78,7 @@ import { PaymentStatusChecker } from "../utils/checkPaymentStatus";
 import { IAdminAuthService, IInspectorAuthService, IUserAuthService } from "../core/interfaces/services/auth.service.interface";
 import { IAdminAuthController, IInspectorAuthController, IUserAuthController } from "../core/interfaces/controllers/auth.controller.interface";
 import { CloudinaryController } from "../controllers/cloudinary.controller";
+import { DataTransformerService } from "../services/data-transformer.service";
 import { IReviewRepository } from "../core/interfaces/repositories/review.repository.interface";
 import { ReviewRepository } from "../repositories/review.repository";
 import { IReviewService } from "../core/interfaces/services/review.service.interface";
@@ -193,5 +194,8 @@ container.bind<PaymentStatusChecker>(TYPES.PaymentStatusChecker).to(PaymentStatu
 
 //cloudinary
 container.bind<CloudinaryController>(TYPES.CloudinaryController).to(CloudinaryController)
+
+//Data Transformer
+container.bind<DataTransformerService>(TYPES.DataTransformerService).to(DataTransformerService).inSingletonScope();
 
 export { container };

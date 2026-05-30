@@ -24,8 +24,10 @@ export const RESPONSE_MESSAGES = {
     OTP_VERIFIED: 'OTP verified successfully',
     RESET_LINK_SENT: 'Reset link sent successfully',
     PASSWORD_RESET: 'Password reset successfully',
+    REGISTRATION_SUCCESSFUL: 'Registration successful! Please verify your email.',
+    PASSWORD_RESET_SUCCESSFUL: 'Password reset successfully! You can now login with your new password.',
   },
-  
+
   // Error Messages
   ERROR: {
     // General Errors
@@ -41,7 +43,7 @@ export const RESPONSE_MESSAGES = {
     POPULATED_INSPECTION_DATA_NOT_FOUND: 'Populated inspection data not found',
     FAILED_TO_UPLOAD_PDF_TO_CLOUDINARY: 'Failed to upload PDF to Cloudinary',
     FAILED_TO_UPLOAD_IMAGE_TO_CLOUDINARY: 'Failed to upload image to Cloudinary',
-    
+
     // Authentication Errors
     INVALID_CREDENTIALS: 'Invalid credentials',
     TOKEN_EXPIRED: 'Token expired',
@@ -51,28 +53,28 @@ export const RESPONSE_MESSAGES = {
     ACCOUNT_BLOCKED: 'Account is blocked',
     INVALID_OTP: 'Invalid OTP',
     OTP_EXPIRED: 'OTP expired',
-    
+
     // User Errors
     USER_NOT_FOUND: 'User not found',
     USER_ALREADY_EXISTS: 'User already exists',
     EMAIL_ALREADY_EXISTS: 'Email already exists',
     PHONE_ALREADY_EXISTS: 'Phone number already exists',
     INVALID_USER_ID: 'Invalid user ID format',
-    
+
     // Inspector Errors
     INSPECTOR_NOT_FOUND: 'Inspector not found',
     INSPECTOR_ALREADY_APPROVED: 'Inspector is already approved',
     INSPECTOR_ID_MISSING: 'Inspector ID is missing in the params',
-    
+
     // Inspection Errors
     INSPECTION_NOT_FOUND: 'Inspection not found',
     INSPECTION_TYPE_NOT_FOUND: 'Inspection type not found',
     INSPECTION_TYPE_ID_MISSING: 'Inspection type ID is missing',
-    
+
     // Payment Errors
     PAYMENT_FAILED: 'Payment failed',
     INSUFFICIENT_BALANCE: 'Insufficient balance',
-    
+
     // Notification Errors
     NOTIFICATION_NOT_FOUND: 'Notification not found',
   }

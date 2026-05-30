@@ -1,0 +1,401 @@
+rules:
+  - name: "Inspecto — MERN + TypeScript Project Rules"
+    description: >
+      Deep, production-grade coding rules for the Inspecto vehicle inspection
+      marketplace. Monorepo with separate /backend (Node + Express + TS +
+      MongoDB + Redis + InversifyJS) and /frontend (React 18 + Vite + Redux
+      Toolkit + Tailwind + shadcn/ui). Every rule reflects the actual
+      architecture found in this codebase.
+    priority: 1
+
+    triggers:
+      - "generate"
+      - "create"
+      - "refactor"
+      - "fix"
+      - "explain"
+      - "add"
+      - "update"
+      - "implement"
+
+    actions:
+
+      # ─────────────────────────────────────────────
+      # 0. PROJECT IDENTITY & MONOREPO STRUCTURE
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Monorepo layout awareness"
+          details:
+            - "This is a monorepo. Backend lives in /backend, frontend in /frontend. Never mix them."
+            - "Root docker-compose.yml orchestrates both services for local dev."
+            - "CI/CD is GitHub Actions → deploy-backend-render.yml (Render hosting)."
+            - "Never create files at root level unless they are docker-compose.yml, .github/, or README.md."
+            - "Each workspace (backend / frontend) has its own package.json, tsconfig.json, and .env."
+
+      - enforce:
+          description: "Standard backend folder structure — match exactly"
+          details:
+            - "backend/src/config/        — env config, DB, Redis, Logger (e.g. app.config.ts)"
+            - "backend/src/controllers/   — route handlers only, no business logic"
+            - "backend/src/core/abstracts/ — BaseRepository, BaseService"
+            - "backend/src/core/errors/   — ServiceError class"
+            - "backend/src/core/interfaces/repositories/ — repository interface contracts"
+            - "backend/src/core/interfaces/services/     — service interface contracts"
+            - "backend/src/core/types/    — shared TypeScript types"
+            - "backend/src/di/            — InversifyJS container (container.ts) and TYPES symbols"
+            - "backend/src/middlewares/   — authenticateToken, authorizeRole, errorHandler"
+            - "backend/src/models/        — Mongoose schemas (User, Inspector, Inspection, etc.)"
+            - "backend/src/repositories/  — DB access implementations (implement core/interfaces)"
+            - "backend/src/routes/        — Express router definitions"
+            - "backend/src/scripts/       — one-off seed scripts (seed-admin.ts, seed-inspection-types.ts)"
+            - "backend/src/services/      — business logic (implement core/interfaces)"
+            - "backend/src/services/auth/ — role-scoped auth services (user, inspector, admin)"
+            - "backend/src/utils/         — token utils, email, OTP, PDF (Puppeteer), checkPaymentStatus"
+            - "backend/src/app.ts         — Express app setup (CORS, middleware, routes)"
+            - "backend/src/server.ts      — server startup, DB + Redis connection"
+
+      - enforce:
+          description: "Standard frontend folder structure — match exactly"
+          details:
+            - "frontend/src/api/          — Axios instance + interceptors (axiosInstance.ts)"
+            - "frontend/src/app/          — Redux store setup"
+            - "frontend/src/components/   — reusable UI (shadcn/ui wrappers, shared widgets)"
+            - "frontend/src/components/ui/ — shadcn/ui primitive components"
+            - "frontend/src/features/     — Redux Toolkit slices (auth, user, inspector, admin)"
+            - "frontend/src/pages/        — route-level page components"
+            - "frontend/src/services/     — typed API call functions (use axiosInstance)"
+            - "frontend/src/routes/       — React Router v6 configuration"
+            - "frontend/src/types/        — TypeScript interfaces matching backend models"
+            - "frontend/src/App.tsx       — root component"
+            - "frontend/src/main.tsx      — entry point"
+
+      # ─────────────────────────────────────────────
+      # 1. LANGUAGE & STYLE
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "TypeScript conventions"
+          details:
+            - "Always TypeScript — never plain JS in either workspace."
+            - "TypeScript version: 5.6.2 (frontend), keep backend in sync."
+            - "Use 'interface' for object shapes; use 'type' only for unions/intersections."
+            - "No 'any' type. Use 'unknown' + type narrowing when the shape is truly unknown."
+            - "Enable strict mode in all tsconfig.json files."
+            - "Use arrow functions for utilities and service methods outside class context."
+            - "Use async/await exclusively — no raw Promise chains or callbacks."
+            - "Prefer optional chaining (?.) and nullish coalescing (??) over manual null checks."
+            - "No console.log in production code. Use the configured Logger (Winston or equivalent in /config)."
+            - "No dead code, unused imports, or commented-out blocks."
+            - "Format with Prettier. No exceptions."
+
+      # ─────────────────────────────────────────────
+      # 2. BACKEND ARCHITECTURE — INVERSIFYJS DI
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Dependency Injection with InversifyJS — mandatory"
+          details:
+            - "Every service and repository MUST be registered in backend/src/di/container.ts."
+            - "Use TYPES symbols (backend/src/di/types.ts) as injection tokens — never use string literals."
+            - "Decorate classes with @injectable(). Inject dependencies with @inject(TYPES.XxxSymbol)."
+            - "Controllers receive service instances via DI constructor injection."
+            - "Never instantiate services or repositories with 'new' inside business code — always resolve from the container."
+            - "When adding a new service/repository pair: (1) define interface in core/interfaces, (2) implement class, (3) add TYPES symbol, (4) bind in container."
+
+      - enforce:
+          description: "Controller → Service → Repository layering"
+          details:
+            - "Controllers: validate request input → call service → return JSON response. Nothing else."
+            - "Services: contain all business logic, call repositories for data. Never touch req/res objects."
+            - "Repositories: all Mongoose/DB operations live here. No business rules."
+            - "Every controller class must extend or follow the same base pattern used in the project."
+            - "Every controller method must be wrapped in try/catch → pass errors to next(err)."
+            - "Services throw ServiceError (backend/src/core/errors/service.error.ts) — never throw raw Error."
+            - "The central error-handling middleware in app.ts is the single place errors become HTTP responses."
+
+      - enforce:
+          description: "Interface-driven development"
+          details:
+            - "Every service MUST have a corresponding interface in backend/src/core/interfaces/services/."
+            - "Every repository MUST have a corresponding interface in backend/src/core/interfaces/repositories/."
+            - "Interfaces define the contract; implementations live in /services and /repositories."
+            - "Extend BaseRepository and BaseService from core/abstracts for common CRUD methods."
+            - "Example pattern: IInspectorRepository → InspectorRepository; IAuthService → UserAuthService."
+
+      # ─────────────────────────────────────────────
+      # 3. BACKEND — AUTH & SECURITY
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Authentication & authorization rules"
+          details:
+            - "Three auth service files exist: user.auth.service.ts, inspector.auth.service.ts, admin.auth.service.ts. New auth logic must go in the correct file."
+            - "JWT: short-lived access tokens + long-lived refresh tokens stored in HttpOnly cookies."
+            - "Token blacklisting on logout uses Redis — always call the blacklist util on logout."
+            - "OTPs are stored in Redis with TTL — never store OTPs in MongoDB."
+            - "Password reset uses crypto-hashed tokens sent by email (Brevo SMTP)."
+            - "Google OAuth is supported for Users only via GOOGLE_CLIENT_ID."
+            - "All protected routes must use the 'authenticateToken' middleware."
+            - "Role-gating uses 'authorizeRole(['user' | 'inspector' | 'admin'])' middleware — never hardcode role checks inside controllers."
+            - "Admin is seeded via scripts/seed-admin.ts — there is only one admin account."
+            - "Inspector accounts require admin approval (status: APPROVED, isListed: true) before appearing to users."
+
+      # ─────────────────────────────────────────────
+      # 4. BACKEND — MONGODB / MONGOOSE
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Mongoose schema rules"
+          details:
+            - "All Mongoose schemas live in backend/src/models/."
+            - "Use strict TypeScript typing for every schema: define a Document interface and pass it as generic."
+            - "Use { strict: true } on all schemas."
+            - "Repository layer handles all DB operations — services never call Mongoose directly."
+            - "Use lean() on read-only queries for performance."
+            - "Use transactions for any operation that writes to more than one collection (e.g. payment + wallet)."
+            - "Key models: User, Inspector, Inspection, InspectionType, Payment, Wallet, Vehicle, Review."
+            - "InspectionType schema has a configurable 'platformFee' field — never hardcode fee splits."
+
+      # ─────────────────────────────────────────────
+      # 5. BACKEND — REDIS
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Redis usage conventions"
+          details:
+            - "Redis config is in backend/src/config/ (REDIS_HOST, REDIS_PORT env vars)."
+            - "Redis is used for: JWT token blacklisting, OTP storage with TTL, session caching."
+            - "Always set TTL on Redis keys — never store without expiry."
+            - "Redis operations must be wrapped in try/catch — a Redis failure should not crash the server."
+
+      # ─────────────────────────────────────────────
+      # 6. BACKEND — PAYMENTS (STRIPE)
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Stripe payment rules"
+          details:
+            - "All Stripe logic lives in backend/src/services/payment.service.ts."
+            - "Use Stripe Payment Intents — never Charges API."
+            - "Webhook handler must verify the Stripe signature using STRIPE_WEBHOOK_SECRET before processing."
+            - "Payment window: 10-minute expiration enforced by the PaymentStatusChecker cron job (utils/checkPaymentStatus.ts)."
+            - "After a successful payment, update Inspection status and credit inspector Wallet in a single transaction."
+            - "platformFee is read from InspectionType — never hardcoded."
+            - "Never log or store raw Stripe secret keys. Use environment variables only."
+
+      # ─────────────────────────────────────────────
+      # 7. BACKEND — PDF & MEDIA
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "PDF generation and media storage"
+          details:
+            - "PDF reports are generated with Puppeteer (backend/src/utils/generatePDF.ts)."
+            - "Never use wkhtmltopdf or any other PDF library — Puppeteer is the standard here."
+            - "Images (inspector certificates, vehicle photos) are stored on Cloudinary."
+            - "Cloudinary credentials: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET."
+            - "Upload widgets on the frontend use the cloudinary-react package — do not upload to backend then to Cloudinary."
+
+      # ─────────────────────────────────────────────
+      # 8. BACKEND — EXPRESS CONVENTIONS
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Express routing and response conventions"
+          details:
+            - "Use express.Router() — each domain gets its own router file in /routes."
+            - "All routes are mounted in app.ts with a versioned prefix (e.g. /api/v1/)."
+            - "HTTP response shape is always: { success: boolean, message: string, data?: any }."
+            - "Use standard HTTP status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 500 Internal Server Error."
+            - "List endpoints must support pagination (page, limit) and filtering query params."
+            - "CORS whitelist is configured in app.ts — never use '*' in production."
+            - "Use helmet and express-rate-limit for security headers and abuse prevention."
+
+      # ─────────────────────────────────────────────
+      # 9. BACKEND — PATH ALIASES
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "TypeScript path alias setup (backend)"
+          details:
+            - "baseUrl: './src' in backend/tsconfig.json."
+            - "Use @/ prefix for all src-relative imports."
+            - "Alias map:"
+            - "  @/controllers/*  → src/controllers/"
+            - "  @/services/*     → src/services/"
+            - "  @/repositories/* → src/repositories/"
+            - "  @/models/*       → src/models/"
+            - "  @/routes/*       → src/routes/"
+            - "  @/middlewares/*  → src/middlewares/"
+            - "  @/utils/*        → src/utils/"
+            - "  @/config/*       → src/config/"
+            - "  @/validators/*   → src/validators/"
+            - "  @/types/*        → src/types/"
+            - "  @/core/*         → src/core/"
+            - "  @/di/*           → src/di/"
+            - "Runtime resolution: tsconfig-paths/register (ts-node-dev)."
+            - "Production build: tsc then tsc-alias to rewrite paths."
+
+      # ─────────────────────────────────────────────
+      # 10. BACKEND — BUILD & SCRIPTS
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Build and dev scripts (backend)"
+          details:
+            - "Package manager: pnpm only — never npm or yarn."
+            - "Dev: ts-node-dev with --require tsconfig-paths/register."
+            - "Build: tsc → tsc-alias → output to /dist."
+            - "Production start: node dist/server.js."
+            - "Seed admin: pnpm run seed:admin (runs scripts/seed-admin.ts)."
+            - "Dockerfile must copy /dist and run node dist/server.js."
+
+      # ─────────────────────────────────────────────
+      # 11. FRONTEND — REACT & STATE
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "React 18 + Redux Toolkit conventions"
+          details:
+            - "React version: 18.3.1. Use functional components and hooks only — no class components."
+            - "State management: Redux Toolkit (v2.5.0). Feature-based slices in frontend/src/features/."
+            - "One slice per domain: auth, user, inspector, admin — follow this pattern for new domains."
+            - "Use createSlice and createAsyncThunk. Never use legacy Redux patterns."
+            - "Local component state uses useState/useReducer. Only promote to Redux when state is truly shared."
+            - "Side effects and async data fetching: use React Query (TanStack Query) — do not put API calls in Redux thunks unless strictly necessary."
+            - "Keep components small and single-responsibility. Extract reusable UI into /components."
+            - "Page components in /pages are route-level only — they compose smaller components."
+
+      # ─────────────────────────────────────────────
+      # 12. FRONTEND — API LAYER
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Axios and API service conventions"
+          details:
+            - "All HTTP calls use the configured Axios instance at frontend/src/api/axiosInstance.ts."
+            - "Never create a new Axios instance elsewhere — always import the shared one."
+            - "The Axios instance handles: base URL (VITE_API_BASE_URL), auth token attachment, and automatic token refresh."
+            - "Interceptors enforce user/inspector blocking: if the API returns a 'blocked' signal, force logout and redirect."
+            - "API service functions live in frontend/src/services/ — typed with request/response interfaces."
+            - "Never make raw fetch() calls — always go through the Axios instance."
+            - "Type all API responses using interfaces from frontend/src/types/ that mirror backend models."
+
+      # ─────────────────────────────────────────────
+      # 13. FRONTEND — FORMS & VALIDATION
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Form handling with React Hook Form + Zod"
+          details:
+            - "All forms use React Hook Form (v7.54.2) + Zod (v3.24.1) for validation."
+            - "Define a Zod schema for every form. Derive the TypeScript type from the schema with z.infer<>."
+            - "Use zodResolver from @hookform/resolvers/zod — never write manual validation functions."
+            - "Display field-level errors using formState.errors from useForm."
+            - "Never do client-side-only validation — the backend also validates all inputs."
+
+      # ─────────────────────────────────────────────
+      # 14. FRONTEND — UI & STYLING
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Tailwind CSS + shadcn/ui + Radix UI rules"
+          details:
+            - "Styling: Tailwind CSS (v3.4.17) utility classes only — no custom CSS files unless extending the design system."
+            - "Global styles and CSS variables live in frontend/src/index.css."
+            - "Tailwind config is in frontend/tailwind.config.js — extend the theme there, never inline arbitrary values."
+            - "Component library: shadcn/ui built on Radix UI primitives. Use existing components from /components/ui before building custom ones."
+            - "Stripe payment forms use Stripe Elements (VITE_STRIPE_PUBLISHABLE_KEY)."
+            - "Image uploads use Cloudinary React widgets (VITE_CLOUDINARY_CLOUD_NAME) — not file input + backend upload."
+            - "All UI must be fully responsive — mobile-first Tailwind classes."
+
+      # ─────────────────────────────────────────────
+      # 15. FRONTEND — ROUTING
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "React Router v6 routing conventions"
+          details:
+            - "All routes defined in frontend/src/routes/."
+            - "Use role-based protected route wrappers — never let unauthorized roles access protected pages."
+            - "Three route groups: user routes, inspector routes, admin routes."
+            - "Use React Router's lazy() + Suspense for code splitting on page components."
+            - "Use useNavigate for programmatic navigation — never window.location."
+
+      # ─────────────────────────────────────────────
+      # 16. FRONTEND — BUILD & ENV
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Vite build + environment variables (frontend)"
+          details:
+            - "Build tool: Vite (v6.0.5). Config lives in frontend/vite.config.ts."
+            - "All env vars must be prefixed with VITE_ to be exposed to the client bundle."
+            - "Required frontend env vars: VITE_API_BASE_URL, VITE_STRIPE_PUBLISHABLE_KEY, VITE_GOOGLE_CLIENT_ID, VITE_CLOUDINARY_CLOUD_NAME."
+            - "Never embed secrets in frontend env vars — only publishable/public keys."
+            - "Package manager: pnpm only."
+
+      # ─────────────────────────────────────────────
+      # 17. THREE USER ROLES — DOMAIN RULES
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "User role domain logic"
+          details:
+            - "Users register with email/password (OTP verified) OR Google OAuth."
+            - "User features: vehicle CRUD, inspection booking wizard, Stripe payment, report viewing, review submission."
+            - "Booking wizard flow: select inspection type → choose inspector → pick slot → pay (10-min window)."
+            - "Users interact with the /api/v1/user/* route namespace."
+
+      - enforce:
+          description: "Inspector role domain logic"
+          details:
+            - "Inspector registration: email + OTP → profile completion (location, certificates) → pending admin approval."
+            - "Inspectors are visible to users only when status === 'APPROVED' && isListed === true."
+            - "Inspector features: manage availability slots, accept/reject inspection requests, submit inspection reports, view earnings (Wallet)."
+            - "Wallet credits happen automatically after payment confirmation — never allow manual wallet edits."
+            - "Inspectors interact with the /api/v1/inspector/* route namespace."
+
+      - enforce:
+          description: "Admin role domain logic"
+          details:
+            - "Single admin account seeded via seed-admin.ts — never create admin registration UI."
+            - "Admin features: approve/deny inspector applications, block/unblock users and inspectors, manage inspection types (including platformFee), view platform analytics."
+            - "Admin interacts with the /api/v1/admin/* route namespace."
+            - "Admin routes are protected by authorizeRole(['admin']) — never relax this."
+
+      # ─────────────────────────────────────────────
+      # 18. INSPECTION LIFECYCLE
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Inspection status machine — follow exactly"
+          details:
+            - "Inspection statuses (in order): PENDING_PAYMENT → PENDING → CONFIRMED → IN_PROGRESS → COMPLETED → CANCELLED."
+            - "PENDING_PAYMENT: created when user initiates booking. Expires after 10 minutes if not paid (cron job)."
+            - "PENDING: payment confirmed, waiting for inspector acceptance."
+            - "CONFIRMED: inspector accepted the request."
+            - "IN_PROGRESS: inspection is underway."
+            - "COMPLETED: inspector submits report → PDF generated via Puppeteer → wallet credited."
+            - "CANCELLED: either side cancels before completion."
+            - "Never skip statuses or allow direct transitions outside this machine."
+
+      # ─────────────────────────────────────────────
+      # 19. ENVIRONMENT & CONFIG
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Environment variable rules"
+          details:
+            - "Backend env vars are read through backend/src/config/app.config.ts — never access process.env directly elsewhere."
+            - "Required backend env vars: DATABASE_URL, REDIS_HOST, REDIS_PORT, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, BREVO_API_KEY, GOOGLE_CLIENT_ID, ADMIN_EMAIL, ADMIN_PASSWORD."
+            - "Throw a descriptive startup error if any required env var is missing."
+            - "Never commit .env files. Use .env.example to document required vars."
+
+      # ─────────────────────────────────────────────
+      # 20. DEPLOYMENT & DOCKER
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "Docker and CI/CD rules"
+          details:
+            - "Backend Dockerfile: build with tsc + tsc-alias, copy /dist, start with node dist/server.js."
+            - "Frontend Dockerfile: vite build, serve /dist."
+            - "Local dev: docker-compose.yml at repo root orchestrates backend, frontend, MongoDB, Redis."
+            - "CI/CD: GitHub Actions workflow at .github/workflows/deploy-backend-render.yml triggers on push to main."
+            - "Never hardcode environment values in Dockerfiles — pass via env or Docker secrets."
+            - "Production is hosted on Render — do not introduce Vercel/Heroku-specific config."
+
+      # ─────────────────────────────────────────────
+      # 21. OUTPUT STYLE
+      # ─────────────────────────────────────────────
+      - enforce:
+          description: "AI output rules"
+          details:
+            - "Output only the solution (code + file paths) unless an explanation is explicitly requested."
+            - "Always state the target file path as a comment at the top of each code block."
+            - "Generated backend code must follow the InversifyJS DI pattern — never skip container registration."
+            - "Generated frontend code must use the shared Axios instance and RTK slice pattern."
+            - "Prefer minimal, readable, production-quality code — no boilerplate padding."
+            - "When generating a new feature, output all layers: interface → repository → service → controller → route, in that order."
+            - "Never generate test stubs unless the user asks for tests."
