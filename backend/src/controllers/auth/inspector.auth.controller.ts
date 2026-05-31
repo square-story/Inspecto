@@ -44,14 +44,9 @@ export class InspectorAuthController implements IInspectorAuthController {
             sameSite: 'none',
         });
 
-        // Return access token and role
-        res.status(HTTP_STATUS.OK).json({
-            success: true,
-            data: {
-                accessToken,
-                role: 'inspector'
-            }
-        });
+        // Return access token, role and status (flat shape consumed by frontend loginUser thunk)
+        const response = { accessToken, role: 'inspector', status: true }
+        res.status(HTTP_STATUS.OK).json(response);
     }
 
     /**
